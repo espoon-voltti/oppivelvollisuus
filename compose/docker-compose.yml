@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  oppivelvollisuus-db:
+    image: postgres:15.4-alpine3.18
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: oppivelvollisuus
+      POSTGRES_USER: oppivelvollisuus
+      POSTGRES_PASSWORD: postgres
+
+volumes:
+  db-data:
+    driver: local
