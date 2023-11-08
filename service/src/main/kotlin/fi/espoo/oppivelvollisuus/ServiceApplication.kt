@@ -22,10 +22,13 @@ class HelloWorldController {
     lateinit var jdbi: Jdbi
 
     @GetMapping("/hello")
-    fun helloWorld(): String {
-        val hellos = jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery("SELECT count(*) FROM hello").mapTo<Int>().one()
+    fun helloWorld(): Hello {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.createQuery("SELECT count(*) as rows FROM hello").mapTo<Hello>().one()
         }
-        return "hello! db has $hellos rows"
     }
+
+    data class Hello(
+        val rows: Int
+    )
 }
