@@ -101,8 +101,9 @@ function serve() {
   const app = express()
   app.use(
     '/api',
-    proxy(process.env.API_GATEWAY_URL ?? 'http://localhost:8080', {
-      parseReqBody: false
+    proxy(process.env.API_GATEWAY_URL ?? 'http://localhost:3000', {
+      parseReqBody: false,
+      proxyReqPathResolver: ({ originalUrl }) => originalUrl
     })
   )
 

@@ -7,7 +7,6 @@
     "clean": "rm -rf dist node_modules/.cache",
     "dev": "concurrently -n tsc,esbuild -c blue,green 'yarn type-check:watch' 'yarn build:serve'",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx --max-warnings 0 .",
-    "lint:fix": "yarn lint --fix",
     "type-check": "tsc --build --force .",
     "type-check:watch": "yarn type-check --watch --preserveWatchOutput",
     "build": "node build.js",
