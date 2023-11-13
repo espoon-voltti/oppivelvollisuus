@@ -1,0 +1,7 @@
+*
+
+!src
+!nginx
+!*.js
+!*.json
+!*.lock
