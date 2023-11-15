@@ -30,6 +30,8 @@ jobs:
             path: frontend
           - name: oppivelvollisuus/api-gateway
             path: api-gateway
+          - name: oppivelvollisuus/service
+            path: service
 
     steps:
       - uses: actions/checkout@v3
