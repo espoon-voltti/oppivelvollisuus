@@ -38,15 +38,7 @@ WORKDIR /app
 COPY ./entrypoint.sh entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
 
-ENV USERNAME oppivelvollisuus
-ENV HOME_DIR /home/${USERNAME}
-ENV USER_ID 1000
-
-RUN adduser ${USERNAME} --gecos "" -q --home ${HOME_DIR} --uid ${USER_ID} --disabled-password
-
 COPY --from=builder /app/target/ .
-
-USER ${USERNAME}
 
 ARG build=none
 ARG commit=none
