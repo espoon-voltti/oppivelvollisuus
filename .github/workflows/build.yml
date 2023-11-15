@@ -28,6 +28,8 @@ jobs:
         include:
           - name: oppivelvollisuus/frontend
             path: frontend
+          - name: oppivelvollisuus/api-gateway
+            path: api-gateway
 
     steps:
       - uses: actions/checkout@v3
