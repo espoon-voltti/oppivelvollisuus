@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
     id("org.springframework.boot") version "3.1.5"
@@ -8,9 +9,6 @@ plugins {
     id("org.flywaydb.flyway") version "10.0.1"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
-
-group = "fi.espoo"
-version = "0.0.1-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -51,6 +49,32 @@ tasks.withType<KotlinCompile> {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+tasks.getByName<Jar>("jar") {
+    archiveClassifier.set("")
+}
+
+tasks.getByName<BootJar>("bootJar") {
+    archiveClassifier.set("boot")
+}
+
+tasks.register("resolveDependencies") {
+    description = "Resolves all dependencies"
+    doLast {
+        configurations
+            .matching { it.isCanBeResolved }
+            .map {
+                val files = it.resolve()
+                it.name to files.size
+            }
+            .groupBy({ (_, count) -> count }) { (name, _) -> name }
+            .forEach { (count, names) ->
+                println(
+                    "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
+                )
+            }
+    }
 }
 
 flyway {
