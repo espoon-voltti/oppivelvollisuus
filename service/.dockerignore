@@ -1,0 +1,6 @@
+*
+
+!*.gradle.kts
+!entrypoint.sh
+!gradle*
+!src

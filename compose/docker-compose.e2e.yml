@@ -2,6 +2,7 @@ version: '3.5'
 
 services:
   service:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/service:${TAG:-master}
     build:
       context: ../service/
     ports:
@@ -13,6 +14,7 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
 
   api-gateway:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/api-gateway:${TAG:-master}
     build:
       context: ../api-gateway/
     ports:

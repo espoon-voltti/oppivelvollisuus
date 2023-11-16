@@ -7,24 +7,12 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+      - ./db/test-db.sh:/docker-entrypoint-initdb.d/test-db.sh
     environment:
       POSTGRES_DB: oppivelvollisuus
       POSTGRES_USER: oppivelvollisuus
       POSTGRES_PASSWORD: postgres
 
-  oppivelvollisuus-db-it:
-    image: postgres:15.4-alpine3.18
-    ports:
-      - "6432:5432"
-    volumes:
-      - db-it-data:/var/lib/postgresql/data
-    environment:
-      POSTGRES_DB: oppivelvollisuus_it
-      POSTGRES_USER: oppivelvollisuus
-      POSTGRES_PASSWORD: postgres
-
 volumes:
   db-data:
-    driver: local
-  db-it-data:
     driver: local

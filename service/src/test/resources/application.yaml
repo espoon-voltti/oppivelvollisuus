@@ -1,5 +1,5 @@
 spring:
   datasource:
-    url: "jdbc:postgresql://localhost:6432/oppivelvollisuus_it"
+    url: "jdbc:postgresql://localhost:5432/oppivelvollisuus_it"
     username: "oppivelvollisuus"
     password: "postgres"
