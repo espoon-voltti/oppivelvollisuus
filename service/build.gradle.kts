@@ -55,6 +55,7 @@ tasks.withType<Test> {
     useJUnitPlatform()
     testClassesDirs = sourceSets["test"].output.classesDirs
     classpath = sourceSets["test"].runtimeClasspath
+    outputs.upToDateWhen { false }
 }
 
 tasks.getByName<Jar>("jar") {
