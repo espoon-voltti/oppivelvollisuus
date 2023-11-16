@@ -8,7 +8,7 @@ services:
     volumes:
       - db-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: oppivelvollisuus_it
+      POSTGRES_DB: oppivelvollisuus
       POSTGRES_USER: oppivelvollisuus
       POSTGRES_PASSWORD: postgres
 
@@ -17,9 +17,9 @@ services:
     ports:
       - "6432:5432"
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-it-data:/var/lib/postgresql/data
     environment:
-      POSTGRES_DB: oppivelvollisuus
+      POSTGRES_DB: oppivelvollisuus_it
       POSTGRES_USER: oppivelvollisuus
       POSTGRES_PASSWORD: postgres
 
