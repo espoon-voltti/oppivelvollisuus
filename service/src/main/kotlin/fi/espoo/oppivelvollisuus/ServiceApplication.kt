@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
 }
 
 @RestController
-class HelloWorldController {
+class MainController {
     @Autowired
     lateinit var jdbi: Jdbi
 
@@ -33,14 +33,17 @@ class HelloWorldController {
         val firstName: String,
         val lastName: String
     )
+
     @PostMapping("/students")
     fun createStudent(@RequestBody body: StudentInput): UUID {
         val id = UUID.randomUUID()
         jdbi.inTransactionUnchecked { tx ->
-            tx.createUpdate("""
+            tx.createUpdate(
+                """
                 INSERT INTO students (id, first_name, last_name) 
                 VALUES (:id, :firstName, :lastName)
-            """)
+            """
+            )
                 .bind("id", id)
                 .bindKotlin(body)
                 .execute()
@@ -53,6 +56,7 @@ class HelloWorldController {
         val firstName: String,
         val lastName: String
     )
+
     @GetMapping("/students")
     fun getStudents(): List<StudentBasics> {
         return jdbi.inTransactionUnchecked { tx ->
@@ -61,14 +65,17 @@ class HelloWorldController {
                 .list()
         }
     }
+
     @GetMapping("/students/{id}")
     fun getStudent(@PathVariable id: UUID): StudentBasics {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery("""
+            tx.createQuery(
+                """
                 SELECT id, first_name, last_name 
                 FROM students
                 WHERE id = :id
-            """.trimIndent())
+                """.trimIndent()
+            )
                 .bind("id", id)
                 .mapTo<StudentBasics>()
                 .findOne()
@@ -78,17 +85,19 @@ class HelloWorldController {
     }
 
     @PutMapping("/students/{id}")
-    fun updateStudent(@PathVariable id: UUID, @RequestBody body: StudentInput): Unit {
+    fun updateStudent(@PathVariable id: UUID, @RequestBody body: StudentInput) {
         jdbi.inTransactionUnchecked { tx ->
-            tx.createUpdate("""
+            tx.createUpdate(
+                """
                 UPDATE students 
                 SET first_name = :firstName, last_name = :lastName
                 WHERE id = :id
-            """)
+            """
+            )
                 .bind("id", id)
                 .bindKotlin(body)
                 .execute()
-                .also { if(it != 1) error("not found") }
+                .also { if (it != 1) error("not found") }
         }
     }
 
@@ -96,14 +105,17 @@ class HelloWorldController {
         val openedAt: LocalDate,
         val info: String
     )
+
     @PostMapping("/students/{studentId}/cases")
     fun createStudentCase(@PathVariable studentId: UUID, @RequestBody body: StudentCaseInput): UUID {
         val id = UUID.randomUUID()
         jdbi.inTransactionUnchecked { tx ->
-            tx.createUpdate("""
+            tx.createUpdate(
+                """
                 INSERT INTO student_cases (id, student_id, opened_at, info) 
                 VALUES (:id, :studentId, :openedAt, :info)
-            """)
+            """
+            )
                 .bind("id", id)
                 .bind("studentId", studentId)
                 .bindKotlin(body)
@@ -118,14 +130,17 @@ class HelloWorldController {
         val openedAt: LocalDate,
         val info: String
     )
+
     @GetMapping("/students/{studentId}/cases")
     fun getStudentCasesByStudent(@PathVariable studentId: UUID): List<StudentCase> {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery("""
+            tx.createQuery(
+                """
                 SELECT id, student_id, opened_at, info
                 FROM student_cases
                 WHERE student_id = :studentId
-            """.trimIndent())
+                """.trimIndent()
+            )
                 .bind("studentId", studentId)
                 .mapTo<StudentCase>()
                 .list()
@@ -139,18 +154,20 @@ class HelloWorldController {
         @RequestBody body: StudentCaseInput
     ) {
         jdbi.inTransactionUnchecked { tx ->
-            tx.createUpdate("""
+            tx.createUpdate(
+                """
                 UPDATE student_cases
                 SET 
                     opened_at = :openedAt,
                     info = :info
                 WHERE id = :id AND student_id = :studentId
-            """)
+            """
+            )
                 .bind("id", id)
                 .bind("studentId", studentId)
                 .bindKotlin(body)
                 .execute()
-                .also { if(it != 1) error("not found") }
+                .also { if (it != 1) error("not found") }
         }
     }
 
@@ -161,17 +178,19 @@ class HelloWorldController {
         val lastName: String,
         val openedAt: LocalDate
     )
+
     @GetMapping("/students-cases")
     fun getStudentCases(): List<StudentCaseSummary> {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery("""
+            tx.createQuery(
+                """
                 SELECT c.id, student_id, first_name, last_name, opened_at, info
                 FROM student_cases c
                 JOIN students s on s.id = c.student_id
-            """.trimIndent())
+                """.trimIndent()
+            )
                 .mapTo<StudentCaseSummary>()
                 .list()
         }
     }
-
 }
