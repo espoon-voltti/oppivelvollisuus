@@ -1,0 +1,16 @@
+version: '3.5'
+
+services:
+  service-tests:
+    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/service-builder:${TAG:-master}
+    build:
+      context: ../service/
+      target: builder
+    ports:
+      - "8080:8080"
+    environment:
+      JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
+      SPRING_DATASOURCE_URL: jdbc:postgresql://oppivelvollisuus-db:5432/oppivelvollisuus
+    entrypoint: ./gradlew test
+    depends_on:
+      - oppivelvollisuus-db
