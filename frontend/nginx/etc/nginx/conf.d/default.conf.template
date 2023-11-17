@@ -127,7 +127,7 @@ server {
   root /static;
   index index.html;
 
-  listen 8080;
+  listen 80;
   server_name _;
   port_in_redirect off;
 
@@ -191,5 +191,4 @@ server {
     include     proxy_params;
     proxy_pass  $serviceURL;
   }
-
 }
