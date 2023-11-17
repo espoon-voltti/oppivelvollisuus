@@ -131,9 +131,14 @@ server {
   server_name _;
   port_in_redirect off;
 
+  <% if ENV.key?("BASIC_AUTH_ENABLED") && ENV["BASIC_AUTH_ENABLED"] == "true" %>
+  auth_basic            "Log in";
+  auth_basic_user_file  "/etc/nginx/.htpasswd";
+  <% end %>
+
   # Variables
 
-  set $serviceURL "<%= ENV["SERVICE_URL"] %>";
+  set $apiGatewayURL "<%= ENV["API_GATEWAY_URL"] %>";
   set $httpScheme "<%= ENV["HTTP_SCHEME"] || "https" %>";
 
   access_log /var/log/nginx/access.log json_access;
@@ -171,8 +176,14 @@ server {
   limit_req_status  429;
 
   location /health {
-    access_log  off;
-    return      200;
+    auth_basic off;
+    access_log off;
+    return     200;
+  }
+
+  location /api {
+    include     proxy_params;
+    proxy_pass  $apiGatewayURL;
   }
 
   location / {
@@ -187,8 +198,4 @@ server {
     rewrite     /(.*) /index.html break;
   }
 
-  location /children {
-    include     proxy_params;
-    proxy_pass  $serviceURL;
-  }
 }
