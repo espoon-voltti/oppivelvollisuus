@@ -14,8 +14,8 @@ fi
 
 export HOST_IP="UNAVAILABLE"
 
-if [ "${SERVICE_URL:-X}" = 'X' ]; then
-  echo 'ERROR: SERVICE_URL must be a non-empty string!'
+if [ "${API_GATEWAY_URL:-X}" = 'X' ]; then
+  echo 'ERROR: API_GATEWAY_URL must be a non-empty string!'
   exit 1
 fi
 
@@ -32,5 +32,10 @@ if [ "${DEBUG:-false}" = "true" ]; then
   cat /etc/nginx/nginx.conf
   cat /etc/nginx/conf.d/default.conf
 fi
+
+if [ "${BASIC_AUTH_ENABLED:-false}" = 'true' ]; then
+  echo "$BASIC_AUTH_CREDENTIALS" > /etc/nginx/.htpasswd
+fi
+
 
 exec "$@"
