@@ -125,6 +125,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Configure AWS credentials
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: ${{ env.AWS_REGION }}
@@ -132,12 +133,22 @@ jobs:
           role-duration-seconds: 1200
 
       - name: Login to Amazon ECR
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Run tests
+      - name: Pull images
+        if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
         run: |
           ./test-compose pull
+
+      - name: Build images
+        if: ${{ github.actor == 'dependabot[bot]' || github.event.pull_request.head.repo.fork }}
+        run: |
+          ./test-compose build --parallel
+
+      - name: Run tests
+        run: |
           ./test-compose run service-tests | tee tests.log
 
       - name: Get logs
