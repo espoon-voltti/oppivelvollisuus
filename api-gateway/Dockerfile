@@ -25,6 +25,9 @@ FROM builder
 
 ENV NODE_ENV production
 
+RUN apt-get update \
+ && apt-get -y install curl
+
 ARG build=none
 ARG commit=none
 

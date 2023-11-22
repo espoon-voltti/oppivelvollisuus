@@ -166,7 +166,7 @@ jobs:
             compose/tests-all.log
           retention-days: 2
 
-  tag:
+  deploy:
     if: ${{ github.ref == 'refs/heads/master' }}
     runs-on: ubuntu-latest
     needs:
@@ -195,3 +195,21 @@ jobs:
             MANIFEST=$(aws ecr batch-get-image --repository-name "oppivelvollisuus/$repository" --image-ids imageTag="${{ github.event.pull_request.head.sha || github.sha }}" --output json | jq --raw-output --join-output '.images[0].imageManifest')
             aws ecr put-image --repository-name "oppivelvollisuus/$repository" --image-tag "env-${{ matrix.environment }}" --image-manifest "$MANIFEST"
           done
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::674016398114:role/voltti-ci-oppivelvollisuus-${{ matrix.environment }}
+          role-duration-seconds: 1200
+          unset-current-credentials: true
+
+      - name: Deploy
+        run: |
+          aws ecs update-service \
+            --cluster "oppivelvollisuus-${{ matrix.environment }}" \
+            --service "oppivelvollisuus-${{ matrix.environment }}" \
+            --force-new-deployment
+          aws ecs wait services-stable \
+            --cluster "oppivelvollisuus-${{ matrix.environment }}" \
+            --services "oppivelvollisuus-${{ matrix.environment }}"
