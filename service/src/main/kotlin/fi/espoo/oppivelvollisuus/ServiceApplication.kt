@@ -30,8 +30,11 @@ class MainController {
     lateinit var jdbi: Jdbi
 
     data class StudentInput(
+        val valpasLink: String,
+        val ssn: String,
         val firstName: String,
-        val lastName: String
+        val lastName: String,
+        val dateOfBirth: LocalDate?
     )
 
     @PostMapping("/students")
@@ -40,8 +43,8 @@ class MainController {
         jdbi.inTransactionUnchecked { tx ->
             tx.createUpdate(
                 """
-                INSERT INTO students (id, first_name, last_name) 
-                VALUES (:id, :firstName, :lastName)
+                INSERT INTO students (id, valpas_link, ssn, first_name, last_name, date_of_birth) 
+                VALUES (:id, :valpasLink, :ssn, :firstName, :lastName, :dateOfBirth)
             """
             )
                 .bind("id", id)
@@ -51,36 +54,77 @@ class MainController {
         return id
     }
 
-    data class StudentBasics(
+    data class StudentSummary(
         val id: UUID,
         val firstName: String,
-        val lastName: String
+        val lastName: String,
+        val openedAt: LocalDate?
     )
 
     @GetMapping("/students")
-    fun getStudents(): List<StudentBasics> {
+    fun getStudents(): List<StudentSummary> {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery("SELECT id, first_name, last_name FROM students")
-                .mapTo<StudentBasics>()
+            tx.createQuery(
+                """
+                SELECT id, first_name, last_name, sc.opened_at
+                FROM students
+                LEFT JOIN LATERAL (
+                    SELECT opened_at
+                    FROM student_cases
+                    WHERE student_id = students.id
+                    ORDER BY opened_at DESC
+                    LIMIT 1
+                ) sc ON true
+                ORDER BY opened_at DESC, first_name, last_name
+                """.trimIndent()
+            )
+                .mapTo<StudentSummary>()
                 .list()
         }
     }
 
+    data class StudentDetails(
+        val id: UUID,
+        val valpasLink: String,
+        val ssn: String,
+        val firstName: String,
+        val lastName: String,
+        val dateOfBirth: LocalDate?
+    )
+
+    data class StudentResponse(
+        val student: StudentDetails,
+        val cases: List<StudentCase>
+    )
+
     @GetMapping("/students/{id}")
-    fun getStudent(@PathVariable id: UUID): StudentBasics {
+    fun getStudent(@PathVariable id: UUID): StudentResponse {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery(
+            val studentDetails = tx.createQuery(
                 """
-                SELECT id, first_name, last_name 
+                SELECT id, valpas_link, ssn, first_name, last_name, date_of_birth
                 FROM students
                 WHERE id = :id
                 """.trimIndent()
             )
                 .bind("id", id)
-                .mapTo<StudentBasics>()
+                .mapTo<StudentDetails>()
                 .findOne()
                 .getOrNull()
                 ?: error("not found")
+
+            val cases = tx.createQuery(
+                """
+                SELECT id, student_id, opened_at, info
+                FROM student_cases
+                WHERE student_id = :studentId
+                """.trimIndent()
+            )
+                .bind("studentId", id)
+                .mapTo<StudentCase>()
+                .list()
+
+            StudentResponse(studentDetails, cases)
         }
     }
 
@@ -90,7 +134,12 @@ class MainController {
             tx.createUpdate(
                 """
                 UPDATE students 
-                SET first_name = :firstName, last_name = :lastName
+                SET 
+                    valpas_link = :valpasLink,
+                    ssn = :ssn,
+                    first_name = :firstName,
+                    last_name = :lastName,
+                    date_of_birth = :dateOfBirth
                 WHERE id = :id
             """
             )
@@ -100,6 +149,13 @@ class MainController {
                 .also { if (it != 1) error("not found") }
         }
     }
+
+    data class StudentCase(
+        val id: UUID,
+        val studentId: UUID,
+        val openedAt: LocalDate,
+        val info: String
+    )
 
     data class StudentCaseInput(
         val openedAt: LocalDate,
@@ -124,29 +180,6 @@ class MainController {
         return id
     }
 
-    data class StudentCase(
-        val id: UUID,
-        val studentId: UUID,
-        val openedAt: LocalDate,
-        val info: String
-    )
-
-    @GetMapping("/students/{studentId}/cases")
-    fun getStudentCasesByStudent(@PathVariable studentId: UUID): List<StudentCase> {
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery(
-                """
-                SELECT id, student_id, opened_at, info
-                FROM student_cases
-                WHERE student_id = :studentId
-                """.trimIndent()
-            )
-                .bind("studentId", studentId)
-                .mapTo<StudentCase>()
-                .list()
-        }
-    }
-
     @PutMapping("/students/{studentId}/cases/{id}")
     fun updateStudentCase(
         @PathVariable studentId: UUID,
@@ -168,29 +201,6 @@ class MainController {
                 .bindKotlin(body)
                 .execute()
                 .also { if (it != 1) error("not found") }
-        }
-    }
-
-    data class StudentCaseSummary(
-        val id: UUID,
-        val studentId: UUID,
-        val firstName: String,
-        val lastName: String,
-        val openedAt: LocalDate
-    )
-
-    @GetMapping("/students-cases")
-    fun getStudentCases(): List<StudentCaseSummary> {
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.createQuery(
-                """
-                SELECT c.id, student_id, first_name, last_name, opened_at, info
-                FROM student_cases c
-                JOIN students s on s.id = c.student_id
-                """.trimIndent()
-            )
-                .mapTo<StudentCaseSummary>()
-                .list()
         }
     }
 }

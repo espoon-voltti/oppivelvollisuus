@@ -1,9 +1,13 @@
 import React from 'react'
-import { Navigate, createBrowserRouter, Outlet, Link } from 'react-router-dom'
+import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { AuthGuard } from './auth/AuthGuard'
+import { UserContextProvider } from './auth/UserContext'
+import { UserHeader } from './auth/UserHeader'
+import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
-import { StudentCasesSearchPage } from './students/StudentCasesSearchPage'
+import { LoginPage } from './students/LoginPage'
 import { StudentPage } from './students/StudentPage'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
 
@@ -19,24 +23,23 @@ const Header = styled.nav`
   height: 64px;
   display: flex;
   flex-direction: row;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: center;
   border-bottom: 2px double #888;
   margin-bottom: 16px;
-  > * {
-    margin-right: 32px;
-  }
 `
 
 function App() {
   return (
-    <AppContainer>
-      <Header>
-        <Link to="/tapaukset">Tapaukset</Link>
-        <Link to="/oppivelvolliset">Oppivelvolliset</Link>
-      </Header>
-      <Outlet />
-    </AppContainer>
+    <UserContextProvider>
+      <AppContainer>
+        <Header>
+          <H1>Espoon kaupunki - Oppivelvollisuuden valvonta</H1>
+          <UserHeader />
+        </Header>
+        <Outlet />
+      </AppContainer>
+    </UserContextProvider>
   )
 }
 
@@ -46,28 +49,44 @@ export const appRouter = createBrowserRouter([
     element: <App />,
     children: [
       {
-        path: '/oppivelvolliset',
-        element: <StudentsSearchPage />
+        path: '/kirjaudu',
+        element: (
+          <AuthGuard allow="UNAUTHENTICATED_ONLY">
+            <LoginPage />
+          </AuthGuard>
+        )
       },
       {
-        path: '/tapaukset',
-        element: <StudentCasesSearchPage />
+        path: '/oppivelvolliset',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <StudentsSearchPage />
+          </AuthGuard>
+        )
       },
       {
         path: '/oppivelvolliset/uusi',
-        element: <CreateStudentPage />
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <CreateStudentPage />
+          </AuthGuard>
+        )
       },
       {
         path: '/oppivelvolliset/:id',
-        element: <StudentPage />
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <StudentPage />
+          </AuthGuard>
+        )
       },
       {
         path: '/*',
-        element: <Navigate replace to="/tapaukset" />
+        element: <Navigate replace to="/oppivelvolliset" />
       },
       {
         index: true,
-        element: <Navigate replace to="/tapaukset" />
+        element: <Navigate replace to="/oppivelvolliset" />
       }
     ]
   }

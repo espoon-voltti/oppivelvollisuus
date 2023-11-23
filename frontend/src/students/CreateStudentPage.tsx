@@ -1,54 +1,39 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 
-import { FlexColWithGaps, VerticalGap } from '../shared/layout'
-import { H1, Label } from '../shared/typography'
+import { VerticalGap } from '../shared/layout'
+import { H2, H3 } from '../shared/typography'
 
-import { apiPostStudent } from './api'
+import { StudentForm } from './StudentForm'
+import { apiPostStudent, StudentInput } from './api'
 
 export const CreateStudentPage = React.memo(function CreateStudentPage() {
   const navigate = useNavigate()
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [submitting, setSubmitting] = useState(false)
 
-  const valid = firstName.trim() && lastName.trim()
+  const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   return (
     <div>
-      <H1>Uusi oppivelvollinen</H1>
+      <Link to="/oppivelvolliset">Takaisin</Link>
+      <VerticalGap $size="L" />
+
+      <H2>Uusi oppivelvollinen</H2>
 
       <VerticalGap $size="L" />
 
-      <FlexColWithGaps $gapSize="m">
-        <FlexColWithGaps>
-          <Label>Etunimi</Label>
-          <input
-            type="text"
-            onChange={(e) => setFirstName(e.target.value)}
-            value={firstName}
-          />
-        </FlexColWithGaps>
-        <FlexColWithGaps>
-          <Label>Sukunimi</Label>
-          <input
-            type="text"
-            onChange={(e) => setLastName(e.target.value)}
-            value={lastName}
-          />
-        </FlexColWithGaps>
-      </FlexColWithGaps>
-
+      <H3>Oppivelvollisen tiedot</H3>
+      <VerticalGap $size="m" />
+      <StudentForm onChange={setStudentInput} />
       <VerticalGap $size="m" />
 
       <button
-        disabled={submitting || !valid}
+        disabled={submitting || !studentInput}
         onClick={() => {
+          if (submitting || !studentInput) return
+
           setSubmitting(true)
-          apiPostStudent({
-            firstName: firstName.trim(),
-            lastName: lastName.trim()
-          })
+          apiPostStudent(studentInput)
             .then((id) => navigate(`/oppivelvolliset/${id}`))
             .catch(() => setSubmitting(false))
         }}

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 
 import {
   FlexColWithGaps,
@@ -7,103 +7,67 @@ import {
   FlexRowWithGaps,
   VerticalGap
 } from '../shared/layout'
-import { H1, H2, Label } from '../shared/typography'
+import { H1, H2 } from '../shared/typography'
 
 import { StudentCaseForm } from './StudentCaseForm'
+import { StudentForm } from './StudentForm'
 import {
   apiGetStudent,
-  apiGetStudentCasesByStudent,
   apiPutStudent,
-  StudentBasics,
-  StudentCase
+  StudentInput,
+  StudentResponse
 } from './api'
 
 export const StudentPage = React.memo(function StudentPage() {
   const { id } = useParams()
   if (!id) throw Error('Id not found in path')
 
-  const [studentResponse, setStudentResponse] = useState<StudentBasics | null>(
-    null
-  )
+  const [studentResponse, setStudentResponse] =
+    useState<StudentResponse | null>(null)
   const loadStudent = useCallback(() => {
     setStudentResponse(null)
     void apiGetStudent(id).then(setStudentResponse)
   }, [id])
   useEffect(loadStudent, [loadStudent])
 
-  const [studentCasesResponse, setStudentCasesResponse] = useState<
-    StudentCase[] | null
-  >(null)
-  const loadStudentCases = useCallback(() => {
-    setStudentCasesResponse(null)
-    void apiGetStudentCasesByStudent(id).then(setStudentCasesResponse)
-  }, [id])
-  useEffect(loadStudentCases, [loadStudentCases])
-
   const [editing, setEditing] = useState(false)
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [submitting, setSubmitting] = useState(false)
+  const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
 
-  const startEditing = () => {
-    if (!studentResponse) return
-
-    setFirstName(studentResponse.firstName)
-    setLastName(studentResponse.lastName)
-    setEditing(true)
-  }
-
-  const valid = firstName.trim() && lastName.trim()
+  const [submitting, setSubmitting] = useState(false)
 
   return (
     <div>
-      <H1>Oppivelvollinen</H1>
+      <Link to="/oppivelvolliset">Takaisin</Link>
+      <VerticalGap $size="L" />
+
+      <H1>
+        {studentResponse
+          ? `${studentResponse.student.firstName} ${studentResponse.student.lastName}`
+          : ''}
+      </H1>
 
       <VerticalGap $size="L" />
 
       {studentResponse && (
         <div>
-          <FlexColWithGaps $gapSize="m">
-            <FlexColWithGaps>
-              <Label>Etunimi</Label>
-              {editing ? (
-                <input
-                  type="text"
-                  onChange={(e) => setFirstName(e.target.value)}
-                  value={firstName}
-                />
-              ) : (
-                <span>{studentResponse.firstName}</span>
-              )}
-            </FlexColWithGaps>
-            <FlexColWithGaps>
-              <Label>Sukunimi</Label>
-              {editing ? (
-                <input
-                  type="text"
-                  onChange={(e) => setLastName(e.target.value)}
-                  value={lastName}
-                />
-              ) : (
-                <span>{studentResponse.lastName}</span>
-              )}
-            </FlexColWithGaps>
-          </FlexColWithGaps>
-
+          <StudentForm
+            key={editing ? 'student-form' : 'student-read-view'}
+            editing={editing}
+            student={studentResponse.student}
+            onChange={setStudentInput}
+          />
           <VerticalGap $size="m" />
-
           {editing ? (
             <FlexRowWithGaps>
               <button
-                disabled={submitting || !valid}
+                disabled={submitting || !studentInput}
                 onClick={() => {
+                  if (submitting || !studentInput) return
+
                   setSubmitting(true)
-                  void apiPutStudent(id, {
-                    firstName: firstName.trim(),
-                    lastName: lastName.trim()
-                  })
+                  void apiPutStudent(id, studentInput)
                     .then(() => {
                       setEditing(false)
                       loadStudent()
@@ -118,47 +82,43 @@ export const StudentPage = React.memo(function StudentPage() {
               </button>
             </FlexRowWithGaps>
           ) : (
-            <button onClick={() => startEditing()}>Muokkaa</button>
+            <button onClick={() => setEditing(true)}>Muokkaa</button>
           )}
 
           <VerticalGap $size="L" />
 
-          {studentCasesResponse && (
-            <div>
-              <FlexLeftRight>
-                <H2>Seurantatapaukset</H2>
-                <button onClick={() => setEditingCase(true)} disabled={editing}>
-                  Luo uusi
-                </button>
-              </FlexLeftRight>
-              <VerticalGap $size="m" />
-              {editingCase === true && (
-                <StudentCaseForm
-                  studentId={id}
-                  onSaved={() => {
-                    setEditingCase(false)
-                    loadStudentCases()
-                  }}
-                  onCancelled={() => setEditingCase(false)}
-                />
-              )}
-              <FlexColWithGaps>
-                {studentCasesResponse.map((studentCase) => (
-                  <StudentCaseForm
-                    key={studentCase.id}
-                    studentCase={studentCase}
-                    editing={editingCase === studentCase.id}
-                    onStartEdit={() => setEditingCase(studentCase.id)}
-                    onSaved={() => {
-                      setEditingCase(false)
-                      loadStudentCases()
-                    }}
-                    onCancelled={() => setEditingCase(false)}
-                  />
-                ))}
-              </FlexColWithGaps>
-            </div>
+          <FlexLeftRight>
+            <H2>Seurantatapaukset</H2>
+            <button onClick={() => setEditingCase(true)} disabled={editing}>
+              Luo uusi
+            </button>
+          </FlexLeftRight>
+          <VerticalGap $size="m" />
+          {editingCase === true && (
+            <StudentCaseForm
+              studentId={id}
+              onSaved={() => {
+                setEditingCase(false)
+                loadStudent()
+              }}
+              onCancelled={() => setEditingCase(false)}
+            />
           )}
+          <FlexColWithGaps>
+            {studentResponse.cases.map((studentCase) => (
+              <StudentCaseForm
+                key={studentCase.id}
+                studentCase={studentCase}
+                editing={editingCase === studentCase.id}
+                onStartEdit={() => setEditingCase(studentCase.id)}
+                onSaved={() => {
+                  setEditingCase(false)
+                  loadStudent()
+                }}
+                onCancelled={() => setEditingCase(false)}
+              />
+            ))}
+          </FlexColWithGaps>
         </div>
       )}
     </div>

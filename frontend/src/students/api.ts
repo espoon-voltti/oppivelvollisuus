@@ -1,33 +1,86 @@
 import { formatISO, parseISO } from 'date-fns'
 
 import { apiClient } from '../api-client'
+import { JsonOf } from '../shared/api-utils'
 
 export interface StudentInput {
+  valpasLink: string
+  ssn: string
   firstName: string
   lastName: string
+  dateOfBirth: Date | null
 }
 
 export const apiPostStudent = (data: StudentInput): Promise<string> =>
-  apiClient.post<string>('/students', data).then((res) => res.data)
+  apiClient
+    .post<string>('/students', {
+      ...data,
+      dateOfBirth: data.dateOfBirth
+        ? formatISO(data.dateOfBirth, { representation: 'date' })
+        : null
+    })
+    .then((res) => res.data)
 
 export const apiPutStudent = (id: string, data: StudentInput): Promise<void> =>
-  apiClient.put(`/students/${id}`, data)
+  apiClient.put(`/students/${id}`, {
+    ...data,
+    dateOfBirth: data.dateOfBirth
+      ? formatISO(data.dateOfBirth, { representation: 'date' })
+      : null
+  })
 
-export interface StudentBasics {
+export interface StudentSummary {
   id: string
   firstName: string
   lastName: string
+  openedAt: Date | null
 }
 
-export const apiGetStudents = (): Promise<StudentBasics[]> =>
-  apiClient.get<StudentBasics[]>('/students').then((res) => res.data)
+export const apiGetStudents = (): Promise<StudentSummary[]> =>
+  apiClient.get<JsonOf<StudentSummary[]>>('/students').then((res) =>
+    res.data.map((s) => ({
+      ...s,
+      openedAt: s.openedAt ? parseISO(s.openedAt) : null
+    }))
+  )
 
-export const apiGetStudent = (id: string): Promise<StudentBasics> =>
-  apiClient.get<StudentBasics>(`/students/${id}`).then((res) => res.data)
+export interface StudentDetails {
+  id: string
+  valpasLink: string
+  ssn: string
+  firstName: string
+  lastName: string
+  dateOfBirth: Date | null
+}
+
+export interface StudentResponse {
+  student: StudentDetails
+  cases: StudentCase[]
+}
+
+export const apiGetStudent = (id: string): Promise<StudentResponse> =>
+  apiClient.get<JsonOf<StudentResponse>>(`/students/${id}`).then((res) => ({
+    ...res.data,
+    student: {
+      ...res.data.student,
+      dateOfBirth: res.data.student.dateOfBirth
+        ? parseISO(res.data.student.dateOfBirth)
+        : null
+    },
+    cases: res.data.cases.map((c) => ({
+      ...c,
+      openedAt: parseISO(c.openedAt)
+    }))
+  }))
 
 export interface StudentCaseInput {
   openedAt: Date
   info: string
+}
+
+export interface StudentCase extends StudentCaseInput {
+  id: string
+  studentId: string
 }
 
 export const apiPostStudentCase = (
@@ -41,25 +94,6 @@ export const apiPostStudentCase = (
     })
     .then((res) => res.data)
 
-export interface StudentCase extends StudentCaseInput {
-  id: string
-  studentId: string
-}
-
-type StudentCaseJson = StudentCase & {
-  openedAt: string
-}
-
-export const apiGetStudentCasesByStudent = (
-  studentId: string
-): Promise<StudentCase[]> =>
-  apiClient.get<StudentCaseJson[]>(`/students/${studentId}/cases`).then((res) =>
-    res.data.map((row) => ({
-      ...row,
-      openedAt: parseISO(row.openedAt)
-    }))
-  )
-
 export const apiPutStudentCase = (
   studentId: string,
   caseId: string,
@@ -69,21 +103,3 @@ export const apiPutStudentCase = (
     ...data,
     openedAt: formatISO(data.openedAt, { representation: 'date' })
   })
-
-export interface StudentCaseSummary {
-  id: string
-  studentId: string
-  firstName: string
-  lastName: string
-  openedAt: Date
-}
-type StudentCaseSummaryJson = StudentCaseSummary & {
-  openedAt: string
-}
-export const apiGetStudentCases = (): Promise<StudentCaseSummary[]> =>
-  apiClient.get<StudentCaseSummaryJson[]>('/students-cases').then((res) =>
-    res.data.map((row) => ({
-      ...row,
-      openedAt: parseISO(row.openedAt)
-    }))
-  )

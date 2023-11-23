@@ -8,6 +8,7 @@ export const FlexCol = styled.div`
 export const FlexRow = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
 `
 
 export const FlexColWithGaps = styled(FlexCol)<{ $gapSize?: 's' | 'm' | 'L' }>`
@@ -21,6 +22,10 @@ export const FlexRowWithGaps = styled(FlexRow)<{ $gapSize?: 's' | 'm' | 'L' }>`
   > * {
     margin-right: ${(p) =>
       p.$gapSize === 'L' ? '32px' : p.$gapSize === 'm' ? '16px' : '8px'};
+
+    &:last-child {
+      margin-right: 0;
+    }
   }
 `
 
@@ -38,6 +43,7 @@ export const Table = styled.table`
   td {
     border-top: 1px solid #888;
     border-right: 1px solid #888;
+    padding: 8px;
   }
 
   td:last-child {

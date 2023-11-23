@@ -2,14 +2,15 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { FlexLeftRight, Table, VerticalGap } from '../shared/layout'
-import { H1 } from '../shared/typography'
+import { Label } from '../shared/typography'
 
-import { apiGetStudents, StudentBasics } from './api'
+import { apiGetStudents, StudentSummary } from './api'
+import { formatDate } from '../shared/dates'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
   const [studentsResponse, setStudentsResponse] = useState<
-    StudentBasics[] | null
+    StudentSummary[] | null
   >(null)
   useEffect(() => {
     void apiGetStudents().then(setStudentsResponse)
@@ -17,19 +18,24 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
 
   return (
     <div>
+      <VerticalGap $size="L" />
       <FlexLeftRight>
-        <H1>Oppivelvolliset</H1>
+        <Label>
+          Oppivelvollisia{' '}
+          {studentsResponse ? `(${studentsResponse.length})` : ''}
+        </Label>
         <button onClick={() => navigate('/oppivelvolliset/uusi')}>
           Lisää uusi
         </button>
       </FlexLeftRight>
 
-      <VerticalGap $size="L" />
+      <VerticalGap />
 
       {studentsResponse && (
         <Table>
           <tr>
             <th>Nimi</th>
+            <th>Ilmoitettu</th>
           </tr>
           {studentsResponse.map((student) => (
             <tr key={student.id}>
@@ -37,6 +43,9 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                 <Link to={`/oppivelvolliset/${student.id}`}>
                   {student.lastName} {student.firstName}
                 </Link>
+              </td>
+              <td>
+                {student.openedAt ? formatDate(student.openedAt) : '-'}
               </td>
             </tr>
           ))}
