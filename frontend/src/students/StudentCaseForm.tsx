@@ -1,26 +1,22 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 
 import { formatDate, parseDate } from '../shared/dates'
-import { FlexColWithGaps, FlexRowWithGaps, VerticalGap } from '../shared/layout'
-import { H3, Label, P } from '../shared/typography'
+import { FlexColWithGaps } from '../shared/layout'
+import { Label, P } from '../shared/typography'
 
-import { apiPostStudentCase, apiPutStudentCase, StudentCase } from './api'
+import { StudentCase, StudentCaseInput } from './api'
 
 interface CreateProps {
-  studentId: string
-  onSaved: () => void
-  onCancelled: () => void
+  onChange: (validInput: StudentCaseInput | null) => void
 }
 interface ViewProps {
   studentCase: StudentCase
   editing: false
-  onStartEdit: () => void
 }
 interface EditProps {
   studentCase: StudentCase
   editing: true
-  onSaved: () => void
-  onCancelled: () => void
+  onChange: (validInput: StudentCaseInput | null) => void
 }
 type Props = CreateProps | ViewProps | EditProps
 
@@ -41,78 +37,46 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   const [info, setInfo] = useState(
     isCreating(props) ? '' : props.studentCase.info
   )
-  const [submitting, setSubmitting] = useState(false)
 
-  const valid = parseDate(openedAt) !== undefined
+  const validInput: StudentCaseInput | null = useMemo(() => {
+    const openedAtDate = parseDate(openedAt.trim())
+
+    if (!openedAtDate) return null
+
+    return {
+      openedAt: openedAtDate,
+      info
+    }
+  }, [openedAt, info])
+
+  useEffect(() => {
+    if (!isViewing(props)) {
+      props.onChange(validInput)
+    }
+  }, [validInput, props])
 
   return (
-    <div>
-      <FlexRowWithGaps $gapSize="m">
-        <H3>
-          {isCreating(props)
-            ? 'Uusi tapaus'
-            : `Tapaus ${formatDate(props.studentCase.openedAt)}`}
-        </H3>
-        {isViewing(props) && (
-          <button onClick={() => props.onStartEdit()}>Muokkaa</button>
+    <FlexColWithGaps $gapSize="m">
+      <FlexColWithGaps>
+        <Label>Tapaus vastaanotettu</Label>
+        {isViewing(props) ? (
+          <span>{formatDate(props.studentCase.openedAt)}</span>
+        ) : (
+          <input
+            type="text"
+            onChange={(e) => setOpenedAt(e.target.value)}
+            value={openedAt}
+          />
         )}
-      </FlexRowWithGaps>
-
-      <VerticalGap $size="m" />
-
-      <FlexColWithGaps $gapSize="m">
-        <FlexColWithGaps>
-          <Label>Tapaus vastaanotettu</Label>
-          {isViewing(props) ? (
-            <span>{formatDate(props.studentCase.openedAt)}</span>
-          ) : (
-            <input
-              type="text"
-              onChange={(e) => setOpenedAt(e.target.value)}
-              value={openedAt}
-            />
-          )}
-        </FlexColWithGaps>
-        <FlexColWithGaps>
-          <Label>Tapauksen tiedot</Label>
-          {isViewing(props) ? (
-            <P>{props.studentCase.info}</P>
-          ) : (
-            <textarea onChange={(e) => setInfo(e.target.value)} value={info} />
-          )}
-        </FlexColWithGaps>
       </FlexColWithGaps>
-
-      <VerticalGap $size="m" />
-
-      {!isViewing(props) && (
-        <FlexRowWithGaps>
-          <button
-            disabled={submitting || !valid}
-            onClick={() => {
-              setSubmitting(true)
-              const data = {
-                openedAt: parseDate(openedAt)!,
-                info: info
-              }
-              const req = isCreating(props)
-                ? apiPostStudentCase(props.studentId, data)
-                : apiPutStudentCase(
-                    props.studentCase.studentId,
-                    props.studentCase.id,
-                    data
-                  )
-
-              req.then(() => props.onSaved()).catch(() => setSubmitting(false))
-            }}
-          >
-            Tallenna
-          </button>
-          <button disabled={submitting} onClick={() => props.onCancelled()}>
-            Peruuta
-          </button>
-        </FlexRowWithGaps>
-      )}
-    </div>
+      <FlexColWithGaps>
+        <Label>Tapauksen tiedot</Label>
+        {isViewing(props) ? (
+          <P>{props.studentCase.info || '-'}</P>
+        ) : (
+          <textarea onChange={(e) => setInfo(e.target.value)} value={info} />
+        )}
+      </FlexColWithGaps>
+    </FlexColWithGaps>
   )
 })

@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertEquals
 
-class ServiceApplicationTests : FullApplicationTest() {
+class AppControllerTests : FullApplicationTest() {
     @Autowired
-    lateinit var controller: MainController
+    lateinit var controller: AppController
 
     @Test
     fun `get empty list of students`() {
