@@ -56,6 +56,15 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       ? ''
       : formatDate(props.student.dateOfBirth)
   )
+  const [phone, setPhone] = useState(
+    isCreating(props) ? '' : props.student.phone
+  )
+  const [email, setEmail] = useState(
+    isCreating(props) ? '' : props.student.email
+  )
+  const [address, setAdress] = useState(
+    isCreating(props) ? '' : props.student.address
+  )
 
   useEffect(() => {
     if (ssn.length >= 6) {
@@ -83,10 +92,23 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             lastName: lastName.trim(),
             dateOfBirth: dateOfBirth.trim()
               ? parseDate(dateOfBirth.trim()) ?? null
-              : null
+              : null,
+            phone: phone.trim(),
+            email: email.trim(),
+            address: address.trim()
           }
         : null,
-    [isValid, valpasLink, ssn, firstName, lastName, dateOfBirth]
+    [
+      isValid,
+      valpasLink,
+      ssn,
+      firstName,
+      lastName,
+      dateOfBirth,
+      phone,
+      email,
+      address
+    ]
   )
 
   useEffect(() => {
@@ -174,6 +196,44 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             />
           )}
         </LabeledInputS>
+      </FlexRowWithGaps>
+      <FlexRowWithGaps $gapSize="m">
+        <LabeledInputM>
+          <Label>Puhelinnumero</Label>
+          {isViewing(props) ? (
+            <span>{props.student.phone || '-'}</span>
+          ) : (
+            <input
+              type="text"
+              onChange={(e) => setPhone(e.target.value)}
+              value={phone}
+            />
+          )}
+        </LabeledInputM>
+        <LabeledInputM>
+          <Label>Sähköposti</Label>
+          {isViewing(props) ? (
+            <span>{props.student.email || '-'}</span>
+          ) : (
+            <input
+              type="text"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
+            />
+          )}
+        </LabeledInputM>
+        <LabeledInputL>
+          <Label>Lähiosoite</Label>
+          {isViewing(props) ? (
+            <span>{props.student.address || '-'}</span>
+          ) : (
+            <input
+              type="text"
+              onChange={(e) => setAdress(e.target.value)}
+              value={address}
+            />
+          )}
+        </LabeledInputL>
       </FlexRowWithGaps>
     </FlexColWithGaps>
   )

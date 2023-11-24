@@ -1,0 +1,9 @@
+ALTER TABLE students
+    ADD COLUMN phone text NOT NULL DEFAULT '',
+    ADD COLUMN email text NOT NULL DEFAULT '',
+    ADD COLUMN address text NOT NULL DEFAULT '';
+
+ALTER TABLE students
+    ALTER COLUMN phone DROP DEFAULT,
+    ALTER COLUMN email DROP DEFAULT,
+    ALTER COLUMN address DROP DEFAULT;

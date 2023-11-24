@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.1.5"
-    id("io.spring.dependency-management") version "1.1.3"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.20"
     kotlin("plugin.spring") version "1.9.20"
-    id("org.flywaydb.flyway") version "10.0.1"
+    id("org.flywaydb.flyway") version "10.1.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 
@@ -22,24 +22,31 @@ dependencies {
     api(kotlin("stdlib"))
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // cve fixes
+    api("org.yaml:snakeyaml:2.2")
+
+    api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
-    implementation("com.zaxxer:HikariCP")
-    implementation("org.flywaydb:flyway-core")
-    implementation("org.postgresql:postgresql")
+    implementation("com.zaxxer:HikariCP:5.1.0")
+    implementation("org.flywaydb:flyway-core:10.1.0")
+    implementation("org.flywaydb:flyway-database-postgresql:10.1.0")
+    implementation("org.postgresql:postgresql:42.7.0")
 
-    implementation(platform("org.jdbi:jdbi3-bom:3.41.2"))
+    api(platform("org.jdbi:jdbi3-bom:3.41.2"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
+    api(platform("com.fasterxml.jackson:jackson-bom:2.16.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
+    api(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }

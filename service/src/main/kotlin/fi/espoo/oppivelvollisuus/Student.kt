@@ -12,7 +12,10 @@ data class StudentInput(
     val ssn: String,
     val firstName: String,
     val lastName: String,
-    val dateOfBirth: LocalDate?
+    val dateOfBirth: LocalDate?,
+    val phone: String,
+    val email: String,
+    val address: String
 )
 
 fun Handle.insertStudent(
@@ -21,8 +24,8 @@ fun Handle.insertStudent(
 ) {
     createUpdate(
         """
-INSERT INTO students (id, valpas_link, ssn, first_name, last_name, date_of_birth) 
-VALUES (:id, :valpasLink, :ssn, :firstName, :lastName, :dateOfBirth)
+INSERT INTO students (id, valpas_link, ssn, first_name, last_name, date_of_birth, phone, email, address) 
+VALUES (:id, :valpasLink, :ssn, :firstName, :lastName, :dateOfBirth, :phone, :email, :address)
 """
     )
         .bind("id", id)
@@ -60,12 +63,15 @@ data class Student(
     val ssn: String,
     val firstName: String,
     val lastName: String,
-    val dateOfBirth: LocalDate?
+    val dateOfBirth: LocalDate?,
+    val phone: String,
+    val email: String,
+    val address: String
 )
 
 fun Handle.getStudent(id: UUID) = createQuery(
 """
-SELECT id, valpas_link, ssn, first_name, last_name, date_of_birth
+SELECT id, valpas_link, ssn, first_name, last_name, date_of_birth, phone, email, address
 FROM students
 WHERE id = :id
 """
@@ -85,7 +91,10 @@ SET
     ssn = :ssn,
     first_name = :firstName,
     last_name = :lastName,
-    date_of_birth = :dateOfBirth
+    date_of_birth = :dateOfBirth,
+    phone = :phone,
+    email = :email,
+    address = :address
 WHERE id = :id
 """
     )
