@@ -11,23 +11,40 @@ export interface StudentInput {
   dateOfBirth: Date | null
 }
 
-export const apiPostStudent = (data: StudentInput): Promise<string> =>
-  apiClient
-    .post<string>('/students', {
-      ...data,
-      dateOfBirth: data.dateOfBirth
-        ? formatISO(data.dateOfBirth, { representation: 'date' })
-        : null
-    })
-    .then((res) => res.data)
+export interface StudentAndCaseInput {
+  student: StudentInput
+  studentCase: StudentCaseInput
+}
 
-export const apiPutStudent = (id: string, data: StudentInput): Promise<void> =>
-  apiClient.put(`/students/${id}`, {
+export const apiPostStudent = (data: StudentAndCaseInput): Promise<string> => {
+  const body: JsonOf<StudentAndCaseInput> = {
+    ...data,
+    student: {
+      ...data.student,
+      dateOfBirth: data.student.dateOfBirth
+        ? formatISO(data.student.dateOfBirth, { representation: 'date' })
+        : null
+    },
+    studentCase: {
+      ...data.studentCase,
+      openedAt: formatISO(data.studentCase.openedAt, { representation: 'date' })
+    }
+  }
+  return apiClient.post<string>('/students', body).then((res) => res.data)
+}
+
+export const apiPutStudent = (
+  id: string,
+  data: StudentInput
+): Promise<void> => {
+  const body: JsonOf<StudentInput> = {
     ...data,
     dateOfBirth: data.dateOfBirth
       ? formatISO(data.dateOfBirth, { representation: 'date' })
       : null
-  })
+  }
+  return apiClient.put(`/students/${id}`, body)
+}
 
 export interface StudentSummary {
   id: string
@@ -86,20 +103,24 @@ export interface StudentCase extends StudentCaseInput {
 export const apiPostStudentCase = (
   studentId: string,
   data: StudentCaseInput
-): Promise<string> =>
-  apiClient
-    .post<string>(`/students/${studentId}/cases`, {
-      ...data,
-      openedAt: formatISO(data.openedAt, { representation: 'date' })
-    })
+): Promise<string> => {
+  const body: JsonOf<StudentCaseInput> = {
+    ...data,
+    openedAt: formatISO(data.openedAt, { representation: 'date' })
+  }
+  return apiClient
+    .post<string>(`/students/${studentId}/cases`, body)
     .then((res) => res.data)
+}
 
 export const apiPutStudentCase = (
   studentId: string,
   caseId: string,
   data: StudentCaseInput
-): Promise<string> =>
-  apiClient.put(`/students/${studentId}/cases/${caseId}`, {
+): Promise<string> => {
+  const body: JsonOf<StudentCaseInput> = {
     ...data,
     openedAt: formatISO(data.openedAt, { representation: 'date' })
-  })
+  }
+  return apiClient.put(`/students/${studentId}/cases/${caseId}`, body)
+}

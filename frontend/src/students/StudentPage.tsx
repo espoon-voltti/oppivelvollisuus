@@ -1,13 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { formatDate } from '../shared/dates'
 import {
   FlexColWithGaps,
   FlexLeftRight,
   FlexRowWithGaps,
   VerticalGap
 } from '../shared/layout'
-import { H1, H2 } from '../shared/typography'
+import { H2, H3 } from '../shared/typography'
 
 import { StudentCaseForm } from './StudentCaseForm'
 import { StudentForm } from './StudentForm'
@@ -15,7 +16,10 @@ import {
   apiGetStudent,
   apiPutStudent,
   StudentInput,
-  StudentResponse
+  StudentResponse,
+  StudentCaseInput,
+  apiPostStudentCase,
+  apiPutStudentCase
 } from './api'
 
 export const StudentPage = React.memo(function StudentPage() {
@@ -34,6 +38,8 @@ export const StudentPage = React.memo(function StudentPage() {
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
+  const [studentCaseInput, setStudentCaseInput] =
+    useState<StudentCaseInput | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -42,16 +48,18 @@ export const StudentPage = React.memo(function StudentPage() {
       <Link to="/oppivelvolliset">Takaisin</Link>
       <VerticalGap $size="L" />
 
-      <H1>
+      <H2>
         {studentResponse
           ? `${studentResponse.student.firstName} ${studentResponse.student.lastName}`
           : ''}
-      </H1>
+      </H2>
 
       <VerticalGap $size="L" />
 
       {studentResponse && (
         <div>
+          <H3>Oppivelvollisen tiedot</H3>
+          <VerticalGap $size="m" />
           <StudentForm
             key={editing ? 'student-form' : 'student-read-view'}
             editing={editing}
@@ -64,7 +72,7 @@ export const StudentPage = React.memo(function StudentPage() {
               <button
                 disabled={submitting || !studentInput}
                 onClick={() => {
-                  if (submitting || !studentInput) return
+                  if (!studentInput) return
 
                   setSubmitting(true)
                   void apiPutStudent(id, studentInput)
@@ -82,41 +90,118 @@ export const StudentPage = React.memo(function StudentPage() {
               </button>
             </FlexRowWithGaps>
           ) : (
-            <button onClick={() => setEditing(true)}>Muokkaa</button>
+            <button
+              disabled={editingCase !== false}
+              onClick={() => setEditing(true)}
+            >
+              Muokkaa
+            </button>
           )}
 
           <VerticalGap $size="L" />
 
+          <hr />
+
+          <VerticalGap $size="L" />
+
           <FlexLeftRight>
-            <H2>Seurantatapaukset</H2>
-            <button onClick={() => setEditingCase(true)} disabled={editing}>
+            <H3>Seurantatapaukset</H3>
+            <button
+              onClick={() => setEditingCase(true)}
+              disabled={editing || editingCase !== false}
+            >
               Luo uusi
             </button>
           </FlexLeftRight>
           <VerticalGap $size="m" />
           {editingCase === true && (
-            <StudentCaseForm
-              studentId={id}
-              onSaved={() => {
-                setEditingCase(false)
-                loadStudent()
-              }}
-              onCancelled={() => setEditingCase(false)}
-            />
+            <FlexColWithGaps>
+              <H3>Uusi ilmoitus</H3>
+              <StudentCaseForm onChange={setStudentCaseInput} />
+              <FlexRowWithGaps>
+                <button
+                  disabled={submitting || !studentCaseInput}
+                  onClick={() => {
+                    if (!studentCaseInput) return
+
+                    setSubmitting(true)
+                    void apiPostStudentCase(id, studentCaseInput)
+                      .then(() => {
+                        setEditingCase(false)
+                        loadStudent()
+                      })
+                      .finally(() => setSubmitting(false))
+                  }}
+                >
+                  Tallenna
+                </button>
+                <button
+                  disabled={submitting}
+                  onClick={() => {
+                    setEditingCase(false)
+                  }}
+                >
+                  Peruuta
+                </button>
+              </FlexRowWithGaps>
+              <VerticalGap $size="m" />
+            </FlexColWithGaps>
           )}
-          <FlexColWithGaps>
+          <FlexColWithGaps $gapSize="L">
             {studentResponse.cases.map((studentCase) => (
-              <StudentCaseForm
-                key={studentCase.id}
-                studentCase={studentCase}
-                editing={editingCase === studentCase.id}
-                onStartEdit={() => setEditingCase(studentCase.id)}
-                onSaved={() => {
-                  setEditingCase(false)
-                  loadStudent()
-                }}
-                onCancelled={() => setEditingCase(false)}
-              />
+              <FlexColWithGaps key={studentCase.id}>
+                <FlexRowWithGaps>
+                  <H3>Ilmoitus {formatDate(studentCase.openedAt)}</H3>
+                  {editingCase !== studentCase.id && (
+                    <button
+                      disabled={editing || editingCase !== false}
+                      onClick={() => setEditingCase(studentCase.id)}
+                    >
+                      Muokkaa
+                    </button>
+                  )}
+                </FlexRowWithGaps>
+                <StudentCaseForm
+                  key={`${studentCase.id}-${
+                    editingCase ? 'form' : 'read-view'
+                  }`}
+                  studentCase={studentCase}
+                  editing={editingCase === studentCase.id}
+                  onChange={setStudentCaseInput}
+                />
+                {editingCase === studentCase.id && (
+                  <FlexRowWithGaps>
+                    <button
+                      disabled={submitting || !studentCaseInput}
+                      onClick={() => {
+                        if (!studentCaseInput) return
+
+                        setSubmitting(true)
+                        void apiPutStudentCase(
+                          id,
+                          studentCase.id,
+                          studentCaseInput
+                        )
+                          .then(() => {
+                            setEditingCase(false)
+                            loadStudent()
+                          })
+                          .finally(() => setSubmitting(false))
+                      }}
+                    >
+                      Tallenna
+                    </button>
+                    <button
+                      disabled={submitting}
+                      onClick={() => {
+                        setEditingCase(false)
+                      }}
+                    >
+                      Peruuta
+                    </button>
+                  </FlexRowWithGaps>
+                )}
+              </FlexColWithGaps>
             ))}
           </FlexColWithGaps>
         </div>

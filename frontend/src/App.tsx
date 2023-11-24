@@ -20,25 +20,29 @@ const AppContainer = styled.div`
 `
 
 const Header = styled.nav`
-  height: 64px;
+  height: 80px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
   border-bottom: 2px double #888;
-  margin-bottom: 16px;
+  margin-bottom: 32px;
+  padding: 0 32px;
+  background-color: #fff;
 `
 
 function App() {
   return (
     <UserContextProvider>
-      <AppContainer>
+      <div>
         <Header>
           <H1>Espoon kaupunki - Oppivelvollisuuden valvonta</H1>
           <UserHeader />
         </Header>
-        <Outlet />
-      </AppContainer>
+        <AppContainer>
+          <Outlet />
+        </AppContainer>
+      </div>
     </UserContextProvider>
   )
 }

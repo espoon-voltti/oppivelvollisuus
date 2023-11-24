@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { formatDate } from '../shared/dates'
 import { FlexLeftRight, Table, VerticalGap } from '../shared/layout'
 import { Label } from '../shared/typography'
 
 import { apiGetStudents, StudentSummary } from './api'
-import { formatDate } from '../shared/dates'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
@@ -44,9 +44,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                   {student.lastName} {student.firstName}
                 </Link>
               </td>
-              <td>
-                {student.openedAt ? formatDate(student.openedAt) : '-'}
-              </td>
+              <td>{student.openedAt ? formatDate(student.openedAt) : '-'}</td>
             </tr>
           ))}
         </Table>

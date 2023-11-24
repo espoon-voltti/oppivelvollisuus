@@ -1,7 +1,6 @@
 import React, { useContext } from 'react'
 
 import { FlexRowWithGaps } from '../shared/layout'
-import { Label } from '../shared/typography'
 
 import { UserContext } from './UserContext'
 
@@ -12,8 +11,10 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <Label>{user.name}</Label>
-      <button onClick={setLoggedOut}>Kirjaudu ulos</button>
+      <span>{user.name}</span>
+      <a href="#" onClick={setLoggedOut}>
+        Kirjaudu ulos
+      </a>
     </FlexRowWithGaps>
   )
 })

@@ -73,7 +73,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     lastName.trim() !== '' &&
     (dateOfBirth === '' || parseDate(dateOfBirth) !== undefined)
 
-  const validInput = useMemo(
+  const validInput: StudentInput | null = useMemo(
     () =>
       isValid
         ? {
@@ -82,7 +82,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             firstName: firstName.trim(),
             lastName: lastName.trim(),
             dateOfBirth: dateOfBirth.trim()
-              ? parseDate(dateOfBirth) ?? null
+              ? parseDate(dateOfBirth.trim()) ?? null
               : null
           }
         : null,
@@ -110,7 +110,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
                 {props.student.valpasLink}
               </a>
             ) : (
-              <span />
+              <span>-</span>
             )
           ) : (
             <input
@@ -123,7 +123,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
         <LabeledInputS>
           <Label>Hetu</Label>
           {isViewing(props) ? (
-            <span>{props.student.ssn}</span>
+            <span>{props.student.ssn || '-'}</span>
           ) : (
             <input
               type="text"
@@ -164,7 +164,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             <span>
               {props.student.dateOfBirth
                 ? formatDate(props.student.dateOfBirth)
-                : ''}
+                : '-'}
             </span>
           ) : (
             <input

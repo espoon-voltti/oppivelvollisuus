@@ -4,13 +4,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import { VerticalGap } from '../shared/layout'
 import { H2, H3 } from '../shared/typography'
 
+import { StudentCaseForm } from './StudentCaseForm'
 import { StudentForm } from './StudentForm'
-import { apiPostStudent, StudentInput } from './api'
+import { apiPostStudent, StudentCaseInput, StudentInput } from './api'
 
 export const CreateStudentPage = React.memo(function CreateStudentPage() {
   const navigate = useNavigate()
 
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
+  const [studentCaseInput, setStudentCaseInput] =
+    useState<StudentCaseInput | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   return (
@@ -26,14 +29,21 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
       <VerticalGap $size="m" />
       <StudentForm onChange={setStudentInput} />
       <VerticalGap $size="m" />
+      <H3>Ilmoituksen tiedot</H3>
+      <VerticalGap $size="m" />
+      <StudentCaseForm onChange={setStudentCaseInput} />
+      <VerticalGap $size="m" />
 
       <button
-        disabled={submitting || !studentInput}
+        disabled={submitting || !studentInput || !studentCaseInput}
         onClick={() => {
-          if (submitting || !studentInput) return
+          if (!studentInput || !studentCaseInput) return
 
           setSubmitting(true)
-          apiPostStudent(studentInput)
+          apiPostStudent({
+            student: studentInput,
+            studentCase: studentCaseInput
+          })
             .then((id) => navigate(`/oppivelvolliset/${id}`))
             .catch(() => setSubmitting(false))
         }}
