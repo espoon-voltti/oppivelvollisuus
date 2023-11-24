@@ -9,6 +9,9 @@ export interface StudentInput {
   firstName: string
   lastName: string
   dateOfBirth: Date | null
+  phone: string
+  email: string
+  address: string
 }
 
 export interface StudentAndCaseInput {
@@ -68,6 +71,9 @@ export interface StudentDetails {
   firstName: string
   lastName: string
   dateOfBirth: Date | null
+  phone: string
+  email: string
+  address: string
 }
 
 export interface StudentResponse {
