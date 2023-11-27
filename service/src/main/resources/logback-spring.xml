@@ -3,9 +3,9 @@
 <configuration>
     <springProperty scope="context" name="appName" source="spring.application.name"/>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="fi/espoo/oppivelvollisuus/default-appender-sanitized.xml"/>
 
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="VOLTTI_DEFAULT_APPENDER_SANITIZED"/>
     </root>
 </configuration>
