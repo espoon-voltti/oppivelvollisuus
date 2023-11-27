@@ -44,6 +44,10 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.16.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
+    implementation("net.logstash.logback:logstash-logback-encoder")
+    implementation("ch.qos.logback:logback-access")
+    implementation("io.github.microutils:kotlin-logging-jvm")
+
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
     api(platform("org.junit:junit-bom:5.10.0"))
