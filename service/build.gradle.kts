@@ -2,11 +2,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.2.0"
+    id("org.springframework.boot") version "3.1.5"
     id("io.spring.dependency-management") version "1.1.4"
     kotlin("jvm") version "1.9.20"
     kotlin("plugin.spring") version "1.9.20"
-    id("org.flywaydb.flyway") version "10.1.0"
+    id("org.flywaydb.flyway") version "10.0.0"
     id("org.jlleitschuh.gradle.ktlint") version "11.6.1"
 }
 
@@ -31,8 +31,7 @@ dependencies {
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
-    implementation("org.flywaydb:flyway-core:10.1.0")
-    implementation("org.flywaydb:flyway-database-postgresql:10.1.0")
+    implementation("org.flywaydb:flyway-core")
     implementation("org.postgresql:postgresql:42.7.0")
 
     api(platform("org.jdbi:jdbi3-bom:3.41.2"))
@@ -92,6 +91,12 @@ tasks.register("resolveDependencies") {
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
                 )
             }
+    }
+}
+
+tasks {
+    bootRun {
+        systemProperty("spring.profiles.active", "local")
     }
 }
 
