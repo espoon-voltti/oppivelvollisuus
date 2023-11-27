@@ -13,6 +13,16 @@ services:
       POSTGRES_USER: oppivelvollisuus
       POSTGRES_PASSWORD: postgres
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: '[ "$$(redis-cli -h 127.0.0.1 ping)" == "PONG" ]'
+      interval: 1s
+      timeout: 5s
+      retries: 5
+
 volumes:
   db-data:
     driver: local

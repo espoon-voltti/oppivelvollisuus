@@ -29,11 +29,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    implementation("org.springframework.ws:spring-ws-security")
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core")
     implementation("org.postgresql:postgresql:42.7.0")
-
     api(platform("org.jdbi:jdbi3-bom:3.41.2"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
@@ -42,6 +42,8 @@ dependencies {
 
     api(platform("com.fasterxml.jackson:jackson-bom:2.16.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
+    implementation("com.auth0:java-jwt:4.4.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
     implementation("ch.qos.logback:logback-access")

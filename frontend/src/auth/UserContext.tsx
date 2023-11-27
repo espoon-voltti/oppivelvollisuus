@@ -1,39 +1,27 @@
-import React, { createContext, useMemo, useState } from 'react'
+import React, { createContext, useMemo } from 'react'
 
-export interface User {
-  name: string
-}
+import { User } from './auth-status'
 
 export interface UserState {
   user: User | null
-  setLoggedIn: (user: User) => void
-  setLoggedOut: () => void
 }
 
 export const UserContext = createContext<UserState>({
-  user: {
-    name: 'Tessa Testaaja'
-  },
-  setLoggedIn: () => undefined,
-  setLoggedOut: () => undefined
+  user: null
 })
 
 export const UserContextProvider = React.memo(function UserContextProvider({
-  children
+  children,
+  user
 }: {
   children: React.JSX.Element
+  user: User | null
 }) {
-  const [user, setUser] = useState<User | null>({
-    name: 'Tessa Testaaja'
-  })
-
   const value = useMemo(
     () => ({
-      user,
-      setLoggedIn: setUser,
-      setLoggedOut: () => setUser(null)
+      user
     }),
-    [user, setUser]
+    [user]
   )
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
