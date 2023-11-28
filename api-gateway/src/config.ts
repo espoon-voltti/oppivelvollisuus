@@ -199,7 +199,7 @@ export const jwtPrivateKey = required(
     ifNodeEnv(['local', 'test'], 'config/test-cert/jwt_private_key.pem')
 )
 
-export const appName = `oppivelvollisuus-api-gateway`
+export const appName = 'oppivelvollisuus-api-gateway'
 export const jwtKid = process.env.JWT_KID ?? appName
 
 export const appBaseUrl = required(
