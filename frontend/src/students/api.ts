@@ -1,6 +1,7 @@
 import { formatISO, parseISO } from 'date-fns'
 
 import { apiClient } from '../api-client'
+import { EmployeeBasics } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
 
 export interface StudentInput {
@@ -54,6 +55,7 @@ export interface StudentSummary {
   firstName: string
   lastName: string
   openedAt: Date | null
+  assignedTo: EmployeeBasics | null
 }
 
 export const apiGetStudents = (): Promise<StudentSummary[]> =>
@@ -99,11 +101,13 @@ export const apiGetStudent = (id: string): Promise<StudentResponse> =>
 export interface StudentCaseInput {
   openedAt: Date
   info: string
+  assignedTo: string | null
 }
 
-export interface StudentCase extends StudentCaseInput {
+export interface StudentCase extends Omit<StudentCaseInput, 'assignedTo'> {
   id: string
   studentId: string
+  assignedTo: EmployeeBasics | null
 }
 
 export const apiPostStudentCase = (

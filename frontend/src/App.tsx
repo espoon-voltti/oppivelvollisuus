@@ -42,7 +42,7 @@ function App() {
     <UserContextProvider user={user}>
       <div>
         <Header>
-          <H1>Espoon kaupunki - Oppivelvollisuuden valvonta</H1>
+          <H1>Espoon kaupunki - Oppivelvollisuuden seuranta</H1>
           <UserHeader />
         </Header>
         <AppContainer>

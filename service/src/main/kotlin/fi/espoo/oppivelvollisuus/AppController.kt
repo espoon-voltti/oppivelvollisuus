@@ -79,4 +79,9 @@ class AppController {
             tx.updateStudentCase(id = id, studentId = studentId, data = body)
         }
     }
+
+    @GetMapping("/employees")
+    fun getEmployees(): List<EmployeeUser> {
+        return jdbi.inTransactionUnchecked { it.getEmployees() }
+    }
 }

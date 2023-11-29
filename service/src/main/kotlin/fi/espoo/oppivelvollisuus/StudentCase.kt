@@ -3,12 +3,14 @@ package fi.espoo.oppivelvollisuus
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.Nested
 import java.time.LocalDate
 import java.util.*
 
 data class StudentCaseInput(
     val openedAt: LocalDate,
-    val info: String
+    val info: String,
+    val assignedTo: String?
 )
 
 fun Handle.insertStudentCase(
@@ -32,14 +34,20 @@ data class StudentCase(
     val id: UUID,
     val studentId: UUID,
     val openedAt: LocalDate,
-    val info: String
+    val info: String,
+    @Nested("assignedTo") val assignedTo: EmployeeBasics?
 )
 
 fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> = createQuery(
 """
-SELECT id, student_id, opened_at, info
+SELECT 
+    id, student_id, opened_at, info, 
+    assignee.external_id AS assigned_to_id, 
+    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
 FROM student_cases
+LEFT JOIN employees assignee ON student_cases.assigned_to = assignee.external_id
 WHERE student_id = :studentId
+ORDER BY opened_at DESC, student_cases.created DESC 
 """
 )
     .bind("studentId", studentId)
@@ -52,7 +60,8 @@ fun Handle.updateStudentCase(id: UUID, studentId: UUID, data: StudentCaseInput) 
 UPDATE student_cases
 SET 
     opened_at = :openedAt,
-    info = :info
+    info = :info,
+    assigned_to = :assignedTo
 WHERE id = :id AND student_id = :studentId
 """
     )

@@ -1,18 +1,12 @@
 import { useEffect, useState } from 'react'
 
 import { apiClient } from '../api-client'
+import { EmployeeUser } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
-
-export interface User {
-  externalId: string
-  firstName: string
-  lastName: string
-  email?: string | null
-}
 
 export interface AuthStatus {
   loggedIn: boolean
-  user?: User
+  user?: EmployeeUser
   apiVersion: string
 }
 

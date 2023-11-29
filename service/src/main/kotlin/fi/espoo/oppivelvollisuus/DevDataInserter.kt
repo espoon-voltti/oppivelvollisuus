@@ -20,7 +20,9 @@ class DevDataInserter(jdbi: Jdbi) {
                 tx.createUpdate(
                     """
 INSERT INTO employees (external_id, first_name, last_name)
-VALUES ('12345678-0000-0000-0000-000000000000', 'Sanna', 'Suunnittelija')
+VALUES ('12345678-0000-0000-0000-000000000000', 'Sanna', 'Suunnittelija');
+INSERT INTO employees (external_id, first_name, last_name)
+VALUES ('12345678-0000-0000-0000-000000000001', 'Olli', 'Ohjaaja');
                 """
                 ).execute()
             }

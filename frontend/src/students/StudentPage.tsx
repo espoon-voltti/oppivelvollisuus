@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 
+import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { formatDate } from '../shared/dates'
 import {
   FlexColWithGaps,
@@ -25,6 +26,11 @@ import {
 export const StudentPage = React.memo(function StudentPage() {
   const { id } = useParams()
   if (!id) throw Error('Id not found in path')
+
+  const [employees, setEmployees] = useState<EmployeeUser[] | null>(null)
+  useEffect(() => {
+    void apiGetEmployees().then(setEmployees)
+  }, [])
 
   const [studentResponse, setStudentResponse] =
     useState<StudentResponse | null>(null)
@@ -56,7 +62,7 @@ export const StudentPage = React.memo(function StudentPage() {
 
       <VerticalGap $size="L" />
 
-      {studentResponse && (
+      {studentResponse && employees && (
         <div>
           <H3>Oppivelvollisen tiedot</H3>
           <VerticalGap $size="m" />
@@ -117,7 +123,10 @@ export const StudentPage = React.memo(function StudentPage() {
           {editingCase === true && (
             <FlexColWithGaps>
               <H3>Uusi ilmoitus</H3>
-              <StudentCaseForm onChange={setStudentCaseInput} />
+              <StudentCaseForm
+                onChange={setStudentCaseInput}
+                employees={employees}
+              />
               <FlexRowWithGaps>
                 <button
                   disabled={submitting || !studentCaseInput}
@@ -168,6 +177,7 @@ export const StudentPage = React.memo(function StudentPage() {
                   studentCase={studentCase}
                   editing={editingCase === studentCase.id}
                   onChange={setStudentCaseInput}
+                  employees={employees}
                 />
                 {editingCase === studentCase.id && (
                   <FlexRowWithGaps>
