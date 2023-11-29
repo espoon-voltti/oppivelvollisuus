@@ -7,4 +7,4 @@ set -euo pipefail
 export HOST_IP=$(curl --max-time 10 --silent --fail --show-error http://169.254.169.254/latest/meta-data/local-ipv4 || printf 'UNAVAILABLE')
 
 # shellcheck disable=SC2086
-exec java -cp . -server $JAVA_OPTS org.springframework.boot.loader.JarLauncher "$@"
+exec java -cp . -server $JAVA_OPTS org.springframework.boot.loader.launch.JarLauncher "$@"
