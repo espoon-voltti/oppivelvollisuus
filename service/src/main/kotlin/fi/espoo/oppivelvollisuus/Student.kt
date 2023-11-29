@@ -3,6 +3,7 @@ package fi.espoo.oppivelvollisuus
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
+import org.jdbi.v3.core.mapper.Nested
 import java.time.LocalDate
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
@@ -37,20 +38,24 @@ data class StudentSummary(
     val id: UUID,
     val firstName: String,
     val lastName: String,
-    val openedAt: LocalDate?
+    val openedAt: LocalDate?,
+    @Nested("assignedTo") val assignedTo: EmployeeBasics?
 )
 
 fun Handle.getStudentSummaries(): List<StudentSummary> = createQuery(
 """
-SELECT id, first_name, last_name, sc.opened_at
-FROM students
+SELECT s.id, s.first_name, s.last_name, sc.opened_at, 
+    assignee.external_id AS assigned_to_id, 
+    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
+FROM students s
 LEFT JOIN LATERAL (
-    SELECT opened_at
+    SELECT opened_at, assigned_to
     FROM student_cases
-    WHERE student_id = students.id
+    WHERE student_id = s.id
     ORDER BY opened_at DESC
     LIMIT 1
 ) sc ON true
+LEFT JOIN employees assignee ON sc.assigned_to = assignee.external_id
 ORDER BY opened_at DESC, first_name, last_name
 """
 )

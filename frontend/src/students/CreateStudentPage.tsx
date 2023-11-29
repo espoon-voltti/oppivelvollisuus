@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
+import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { VerticalGap } from '../shared/layout'
 import { H2, H3 } from '../shared/typography'
 
@@ -11,10 +12,17 @@ import { apiPostStudent, StudentCaseInput, StudentInput } from './api'
 export const CreateStudentPage = React.memo(function CreateStudentPage() {
   const navigate = useNavigate()
 
+  const [employees, setEmployees] = useState<EmployeeUser[] | null>(null)
+  useEffect(() => {
+    void apiGetEmployees().then(setEmployees)
+  }, [])
+
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
   const [studentCaseInput, setStudentCaseInput] =
     useState<StudentCaseInput | null>(null)
   const [submitting, setSubmitting] = useState(false)
+
+  if (!employees) return <div>...</div>
 
   return (
     <div>
@@ -31,7 +39,7 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
       <VerticalGap $size="m" />
       <H3>Ilmoituksen tiedot</H3>
       <VerticalGap $size="m" />
-      <StudentCaseForm onChange={setStudentCaseInput} />
+      <StudentCaseForm onChange={setStudentCaseInput} employees={employees} />
       <VerticalGap $size="m" />
 
       <button

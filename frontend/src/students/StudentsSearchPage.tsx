@@ -33,20 +33,26 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
 
       {studentsResponse && (
         <Table>
-          <tr>
-            <th>Nimi</th>
-            <th>Ilmoitettu</th>
-          </tr>
-          {studentsResponse.map((student) => (
-            <tr key={student.id}>
-              <td>
-                <Link to={`/oppivelvolliset/${student.id}`}>
-                  {student.lastName} {student.firstName}
-                </Link>
-              </td>
-              <td>{student.openedAt ? formatDate(student.openedAt) : '-'}</td>
+          <thead>
+            <tr>
+              <th>Nimi</th>
+              <th>Ilmoitettu</th>
+              <th>Ohjaaja</th>
             </tr>
-          ))}
+          </thead>
+          <tbody>
+            {studentsResponse.map((student) => (
+              <tr key={student.id}>
+                <td>
+                  <Link to={`/oppivelvolliset/${student.id}`}>
+                    {student.firstName} {student.lastName}
+                  </Link>
+                </td>
+                <td>{student.openedAt ? formatDate(student.openedAt) : '-'}</td>
+                <td>{student.assignedTo?.name ?? ''}</td>
+              </tr>
+            ))}
+          </tbody>
         </Table>
       )}
     </div>
