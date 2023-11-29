@@ -4,17 +4,19 @@ import { FlexRowWithGaps } from '../shared/layout'
 
 import { UserContext } from './UserContext'
 
+export const logoutUrl = `/api/auth/saml/logout?RelayState=/kirjaudu`
+
 export const UserHeader = React.memo(function UserHeader() {
-  const { user, setLoggedOut } = useContext(UserContext)
+  const { user } = useContext(UserContext)
 
   if (!user) return null
 
   return (
     <FlexRowWithGaps>
-      <span>{user.name}</span>
-      <a href="#" onClick={setLoggedOut}>
-        Kirjaudu ulos
-      </a>
+      <span>
+        {user.firstName} {user.lastName}
+      </span>
+      <a href={logoutUrl}>Kirjaudu ulos</a>
     </FlexRowWithGaps>
   )
 })

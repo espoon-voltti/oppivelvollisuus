@@ -6,9 +6,6 @@ spring:
   datasource:
     driver-class-name: "org.postgresql.Driver"
     type: "com.zaxxer.hikari.HikariDataSource"
-    url: "jdbc:postgresql://localhost:5432/oppivelvollisuus"
-    username: "oppivelvollisuus"
-    password: "postgres"
 
   servlet:
     multipart:

@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { AuthGuard } from './auth/AuthGuard'
 import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
+import { useAuthStatus } from './auth/auth-status'
 import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
 import { LoginPage } from './students/LoginPage'
@@ -32,8 +33,13 @@ const Header = styled.nav`
 `
 
 function App() {
+  const authStatus = useAuthStatus()
+  if (!authStatus) return null
+
+  const user = authStatus.loggedIn && authStatus.user ? authStatus.user : null
+
   return (
-    <UserContextProvider>
+    <UserContextProvider user={user}>
       <div>
         <Header>
           <H1>Espoon kaupunki - Oppivelvollisuuden valvonta</H1>
