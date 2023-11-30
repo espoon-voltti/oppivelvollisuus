@@ -88,7 +88,7 @@ export interface ButtonProps extends BaseProps {
   type?: 'submit' | 'button'
 }
 
-export default React.memo(function Button({
+export const Button = React.memo(function Button({
   className,
   'data-qa': dataQa,
   onClick,

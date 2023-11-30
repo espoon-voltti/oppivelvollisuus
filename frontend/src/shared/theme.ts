@@ -1,3 +1,5 @@
+import { css } from 'styled-components'
+
 export const tabletMin = '600px'
 
 const blueColors = {
@@ -36,3 +38,27 @@ export interface BaseProps {
 }
 
 export type IconSize = 's' | 'm' | 'L' | 'XL'
+
+const inputWidths = {
+  xs: '60px',
+  s: '120px',
+  m: '240px',
+  L: '360px',
+  XL: '480px'
+} as const
+
+export type InputWidth = keyof typeof inputWidths
+
+export const inputWidthCss = (width: InputWidth) => css`
+  width: ${inputWidths[width]};
+  max-width: ${inputWidths[width]};
+
+  @media (max-width: ${tabletMin}) {
+    ${width === 'L' || width === 'XL'
+      ? css`
+          width: 100%;
+          max-width: 100%;
+        `
+      : ''}
+  }
+`

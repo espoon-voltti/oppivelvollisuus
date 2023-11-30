@@ -106,7 +106,7 @@ export interface IconButtonProps extends BaseProps {
   color?: string
 }
 
-export default React.memo(function IconButton({
+export const IconButton = React.memo(function IconButton({
   disabled,
   icon,
   size = 's',

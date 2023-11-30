@@ -58,7 +58,7 @@ export interface InlineButtonProps extends BaseProps {
   iconRight?: boolean
 }
 
-const InlineButton = React.memo(function InlineButton({
+export const InlineButton = React.memo(function InlineButton({
   className,
   'data-qa': dataQa,
   onClick,
@@ -84,5 +84,3 @@ const InlineButton = React.memo(function InlineButton({
     </StyledButton>
   )
 })
-
-export default InlineButton

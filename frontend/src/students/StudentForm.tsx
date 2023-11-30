@@ -1,22 +1,18 @@
 import { parse } from 'date-fns'
 import React, { useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
 
 import { formatDate, parseDate } from '../shared/dates'
-import { FlexColWithGaps, FlexRowWithGaps } from '../shared/layout'
+import { InputField } from '../shared/form/InputField'
+import {
+  GroupOfInputRows,
+  LabeledInputL,
+  LabeledInputM,
+  LabeledInputS,
+  RowOfInputs
+} from '../shared/layout'
 import { Label } from '../shared/typography'
 
 import { StudentDetails, StudentInput } from './api'
-
-const LabeledInputS = styled(FlexColWithGaps)`
-  width: 128px;
-`
-const LabeledInputM = styled(FlexColWithGaps)`
-  width: 256px;
-`
-const LabeledInputL = styled(FlexColWithGaps)`
-  flex-grow: 1;
-`
 
 interface CreateProps {
   onChange: (validInput: StudentInput | null) => void
@@ -118,8 +114,28 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   }, [validInput, props])
 
   return (
-    <FlexColWithGaps $gapSize="m">
-      <FlexRowWithGaps $gapSize="m">
+    <GroupOfInputRows $gapSize="L">
+      <RowOfInputs $gapSize="m">
+        <LabeledInputS>
+          <Label>Hetu</Label>
+          {isViewing(props) ? (
+            <span>{props.student.ssn || '-'}</span>
+          ) : (
+            <InputField onChange={setSsn} value={ssn} />
+          )}
+        </LabeledInputS>
+        <LabeledInputS>
+          <Label>Syntymäaika</Label>
+          {isViewing(props) ? (
+            <span>
+              {props.student.dateOfBirth
+                ? formatDate(props.student.dateOfBirth)
+                : '-'}
+            </span>
+          ) : (
+            <InputField onChange={setDateOfBirth} value={dateOfBirth} />
+          )}
+        </LabeledInputS>
         <LabeledInputL>
           <Label>Valpas linkki</Label>
           {isViewing(props) ? (
@@ -135,37 +151,17 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <span>-</span>
             )
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setValpasLink(e.target.value)}
-              value={valpasLink}
-            />
+            <InputField onChange={setValpasLink} value={valpasLink} />
           )}
         </LabeledInputL>
-        <LabeledInputS>
-          <Label>Hetu</Label>
-          {isViewing(props) ? (
-            <span>{props.student.ssn || '-'}</span>
-          ) : (
-            <input
-              type="text"
-              onChange={(e) => setSsn(e.target.value)}
-              value={ssn}
-            />
-          )}
-        </LabeledInputS>
-      </FlexRowWithGaps>
-      <FlexRowWithGaps $gapSize="m">
+      </RowOfInputs>
+      <RowOfInputs $gapSize="L">
         <LabeledInputM>
           <Label>Etunimi</Label>
           {isViewing(props) ? (
             <span>{props.student.firstName}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setFirstName(e.target.value)}
-              value={firstName}
-            />
+            <InputField onChange={setFirstName} value={firstName} />
           )}
         </LabeledInputM>
         <LabeledInputM>
@@ -173,41 +169,17 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           {isViewing(props) ? (
             <span>{props.student.lastName}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setLastName(e.target.value)}
-              value={lastName}
-            />
+            <InputField onChange={setLastName} value={lastName} />
           )}
         </LabeledInputM>
-        <LabeledInputS>
-          <Label>Syntymäaika</Label>
-          {isViewing(props) ? (
-            <span>
-              {props.student.dateOfBirth
-                ? formatDate(props.student.dateOfBirth)
-                : '-'}
-            </span>
-          ) : (
-            <input
-              type="text"
-              onChange={(e) => setDateOfBirth(e.target.value)}
-              value={dateOfBirth}
-            />
-          )}
-        </LabeledInputS>
-      </FlexRowWithGaps>
-      <FlexRowWithGaps $gapSize="m">
+      </RowOfInputs>
+      <RowOfInputs $gapSize="L">
         <LabeledInputM>
           <Label>Puhelinnumero</Label>
           {isViewing(props) ? (
             <span>{props.student.phone || '-'}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setPhone(e.target.value)}
-              value={phone}
-            />
+            <InputField onChange={setPhone} value={phone} />
           )}
         </LabeledInputM>
         <LabeledInputM>
@@ -215,11 +187,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           {isViewing(props) ? (
             <span>{props.student.email || '-'}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setEmail(e.target.value)}
-              value={email}
-            />
+            <InputField onChange={setEmail} value={email} />
           )}
         </LabeledInputM>
         <LabeledInputL>
@@ -227,14 +195,10 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           {isViewing(props) ? (
             <span>{props.student.address || '-'}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setAdress(e.target.value)}
-              value={address}
-            />
+            <InputField onChange={setAdress} value={address} />
           )}
         </LabeledInputL>
-      </FlexRowWithGaps>
-    </FlexColWithGaps>
+      </RowOfInputs>
+    </GroupOfInputRows>
   )
 })

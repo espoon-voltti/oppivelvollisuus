@@ -11,8 +11,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
-import Button from '../shared/buttons/Button'
-import InlineButton from '../shared/buttons/InlineButton'
+import { Button } from '../shared/buttons/Button'
+import { InlineButton } from '../shared/buttons/InlineButton'
 import { formatDate } from '../shared/dates'
 import {
   FlexColWithGaps,
@@ -173,32 +173,33 @@ export const StudentPage = React.memo(function StudentPage() {
                   onChange={setStudentCaseInput}
                   employees={employees}
                 />
-                <FlexRowWithGaps>
-                  <button
-                    disabled={submitting || !studentCaseInput}
-                    onClick={() => {
-                      if (!studentCaseInput) return
+                <FlexRight>
+                  <FlexRowWithGaps>
+                    <Button
+                      text="Peruuta"
+                      disabled={submitting}
+                      onClick={() => {
+                        setEditingCase(false)
+                      }}
+                    />
+                    <Button
+                      text="Tallenna"
+                      primary
+                      disabled={submitting || !studentCaseInput}
+                      onClick={() => {
+                        if (!studentCaseInput) return
 
-                      setSubmitting(true)
-                      void apiPostStudentCase(id, studentCaseInput)
-                        .then(() => {
-                          setEditingCase(false)
-                          loadStudent()
-                        })
-                        .finally(() => setSubmitting(false))
-                    }}
-                  >
-                    Tallenna
-                  </button>
-                  <button
-                    disabled={submitting}
-                    onClick={() => {
-                      setEditingCase(false)
-                    }}
-                  >
-                    Peruuta
-                  </button>
-                </FlexRowWithGaps>
+                        setSubmitting(true)
+                        void apiPostStudentCase(id, studentCaseInput)
+                          .then(() => {
+                            setEditingCase(false)
+                            loadStudent()
+                          })
+                          .finally(() => setSubmitting(false))
+                      }}
+                    />
+                  </FlexRowWithGaps>
+                </FlexRight>
               </FlexColWithGaps>
             )}
 
