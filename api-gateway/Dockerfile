@@ -26,7 +26,10 @@ FROM builder
 ENV NODE_ENV production
 
 RUN apt-get update \
- && apt-get -y install curl
+ && apt-get -y install curl \
+ && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
+       -o /bin/s3download \
+ && chmod +x /bin/s3download
 
 ARG build=none
 ARG commit=none
@@ -37,4 +40,5 @@ ENV APP_COMMIT "$commit"
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
 
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["node", "dist/index.js"]

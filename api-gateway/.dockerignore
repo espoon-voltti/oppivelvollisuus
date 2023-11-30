@@ -4,3 +4,4 @@
 !*.json
 !*.lock
 !config
+!entrypoint.sh
