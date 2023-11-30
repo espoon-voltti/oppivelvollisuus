@@ -2,24 +2,34 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { EmployeeUser } from '../employees/api'
 import { formatDate, parseDate } from '../shared/dates'
-import { FlexColWithGaps, FlexRowWithGaps } from '../shared/layout'
-import { Label, P } from '../shared/typography'
+import { InputField } from '../shared/form/InputField'
+import { Select } from '../shared/form/Select'
+import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
+import {
+  GroupOfInputRows,
+  LabeledInputL,
+  LabeledInputM,
+  LabeledInputS,
+  RowOfInputs
+} from '../shared/layout'
+import { Label } from '../shared/typography'
 
 import { StudentCase, StudentCaseInput } from './api'
 
-interface CreateProps {
-  onChange: (validInput: StudentCaseInput | null) => void
+interface SharedProps {
   employees: EmployeeUser[]
 }
-interface ViewProps {
+interface CreateProps extends SharedProps {
+  onChange: (validInput: StudentCaseInput | null) => void
+}
+interface ViewProps extends SharedProps {
   studentCase: StudentCase
   editing: false
 }
-interface EditProps {
+interface EditProps extends SharedProps {
   studentCase: StudentCase
   editing: true
   onChange: (validInput: StudentCaseInput | null) => void
-  employees: EmployeeUser[]
 }
 type Props = CreateProps | ViewProps | EditProps
 
@@ -41,7 +51,11 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
     isCreating(props) ? '' : props.studentCase.info
   )
   const [assignedTo, setAssignedTo] = useState(
-    isCreating(props) ? null : props.studentCase.assignedTo?.id ?? null
+    isCreating(props) || !props.studentCase.assignedTo
+      ? null
+      : props.employees.find(
+          (e) => e.externalId === props.studentCase.assignedTo?.id
+        ) ?? null
   )
 
   const validInput: StudentCaseInput | null = useMemo(() => {
@@ -52,7 +66,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
     return {
       openedAt: openedAtDate,
       info,
-      assignedTo
+      assignedTo: assignedTo?.externalId ?? null
     }
   }, [openedAt, info, assignedTo])
 
@@ -63,47 +77,42 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   }, [validInput, props])
 
   return (
-    <FlexColWithGaps $gapSize="m">
-      <FlexRowWithGaps $gapSize="L">
-        <FlexColWithGaps>
-          <Label>Tapaus vastaanotettu</Label>
+    <GroupOfInputRows $gapSize="m">
+      <RowOfInputs $gapSize="L">
+        <LabeledInputS>
+          <Label>Ilmoitettu</Label>
           {isViewing(props) ? (
             <span>{formatDate(props.studentCase.openedAt)}</span>
           ) : (
-            <input
-              type="text"
-              onChange={(e) => setOpenedAt(e.target.value)}
-              value={openedAt}
-            />
+            <InputField onChange={setOpenedAt} value={openedAt} />
           )}
-        </FlexColWithGaps>
-        <FlexColWithGaps>
+        </LabeledInputS>
+        <LabeledInputM>
           <Label>Ohjaaja</Label>
           {isViewing(props) ? (
             <span>{props.studentCase.assignedTo?.name ?? '-'}</span>
           ) : (
-            <select
-              onChange={(e) => setAssignedTo(e.target.value || null)}
-              value={assignedTo ?? undefined}
-            >
-              <option value="">-</option>
-              {props.employees.map((e) => (
-                <option key={e.externalId} value={e.externalId}>
-                  {e.firstName} {e.lastName}
-                </option>
-              ))}
-            </select>
+            <Select<EmployeeUser>
+              items={props.employees}
+              selectedItem={assignedTo}
+              getItemValue={(e) => e.externalId}
+              getItemLabel={(e) => `${e.firstName} ${e.lastName}`}
+              placeholder="Ei ohjaajaa"
+              onChange={setAssignedTo}
+            />
           )}
-        </FlexColWithGaps>
-      </FlexRowWithGaps>
-      <FlexColWithGaps>
-        <Label>Tapauksen tiedot</Label>
-        {isViewing(props) ? (
-          <P>{props.studentCase.info || '-'}</P>
-        ) : (
-          <textarea onChange={(e) => setInfo(e.target.value)} value={info} />
-        )}
-      </FlexColWithGaps>
-    </FlexColWithGaps>
+        </LabeledInputM>
+      </RowOfInputs>
+      <RowOfInputs $gapSize="L">
+        <LabeledInputL>
+          <Label>Tapauksen tiedot</Label>
+          {isViewing(props) ? (
+            <ReadOnlyTextArea text={props.studentCase.info ?? '-'} />
+          ) : (
+            <TextArea onChange={setInfo} value={info} />
+          )}
+        </LabeledInputL>
+      </RowOfInputs>
+    </GroupOfInputRows>
   )
 })

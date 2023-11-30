@@ -80,3 +80,20 @@ export const BottomActionBar = styled.div`
   right: 0;
   margin-top: 16px;
 `
+export const LabeledInputS = styled(FlexColWithGaps)`
+  width: 128px;
+`
+export const LabeledInputM = styled(FlexColWithGaps)`
+  width: 256px;
+`
+export const LabeledInputL = styled(FlexColWithGaps)`
+  flex-grow: 1;
+`
+export const RowOfInputs = styled(FlexRowWithGaps)`
+  align-items: flex-start;
+  flex-grow: 1;
+`
+
+export const GroupOfInputRows = styled(FlexColWithGaps)`
+  flex-grow: 1;
+`

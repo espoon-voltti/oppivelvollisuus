@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
-import AddButton from '../shared/buttons/AddButton'
+import { AddButton } from '../shared/buttons/AddButton'
 import { formatDate } from '../shared/dates'
 import {
   FlexRight,

@@ -1,7 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { FlexColWithGaps } from '../shared/layout'
+import { LinkStyledAsButton } from '../shared/buttons/LinkStyledAsButton'
+import {
+  FlexColWithGaps,
+  PageContainer,
+  SectionContainer
+} from '../shared/layout'
 import { H2 } from '../shared/typography'
 
 const Wrapper = styled.div`
@@ -34,11 +39,17 @@ const getLoginUrl = () => {
 
 export const LoginPage = React.memo(function LoginPage() {
   return (
-    <Wrapper>
-      <FlexColWithGaps $gapSize="L">
-        <H2>Kirjaudu sisään Espoo-AD:lla</H2>
-        <a href={getLoginUrl()}>Kirjaudu sisään</a>
-      </FlexColWithGaps>
-    </Wrapper>
+    <PageContainer>
+      <SectionContainer>
+        <Wrapper>
+          <FlexColWithGaps $gapSize="L" style={{ alignItems: 'center' }}>
+            <H2>Kirjaudu sisään Espoo-AD:lla</H2>
+            <LinkStyledAsButton href={getLoginUrl()}>
+              Kirjaudu sisään
+            </LinkStyledAsButton>
+          </FlexColWithGaps>
+        </Wrapper>
+      </SectionContainer>
+    </PageContainer>
   )
 })

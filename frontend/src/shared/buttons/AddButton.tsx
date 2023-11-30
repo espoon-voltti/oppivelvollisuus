@@ -4,6 +4,7 @@ import classNames from 'classnames'
 import React from 'react'
 import styled from 'styled-components'
 
+import { FlexRowWithGaps } from '../layout'
 import { BaseProps, colors } from '../theme'
 
 import { defaultButtonTextStyle } from './Button'
@@ -38,7 +39,6 @@ const StyledButton = styled.button`
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    margin: -4px 8px -4px -4px;
   }
 
   &:focus .icon-wrapper-outer {
@@ -60,12 +60,6 @@ const StyledButton = styled.button`
     border-radius: 100%;
   }
 
-  &.icon-right {
-    .icon-wrapper-outer {
-      margin: -4px -4px -4px 16px;
-    }
-  }
-
   ${defaultButtonTextStyle};
 `
 
@@ -73,34 +67,34 @@ export interface AddButtonProps extends BaseProps {
   text: string
   onClick: () => unknown
   disabled?: boolean
-  iconRight?: boolean
+  iconLeft?: boolean
 }
 
-const AddButton = React.memo(function AddButton({
+export const AddButton = React.memo(function AddButton({
   className,
   'data-qa': dataQa,
   text,
   onClick,
   disabled = false,
-  iconRight = false
+  iconLeft = false
 }: AddButtonProps) {
   return (
     <StyledButton
       type="button"
-      className={classNames(className, { disabled, iconRight })}
+      className={classNames(className, { disabled })}
       data-qa={dataQa}
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
     >
-      {iconRight && <span>{text}</span>}
-      <div className="icon-wrapper-outer">
-        <div className="icon-wrapper-inner">
-          <FontAwesomeIcon icon={faPlus} />
+      <FlexRowWithGaps>
+        {!iconLeft && <span>{text}</span>}
+        <div className="icon-wrapper-outer">
+          <div className="icon-wrapper-inner">
+            <FontAwesomeIcon icon={faPlus} />
+          </div>
         </div>
-      </div>
-      {!iconRight && <span>{text}</span>}
+        {iconLeft && <span>{text}</span>}
+      </FlexRowWithGaps>
     </StyledButton>
   )
 })
-
-export default AddButton

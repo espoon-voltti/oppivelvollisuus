@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
-import Button from '../shared/buttons/Button'
-import InlineButton from '../shared/buttons/InlineButton'
+import { Button } from '../shared/buttons/Button'
+import { InlineButton } from '../shared/buttons/InlineButton'
 import {
   BottomActionBar,
   FlexRight,
