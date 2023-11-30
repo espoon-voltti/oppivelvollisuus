@@ -14,7 +14,12 @@
     "build:serve": "node build.js --dev --watch --serve"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "6.5.0",
+    "@fortawesome/free-regular-svg-icons": "6.5.0",
+    "@fortawesome/free-solid-svg-icons": "6.5.0",
+    "@fortawesome/react-fontawesome": "0.2.0",
     "babel-plugin-styled-components": "^2.1.4",
+    "classnames": "^2.3.2",
     "core-js": "^3.33.0",
     "date-fns": "^2.30.0",
     "lodash": "^4.17.21",
