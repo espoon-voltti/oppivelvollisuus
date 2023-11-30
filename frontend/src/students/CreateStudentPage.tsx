@@ -1,8 +1,17 @@
+import { faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
-import { VerticalGap } from '../shared/layout'
+import Button from '../shared/buttons/Button'
+import InlineButton from '../shared/buttons/InlineButton'
+import {
+  BottomActionBar,
+  FlexRight,
+  PageContainer,
+  SectionContainer,
+  VerticalGap
+} from '../shared/layout'
 import { H2, H3 } from '../shared/typography'
 
 import { StudentCaseForm } from './StudentCaseForm'
@@ -26,38 +35,58 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
 
   return (
     <div>
-      <Link to="/oppivelvolliset">Takaisin</Link>
-      <VerticalGap $size="L" />
+      <PageContainer>
+        <SectionContainer>
+          <InlineButton
+            text="Takaisin"
+            icon={faChevronLeft}
+            onClick={() => navigate('/oppivelvolliset')}
+          />
+          <VerticalGap $size="m" />
+          <H2>Uusi oppivelvollinen</H2>
+        </SectionContainer>
 
-      <H2>Uusi oppivelvollinen</H2>
+        <VerticalGap $size="m" />
 
-      <VerticalGap $size="L" />
+        <SectionContainer>
+          <H3>Oppivelvollisen tiedot</H3>
+          <VerticalGap $size="m" />
+          <StudentForm onChange={setStudentInput} />
+        </SectionContainer>
 
-      <H3>Oppivelvollisen tiedot</H3>
-      <VerticalGap $size="m" />
-      <StudentForm onChange={setStudentInput} />
-      <VerticalGap $size="m" />
-      <H3>Ilmoituksen tiedot</H3>
-      <VerticalGap $size="m" />
-      <StudentCaseForm onChange={setStudentCaseInput} employees={employees} />
-      <VerticalGap $size="m" />
+        <VerticalGap $size="m" />
 
-      <button
-        disabled={submitting || !studentInput || !studentCaseInput}
-        onClick={() => {
-          if (!studentInput || !studentCaseInput) return
+        <SectionContainer>
+          <H3>Ilmoituksen tiedot</H3>
+          <VerticalGap $size="m" />
+          <StudentCaseForm
+            onChange={setStudentCaseInput}
+            employees={employees}
+          />
+        </SectionContainer>
+      </PageContainer>
+      <BottomActionBar>
+        <PageContainer>
+          <FlexRight>
+            <Button
+              text="Tallenna"
+              primary
+              disabled={submitting || !studentInput || !studentCaseInput}
+              onClick={() => {
+                if (!studentInput || !studentCaseInput) return
 
-          setSubmitting(true)
-          apiPostStudent({
-            student: studentInput,
-            studentCase: studentCaseInput
-          })
-            .then((id) => navigate(`/oppivelvolliset/${id}`))
-            .catch(() => setSubmitting(false))
-        }}
-      >
-        Tallenna
-      </button>
+                setSubmitting(true)
+                apiPostStudent({
+                  student: studentInput,
+                  studentCase: studentCaseInput
+                })
+                  .then((id) => navigate(`/oppivelvolliset/${id}`))
+                  .catch(() => setSubmitting(false))
+              }}
+            />
+          </FlexRight>
+        </PageContainer>
+      </BottomActionBar>
     </div>
   )
 })

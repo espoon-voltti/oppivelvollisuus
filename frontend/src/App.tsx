@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { Fragment } from 'react'
 import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -11,14 +11,6 @@ import { CreateStudentPage } from './students/CreateStudentPage'
 import { LoginPage } from './students/LoginPage'
 import { StudentPage } from './students/StudentPage'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
-
-const AppContainer = styled.div`
-  padding: 0 16px;
-  max-width: 1024px;
-  margin: 0 auto;
-  background-color: #fff;
-  min-height: 600px;
-`
 
 const Header = styled.nav`
   height: 80px;
@@ -40,15 +32,13 @@ function App() {
 
   return (
     <UserContextProvider user={user}>
-      <div>
+      <Fragment>
         <Header>
           <H1>Espoon kaupunki - Oppivelvollisuuden seuranta</H1>
           <UserHeader />
         </Header>
-        <AppContainer>
-          <Outlet />
-        </AppContainer>
-      </div>
+        <Outlet />
+      </Fragment>
     </UserContextProvider>
   )
 }
