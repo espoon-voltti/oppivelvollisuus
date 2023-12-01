@@ -14,7 +14,10 @@ RUN apt-get update \
       unzip \
  && ln -fs /usr/share/zoneinfo/Europe/Helsinki /etc/localtime \
  && dpkg-reconfigure --frontend noninteractive tzdata \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
+       -o /bin/s3download \
+ && chmod +x /bin/s3download
 
 FROM base as builder
 
