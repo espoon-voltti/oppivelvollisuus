@@ -54,7 +54,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
     isCreating(props) || !props.studentCase.assignedTo
       ? null
       : props.employees.find(
-          (e) => e.externalId === props.studentCase.assignedTo?.id
+          (e) => e.id === props.studentCase.assignedTo?.id
         ) ?? null
   )
 
@@ -66,7 +66,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
     return {
       openedAt: openedAtDate,
       info,
-      assignedTo: assignedTo?.externalId ?? null
+      assignedTo: assignedTo?.id ?? null
     }
   }, [openedAt, info, assignedTo])
 
@@ -95,7 +95,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             <Select<EmployeeUser>
               items={props.employees}
               selectedItem={assignedTo}
-              getItemValue={(e) => e.externalId}
+              getItemValue={(e) => e.id}
               getItemLabel={(e) => `${e.firstName} ${e.lastName}`}
               placeholder="Ei ohjaajaa"
               onChange={setAssignedTo}

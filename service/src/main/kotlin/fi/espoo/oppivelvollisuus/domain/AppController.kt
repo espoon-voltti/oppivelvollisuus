@@ -1,5 +1,8 @@
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.AppUser
+import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.getAppUsers
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
@@ -22,14 +25,13 @@ class AppController {
     )
 
     @PostMapping("/students")
-    fun createStudent(@RequestBody body: StudentAndCaseInput): UUID {
-        val studentId = UUID.randomUUID()
-        val studentCaseId = UUID.randomUUID()
-        jdbi.inTransactionUnchecked { tx ->
-            tx.insertStudent(id = studentId, data = body.student)
-            tx.insertStudentCase(id = studentCaseId, studentId = studentId, data = body.studentCase)
+    fun createStudent(user: AuthenticatedUser, @RequestBody body: StudentAndCaseInput): UUID {
+        return jdbi.inTransactionUnchecked { tx ->
+            val studentId = tx.insertStudent(data = body.student, user = user)
+            tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
+
+            studentId
         }
-        return studentId
     }
 
     @GetMapping("/students")
@@ -54,34 +56,33 @@ class AppController {
     }
 
     @PutMapping("/students/{id}")
-    fun updateStudent(@PathVariable id: UUID, @RequestBody body: StudentInput) {
+    fun updateStudent(user: AuthenticatedUser, @PathVariable id: UUID, @RequestBody body: StudentInput) {
         jdbi.inTransactionUnchecked { tx ->
-            tx.updateStudent(id = id, data = body)
+            tx.updateStudent(id = id, data = body, user = user)
         }
     }
 
     @PostMapping("/students/{studentId}/cases")
-    fun createStudentCase(@PathVariable studentId: UUID, @RequestBody body: StudentCaseInput): UUID {
-        val id = UUID.randomUUID()
-        jdbi.inTransactionUnchecked { tx ->
-            tx.insertStudentCase(id = id, studentId = studentId, data = body)
+    fun createStudentCase(user: AuthenticatedUser, @PathVariable studentId: UUID, @RequestBody body: StudentCaseInput): UUID {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.insertStudentCase(studentId = studentId, data = body, user = user)
         }
-        return id
     }
 
     @PutMapping("/students/{studentId}/cases/{id}")
     fun updateStudentCase(
+        user: AuthenticatedUser,
         @PathVariable studentId: UUID,
         @PathVariable id: UUID,
         @RequestBody body: StudentCaseInput
     ) {
         jdbi.inTransactionUnchecked { tx ->
-            tx.updateStudentCase(id = id, studentId = studentId, data = body)
+            tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
         }
     }
 
     @GetMapping("/employees")
-    fun getEmployees(): List<EmployeeUser> {
-        return jdbi.inTransactionUnchecked { it.getEmployees() }
+    fun getEmployeeUsers(): List<AppUser> {
+        return jdbi.inTransactionUnchecked { it.getAppUsers() }
     }
 }

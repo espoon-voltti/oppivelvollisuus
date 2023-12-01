@@ -1,5 +1,5 @@
 import type { CacheProvider } from '@node-saml/passport-saml'
-import { RedisClient } from '../redis-client.js'
+import { RedisClient } from '../../clients/redis-client.js'
 
 export interface ProviderOptions {
   /**

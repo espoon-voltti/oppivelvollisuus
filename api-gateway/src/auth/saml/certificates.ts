@@ -16,7 +16,7 @@ export type TrustedCertificates = (typeof names)[number]
 const certificates: Record<TrustedCertificates, string> = {} as any
 for (const name of names) {
   certificates[name] = fs.readFileSync(
-    path.resolve(__dirname, '../config/certificates', name),
+    path.resolve(__dirname, '../../../config/certificates', name),
     'utf-8'
   )
 }

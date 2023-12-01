@@ -8,11 +8,12 @@ import jakarta.servlet.http.HttpFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import mu.KotlinLogging
+import java.util.UUID
 
 data class AuthenticatedUser(
-    val externalId: String
+    val id: UUID
 ) {
-    fun isSystemUser() = externalId == "oppivelvollisuus-system-user"
+    fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
 }
 
 class JwtToAuthenticatedUser : HttpFilter() {
@@ -22,7 +23,7 @@ class JwtToAuthenticatedUser : HttpFilter() {
         chain: FilterChain
     ) {
         val user = request.getDecodedJwt()?.subject?.let { subject ->
-            AuthenticatedUser(externalId = subject)
+            AuthenticatedUser(id = UUID.fromString(subject))
         }
         if (user != null) {
             request.setAttribute(ATTR_USER, user)
@@ -59,7 +60,7 @@ class HttpAccessControl : HttpFilter() {
     private fun HttpServletRequest.isAuthorized(user: AuthenticatedUser): Boolean =
         when {
             requestURI.startsWith("/system/") -> user.isSystemUser()
-            else -> true
+            else -> !user.isSystemUser()
         }
 }
 

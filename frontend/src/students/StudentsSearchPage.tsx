@@ -40,32 +40,34 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
 
         <VerticalGap />
 
-        {studentsResponse && (
-          <Table>
-            <thead>
-              <tr>
-                <th>Nimi</th>
-                <th>Ilmoitettu</th>
-                <th>Ohjaaja</th>
-              </tr>
-            </thead>
-            <tbody>
-              {studentsResponse.map((student) => (
-                <tr key={student.id}>
-                  <td>
-                    <Link to={`/oppivelvolliset/${student.id}`}>
-                      {student.firstName} {student.lastName}
-                    </Link>
-                  </td>
-                  <td>
-                    {student.openedAt ? formatDate(student.openedAt) : '-'}
-                  </td>
-                  <td>{student.assignedTo?.name ?? ''}</td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        )}
+        {studentsResponse
+          ? studentsResponse.length > 0 && (
+              <Table>
+                <thead>
+                  <tr>
+                    <th>Nimi</th>
+                    <th>Ilmoitettu</th>
+                    <th>Ohjaaja</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {studentsResponse.map((student) => (
+                    <tr key={student.id}>
+                      <td>
+                        <Link to={`/oppivelvolliset/${student.id}`}>
+                          {student.firstName} {student.lastName}
+                        </Link>
+                      </td>
+                      <td>
+                        {student.openedAt ? formatDate(student.openedAt) : '-'}
+                      </td>
+                      <td>{student.assignedTo?.name ?? ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )
+          : '...'}
       </SectionContainer>
     </PageContainer>
   )

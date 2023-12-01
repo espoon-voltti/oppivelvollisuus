@@ -7,10 +7,10 @@ import {
 } from 'date-fns'
 import express from 'express'
 import session from 'express-session'
-import { LogoutToken, toMiddleware } from './express.js'
-import { fromCallback } from './promise-utils.js'
-import { RedisClient } from './redis-client.js'
-import { SessionConfig } from './config.js'
+import { LogoutToken, toMiddleware } from '../utils/express.js'
+import { fromCallback } from '../utils/promise-utils.js'
+import { RedisClient } from '../clients/redis-client.js'
+import { SessionConfig } from '../config.js'
 
 const cookieName = 'oppivelvollisuus.session'
 
