@@ -3,12 +3,12 @@ import express from 'express'
 import helmet from 'helmet'
 import * as redis from 'redis'
 import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
-import { fallbackErrorHandler } from './errors.js'
+import { fallbackErrorHandler } from './middleware/errors.js'
 import { createRouter } from './router.js'
-import { logError, loggingMiddleware } from './logging.js'
-import { trustReverseProxy } from './reverse-proxy.js'
-import { assertRedisConnection } from './redis-client.js'
+import { logError, loggingMiddleware } from './logging/index.js'
+import { assertRedisConnection } from './clients/redis-client.js'
 import passport from 'passport'
+import { trustReverseProxy } from './utils/express.js'
 
 sourceMapSupport.install()
 const config = configFromEnv()

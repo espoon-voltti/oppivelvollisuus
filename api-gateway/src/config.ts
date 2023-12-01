@@ -165,16 +165,11 @@ export function configFromEnv(): Config {
     ifNodeEnv(['local', 'test'], false) ??
     true
 
-  const defaultSessionTimeoutMinutes =
-    env('SESSION_TIMEOUT_MINUTES', parseInteger) ?? 32
-
   return {
     session: {
       useSecureCookies,
       cookieSecret,
-      sessionTimeoutMinutes:
-        env('EMPLOYEE_SESSION_TIMEOUT_MINUTES', parseInteger) ??
-        defaultSessionTimeoutMinutes
+      sessionTimeoutMinutes: env('SESSION_TIMEOUT_MINUTES', parseInteger) ?? 32
     },
     ad,
     redis: {

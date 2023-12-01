@@ -10,7 +10,7 @@ import {
   hostIp,
   prettyLogs,
   volttiEnv
-} from './config.js'
+} from '../config.js'
 import {
   LogFn,
   LogLevel,

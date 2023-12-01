@@ -1,5 +1,6 @@
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.domain.AppController
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import kotlin.test.assertEquals

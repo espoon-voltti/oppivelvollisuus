@@ -1,10 +1,12 @@
 import express, { NextFunction, Request, Response } from 'express'
 import { Profile } from '@node-saml/passport-saml'
 import passport, { AuthenticateCallback } from 'passport'
-import { createJwt } from './jwt.js'
-import { fromCallback } from '../promise-utils.js'
-import { Sessions } from '../session.js'
-import { logInfo } from '../logging.js'
+import { fromCallback } from '../utils/promise-utils.js'
+import { Sessions } from './session.js'
+import { logInfo } from '../logging/index.js'
+import jwt from 'jsonwebtoken'
+import { jwtKid, jwtPrivateKey } from '../config.js'
+import { readFileSync } from 'node:fs'
 
 export function requireAuthentication(
   req: Request,
@@ -23,18 +25,22 @@ export interface AppSessionUser {
   id?: string | undefined
 }
 
-function createJwtToken(user: AppSessionUser): string {
+const jwtPrivateKeyValue = readFileSync(jwtPrivateKey)
+
+export function createAuthHeader(user: AppSessionUser): string {
   if (!user.id) {
     throw new Error('User is missing an id')
   }
 
-  return createJwt({
+  const jwtPayload = {
     sub: user.id
+  }
+  const jwtToken = jwt.sign(jwtPayload, jwtPrivateKeyValue, {
+    algorithm: 'RS256',
+    expiresIn: '48h',
+    keyid: jwtKid
   })
-}
-
-export function createAuthHeader(user: AppSessionUser): string {
-  return `Bearer ${createJwtToken(user)}`
+  return `Bearer ${jwtToken}`
 }
 
 export function createLogoutToken(

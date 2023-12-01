@@ -1,5 +1,7 @@
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
@@ -20,18 +22,21 @@ data class StudentInput(
 )
 
 fun Handle.insertStudent(
-    id: UUID,
-    data: StudentInput
-) {
-    createUpdate(
+    data: StudentInput,
+    user: AuthenticatedUser
+): UUID {
+    return createUpdate(
         """
-INSERT INTO students (id, valpas_link, ssn, first_name, last_name, date_of_birth, phone, email, address) 
-VALUES (:id, :valpasLink, :ssn, :firstName, :lastName, :dateOfBirth, :phone, :email, :address)
+INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, date_of_birth, phone, email, address) 
+VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :dateOfBirth, :phone, :email, :address)
+RETURNING id
 """
     )
-        .bind("id", id)
         .bindKotlin(data)
-        .execute()
+        .bind("user", user.id)
+        .executeAndReturnGeneratedKeys()
+        .mapTo<UUID>()
+        .one()
 }
 
 data class StudentSummary(
@@ -39,13 +44,13 @@ data class StudentSummary(
     val firstName: String,
     val lastName: String,
     val openedAt: LocalDate?,
-    @Nested("assignedTo") val assignedTo: EmployeeBasics?
+    @Nested("assignedTo") val assignedTo: UserBasics?
 )
 
 fun Handle.getStudentSummaries(): List<StudentSummary> = createQuery(
 """
 SELECT s.id, s.first_name, s.last_name, sc.opened_at, 
-    assignee.external_id AS assigned_to_id, 
+    assignee.id AS assigned_to_id, 
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
 FROM students s
 LEFT JOIN LATERAL (
@@ -55,7 +60,7 @@ LEFT JOIN LATERAL (
     ORDER BY opened_at DESC
     LIMIT 1
 ) sc ON true
-LEFT JOIN employees assignee ON sc.assigned_to = assignee.external_id
+LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 ORDER BY opened_at DESC, first_name, last_name
 """
 )
@@ -87,11 +92,13 @@ WHERE id = :id
     .getOrNull()
     ?: error("not found")
 
-fun Handle.updateStudent(id: UUID, data: StudentInput) {
+fun Handle.updateStudent(id: UUID, data: StudentInput, user: AuthenticatedUser) {
     createUpdate(
 """
 UPDATE students 
 SET 
+    updated = now(),
+    updated_by = :user,
     valpas_link = :valpasLink,
     ssn = :ssn,
     first_name = :firstName,
@@ -105,6 +112,7 @@ WHERE id = :id
     )
         .bind("id", id)
         .bindKotlin(data)
+        .bind("user", user.id)
         .execute()
         .also { if (it != 1) error("not found") }
 }

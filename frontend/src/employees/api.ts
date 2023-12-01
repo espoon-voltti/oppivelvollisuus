@@ -2,6 +2,7 @@ import { apiClient } from '../api-client'
 import { JsonOf } from '../shared/api-utils'
 
 export interface EmployeeUser {
+  id: string
   externalId: string
   firstName: string
   lastName: string

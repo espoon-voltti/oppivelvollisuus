@@ -7,16 +7,16 @@ import {
   Strategy as SamlStrategy,
   VerifyWithRequest
 } from '@node-saml/passport-saml'
-import { logError, logWarn } from '../logging.js'
-import { createLogoutToken, AppSessionUser } from '../auth/index.js'
-import { appBaseUrl, Config, EspooSamlConfig } from '../config.js'
+import { logError, logWarn } from '../../logging/index.js'
+import { createLogoutToken, AppSessionUser } from '../index.js'
+import { appBaseUrl, Config, EspooSamlConfig } from '../../config.js'
 import { readFileSync } from 'node:fs'
-import certificates, { TrustedCertificates } from '../certificates.js'
+import certificates, { TrustedCertificates } from './certificates.js'
 import express from 'express'
 import path from 'node:path'
 import { Sessions } from '../session.js'
-import { fromCallback } from '../promise-utils.js'
-import { employeeLogin } from '../service-client.js'
+import { fromCallback } from '../../utils/promise-utils.js'
+import { userLogin } from '../../clients/service-client.js'
 
 export function createSamlConfig(
   config: EspooSamlConfig,
@@ -93,14 +93,14 @@ export function createAdSamlStrategy(
 
     const aad = profile[config.userIdKey]
     if (!aad) throw Error('No user ID in SAML data')
-    const person = await employeeLogin({
+    const person = await userLogin({
       externalId: `${config.externalIdPrefix}:${aad}`,
       firstName: asString(profile[AD_GIVEN_NAME_KEY]) ?? '',
       lastName: asString(profile[AD_FAMILY_NAME_KEY]) ?? '',
       email: asString(profile[AD_EMAIL_KEY])
     })
     return {
-      id: person.externalId
+      id: person.id
     }
   }
 

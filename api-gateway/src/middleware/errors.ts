@@ -1,6 +1,6 @@
 import { ErrorRequestHandler } from 'express'
-import { csrfCookieName } from './config.js'
-import { logError } from './logging.js'
+import { csrfCookieName } from '../config.js'
+import { logError } from '../logging/index.js'
 
 export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
   // https://github.com/expressjs/csurf#custom-error-handling

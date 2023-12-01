@@ -1,17 +1,17 @@
 import express, { Router, urlencoded } from 'express'
 import passport from 'passport'
 import passportSaml from '@node-saml/passport-saml'
-import { createLogoutToken, login, logout } from './auth/index.js'
-import { toMiddleware, toRequestHandler } from './express.js'
-import { logDebug, logInfo } from './logging.js'
-import { fromCallback } from './promise-utils.js'
-import { Sessions } from './session.js'
-import { parseDescriptionFromSamlError } from './saml/error-utils.js'
+import { createLogoutToken, login, logout } from '../index.js'
+import { toMiddleware, toRequestHandler } from '../../utils/express.js'
+import { logDebug, logInfo } from '../../logging/index.js'
+import { fromCallback } from '../../utils/promise-utils.js'
+import { Sessions } from '../session.js'
+import { parseDescriptionFromSamlError } from './error-utils.js'
 import type {
   AuthenticateOptions,
   RequestWithUser
 } from '@node-saml/passport-saml/lib/types.js'
-import { parseRelayState } from './saml/index.js'
+import { parseRelayState } from './index.js'
 
 const urlencodedParser = urlencoded({ extended: false })
 

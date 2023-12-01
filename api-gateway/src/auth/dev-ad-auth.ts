@@ -4,12 +4,12 @@ import {
   assertStringProp,
   AsyncRequestHandler,
   toRequestHandler
-} from '../express.js'
-import { employeeLogin, EmployeeUser } from '../service-client.js'
-import { Sessions } from '../session.js'
+} from '../utils/express.js'
+import { AdUser, userLogin } from '../clients/service-client.js'
+import { Sessions } from './session.js'
 import passport, { Strategy } from 'passport'
 import { AppSessionUser, authenticate, login, logout } from './index.js'
-import { parseRelayState } from '../saml/index.js'
+import { parseRelayState } from './saml/index.js'
 import { appBaseUrl } from '../config.js'
 
 class DevStrategy extends Strategy {
@@ -25,18 +25,23 @@ class DevStrategy extends Strategy {
   }
 }
 
-const devEmployees: EmployeeUser[] = [
+const devUsers: AdUser[] = [
   {
-    externalId: '12345678-0000-0000-0000-000000000000',
+    externalId: 'ad:001',
     firstName: 'Sanna',
     lastName: 'Suunnittelija'
+  },
+  {
+    externalId: 'ad:002',
+    firstName: 'Olli',
+    lastName: 'Ohjaaja'
   }
 ]
 
 const loginFormHandler: AsyncRequestHandler = async (req, res) => {
-  const employeeInputs = devEmployees.map((employee, idx) => {
-    const { externalId, firstName, lastName } = employee
-    const json = JSON.stringify(employee)
+  const userOptions = devUsers.map((user, idx) => {
+    const { externalId, firstName, lastName } = user
+    const json = JSON.stringify(user)
     return `<div>
             <input
               type="radio"
@@ -59,7 +64,7 @@ const loginFormHandler: AsyncRequestHandler = async (req, res) => {
           <body>
             <h1>Devausympäristön AD-kirjautuminen</h1>
             <form action="${formUri}" method="post">
-                ${employeeInputs.join('\n')}
+                ${userOptions.join('\n')}
                 <div style="margin-top: 20px">
                   <button type="submit">Kirjaudu</button>
                 </div>
@@ -71,9 +76,9 @@ const loginFormHandler: AsyncRequestHandler = async (req, res) => {
 
 const verifyUser = async (req: Request): Promise<AppSessionUser> => {
   const preset = assertStringProp(req.body, 'preset')
-  const person = await employeeLogin(JSON.parse(preset))
+  const person = await userLogin(JSON.parse(preset))
   return {
-    id: person.externalId
+    id: person.id
   }
 }
 

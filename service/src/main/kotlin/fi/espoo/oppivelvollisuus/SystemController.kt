@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
 
 /**
  * Controller for "system" endpoints intended to be only called from api-gateway
@@ -20,13 +21,13 @@ class SystemController {
     @Autowired
     lateinit var jdbi: Jdbi
 
-    @PostMapping("/employee-login")
-    fun employeeLogin(@RequestBody employee: EmployeeLoginRequest): EmployeeUser {
-        return jdbi.inTransactionUnchecked { it.upsertEmployee(employee) }
+    @PostMapping("/user-login")
+    fun userLogin(@RequestBody adUser: AdUser): AppUser {
+        return jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
     }
 
-    @GetMapping("/employee/{id}")
-    fun getEmployeeUser(@PathVariable id: String): EmployeeUser? {
-        return jdbi.inTransactionUnchecked { it.getEmployee(id) }
+    @GetMapping("/users/{id}")
+    fun getUser(@PathVariable id: UUID): AppUser? {
+        return jdbi.inTransactionUnchecked { it.getAppUser(id) }
     }
 }

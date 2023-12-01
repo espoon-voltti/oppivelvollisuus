@@ -1,28 +1,29 @@
 import express from 'express'
-import { toRequestHandler } from './express.js'
-import { EmployeeUser, getEmployeeDetails } from './service-client.js'
+import { toRequestHandler } from '../utils/express.js'
+import { AppUser, getUserDetails } from '../clients/service-client.js'
 import { Sessions } from './session.js'
-import { appCommit } from './config.js'
-import { logout } from './auth/index.js'
+import { appCommit } from '../config.js'
+import { logout } from './index.js'
 
 interface AuthStatus {
   loggedIn: boolean
-  user?: EmployeeUser
+  user?: AppUser
   apiVersion: string
 }
 
 async function validateUser(
   req: express.Request
-): Promise<EmployeeUser | undefined> {
+): Promise<AppUser | undefined> {
   const user = req.user
   if (!user || !user.id) return undefined
-  return getEmployeeDetails(req, user.id)
+  return getUserDetails(req, user.id)
 }
 
 export default (sessions: Sessions) =>
   toRequestHandler(async (req, res) => {
     const sessionUser = req.user
     const validUser = sessionUser && (await validateUser(req))
+    console.log('here', validUser)
 
     let status: AuthStatus
     if (validUser) {
