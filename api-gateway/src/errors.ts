@@ -1,7 +1,8 @@
 import { ErrorRequestHandler } from 'express'
 import { csrfCookieName } from './config.js'
+import { logError } from './logging.js'
 
-export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
+export const errorHandler: ErrorRequestHandler = (error, req, res, next) => {
   // https://github.com/expressjs/csurf#custom-error-handling
   if (error.code === 'EBADCSRFTOKEN') {
     console.warn(
@@ -19,7 +20,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, _next) => {
     return
   }
 
-  res.status(error.response?.status ?? 500).json(null)
+  return fallbackErrorHandler(error, req, res, next)
 }
 
 export const fallbackErrorHandler: ErrorRequestHandler = (
@@ -28,7 +29,7 @@ export const fallbackErrorHandler: ErrorRequestHandler = (
   res,
   _next
 ) => {
-  console.error(
+  logError(
     `Internal server error: ${error.message || error || 'No error object'}`,
     req,
     undefined,
