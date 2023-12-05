@@ -70,7 +70,7 @@ fun Handle.getCaseEventsByStudentCase(studentCaseId: UUID): List<CaseEvent> = cr
 SELECT sc.id, sc.student_case_id, sc.date, sc.type, sc.notes,
     creator.first_name || ' ' || creator.last_name AS created_name,
     sc.created AS created_time,
-    CASE WHEN updater.id IS NOT NULL THEN creator.first_name || ' ' || creator.last_name END AS updated_name,
+    CASE WHEN updater.id IS NOT NULL THEN updater.first_name || ' ' || updater.last_name END AS updated_name,
     sc.updated AS updated_time
 FROM case_events sc
 JOIN users creator on sc.created_by = creator.id
