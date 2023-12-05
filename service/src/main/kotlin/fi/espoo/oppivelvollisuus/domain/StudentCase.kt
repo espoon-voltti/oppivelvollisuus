@@ -11,8 +11,7 @@ import java.util.*
 
 data class StudentCaseInput(
     val openedAt: LocalDate,
-    val assignedTo: UUID?,
-    val info: String
+    val assignedTo: UUID?
 )
 
 fun Handle.insertStudentCase(
@@ -22,8 +21,8 @@ fun Handle.insertStudentCase(
 ): UUID {
     return createUpdate(
         """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, info) 
-                VALUES (:user, :studentId, :openedAt, :assignedTo, :info)
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to) 
+                VALUES (:user, :studentId, :openedAt, :assignedTo)
                 RETURNING id
             """
     )
@@ -39,8 +38,7 @@ data class StudentCase(
     val id: UUID,
     val studentId: UUID,
     val openedAt: LocalDate,
-    @Nested("assignedTo") val assignedTo: UserBasics?,
-    val info: String
+    @Nested("assignedTo") val assignedTo: UserBasics?
 )
 
 fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> = createQuery(
@@ -48,8 +46,7 @@ fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> = create
 SELECT 
     sc.id, sc.student_id, sc.opened_at, 
     assignee.id AS assigned_to_id, 
-    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
-    sc.info
+    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
 FROM student_cases sc
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
@@ -68,8 +65,7 @@ SET
     updated = now(),
     updated_by = :user,
     opened_at = :openedAt,
-    assigned_to = :assignedTo,
-    info = :info
+    assigned_to = :assignedTo
 WHERE id = :id AND student_id = :studentId
 """
     )

@@ -26,6 +26,7 @@ import {
 import { colors } from '../shared/theme'
 import { H2, H3 } from '../shared/typography'
 
+import { CaseEvents } from './CaseEvents'
 import { StudentCaseForm } from './StudentCaseForm'
 import { StudentForm } from './StudentForm'
 import {
@@ -47,7 +48,7 @@ const AccordionRow = styled(FlexLeftRight)<{ $disabled: boolean }>`
     font-size: 16px;
   }
 
-  border-top: 1px dashed ${colors.grayscale.g35};
+  border-top: 1px solid ${colors.grayscale.g15};
   padding: 8px 0;
 `
 
@@ -66,11 +67,14 @@ export const StudentPage = React.memo(function StudentPage() {
     useState<StudentResponse | null>(null)
   const loadStudent = useCallback(() => {
     setStudentResponse(null)
-    void apiGetStudent(id).then(setStudentResponse)
+    void apiGetStudent(id).then((response) => {
+      setStudentResponse(response)
+      setExpandedCase(response.cases.length > 0 ? response.cases[0].id : null)
+    })
   }, [id])
   useEffect(loadStudent, [loadStudent])
 
-  const [editing, setEditing] = useState(false)
+  const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
   // true = creating new, string = id of the edited case
@@ -78,6 +82,8 @@ export const StudentPage = React.memo(function StudentPage() {
   const [studentCaseInput, setStudentCaseInput] =
     useState<StudentCaseInput | null>(null)
   const [expandedCase, setExpandedCase] = useState<string | null>(null)
+
+  const [editingCaseEvent, setEditingCaseEvent] = useState(false)
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -107,25 +113,25 @@ export const StudentPage = React.memo(function StudentPage() {
               <InlineButton
                 text="Muokkaa"
                 icon={faPen}
-                disabled={editingCase !== false}
-                onClick={() => setEditing(true)}
+                disabled={editingCase !== false || editingCaseEvent}
+                onClick={() => setEditingStudent(true)}
               />
             </FlexLeftRight>
             <VerticalGap $size="L" />
             <StudentForm
-              key={editing ? 'student-form' : 'student-read-view'}
-              editing={editing}
+              key={editingStudent ? 'EDIT' : 'VIEW'}
+              mode={editingStudent ? 'EDIT' : 'VIEW'}
               student={studentResponse.student}
               onChange={setStudentInput}
             />
             <VerticalGap $size="m" />
-            {editing && (
+            {editingStudent && (
               <FlexRight>
                 <FlexRowWithGaps>
                   <Button
                     text="Peruuta"
                     disabled={submitting}
-                    onClick={() => setEditing(false)}
+                    onClick={() => setEditingStudent(false)}
                   />
                   <Button
                     text="Tallenna"
@@ -137,7 +143,7 @@ export const StudentPage = React.memo(function StudentPage() {
                       setSubmitting(true)
                       void apiPutStudent(id, studentInput)
                         .then(() => {
-                          setEditing(false)
+                          setEditingStudent(false)
                           loadStudent()
                         })
                         .finally(() => setSubmitting(false))
@@ -151,25 +157,28 @@ export const StudentPage = React.memo(function StudentPage() {
           <VerticalGap $size="m" />
 
           <SectionContainer>
-            <FlexLeftRight>
+            <FlexColWithGaps>
               <H3>Oppivelvollisuusilmoitukset</H3>
-              <InlineButton
-                text="Lisää ilmoitus"
-                icon={faPlus}
-                onClick={() => {
-                  setEditingCase(true)
-                  setExpandedCase(null)
-                }}
-                disabled={editing || editingCase !== false}
-              />
-            </FlexLeftRight>
-
-            <VerticalGap $size="m" />
+              {editingCase !== true && (
+                <InlineButton
+                  text="Lisää ilmoitus"
+                  icon={faPlus}
+                  onClick={() => {
+                    setEditingCase(true)
+                    setExpandedCase(null)
+                  }}
+                  disabled={
+                    editingStudent || editingCase !== false || editingCaseEvent
+                  }
+                />
+              )}
+            </FlexColWithGaps>
 
             {editingCase === true && (
               <FlexColWithGaps>
                 <H3>Uusi ilmoitus</H3>
                 <StudentCaseForm
+                  mode="CREATE"
                   onChange={setStudentCaseInput}
                   employees={employees}
                 />
@@ -203,7 +212,7 @@ export const StudentPage = React.memo(function StudentPage() {
               </FlexColWithGaps>
             )}
 
-            <VerticalGap $size="m" />
+            <VerticalGap $size="L" />
 
             <FlexColWithGaps $gapSize="L">
               {studentResponse.cases.map((studentCase) => (
@@ -236,14 +245,17 @@ export const StudentPage = React.memo(function StudentPage() {
                     </FlexRowWithGaps>
                   </AccordionRow>
                   {expandedCase === studentCase.id && (
-                    <FlexColWithGaps $gapSize="m">
+                    <FlexColWithGaps
+                      $gapSize="L"
+                      style={{ paddingLeft: '24px' }}
+                    >
                       <FlexLeftRight style={{ alignItems: 'flex-start' }}>
                         <StudentCaseForm
-                          key={`${studentCase.id}-${
-                            editingCase ? 'form' : 'read-view'
-                          }`}
+                          key={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
+                          mode={
+                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
+                          }
                           studentCase={studentCase}
-                          editing={editingCase === studentCase.id}
                           onChange={setStudentCaseInput}
                           employees={employees}
                         />
@@ -251,7 +263,11 @@ export const StudentPage = React.memo(function StudentPage() {
                           <InlineButton
                             text="Muokkaa"
                             icon={faPen}
-                            disabled={editing || editingCase !== false}
+                            disabled={
+                              editingStudent ||
+                              editingCase !== false ||
+                              editingCaseEvent
+                            }
                             onClick={() => setEditingCase(studentCase.id)}
                           />
                         )}
@@ -289,6 +305,11 @@ export const StudentPage = React.memo(function StudentPage() {
                           </FlexRowWithGaps>
                         </FlexRight>
                       )}
+                      <CaseEvents
+                        studentCaseId={studentCase.id}
+                        disabled={editingStudent || editingCaseEvent}
+                        onChangeEditState={setEditingCaseEvent}
+                      />
                     </FlexColWithGaps>
                   )}
                 </FlexColWithGaps>

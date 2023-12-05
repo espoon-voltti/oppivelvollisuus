@@ -10,7 +10,7 @@ import styled from 'styled-components'
 
 import { colors, InputWidth, inputWidthCss } from '../theme'
 
-export interface DropdownProps<T, E extends HTMLElement> {
+export interface SelectProps<T> {
   id?: string
   items: readonly T[]
   selectedItem: T | null
@@ -19,25 +19,22 @@ export interface DropdownProps<T, E extends HTMLElement> {
   placeholder?: string
   width?: InputWidth
   getItemLabel?: (item: T) => string
+  getItemValue?: (item: T) => string
   getItemDataQa?: (item: T) => string | undefined
   name?: string
-  onFocus?: FocusEventHandler<E>
+  onFocus?: FocusEventHandler<HTMLSelectElement>
   'data-qa'?: string
 }
 
-type SelectProps<T> = DropdownProps<T, HTMLSelectElement> &
-  (T extends string | number
-    ? { getItemValue?: never }
-    : { getItemValue: (item: T) => string })
-
-function SelectGeneric<T>(props: SelectProps<T>) {
+function GenericSelect<T>(props: SelectProps<T>) {
   const {
     id,
     name,
     'data-qa': dataQa,
     items,
     selectedItem,
-    getItemLabel = defaultGetItemLabel,
+    getItemLabel = (item) => String(item),
+    getItemValue = (item) => String(item),
     getItemDataQa,
     onChange,
     onFocus,
@@ -45,11 +42,6 @@ function SelectGeneric<T>(props: SelectProps<T>) {
     placeholder,
     disabled
   } = props
-
-  const getItemValue =
-    'getItemValue' in props && props.getItemValue
-      ? props.getItemValue
-      : defaultGetItemLabel
 
   const options = useMemo(
     () =>
@@ -94,10 +86,6 @@ function SelectGeneric<T>(props: SelectProps<T>) {
   )
 }
 
-function defaultGetItemLabel<T>(item: T) {
-  return String(item)
-}
-
 export const Root = styled.div<{ $width: InputWidth | undefined }>`
   ${(p) => (p.$width ? inputWidthCss(p.$width) : '')}
   border-radius: 2px;
@@ -133,4 +121,4 @@ const Icon = styled(FontAwesomeIcon)`
   top: 12px;
 `
 
-export const Select = React.memo(SelectGeneric) as typeof SelectGeneric
+export const Select = React.memo(GenericSelect) as typeof GenericSelect

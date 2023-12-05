@@ -4,10 +4,8 @@ import { EmployeeUser } from '../employees/api'
 import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
 import { Select } from '../shared/form/Select'
-import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
 import {
   GroupOfInputRows,
-  LabeledInputL,
   LabeledInputM,
   LabeledInputS,
   RowOfInputs
@@ -20,38 +18,30 @@ interface SharedProps {
   employees: EmployeeUser[]
 }
 interface CreateProps extends SharedProps {
+  mode: 'CREATE'
   onChange: (validInput: StudentCaseInput | null) => void
 }
 interface ViewProps extends SharedProps {
+  mode: 'VIEW'
   studentCase: StudentCase
-  editing: false
 }
 interface EditProps extends SharedProps {
+  mode: 'EDIT'
   studentCase: StudentCase
-  editing: true
   onChange: (validInput: StudentCaseInput | null) => void
 }
 type Props = CreateProps | ViewProps | EditProps
-
-function isCreating(p: Props): p is CreateProps {
-  return !('studentCase' in p)
-}
-
-function isViewing(p: Props): p is ViewProps {
-  return 'studentCase' in p && !p.editing
-}
 
 export const StudentCaseForm = React.memo(function StudentCaseForm(
   props: Props
 ) {
   const [openedAt, setOpenedAt] = useState(
-    formatDate(isCreating(props) ? new Date() : props.studentCase.openedAt)
-  )
-  const [info, setInfo] = useState(
-    isCreating(props) ? '' : props.studentCase.info
+    formatDate(
+      props.mode === 'CREATE' ? new Date() : props.studentCase.openedAt
+    )
   )
   const [assignedTo, setAssignedTo] = useState(
-    isCreating(props) || !props.studentCase.assignedTo
+    props.mode === 'CREATE' || !props.studentCase.assignedTo
       ? null
       : props.employees.find(
           (e) => e.id === props.studentCase.assignedTo?.id
@@ -65,13 +55,12 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
 
     return {
       openedAt: openedAtDate,
-      info,
       assignedTo: assignedTo?.id ?? null
     }
-  }, [openedAt, info, assignedTo])
+  }, [openedAt, assignedTo])
 
   useEffect(() => {
-    if (!isViewing(props)) {
+    if (props.mode !== 'VIEW') {
       props.onChange(validInput)
     }
   }, [validInput, props])
@@ -81,7 +70,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
       <RowOfInputs $gapSize="L">
         <LabeledInputS>
           <Label>Ilmoitettu</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{formatDate(props.studentCase.openedAt)}</span>
           ) : (
             <InputField onChange={setOpenedAt} value={openedAt} />
@@ -89,7 +78,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
         </LabeledInputS>
         <LabeledInputM>
           <Label>Ohjaaja</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.studentCase.assignedTo?.name ?? '-'}</span>
           ) : (
             <Select<EmployeeUser>
@@ -102,16 +91,6 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             />
           )}
         </LabeledInputM>
-      </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputL>
-          <Label>Tapauksen tiedot</Label>
-          {isViewing(props) ? (
-            <ReadOnlyTextArea text={props.studentCase.info ?? '-'} />
-          ) : (
-            <TextArea onChange={setInfo} value={info} />
-          )}
-        </LabeledInputL>
       </RowOfInputs>
     </GroupOfInputRows>
   )

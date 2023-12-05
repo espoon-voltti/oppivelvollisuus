@@ -51,7 +51,7 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
         <SectionContainer>
           <H3>Oppivelvollisen tiedot</H3>
           <VerticalGap $size="m" />
-          <StudentForm onChange={setStudentInput} />
+          <StudentForm mode="CREATE" onChange={setStudentInput} />
         </SectionContainer>
 
         <VerticalGap $size="m" />
@@ -60,6 +60,7 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
           <H3>Ilmoituksen tiedot</H3>
           <VerticalGap $size="m" />
           <StudentCaseForm
+            mode="CREATE"
             onChange={setStudentCaseInput}
             employees={employees}
           />
