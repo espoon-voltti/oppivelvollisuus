@@ -3,6 +3,7 @@ import React, { RefObject, useMemo, useState } from 'react'
 import TextareaAutosize from 'react-autosize-textarea'
 import styled from 'styled-components'
 
+import { FlexColWithGaps } from '../layout'
 import { BaseProps, colors, InputWidth, inputWidthCss } from '../theme'
 import { P } from '../typography'
 
@@ -38,7 +39,13 @@ export const ReadOnlyTextArea = React.memo(function ReadOnlyTextArea({
 }: {
   text: string
 }) {
-  return text.split('\n').map((s, i) => <P key={i}>{s}</P>)
+  return (
+    <FlexColWithGaps>
+      {text.split('\n').map((s, i) => (
+        <P key={i}>{s}</P>
+      ))}
+    </FlexColWithGaps>
+  )
 })
 
 export const TextArea = React.memo(function TextArea({

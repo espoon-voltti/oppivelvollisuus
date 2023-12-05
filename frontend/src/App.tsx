@@ -3,12 +3,12 @@ import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { AuthGuard } from './auth/AuthGuard'
+import { LoginPage } from './auth/LoginPage'
 import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
 import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
-import { LoginPage } from './students/LoginPage'
 import { StudentPage } from './students/StudentPage'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
 

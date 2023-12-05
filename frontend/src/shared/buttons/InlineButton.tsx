@@ -15,7 +15,6 @@ const StyledButton = styled.button<{ $color?: string; $iconRight?: boolean }>`
 
   border: none;
   padding: 0;
-  margin: 0;
   border-radius: 4px;
   background: none;
 

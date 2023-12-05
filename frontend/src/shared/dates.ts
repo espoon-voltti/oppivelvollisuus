@@ -10,4 +10,7 @@ export const parseDate = (date: string) => {
     return undefined
   }
 }
+
 export const formatDate = (date: Date) => format(date, 'dd.MM.yyyy')
+
+export const formatDateTime = (date: Date) => format(date, 'dd.MM.yyyy HH:mm')

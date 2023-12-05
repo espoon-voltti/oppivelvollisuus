@@ -100,7 +100,6 @@ export const apiGetStudent = (id: string): Promise<StudentResponse> =>
 
 export interface StudentCaseInput {
   openedAt: Date
-  info: string
   assignedTo: string | null
 }
 
@@ -127,10 +126,108 @@ export const apiPutStudentCase = (
   studentId: string,
   caseId: string,
   data: StudentCaseInput
-): Promise<string> => {
+): Promise<void> => {
   const body: JsonOf<StudentCaseInput> = {
     ...data,
     openedAt: formatISO(data.openedAt, { representation: 'date' })
   }
   return apiClient.put(`/students/${studentId}/cases/${caseId}`, body)
 }
+
+export const caseEventTypes = [
+  'NOTE',
+  'EXPLANATION_REQUEST',
+  'EDUCATION_SUSPENSION_APPLICATION_RECEIVED',
+  'EDUCATION_SUSPENSION_GRANTED',
+  'EDUCATION_SUSPENSION_DENIED',
+  'CHILD_PROTECTION_NOTICE',
+  'HEARING_LETTER',
+  'HEARING',
+  'DIRECTED_TO_SCHOOL_TUVA',
+  'DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TUVA',
+  'DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TELMA'
+] as const
+
+export type CaseEventType = (typeof caseEventTypes)[number]
+
+export const caseEventTypeNames: Record<CaseEventType, string> = {
+  NOTE: 'Muistiinpano',
+  EXPLANATION_REQUEST: 'Selvityspyyntö',
+  EDUCATION_SUSPENSION_APPLICATION_RECEIVED:
+    'Keskeytyshakemus saapunut asuinkuntaan',
+  EDUCATION_SUSPENSION_GRANTED: 'Määräaikainen keskeytys myönnetty',
+  EDUCATION_SUSPENSION_DENIED: 'Keskeytyshakemus hylätty',
+  CHILD_PROTECTION_NOTICE: 'Lastensuojeluilmoitus',
+  HEARING_LETTER: 'Kuulemiskirje',
+  HEARING: 'Kuuleminen',
+  DIRECTED_TO_SCHOOL_TUVA: 'Osoitus - Yleisoppilaitoksen tuva',
+  DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TUVA:
+    'Osoitus - Erityisoppilaitoksen tuva',
+  DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TELMA:
+    'Osoitus - Erityisoppilaitoksen telma'
+}
+
+export interface CaseEventInput {
+  date: Date
+  type: CaseEventType
+  notes: string
+}
+
+export interface CaseEvent extends CaseEventInput {
+  id: string
+  studentCaseId: string
+  created: ModifyInfo
+  updated: ModifyInfo | null
+}
+
+interface ModifyInfo {
+  name: string
+  time: Date
+}
+
+export const apiPostCaseEvent = (
+  studentCaseId: string,
+  data: CaseEventInput
+): Promise<string> => {
+  const body: JsonOf<CaseEventInput> = {
+    ...data,
+    date: formatISO(data.date, { representation: 'date' })
+  }
+  return apiClient
+    .post<string>(`/student-cases/${studentCaseId}/case-events`, body)
+    .then((res) => res.data)
+}
+
+export const apiGetCaseEvents = (studentCaseId: string): Promise<CaseEvent[]> =>
+  apiClient
+    .get<JsonOf<CaseEvent[]>>(`/student-cases/${studentCaseId}/case-events`)
+    .then((res) =>
+      res.data.map((e) => ({
+        ...e,
+        date: parseISO(e.date),
+        created: {
+          ...e.created,
+          time: parseISO(e.created.time)
+        },
+        updated: e.updated
+          ? {
+              ...e.updated,
+              time: parseISO(e.updated.time)
+            }
+          : null
+      }))
+    )
+
+export const apiPutCaseEvent = (
+  caseEventId: string,
+  data: CaseEventInput
+): Promise<void> => {
+  const body: JsonOf<CaseEventInput> = {
+    ...data,
+    date: formatISO(data.date, { representation: 'date' })
+  }
+  return apiClient.put(`/case-events/${caseEventId}`, body)
+}
+
+export const apiDeleteCaseEvent = (caseEventId: string): Promise<void> =>
+  apiClient.delete(`/case-events/${caseEventId}`)

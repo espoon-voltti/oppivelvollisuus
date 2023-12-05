@@ -1,5 +1,7 @@
 import styled from 'styled-components'
 
+import { colors } from './theme'
+
 export const FlexCol = styled.div`
   display: flex;
   flex-direction: column;
@@ -87,6 +89,9 @@ export const LabeledInputM = styled(FlexColWithGaps)`
   width: 256px;
 `
 export const LabeledInputL = styled(FlexColWithGaps)`
+  width: 400px;
+`
+export const LabeledInputFull = styled(FlexColWithGaps)`
   flex-grow: 1;
 `
 export const RowOfInputs = styled(FlexRowWithGaps)`
@@ -96,4 +101,10 @@ export const RowOfInputs = styled(FlexRowWithGaps)`
 
 export const GroupOfInputRows = styled(FlexColWithGaps)`
   flex-grow: 1;
+`
+
+export const Separator = styled.div`
+  border-top: 1px solid ${colors.grayscale.g15};
+  margin: 16px 0;
+  width: 100%;
 `

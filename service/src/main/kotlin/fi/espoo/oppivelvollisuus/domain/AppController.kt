@@ -6,6 +6,7 @@ import fi.espoo.oppivelvollisuus.getAppUsers
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -78,6 +79,42 @@ class AppController {
     ) {
         jdbi.inTransactionUnchecked { tx ->
             tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
+        }
+    }
+
+    @PostMapping("/student-cases/{studentCaseId}/case-events")
+    fun createCaseEvent(
+        user: AuthenticatedUser,
+        @PathVariable studentCaseId: UUID,
+        @RequestBody body: CaseEventInput
+    ): UUID {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
+        }
+    }
+
+    @GetMapping("/student-cases/{studentCaseId}/case-events")
+    fun getCaseEvents(@PathVariable studentCaseId: UUID): List<CaseEvent> {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.getCaseEventsByStudentCase(studentCaseId = studentCaseId)
+        }
+    }
+
+    @PutMapping("/case-events/{id}")
+    fun updateCaseEvent(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID,
+        @RequestBody body: CaseEventInput
+    ) {
+        jdbi.inTransactionUnchecked { tx ->
+            tx.updateCaseEvent(id = id, data = body, user = user)
+        }
+    }
+
+    @DeleteMapping("/case-events/{id}")
+    fun deleteCaseEvent(@PathVariable id: UUID) {
+        jdbi.inTransactionUnchecked { tx ->
+            tx.deleteCaseEvent(id = id)
         }
     }
 

@@ -115,18 +115,20 @@ export const IconButton = React.memo(function IconButton({
   ...props
 }: IconButtonProps) {
   return (
-    <StyledButton
-      type="button"
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      className={classNames(props.className, { disabled })}
-      $size={size}
-      $color={color}
-      {...props}
-    >
-      <div className="icon-wrapper">
-        <FontAwesomeIcon icon={icon} />
-      </div>
-    </StyledButton>
+    <div>
+      <StyledButton
+        type="button"
+        onClick={disabled ? undefined : onClick}
+        disabled={disabled}
+        className={classNames(props.className, { disabled })}
+        $size={size}
+        $color={color}
+        {...props}
+      >
+        <div className="icon-wrapper">
+          <FontAwesomeIcon icon={icon} />
+        </div>
+      </StyledButton>
+    </div>
   )
 })

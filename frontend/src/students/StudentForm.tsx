@@ -5,7 +5,7 @@ import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
 import {
   GroupOfInputRows,
-  LabeledInputL,
+  LabeledInputFull,
   LabeledInputM,
   LabeledInputS,
   RowOfInputs
@@ -15,51 +15,46 @@ import { Label } from '../shared/typography'
 import { StudentDetails, StudentInput } from './api'
 
 interface CreateProps {
+  mode: 'CREATE'
   onChange: (validInput: StudentInput | null) => void
 }
 interface ViewProps {
+  mode: 'VIEW'
   student: StudentDetails
-  editing: false
 }
 interface EditProps {
+  mode: 'EDIT'
   student: StudentDetails
-  editing: true
   onChange: (validInput: StudentInput | null) => void
 }
 type Props = CreateProps | ViewProps | EditProps
 
-function isCreating(p: Props): p is CreateProps {
-  return !('student' in p)
-}
-
-function isViewing(p: Props): p is ViewProps {
-  return 'student' in p && !p.editing
-}
-
 export const StudentForm = React.memo(function StudentForm(props: Props) {
   const [valpasLink, setValpasLink] = useState(
-    isCreating(props) ? '' : props.student.valpasLink
+    props.mode === 'CREATE' ? '' : props.student.valpasLink
   )
-  const [ssn, setSsn] = useState(isCreating(props) ? '' : props.student.ssn)
+  const [ssn, setSsn] = useState(
+    props.mode === 'CREATE' ? '' : props.student.ssn
+  )
   const [firstName, setFirstName] = useState(
-    isCreating(props) ? '' : props.student.firstName
+    props.mode === 'CREATE' ? '' : props.student.firstName
   )
   const [lastName, setLastName] = useState(
-    isCreating(props) ? '' : props.student.lastName
+    props.mode === 'CREATE' ? '' : props.student.lastName
   )
   const [dateOfBirth, setDateOfBirth] = useState(
-    isCreating(props) || !props.student.dateOfBirth
+    props.mode === 'CREATE' || !props.student.dateOfBirth
       ? ''
       : formatDate(props.student.dateOfBirth)
   )
   const [phone, setPhone] = useState(
-    isCreating(props) ? '' : props.student.phone
+    props.mode === 'CREATE' ? '' : props.student.phone
   )
   const [email, setEmail] = useState(
-    isCreating(props) ? '' : props.student.email
+    props.mode === 'CREATE' ? '' : props.student.email
   )
   const [address, setAdress] = useState(
-    isCreating(props) ? '' : props.student.address
+    props.mode === 'CREATE' ? '' : props.student.address
   )
 
   useEffect(() => {
@@ -108,7 +103,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   )
 
   useEffect(() => {
-    if (!isViewing(props)) {
+    if (props.mode !== 'VIEW') {
       props.onChange(validInput)
     }
   }, [validInput, props])
@@ -118,7 +113,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       <RowOfInputs $gapSize="m">
         <LabeledInputS>
           <Label>Hetu</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.ssn || '-'}</span>
           ) : (
             <InputField onChange={setSsn} value={ssn} />
@@ -126,7 +121,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
         </LabeledInputS>
         <LabeledInputS>
           <Label>Syntymäaika</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>
               {props.student.dateOfBirth
                 ? formatDate(props.student.dateOfBirth)
@@ -136,9 +131,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             <InputField onChange={setDateOfBirth} value={dateOfBirth} />
           )}
         </LabeledInputS>
-        <LabeledInputL>
+        <LabeledInputFull>
           <Label>Valpas linkki</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             props.student.valpasLink ? (
               <a
                 href={props.student.valpasLink}
@@ -153,12 +148,12 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           ) : (
             <InputField onChange={setValpasLink} value={valpasLink} />
           )}
-        </LabeledInputL>
+        </LabeledInputFull>
       </RowOfInputs>
       <RowOfInputs $gapSize="L">
         <LabeledInputM>
           <Label>Etunimi</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.firstName}</span>
           ) : (
             <InputField onChange={setFirstName} value={firstName} />
@@ -166,7 +161,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
         </LabeledInputM>
         <LabeledInputM>
           <Label>Sukunimi</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.lastName}</span>
           ) : (
             <InputField onChange={setLastName} value={lastName} />
@@ -176,7 +171,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       <RowOfInputs $gapSize="L">
         <LabeledInputM>
           <Label>Puhelinnumero</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.phone || '-'}</span>
           ) : (
             <InputField onChange={setPhone} value={phone} />
@@ -184,20 +179,20 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
         </LabeledInputM>
         <LabeledInputM>
           <Label>Sähköposti</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.email || '-'}</span>
           ) : (
             <InputField onChange={setEmail} value={email} />
           )}
         </LabeledInputM>
-        <LabeledInputL>
+        <LabeledInputFull>
           <Label>Lähiosoite</Label>
-          {isViewing(props) ? (
+          {props.mode === 'VIEW' ? (
             <span>{props.student.address || '-'}</span>
           ) : (
             <InputField onChange={setAdress} value={address} />
           )}
-        </LabeledInputL>
+        </LabeledInputFull>
       </RowOfInputs>
     </GroupOfInputRows>
   )
