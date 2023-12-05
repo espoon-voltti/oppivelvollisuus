@@ -73,8 +73,8 @@ SELECT sc.id, sc.student_case_id, sc.date, sc.type, sc.notes,
     CASE WHEN updater.id IS NOT NULL THEN updater.first_name || ' ' || updater.last_name END AS updated_name,
     sc.updated AS updated_time
 FROM case_events sc
-JOIN users creator on sc.created_by = creator.id
-LEFT JOIN users updater on sc.created_by = updater.id
+JOIN users creator ON sc.created_by = creator.id
+LEFT JOIN users updater ON sc.updated_by = updater.id
 WHERE student_case_id = :studentCaseId
 ORDER BY date DESC, sc.created DESC 
 """
