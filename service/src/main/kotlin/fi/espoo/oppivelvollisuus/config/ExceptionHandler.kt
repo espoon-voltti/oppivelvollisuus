@@ -1,3 +1,5 @@
+package fi.espoo.oppivelvollisuus.config
+
 import fi.espoo.oppivelvollisuus.common.BadRequest
 import fi.espoo.oppivelvollisuus.common.Conflict
 import fi.espoo.oppivelvollisuus.common.Forbidden
@@ -15,7 +17,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
-import org.springframework.web.multipart.MaxUploadSizeExceededException
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.io.IOException
 import java.lang.Exception
@@ -66,15 +67,6 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse("UniqueConstraintViolation"))
         }
         return unexpectedError(req, ex)
-    }
-
-    @ExceptionHandler(value = [MaxUploadSizeExceededException::class])
-    fun maxUploadSizeExceeded(
-        req: HttpServletRequest,
-        ex: MaxUploadSizeExceededException
-    ): ResponseEntity<ErrorResponse> {
-        logger.warn("Max upload size exceeded (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE).body(ErrorResponse())
     }
 
     // We don't want alerts from ClientAbortExceptions or return any http responses to them
