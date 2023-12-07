@@ -186,7 +186,7 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
-                address = "Katu 1"
+                address = "Katu 2"
             ),
             studentResponse.student
         )
