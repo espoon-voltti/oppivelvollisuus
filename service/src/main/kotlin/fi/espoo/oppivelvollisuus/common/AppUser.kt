@@ -1,4 +1,4 @@
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.common
 
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin

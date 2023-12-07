@@ -7,6 +7,8 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import testUser
+import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -45,6 +47,12 @@ END ${'$'}${'$'} LANGUAGE plpgsql;
     fun beforeEach() {
         jdbi.withHandleUnchecked { tx ->
             tx.execute("SELECT reset_database()")
+            tx.createUpdate(
+                """
+                INSERT INTO users (id, updated, external_id, first_name, last_name, email) 
+                VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
+            """
+            ).bind("id", testUser.id).execute()
         }
     }
 }

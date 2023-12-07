@@ -1,5 +1,9 @@
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.common.AdUser
+import fi.espoo.oppivelvollisuus.common.AppUser
+import fi.espoo.oppivelvollisuus.common.getAppUser
+import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,8 +1,8 @@
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.AppUser
+import fi.espoo.oppivelvollisuus.common.AppUser
+import fi.espoo.oppivelvollisuus.common.getAppUsers
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import fi.espoo.oppivelvollisuus.getAppUsers
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired

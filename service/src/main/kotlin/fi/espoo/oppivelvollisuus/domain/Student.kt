@@ -1,6 +1,7 @@
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.common.NotFound
+import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
@@ -90,7 +91,7 @@ WHERE id = :id
     .mapTo<Student>()
     .findOne()
     .getOrNull()
-    ?: error("not found")
+    ?: throw NotFound()
 
 fun Handle.updateStudent(id: UUID, data: StudentInput, user: AuthenticatedUser) {
     createUpdate(
@@ -114,5 +115,5 @@ WHERE id = :id
         .bindKotlin(data)
         .bind("user", user.id)
         .execute()
-        .also { if (it != 1) error("not found") }
+        .also { if (it != 1) throw NotFound() }
 }
