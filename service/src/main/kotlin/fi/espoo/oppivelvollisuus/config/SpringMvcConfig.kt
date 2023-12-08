@@ -33,7 +33,7 @@ object AuthenticatedUserResolver : HandlerMethodArgumentResolver {
     ): AuthenticatedUser? {
         val user = webRequest.getNativeRequest(HttpServletRequest::class.java)?.getAuthenticatedUser()
         if (user == null && !parameter.isOptional) {
-            error("Unauthorized request (${webRequest.getDescription(false)})")
+            error("fi.espoo.oppivelvollisuus.common.Unauthorized request (${webRequest.getDescription(false)})")
         }
         return user
     }

@@ -41,10 +41,10 @@ class HttpAccessControl : HttpFilter() {
         if (request.requiresAuthentication()) {
             val authenticatedUser = request.getAuthenticatedUser()
             if (authenticatedUser == null) {
-                return response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                return response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "fi.espoo.oppivelvollisuus.common.Unauthorized")
             }
             if (!request.isAuthorized(authenticatedUser)) {
-                return response.sendError(HttpServletResponse.SC_FORBIDDEN, "Forbidden")
+                return response.sendError(HttpServletResponse.SC_FORBIDDEN, "fi.espoo.oppivelvollisuus.common.Forbidden")
             }
         }
 

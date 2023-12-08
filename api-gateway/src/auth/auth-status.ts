@@ -23,7 +23,6 @@ export default (sessions: Sessions) =>
   toRequestHandler(async (req, res) => {
     const sessionUser = req.user
     const validUser = sessionUser && (await validateUser(req))
-    console.log('here', validUser)
 
     let status: AuthStatus
     if (validUser) {

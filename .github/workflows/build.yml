@@ -149,6 +149,7 @@ jobs:
 
       - name: Run tests
         run: |
+          set -o pipefail
           ./test-compose run service-tests | tee tests.log
 
       - name: Get logs

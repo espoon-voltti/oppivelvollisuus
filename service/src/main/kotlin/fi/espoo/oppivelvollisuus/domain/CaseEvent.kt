@@ -1,5 +1,6 @@
 package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.common.NotFound
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
@@ -100,7 +101,7 @@ WHERE id = :id
         .bindKotlin(data)
         .bind("user", user.id)
         .execute()
-        .also { if (it != 1) error("not found") }
+        .also { if (it != 1) throw NotFound() }
 }
 
 fun Handle.deleteCaseEvent(id: UUID) {
