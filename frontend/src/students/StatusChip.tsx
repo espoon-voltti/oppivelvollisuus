@@ -7,7 +7,7 @@ import { CaseStatus, caseStatusNames } from './enums'
 
 const chipColors: Record<CaseStatus, string> = {
   TODO: colors.main.m1,
-  ON_HOLD: colors.status.success,
+  ON_HOLD: '#148190',
   FINISHED: colors.grayscale.g15
 }
 

@@ -66,13 +66,25 @@ export interface StudentSummary {
   assignedTo: EmployeeBasics | null
 }
 
-export const apiGetStudents = (): Promise<StudentSummary[]> =>
-  apiClient.get<JsonOf<StudentSummary[]>>('/students').then((res) =>
-    res.data.map((s) => ({
-      ...s,
-      openedAt: s.openedAt ? parseISO(s.openedAt) : null
-    }))
-  )
+export interface StudentSearchParams {
+  query: string
+  statuses: CaseStatus[]
+  assignedTo: string | null
+}
+
+export const apiGetStudents = (
+  params: StudentSearchParams
+): Promise<StudentSummary[]> => {
+  const body: JsonOf<StudentSearchParams> = params
+  return apiClient
+    .post<JsonOf<StudentSummary[]>>('/students/search', body)
+    .then((res) =>
+      res.data.map((s) => ({
+        ...s,
+        openedAt: s.openedAt ? parseISO(s.openedAt) : null
+      }))
+    )
+}
 
 export interface StudentDetails {
   id: string
