@@ -1,22 +1,14 @@
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, {
-  ChangeEvent,
-  FocusEventHandler,
-  useCallback,
-  useMemo
-} from 'react'
+import React, { FocusEventHandler, useMemo } from 'react'
 import styled from 'styled-components'
 
 import { colors, InputWidth, inputWidthCss } from '../theme'
 
-export interface SelectProps<T> {
+export type SelectProps<T> = {
   id?: string
   items: readonly T[]
-  selectedItem: T | null
-  onChange: (item: T | null) => void
   disabled?: boolean
-  placeholder?: string
   width?: InputWidth
   getItemLabel?: (item: T) => string
   getItemValue?: (item: T) => string
@@ -24,7 +16,18 @@ export interface SelectProps<T> {
   name?: string
   onFocus?: FocusEventHandler<HTMLSelectElement>
   'data-qa'?: string
-}
+} & (
+  | {
+      placeholder: string
+      selectedItem: T | null
+      onChange: (item: T | null) => void
+    }
+  | {
+      placeholder?: undefined
+      selectedItem: T
+      onChange: (item: T) => void
+    }
+)
 
 function GenericSelect<T>(props: SelectProps<T>) {
   const {
@@ -36,10 +39,8 @@ function GenericSelect<T>(props: SelectProps<T>) {
     getItemLabel = (item) => String(item),
     getItemValue = (item) => String(item),
     getItemDataQa,
-    onChange,
     onFocus,
     width,
-    placeholder,
     disabled
   } = props
 
@@ -53,15 +54,6 @@ function GenericSelect<T>(props: SelectProps<T>) {
     [getItemDataQa, getItemLabel, getItemValue, items]
   )
 
-  const handleChange = useCallback(
-    (e: ChangeEvent<HTMLSelectElement>) => {
-      const newSelectedItem =
-        items.find((item) => getItemValue(item) === e.target.value) ?? null
-      onChange(newSelectedItem)
-    },
-    [items, getItemValue, onChange]
-  )
-
   return (
     <Root $width={width} data-qa={dataQa}>
       <Wrapper>
@@ -69,11 +61,22 @@ function GenericSelect<T>(props: SelectProps<T>) {
           id={id}
           name={name}
           value={selectedItem ? getItemValue(selectedItem) : ''}
-          onChange={handleChange}
+          onChange={(e) => {
+            const newSelectedItem = items.find(
+              (item) => getItemValue(item) === e.target.value
+            )
+            if (props.placeholder === undefined) {
+              props.onChange(newSelectedItem ?? items[0])
+            } else {
+              props.onChange(newSelectedItem ?? null)
+            }
+          }}
           disabled={disabled}
           onFocus={onFocus}
         >
-          {placeholder !== undefined && <option value="">{placeholder}</option>}
+          {props.placeholder !== undefined && (
+            <option value="">{props.placeholder}</option>
+          )}
           {options.map((item) => (
             <option key={item.value} value={item.value} data-qa={item.dataQa}>
               {item.label}

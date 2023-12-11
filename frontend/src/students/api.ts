@@ -4,6 +4,13 @@ import { apiClient } from '../api-client'
 import { EmployeeBasics } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
 
+import {
+  CaseEventType,
+  CaseFinishedReason,
+  CaseStatus,
+  SchoolType
+} from './enums'
+
 export interface StudentInput {
   valpasLink: string
   ssn: string
@@ -55,6 +62,7 @@ export interface StudentSummary {
   firstName: string
   lastName: string
   openedAt: Date | null
+  status: CaseStatus | null
   assignedTo: EmployeeBasics | null
 }
 
@@ -103,11 +111,12 @@ export interface StudentCaseInput {
   assignedTo: string | null
 }
 
-export interface StudentCase extends Omit<StudentCaseInput, 'assignedTo'> {
-  id: string
-  studentId: string
-  assignedTo: EmployeeBasics | null
-}
+export type StudentCase = StudentCaseInput &
+  CaseStatusInput & {
+    id: string
+    studentId: string
+    assignedTo: EmployeeBasics | null
+  }
 
 export const apiPostStudentCase = (
   studentId: string,
@@ -132,39 +141,6 @@ export const apiPutStudentCase = (
     openedAt: formatISO(data.openedAt, { representation: 'date' })
   }
   return apiClient.put(`/students/${studentId}/cases/${caseId}`, body)
-}
-
-export const caseEventTypes = [
-  'NOTE',
-  'EXPLANATION_REQUEST',
-  'EDUCATION_SUSPENSION_APPLICATION_RECEIVED',
-  'EDUCATION_SUSPENSION_GRANTED',
-  'EDUCATION_SUSPENSION_DENIED',
-  'CHILD_PROTECTION_NOTICE',
-  'HEARING_LETTER',
-  'HEARING',
-  'DIRECTED_TO_SCHOOL_TUVA',
-  'DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TUVA',
-  'DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TELMA'
-] as const
-
-export type CaseEventType = (typeof caseEventTypes)[number]
-
-export const caseEventTypeNames: Record<CaseEventType, string> = {
-  NOTE: 'Muistiinpano',
-  EXPLANATION_REQUEST: 'Selvityspyyntö',
-  EDUCATION_SUSPENSION_APPLICATION_RECEIVED:
-    'Keskeytyshakemus saapunut asuinkuntaan',
-  EDUCATION_SUSPENSION_GRANTED: 'Määräaikainen keskeytys myönnetty',
-  EDUCATION_SUSPENSION_DENIED: 'Keskeytyshakemus hylätty',
-  CHILD_PROTECTION_NOTICE: 'Lastensuojeluilmoitus',
-  HEARING_LETTER: 'Kuulemiskirje',
-  HEARING: 'Kuuleminen',
-  DIRECTED_TO_SCHOOL_TUVA: 'Osoitus - Yleisoppilaitoksen tuva',
-  DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TUVA:
-    'Osoitus - Erityisoppilaitoksen tuva',
-  DIRECTED_TO_SCHOOL_SPECIAL_EDUCATION_TELMA:
-    'Osoitus - Erityisoppilaitoksen telma'
 }
 
 export interface CaseEventInput {
@@ -231,3 +207,32 @@ export const apiPutCaseEvent = (
 
 export const apiDeleteCaseEvent = (caseEventId: string): Promise<void> =>
   apiClient.delete(`/case-events/${caseEventId}`)
+
+export type FinishedInfo =
+  | {
+      reason: Exclude<CaseFinishedReason, 'BEGAN_STUDIES'>
+      startedAtSchool: null
+    }
+  | {
+      reason: 'BEGAN_STUDIES'
+      startedAtSchool: SchoolType
+    }
+
+export type CaseStatusInput =
+  | {
+      status: Exclude<CaseStatus, 'FINISHED'>
+      finishedInfo: null
+    }
+  | {
+      status: 'FINISHED'
+      finishedInfo: FinishedInfo
+    }
+
+export const apiPutStudentCaseStatus = (
+  studentId: string,
+  caseId: string,
+  data: CaseStatusInput
+): Promise<void> => {
+  const body: JsonOf<CaseStatusInput> = data
+  return apiClient.put(`/students/${studentId}/cases/${caseId}/status`, body)
+}

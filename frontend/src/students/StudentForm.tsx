@@ -152,19 +152,19 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       </RowOfInputs>
       <RowOfInputs $gapSize="L">
         <LabeledInputM>
-          <Label>Etunimi</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.firstName}</span>
-          ) : (
-            <InputField onChange={setFirstName} value={firstName} />
-          )}
-        </LabeledInputM>
-        <LabeledInputM>
           <Label>Sukunimi</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.student.lastName}</span>
           ) : (
             <InputField onChange={setLastName} value={lastName} />
+          )}
+        </LabeledInputM>
+        <LabeledInputM>
+          <Label>Etunimi</Label>
+          {props.mode === 'VIEW' ? (
+            <span>{props.student.firstName}</span>
+          ) : (
+            <InputField onChange={setFirstName} value={firstName} />
           )}
         </LabeledInputM>
       </RowOfInputs>
