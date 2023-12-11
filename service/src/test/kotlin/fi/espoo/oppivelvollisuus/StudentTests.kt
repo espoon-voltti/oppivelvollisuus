@@ -3,6 +3,7 @@ package fi.espoo.oppivelvollisuus
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
@@ -58,7 +59,8 @@ class StudentTests : FullApplicationTest() {
                     firstName = "Testi",
                     lastName = "Testilä",
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName)
+                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    status = CaseStatus.TODO
                 )
             ),
             actual = controller.getStudents()
@@ -86,7 +88,9 @@ class StudentTests : FullApplicationTest() {
                     id = studentCase.id,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName)
+                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    status = CaseStatus.TODO,
+                    finishedInfo = null
                 ),
                 studentCase
             )
@@ -121,7 +125,8 @@ class StudentTests : FullApplicationTest() {
                     firstName = "Testi",
                     lastName = "Testilä",
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = null
+                    assignedTo = null,
+                    status = CaseStatus.TODO
                 )
             ),
             actual = controller.getStudents()
@@ -149,7 +154,9 @@ class StudentTests : FullApplicationTest() {
                     id = studentCase.id,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = null
+                    assignedTo = null,
+                    status = CaseStatus.TODO,
+                    finishedInfo = null
                 ),
                 studentCase
             )

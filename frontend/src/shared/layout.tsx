@@ -13,10 +13,18 @@ export const FlexRow = styled.div`
   align-items: center;
 `
 
-export const FlexColWithGaps = styled(FlexCol)<{ $gapSize?: 's' | 'm' | 'L' }>`
+export const FlexColWithGaps = styled(FlexCol)<{
+  $gapSize?: 's' | 'm' | 'L' | 'XL'
+}>`
   > * {
     margin-bottom: ${(p) =>
-      p.$gapSize === 'L' ? '32px' : p.$gapSize === 'm' ? '16px' : '8px'};
+      p.$gapSize === 'XL'
+        ? '64px'
+        : p.$gapSize === 'L'
+          ? '32px'
+          : p.$gapSize === 'm'
+            ? '16px'
+            : '8px'};
 
     &:last-child {
       margin-bottom: 0;
@@ -24,10 +32,18 @@ export const FlexColWithGaps = styled(FlexCol)<{ $gapSize?: 's' | 'm' | 'L' }>`
   }
 `
 
-export const FlexRowWithGaps = styled(FlexRow)<{ $gapSize?: 's' | 'm' | 'L' }>`
+export const FlexRowWithGaps = styled(FlexRow)<{
+  $gapSize?: 's' | 'm' | 'L' | 'XL'
+}>`
   > * {
     margin-right: ${(p) =>
-      p.$gapSize === 'L' ? '32px' : p.$gapSize === 'm' ? '16px' : '8px'};
+      p.$gapSize === 'XL'
+        ? '64px'
+        : p.$gapSize === 'L'
+          ? '32px'
+          : p.$gapSize === 'm'
+            ? '16px'
+            : '8px'};
 
     &:last-child {
       margin-right: 0;

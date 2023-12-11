@@ -45,24 +45,25 @@ data class StudentSummary(
     val firstName: String,
     val lastName: String,
     val openedAt: LocalDate?,
+    val status: CaseStatus?,
     @Nested("assignedTo") val assignedTo: UserBasics?
 )
 
 fun Handle.getStudentSummaries(): List<StudentSummary> = createQuery(
 """
-SELECT s.id, s.first_name, s.last_name, sc.opened_at, 
+SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status,
     assignee.id AS assigned_to_id, 
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
 FROM students s
 LEFT JOIN LATERAL (
-    SELECT opened_at, assigned_to
+    SELECT opened_at, assigned_to, status
     FROM student_cases
     WHERE student_id = s.id
-    ORDER BY opened_at DESC
+    ORDER BY status != 'FINISHED' DESC, opened_at DESC
     LIMIT 1
 ) sc ON true
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
-ORDER BY opened_at DESC, first_name, last_name
+ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
 )
     .mapTo<StudentSummary>()

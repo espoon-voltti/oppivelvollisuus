@@ -82,6 +82,18 @@ class AppController {
         }
     }
 
+    @PutMapping("/students/{studentId}/cases/{id}/status")
+    fun updateStudentCaseStatus(
+        user: AuthenticatedUser,
+        @PathVariable studentId: UUID,
+        @PathVariable id: UUID,
+        @RequestBody body: CaseStatusInput
+    ) {
+        jdbi.inTransactionUnchecked { tx ->
+            tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
+        }
+    }
+
     @PostMapping("/student-cases/{studentCaseId}/case-events")
     fun createCaseEvent(
         user: AuthenticatedUser,

@@ -17,13 +17,8 @@ import {
 import { colors } from '../shared/theme'
 import { Label } from '../shared/typography'
 
-import {
-  CaseEvent,
-  CaseEventInput,
-  caseEventTypeNames,
-  CaseEventType,
-  caseEventTypes
-} from './api'
+import { CaseEvent, CaseEventInput } from './api'
+import { CaseEventType, caseEventTypeNames, caseEventTypes } from './enums'
 
 interface CreateProps {
   mode: 'CREATE'

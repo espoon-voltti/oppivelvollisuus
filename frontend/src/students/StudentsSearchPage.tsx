@@ -12,6 +12,7 @@ import {
 } from '../shared/layout'
 import { Label } from '../shared/typography'
 
+import { StatusChip } from './StatusChip'
 import { apiGetStudents, StudentSummary } from './api'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
@@ -45,8 +46,9 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <Table>
                 <thead>
                   <tr>
-                    <th>Nimi</th>
                     <th>Ilmoitettu</th>
+                    <th>Nimi</th>
+                    <th>Tila</th>
                     <th>Ohjaaja</th>
                   </tr>
                 </thead>
@@ -54,14 +56,21 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                   {studentsResponse.map((student) => (
                     <tr key={student.id}>
                       <td>
+                        {student.openedAt ? formatDate(student.openedAt) : '-'}
+                      </td>
+                      <td>
                         <Link to={`/oppivelvolliset/${student.id}`}>
-                          {student.firstName} {student.lastName}
+                          {student.lastName} {student.firstName}
                         </Link>
                       </td>
                       <td>
-                        {student.openedAt ? formatDate(student.openedAt) : '-'}
+                        {student.status ? (
+                          <StatusChip status={student.status} />
+                        ) : (
+                          <span>Ei ilmoitusta</span>
+                        )}
                       </td>
-                      <td>{student.assignedTo?.name ?? ''}</td>
+                      <td>{student.assignedTo?.name ?? 'Ei ohjaajaa'}</td>
                     </tr>
                   ))}
                 </tbody>
