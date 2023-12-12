@@ -51,7 +51,9 @@ class StudentTests : FullApplicationTest() {
                     dateOfBirth = LocalDate.of(2008, 1, 17),
                     phone = "1234567",
                     email = "a@a.com",
-                    address = "Katu 1"
+                    address = "Katu 1",
+                    guardianInfo = "Huoltaja",
+                    supportContactsInfo = "Joku muu"
                 ),
                 studentCase = StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 7),
@@ -84,7 +86,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
-                address = "Katu 1"
+                address = "Katu 1",
+                guardianInfo = "Huoltaja",
+                supportContactsInfo = "Joku muu"
             ),
             studentResponse.student
         )
@@ -117,7 +121,9 @@ class StudentTests : FullApplicationTest() {
                     dateOfBirth = null,
                     phone = "",
                     email = "",
-                    address = ""
+                    address = "",
+                    guardianInfo = "",
+                    supportContactsInfo = ""
                 ),
                 studentCase = StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 7),
@@ -150,7 +156,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = null,
                 phone = "",
                 email = "",
-                address = ""
+                address = "",
+                guardianInfo = "",
+                supportContactsInfo = ""
             ),
             studentResponse.student
         )
@@ -185,7 +193,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
-                address = "Katu 1"
+                address = "Katu 1",
+                guardianInfo = "Huoltaja",
+                supportContactsInfo = "Opo"
             )
         )
 
@@ -200,7 +210,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
-                address = "Katu 1"
+                address = "Katu 1",
+                guardianInfo = "Huoltaja",
+                supportContactsInfo = "Opo"
             ),
             studentResponse.student
         )

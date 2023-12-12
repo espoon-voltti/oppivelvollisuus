@@ -22,7 +22,7 @@ export const StatusChip = React.memo(function StatusChip({
       $textColor={
         status === 'FINISHED' ? colors.grayscale.g70 : colors.grayscale.g0
       }
-      style={{width: '180px', textAlign: 'center'}}
+      style={{ width: '180px', textAlign: 'center' }}
     >
       {caseStatusNames[status]}
     </StaticChip>
