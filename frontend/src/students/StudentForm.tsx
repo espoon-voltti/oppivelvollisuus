@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
+import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
 import {
   GroupOfInputRows,
   LabeledInputFull,
@@ -10,7 +11,7 @@ import {
   LabeledInputS,
   RowOfInputs
 } from '../shared/layout'
-import { Label } from '../shared/typography'
+import { H3, Label } from '../shared/typography'
 
 import { StudentDetails, StudentInput } from './api'
 
@@ -53,8 +54,14 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   const [email, setEmail] = useState(
     props.mode === 'CREATE' ? '' : props.student.email
   )
-  const [address, setAdress] = useState(
+  const [address, setAddress] = useState(
     props.mode === 'CREATE' ? '' : props.student.address
+  )
+  const [guardianInfo, setGuardianInfo] = useState(
+    props.mode === 'CREATE' ? '' : props.student.guardianInfo
+  )
+  const [supportContactsInfo, setSupportContactsInfo] = useState(
+    props.mode === 'CREATE' ? '' : props.student.supportContactsInfo
   )
 
   useEffect(() => {
@@ -86,7 +93,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               : null,
             phone: phone.trim(),
             email: email.trim(),
-            address: address.trim()
+            address: address.trim(),
+            guardianInfo,
+            supportContactsInfo
           }
         : null,
     [
@@ -98,7 +107,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       dateOfBirth,
       phone,
       email,
-      address
+      address,
+      guardianInfo,
+      supportContactsInfo
     ]
   )
 
@@ -190,7 +201,31 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           {props.mode === 'VIEW' ? (
             <span>{props.student.address || '-'}</span>
           ) : (
-            <InputField onChange={setAdress} value={address} />
+            <InputField onChange={setAddress} value={address} />
+          )}
+        </LabeledInputFull>
+      </RowOfInputs>
+      <H3>Huoltajat ja tukiverkosto</H3>
+      <RowOfInputs $gapSize="L">
+        <LabeledInputFull>
+          <Label>Huoltajat ja yhteystiedot</Label>
+          {props.mode === 'VIEW' ? (
+            <ReadOnlyTextArea text={props.student.guardianInfo || '-'} />
+          ) : (
+            <TextArea onChange={setGuardianInfo} value={guardianInfo} />
+          )}
+        </LabeledInputFull>
+      </RowOfInputs>
+      <RowOfInputs $gapSize="L">
+        <LabeledInputFull>
+          <Label>Muut yhteyshenkilöt ja yhteystiedot</Label>
+          {props.mode === 'VIEW' ? (
+            <ReadOnlyTextArea text={props.student.supportContactsInfo || '-'} />
+          ) : (
+            <TextArea
+              onChange={setSupportContactsInfo}
+              value={supportContactsInfo}
+            />
           )}
         </LabeledInputFull>
       </RowOfInputs>

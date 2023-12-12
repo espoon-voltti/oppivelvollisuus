@@ -16,7 +16,9 @@ val minimalStudentTestInput = StudentInput(
     dateOfBirth = null,
     phone = "",
     email = "",
-    address = ""
+    address = "",
+    guardianInfo = "",
+    supportContactsInfo = ""
 )
 val minimalStudentCaseTestInput = StudentCaseInput(
     openedAt = LocalDate.of(2023, 12, 7),

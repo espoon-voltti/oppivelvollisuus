@@ -1,5 +1,7 @@
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import styled from 'styled-components'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { SelectionChip } from '../shared/Chip'
@@ -24,8 +26,6 @@ import { useDebouncedState } from '../shared/useDebouncedState'
 import { StatusChip } from './StatusChip'
 import { apiGetStudents, StudentSummary } from './api'
 import { CaseStatus, caseStatuses, caseStatusNames } from './enums'
-import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
-import styled from 'styled-components'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
@@ -58,7 +58,11 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
           <FlexLeftRight style={{ alignItems: 'flex-start' }}>
             <LabeledInputL>
               <Label>Haku nimellä tai hetulla</Label>
-              <InputField value={query} onChange={setQuery} icon={faMagnifyingGlass} />
+              <InputField
+                value={query}
+                onChange={setQuery}
+                icon={faMagnifyingGlass}
+              />
             </LabeledInputL>
             <FlexRight>
               <AddButton
@@ -125,7 +129,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                     <Th style={{ width: '160px' }}>Ilmoitettu</Th>
                     <Th style={{ width: '40%' }}>Nimi</Th>
                     <Th>Ohjaaja</Th>
-                    <Th style={{ width: '200px' }}/>
+                    <Th style={{ width: '200px' }} />
                   </tr>
                 </thead>
                 <tbody>

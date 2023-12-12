@@ -20,6 +20,8 @@ export interface StudentInput {
   phone: string
   email: string
   address: string
+  guardianInfo: string
+  supportContactsInfo: string
 }
 
 export interface StudentAndCaseInput {
@@ -96,6 +98,8 @@ export interface StudentDetails {
   phone: string
   email: string
   address: string
+  guardianInfo: string
+  supportContactsInfo: string
 }
 
 export interface StudentResponse {
