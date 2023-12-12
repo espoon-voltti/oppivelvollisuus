@@ -35,10 +35,14 @@ class AppController {
         }
     }
 
-    @GetMapping("/students")
-    fun getStudents(): List<StudentSummary> {
+    @PostMapping("/students/search")
+    fun getStudents(@RequestBody body: StudentSearchParams): List<StudentSummary> {
         return jdbi.inTransactionUnchecked { tx ->
-            tx.getStudentSummaries()
+            tx.getStudentSummaries(
+                params = body.copy(
+                    query = body.query.takeIf { !it.isNullOrBlank() }
+                )
+            )
         }
     }
 

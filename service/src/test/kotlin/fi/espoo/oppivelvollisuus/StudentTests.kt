@@ -8,6 +8,7 @@ import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
+import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
 import fi.espoo.oppivelvollisuus.domain.StudentSummary
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
@@ -26,9 +27,15 @@ class StudentTests : FullApplicationTest() {
     @Autowired
     lateinit var controller: AppController
 
+    val emptySearch = StudentSearchParams(
+        query = "",
+        statuses = CaseStatus.entries,
+        assignedTo = null
+    )
+
     @Test
     fun `get empty list of students`() {
-        assertEquals(emptyList(), controller.getStudents())
+        assertEquals(emptyList(), controller.getStudents(emptySearch))
     }
 
     @Test
@@ -63,7 +70,7 @@ class StudentTests : FullApplicationTest() {
                     status = CaseStatus.TODO
                 )
             ),
-            actual = controller.getStudents()
+            actual = controller.getStudents(emptySearch)
         )
 
         val studentResponse = controller.getStudent(studentId)
@@ -129,7 +136,7 @@ class StudentTests : FullApplicationTest() {
                     status = CaseStatus.TODO
                 )
             ),
-            actual = controller.getStudents()
+            actual = controller.getStudents(emptySearch)
         )
 
         val studentResponse = controller.getStudent(studentId)
@@ -216,7 +223,7 @@ class StudentTests : FullApplicationTest() {
             )
         )
 
-        assertEquals(2, controller.getStudents().size)
+        assertEquals(2, controller.getStudents(emptySearch).size)
     }
 
     @Test
@@ -243,7 +250,7 @@ class StudentTests : FullApplicationTest() {
         }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents().size)
+        assertEquals(1, controller.getStudents(emptySearch).size)
     }
 
     @Test
@@ -270,6 +277,6 @@ class StudentTests : FullApplicationTest() {
         }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents().size)
+        assertEquals(1, controller.getStudents(emptySearch).size)
     }
 }

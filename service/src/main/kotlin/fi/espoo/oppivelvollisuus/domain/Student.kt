@@ -49,7 +49,13 @@ data class StudentSummary(
     @Nested("assignedTo") val assignedTo: UserBasics?
 )
 
-fun Handle.getStudentSummaries(): List<StudentSummary> = createQuery(
+data class StudentSearchParams(
+    val query: String?,
+    val statuses: List<CaseStatus>,
+    val assignedTo: UUID?
+)
+
+fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> = createQuery(
 """
 SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status,
     assignee.id AS assigned_to_id, 
@@ -63,9 +69,23 @@ LEFT JOIN LATERAL (
     LIMIT 1
 ) sc ON true
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
+WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
+${if (params.assignedTo != null) "AND assignee.id = :assignedTo" else ""}
+${if (params.query != null) {
+        """
+    AND (lower(s.first_name) LIKE :query || '%' OR 
+        lower(s.last_name) LIKE :query || '%' OR 
+        lower(s.first_name || ' ' || s.last_name) LIKE :query || '%' OR
+        lower(s.last_name || ' ' || s.first_name) LIKE :query || '%' OR
+        lower(s.ssn) LIKE :query || '%')
+"""
+    } else {
+        ""
+    }}
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
 )
+    .bindKotlin(params.copy(query = params.query?.trim()?.lowercase()))
     .mapTo<StudentSummary>()
     .list()
 

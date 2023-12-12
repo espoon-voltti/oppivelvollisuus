@@ -67,15 +67,17 @@ export const VerticalGap = styled.div<{ $size?: 's' | 'm' | 'L' }>`
 `
 
 export const Table = styled.table`
-  td {
-    border-top: 1px solid #888;
-    border-right: 1px solid #888;
+  border-collapse: collapse;
+
+  tr {
+    border-bottom: 1px solid #888;
     padding: 8px;
   }
 
-  td:last-child {
-    border-right: none;
+  td, th {
+    padding: 8px;
   }
+
 `
 
 export const PageContainer = styled.div`
