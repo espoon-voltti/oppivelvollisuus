@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
+import { SelectionChip } from '../shared/Chip'
 import { AddButton } from '../shared/buttons/AddButton'
 import { formatDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
@@ -23,6 +24,8 @@ import { useDebouncedState } from '../shared/useDebouncedState'
 import { StatusChip } from './StatusChip'
 import { apiGetStudents, StudentSummary } from './api'
 import { CaseStatus, caseStatuses, caseStatusNames } from './enums'
+import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
+import styled from 'styled-components'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
@@ -55,7 +58,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
           <FlexLeftRight style={{ alignItems: 'flex-start' }}>
             <LabeledInputL>
               <Label>Haku nimellä tai hetulla</Label>
-              <InputField value={query} onChange={setQuery} />
+              <InputField value={query} onChange={setQuery} icon={faMagnifyingGlass} />
             </LabeledInputL>
             <FlexRight>
               <AddButton
@@ -70,27 +73,20 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
           >
             <FlexColWithGaps>
               <Label>Näytettävät tilat</Label>
-              <FlexRowWithGaps $gapSize="L">
+              <FlexRowWithGaps $gapSize="s">
                 {caseStatuses.map((status) => (
-                  <FlexRowWithGaps key={status}>
-                    <input
-                      id={`status-filter-${status}`}
-                      type="checkbox"
-                      checked={statuses.includes(status)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setStatuses((prev) => [...prev, status])
-                        } else {
-                          setStatuses((prev) =>
-                            prev.filter((s) => s !== status)
-                          )
-                        }
-                      }}
-                    />
-                    <label htmlFor={`status-filter-${status}`}>
-                      {caseStatusNames[status]}
-                    </label>
-                  </FlexRowWithGaps>
+                  <SelectionChip
+                    key={status}
+                    text={caseStatusNames[status]}
+                    selected={statuses.includes(status)}
+                    onChange={(checked) => {
+                      if (checked) {
+                        setStatuses((prev) => [...prev, status])
+                      } else {
+                        setStatuses((prev) => prev.filter((s) => s !== status))
+                      }
+                    }}
+                  />
                 ))}
               </FlexRowWithGaps>
             </FlexColWithGaps>
@@ -126,10 +122,10 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <Table style={{ width: '100%' }}>
                 <thead>
                   <tr>
-                    <th style={{ width: '128px' }}>Ilmoitettu</th>
-                    <th style={{ width: '40%' }}>Nimi</th>
-                    <th>Ohjaaja</th>
-                    <th style={{ width: '200px' }}>Tila</th>
+                    <Th style={{ width: '160px' }}>Ilmoitettu</Th>
+                    <Th style={{ width: '40%' }}>Nimi</Th>
+                    <Th>Ohjaaja</Th>
+                    <Th style={{ width: '200px' }}/>
                   </tr>
                 </thead>
                 <tbody>
@@ -144,7 +140,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                         </Link>
                       </td>
                       <td>{student.assignedTo?.name ?? 'Ei ohjaajaa'}</td>
-                      <td align="center">
+                      <td>
                         {student.status ? (
                           <StatusChip status={student.status} />
                         ) : (
@@ -161,3 +157,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
     </PageContainer>
   )
 })
+
+const Th = styled.th`
+  text-align: left;
+`
