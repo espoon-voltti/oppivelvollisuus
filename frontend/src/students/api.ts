@@ -18,6 +18,7 @@ export interface StudentInput {
   ssn: string
   firstName: string
   lastName: string
+  language: string
   dateOfBirth: Date | null
   phone: string
   email: string
@@ -90,18 +91,8 @@ export const apiGetStudents = (
     )
 }
 
-export interface StudentDetails {
+export interface StudentDetails extends StudentInput {
   id: string
-  valpasLink: string
-  ssn: string
-  firstName: string
-  lastName: string
-  dateOfBirth: Date | null
-  phone: string
-  email: string
-  address: string
-  guardianInfo: string
-  supportContactsInfo: string
 }
 
 export interface StudentResponse {
