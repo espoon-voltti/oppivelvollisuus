@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
@@ -75,11 +75,15 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
           $gapSize="s"
           style={{ width: '200px', flexShrink: '0' }}
         >
-          <strong>{formatDate(props.caseEvent.date)}</strong>
+          <TypeLabel $type={props.caseEvent.type}>
+            {formatDate(props.caseEvent.date)}
+          </TypeLabel>
           <span>{props.caseEvent.created.name}</span>
         </FlexColWithGaps>
         <FlexColWithGaps $gapSize="s" style={{ flexGrow: '1' }}>
-          <strong>{caseEventTypeNames[props.caseEvent.type]}</strong>
+          <TypeLabel $type={props.caseEvent.type}>
+            {caseEventTypeNames[props.caseEvent.type]}
+          </TypeLabel>
           <ReadOnlyTextArea text={props.caseEvent.notes} />
           {props.caseEvent.updated && (
             <UpdaterInfo>
@@ -118,3 +122,12 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
     </GroupOfInputRows>
   )
 })
+
+const TypeLabel = styled.span<{ $type: CaseEventType }>`
+  ${(p) =>
+    p.$type !== 'NOTE'
+      ? css`
+          font-weight: 600;
+        `
+      : ''}
+`
