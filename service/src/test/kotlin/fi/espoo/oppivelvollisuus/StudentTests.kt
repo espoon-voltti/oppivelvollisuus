@@ -3,6 +3,7 @@ package fi.espoo.oppivelvollisuus
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
@@ -10,6 +11,7 @@ import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
 import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
 import fi.espoo.oppivelvollisuus.domain.StudentSummary
+import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
 import minimalStudentTestInput
@@ -57,7 +59,11 @@ class StudentTests : FullApplicationTest() {
                 ),
                 studentCase = StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = testUser.id
+                    assignedTo = testUser.id,
+                    source = CaseSource.VALPAS_NOTICE,
+                    sourceValpas = ValpasNotifier.PERUSOPETUS,
+                    sourceOther = null,
+                    sourceContact = "Espoon ala-aste"
                 )
             )
         )
@@ -101,7 +107,11 @@ class StudentTests : FullApplicationTest() {
                     openedAt = LocalDate.of(2023, 12, 7),
                     assignedTo = UserBasics(id = testUser.id, name = testUserName),
                     status = CaseStatus.TODO,
-                    finishedInfo = null
+                    finishedInfo = null,
+                    source = CaseSource.VALPAS_NOTICE,
+                    sourceValpas = ValpasNotifier.PERUSOPETUS,
+                    sourceOther = null,
+                    sourceContact = "Espoon ala-aste"
                 ),
                 studentCase
             )
@@ -127,7 +137,11 @@ class StudentTests : FullApplicationTest() {
                 ),
                 studentCase = StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = null
+                    assignedTo = null,
+                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                    sourceValpas = null,
+                    sourceOther = null,
+                    sourceContact = ""
                 )
             )
         )
@@ -171,7 +185,11 @@ class StudentTests : FullApplicationTest() {
                     openedAt = LocalDate.of(2023, 12, 7),
                     assignedTo = null,
                     status = CaseStatus.TODO,
-                    finishedInfo = null
+                    finishedInfo = null,
+                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                    sourceValpas = null,
+                    sourceOther = null,
+                    sourceContact = ""
                 ),
                 studentCase
             )

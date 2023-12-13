@@ -100,6 +100,15 @@ export const BottomActionBar = styled.div`
   right: 0;
   margin-top: 16px;
 `
+export const FixedWidthDivS = styled.div`
+  width: 128px;
+`
+export const FixedWidthDivM = styled.div`
+  width: 256px;
+`
+export const FixedWidthDivL = styled.div`
+  width: 400px;
+`
 export const LabeledInputS = styled(FlexColWithGaps)`
   width: 128px;
 `

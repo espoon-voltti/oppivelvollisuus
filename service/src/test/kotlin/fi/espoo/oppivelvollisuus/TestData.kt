@@ -1,5 +1,6 @@
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
 import java.time.LocalDate
@@ -22,7 +23,11 @@ val minimalStudentTestInput = StudentInput(
 )
 val minimalStudentCaseTestInput = StudentCaseInput(
     openedAt = LocalDate.of(2023, 12, 7),
-    assignedTo = null
+    assignedTo = null,
+    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+    sourceValpas = null,
+    sourceOther = null,
+    sourceContact = ""
 )
 val minimalStudentAndCaseTestInput = AppController.StudentAndCaseInput(
     student = minimalStudentTestInput,

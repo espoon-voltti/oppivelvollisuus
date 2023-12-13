@@ -5,12 +5,15 @@ import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
+import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
 import fi.espoo.oppivelvollisuus.domain.FinishedInfo
+import fi.espoo.oppivelvollisuus.domain.OtherNotifier
 import fi.espoo.oppivelvollisuus.domain.SchoolType
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
+import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException
@@ -45,7 +48,11 @@ class StudentCaseTests : FullApplicationTest() {
             studentId,
             StudentCaseInput(
                 openedAt = LocalDate.of(2023, 12, 8),
-                assignedTo = testUser.id
+                assignedTo = testUser.id,
+                source = CaseSource.OTHER,
+                sourceValpas = null,
+                sourceOther = OtherNotifier.LASTENSUOJELU,
+                sourceContact = "Lastensuojelu, Minna Mikkola"
             )
         )
 
@@ -59,7 +66,11 @@ class StudentCaseTests : FullApplicationTest() {
                     openedAt = LocalDate.of(2023, 12, 8),
                     assignedTo = UserBasics(id = testUser.id, name = testUserName),
                     status = CaseStatus.TODO,
-                    finishedInfo = null
+                    finishedInfo = null,
+                    source = CaseSource.OTHER,
+                    sourceValpas = null,
+                    sourceOther = OtherNotifier.LASTENSUOJELU,
+                    sourceContact = "Lastensuojelu, Minna Mikkola"
                 ),
                 studentCase
             )
@@ -83,7 +94,11 @@ class StudentCaseTests : FullApplicationTest() {
             studentId,
             StudentCaseInput(
                 openedAt = LocalDate.of(2023, 12, 8),
-                assignedTo = null
+                assignedTo = null,
+                source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                sourceValpas = null,
+                sourceOther = null,
+                sourceContact = ""
             )
         )
 
@@ -97,7 +112,11 @@ class StudentCaseTests : FullApplicationTest() {
                     openedAt = LocalDate.of(2023, 12, 8),
                     assignedTo = null,
                     status = CaseStatus.TODO,
-                    finishedInfo = null
+                    finishedInfo = null,
+                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                    sourceValpas = null,
+                    sourceOther = null,
+                    sourceContact = ""
                 ),
                 studentCase
             )
@@ -109,7 +128,11 @@ class StudentCaseTests : FullApplicationTest() {
             caseId,
             StudentCaseInput(
                 openedAt = LocalDate.of(2023, 12, 9),
-                assignedTo = testUser.id
+                assignedTo = testUser.id,
+                source = CaseSource.VALPAS_NOTICE,
+                sourceValpas = ValpasNotifier.LUKIO,
+                sourceOther = null,
+                sourceContact = "Espoon lukio"
             )
         )
 
@@ -123,7 +146,11 @@ class StudentCaseTests : FullApplicationTest() {
                     openedAt = LocalDate.of(2023, 12, 9),
                     assignedTo = UserBasics(id = testUser.id, name = testUserName),
                     status = CaseStatus.TODO,
-                    finishedInfo = null
+                    finishedInfo = null,
+                    source = CaseSource.VALPAS_NOTICE,
+                    sourceValpas = ValpasNotifier.LUKIO,
+                    sourceOther = null,
+                    sourceContact = "Espoon lukio"
                 ),
                 studentCase
             )
@@ -138,10 +165,7 @@ class StudentCaseTests : FullApplicationTest() {
             controller.createStudentCase(
                 testUser,
                 studentId,
-                StudentCaseInput(
-                    openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = null
-                )
+                minimalStudentCaseTestInput
             )
         }.also { assertTrue { it.isUniqueConstraintViolation() } }
     }
