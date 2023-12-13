@@ -1,7 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
 import { Select } from '../shared/form/Select'
-import { FlexColWithGaps, LabeledInputL, LabeledInputM } from '../shared/layout'
+import {
+  FlexRowWithGaps,
+  LabeledInputFull,
+  LabeledInputM
+} from '../shared/layout'
 import { Label } from '../shared/typography'
 
 import { StatusChip } from './StatusChip'
@@ -69,19 +73,22 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
 
   if (props.mode === 'VIEW') {
     return (
-      <FlexColWithGaps $gapSize="m">
-        <StatusChip status={props.studentCase.status} />
+      <FlexRowWithGaps $gapSize="L">
+        <LabeledInputM>
+          <Label>Tila</Label>
+          <StatusChip status={props.studentCase.status} />
+        </LabeledInputM>
         {props.studentCase.status === 'FINISHED' && (
-          <LabeledInputL>
+          <LabeledInputM>
             <Label>Syy ohjauksen päättymiselle</Label>
             <span>
               {caseFinishedReasonNames[props.studentCase.finishedInfo.reason]}
             </span>
-          </LabeledInputL>
+          </LabeledInputM>
         )}
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason === 'BEGAN_STUDIES' && (
-            <LabeledInputL>
+            <LabeledInputM>
               <Label>Oppilaitos</Label>
               <span>
                 {
@@ -90,15 +97,16 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
                   ]
                 }
               </span>
-            </LabeledInputL>
+            </LabeledInputM>
           )}
-      </FlexColWithGaps>
+      </FlexRowWithGaps>
     )
   }
 
   return (
-    <FlexColWithGaps $gapSize="m">
+    <FlexRowWithGaps $gapSize="L">
       <LabeledInputM>
+        <Label>Tila</Label>
         {props.studentCase.status === 'FINISHED' && props.activeCaseExists ? (
           <StatusChip status={props.studentCase.status} />
         ) : (
@@ -111,7 +119,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         )}
       </LabeledInputM>
       {status === 'FINISHED' && (
-        <LabeledInputL>
+        <LabeledInputM>
           <Label>Syy ohjauksen päättymiselle</Label>
           <Select<CaseFinishedReason>
             items={caseFinishedReasons}
@@ -120,10 +128,10 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             placeholder="Valitse"
             onChange={(item) => setFinishedReason(item)}
           />
-        </LabeledInputL>
+        </LabeledInputM>
       )}
       {status === 'FINISHED' && finishedReason === 'BEGAN_STUDIES' && (
-        <LabeledInputL>
+        <LabeledInputFull>
           <Label>Oppilaitos</Label>
           <Select<SchoolType>
             items={schoolTypes}
@@ -132,8 +140,8 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             placeholder="Valitse"
             onChange={(item) => setStartedAtSchool(item)}
           />
-        </LabeledInputL>
+        </LabeledInputFull>
       )}
-    </FlexColWithGaps>
+    </FlexRowWithGaps>
   )
 })

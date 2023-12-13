@@ -5,14 +5,27 @@ import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
 import { Select } from '../shared/form/Select'
 import {
+  FixedWidthDivM,
   GroupOfInputRows,
+  LabeledInputFull,
   LabeledInputM,
   LabeledInputS,
   RowOfInputs
 } from '../shared/layout'
 import { Label } from '../shared/typography'
 
-import { StudentCase, StudentCaseInput } from './api'
+import { CaseSourceFields, StudentCase, StudentCaseInput } from './api'
+import {
+  CaseSource,
+  caseSourceNames,
+  caseSources,
+  OtherNotifier,
+  otherNotifierNames,
+  otherNotifiers,
+  ValpasNotifier,
+  valpasNotifierNames,
+  valpasNotifiers
+} from './enums'
 
 interface SharedProps {
   employees: EmployeeUser[]
@@ -47,17 +60,55 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
           (e) => e.id === props.studentCase.assignedTo?.id
         ) ?? null
   )
+  const [source, setSource] = useState<CaseSource | null>(
+    props.mode === 'CREATE' ? null : props.studentCase.source
+  )
+  const [sourceValpas, setSourceValpas] = useState<ValpasNotifier | null>(
+    props.mode === 'CREATE' ? null : props.studentCase.sourceValpas
+  )
+  const [sourceOther, setSourceOther] = useState<OtherNotifier | null>(
+    props.mode === 'CREATE' ? null : props.studentCase.sourceOther
+  )
+  const [sourceContact, setSourceContact] = useState<string>(
+    props.mode === 'CREATE' ? '' : props.studentCase.sourceContact
+  )
 
   const validInput: StudentCaseInput | null = useMemo(() => {
     const openedAtDate = parseDate(openedAt.trim())
 
     if (!openedAtDate) return null
+    if (!source) return null
+
+    const validSourceFields: CaseSourceFields | null =
+      source === 'VALPAS_NOTICE' && sourceValpas
+        ? {
+            source,
+            sourceValpas,
+            sourceOther: null
+          }
+        : source === 'VALPAS_AUTOMATIC_CHECK'
+          ? {
+              source,
+              sourceValpas: null,
+              sourceOther: null
+            }
+          : source === 'OTHER' && sourceOther
+            ? {
+                source,
+                sourceValpas: null,
+                sourceOther
+              }
+            : null
+
+    if (!validSourceFields) return null
 
     return {
       openedAt: openedAtDate,
-      assignedTo: assignedTo?.id ?? null
+      assignedTo: assignedTo?.id ?? null,
+      ...validSourceFields,
+      sourceContact
     }
-  }, [openedAt, assignedTo])
+  }, [openedAt, assignedTo, source, sourceValpas, sourceOther, sourceContact])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -68,14 +119,16 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   return (
     <GroupOfInputRows $gapSize="m">
       <RowOfInputs $gapSize="L">
-        <LabeledInputS>
-          <Label>Ilmoitettu</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{formatDate(props.studentCase.openedAt)}</span>
-          ) : (
-            <InputField onChange={setOpenedAt} value={openedAt} />
-          )}
-        </LabeledInputS>
+        <FixedWidthDivM>
+          <LabeledInputS>
+            <Label>Ilmoitettu</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{formatDate(props.studentCase.openedAt)}</span>
+            ) : (
+              <InputField onChange={setOpenedAt} value={openedAt} />
+            )}
+          </LabeledInputS>
+        </FixedWidthDivM>
         <LabeledInputM>
           <Label>Ohjaaja</Label>
           {props.mode === 'VIEW' ? (
@@ -91,6 +144,70 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             />
           )}
         </LabeledInputM>
+      </RowOfInputs>
+      <RowOfInputs $gapSize="L">
+        <LabeledInputM>
+          <Label>Mitä kautta tieto saapunut?</Label>
+          {props.mode === 'VIEW' ? (
+            <span>{caseSourceNames[props.studentCase.source]}</span>
+          ) : (
+            <Select<CaseSource>
+              items={caseSources}
+              selectedItem={source}
+              placeholder="Valitse"
+              getItemLabel={(item) => caseSourceNames[item]}
+              onChange={(item) => setSource(item)}
+            />
+          )}
+        </LabeledInputM>
+        <LabeledInputM>
+          <Label>Ilmoittanut taho</Label>
+          {props.mode === 'VIEW' ? (
+            <>
+              {props.studentCase.source === 'VALPAS_NOTICE' && (
+                <span>
+                  {valpasNotifierNames[props.studentCase.sourceValpas]}
+                </span>
+              )}
+              {props.studentCase.source === 'VALPAS_AUTOMATIC_CHECK' && (
+                <span>-</span>
+              )}
+              {props.studentCase.source === 'OTHER' && (
+                <span>{otherNotifierNames[props.studentCase.sourceOther]}</span>
+              )}
+            </>
+          ) : (
+            <>
+              {source === 'VALPAS_NOTICE' && (
+                <Select<ValpasNotifier>
+                  items={valpasNotifiers}
+                  selectedItem={sourceValpas}
+                  placeholder="Valitse"
+                  getItemLabel={(item) => valpasNotifierNames[item]}
+                  onChange={(item) => setSourceValpas(item)}
+                />
+              )}
+              {source === 'VALPAS_AUTOMATIC_CHECK' && <span>-</span>}
+              {source === 'OTHER' && (
+                <Select<OtherNotifier>
+                  items={otherNotifiers}
+                  selectedItem={sourceOther}
+                  placeholder="Valitse"
+                  getItemLabel={(item) => otherNotifierNames[item]}
+                  onChange={(item) => setSourceOther(item)}
+                />
+              )}
+            </>
+          )}
+        </LabeledInputM>
+        <LabeledInputFull>
+          <Label>Ilmoitettajan yhteystiedot</Label>
+          {props.mode === 'VIEW' ? (
+            <span>{props.studentCase.sourceContact || '-'}</span>
+          ) : (
+            <InputField onChange={setSourceContact} value={sourceContact} />
+          )}
+        </LabeledInputFull>
       </RowOfInputs>
     </GroupOfInputRows>
   )

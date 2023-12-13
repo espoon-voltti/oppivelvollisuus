@@ -18,10 +18,52 @@ enum class CaseStatus {
     FINISHED
 }
 
+enum class CaseSource {
+    VALPAS_NOTICE,
+    VALPAS_AUTOMATIC_CHECK,
+    OTHER
+}
+
+enum class ValpasNotifier {
+    PERUSOPETUS,
+    AIKUISTEN_PERUSOPETUS,
+    AMMATILLINEN_PERUSTUTKINTO,
+    LUKIO,
+    AIKUISLUKIO,
+    YLEISOPPILAITOKSEN_TUVA,
+    AMMATILLISEN_ERITYISOPPILAITOKSEN_PERUSTUTKINTO,
+    AMMATILLISEN_ERITYISOPPILAITOKSEN_TUVA,
+    TELMA,
+    TOINEN_ASUINKUNTA
+}
+
+enum class OtherNotifier {
+    ENNAKOIVA_OHJAUS,
+    TYOLLISYYSPALVELUT,
+    OMA_YHTEYDENOTTO,
+    OHJAAMOTALO,
+    OPPILAITOS,
+    LASTENSUOJELU,
+    OTHER
+}
+
 data class StudentCaseInput(
     val openedAt: LocalDate,
-    val assignedTo: UUID?
-)
+    val assignedTo: UUID?,
+    val source: CaseSource,
+    val sourceValpas: ValpasNotifier?,
+    val sourceOther: OtherNotifier?,
+    val sourceContact: String
+) {
+    init {
+        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
+            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
+        }
+        if ((source == CaseSource.OTHER) != (sourceOther != null)) {
+            throw BadRequest("sourceOther must be present if and only if source is OTHER")
+        }
+    }
+}
 
 fun Handle.insertStudentCase(
     studentId: UUID,
@@ -30,8 +72,8 @@ fun Handle.insertStudentCase(
 ): UUID {
     return createUpdate(
         """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status) 
-                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO')
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact) 
+                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact)
                 RETURNING id
             """
     )
@@ -85,11 +127,21 @@ data class StudentCase(
     val openedAt: LocalDate,
     @Nested("assignedTo") val assignedTo: UserBasics?,
     val status: CaseStatus,
-    @Nested("finishedInfo") val finishedInfo: FinishedInfo?
+    @Nested("finishedInfo") val finishedInfo: FinishedInfo?,
+    val source: CaseSource,
+    val sourceValpas: ValpasNotifier?,
+    val sourceOther: OtherNotifier?,
+    val sourceContact: String
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
             throw BadRequest("finishedInfo must be present if and only if status is FINISHED")
+        }
+        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
+            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
+        }
+        if ((source == CaseSource.OTHER) != (sourceOther != null)) {
+            throw BadRequest("sourceOther must be present if and only if source is OTHER")
         }
     }
 }
@@ -102,7 +154,11 @@ SELECT
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
     sc.status,
     sc.finished_reason AS finished_info_reason,
-    sc.started_at_school AS finished_info_started_at_school
+    sc.started_at_school AS finished_info_started_at_school,
+    sc.source,
+    sc.source_valpas,
+    sc.source_other,
+    sc.source_contact
 FROM student_cases sc
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
@@ -121,7 +177,11 @@ SET
     updated = now(),
     updated_by = :user,
     opened_at = :openedAt,
-    assigned_to = :assignedTo
+    assigned_to = :assignedTo,
+    source = :source,
+    source_valpas = :sourceValpas,
+    source_other = :sourceOther,
+    source_contact = :sourceContact
 WHERE id = :id AND student_id = :studentId
 """
     )

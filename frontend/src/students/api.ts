@@ -8,7 +8,9 @@ import {
   CaseEventType,
   CaseFinishedReason,
   CaseStatus,
-  SchoolType
+  OtherNotifier,
+  SchoolType,
+  ValpasNotifier
 } from './enums'
 
 export interface StudentInput {
@@ -122,10 +124,28 @@ export const apiGetStudent = (id: string): Promise<StudentResponse> =>
     }))
   }))
 
-export interface StudentCaseInput {
+export type CaseSourceFields =
+  | {
+      source: 'VALPAS_NOTICE'
+      sourceValpas: ValpasNotifier
+      sourceOther: null
+    }
+  | {
+      source: 'VALPAS_AUTOMATIC_CHECK'
+      sourceValpas: null
+      sourceOther: null
+    }
+  | {
+      source: 'OTHER'
+      sourceValpas: null
+      sourceOther: OtherNotifier
+    }
+
+export type StudentCaseInput = {
   openedAt: Date
   assignedTo: string | null
-}
+  sourceContact: string
+} & CaseSourceFields
 
 export type StudentCase = StudentCaseInput &
   CaseStatusInput & {
