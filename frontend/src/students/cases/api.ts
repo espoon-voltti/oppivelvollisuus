@@ -4,7 +4,13 @@ import { apiClient } from '../../api-client'
 import { EmployeeBasics } from '../../employees/api'
 import { JsonOf } from '../../shared/api-utils'
 
-import { OtherNotifier, ValpasNotifier } from './enums'
+import {
+  CaseBackgroundReason,
+  NotInSchoolReason,
+  OtherNotifier,
+  SchoolBackground,
+  ValpasNotifier
+} from './enums'
 import { CaseStatusInput } from './status/api'
 
 export const apiPostStudentCase = (
@@ -43,6 +49,9 @@ export type StudentCaseInput = {
   openedAt: Date
   assignedTo: string | null
   sourceContact: string
+  schoolBackground: SchoolBackground[]
+  caseBackgroundReasons: CaseBackgroundReason[]
+  notInSchoolReason: NotInSchoolReason | null
 } & CaseSourceFields
 
 export type CaseSourceFields =

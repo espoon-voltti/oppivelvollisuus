@@ -3,9 +3,12 @@ package fi.espoo.oppivelvollisuus
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.Gender
+import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
+import fi.espoo.oppivelvollisuus.domain.SchoolBackground
 import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
@@ -67,7 +70,10 @@ class StudentTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_NOTICE,
                     sourceValpas = ValpasNotifier.PERUSOPETUS,
                     sourceOther = null,
-                    sourceContact = "Espoon ala-aste"
+                    sourceContact = "Espoon ala-aste",
+                    schoolBackground = SchoolBackground.entries.toSet(),
+                    caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
                 )
             )
         )
@@ -118,7 +124,10 @@ class StudentTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_NOTICE,
                     sourceValpas = ValpasNotifier.PERUSOPETUS,
                     sourceOther = null,
-                    sourceContact = "Espoon ala-aste"
+                    sourceContact = "Espoon ala-aste",
+                    schoolBackground = SchoolBackground.entries.toSet(),
+                    caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
                 ),
                 studentCase
             )
@@ -151,7 +160,10 @@ class StudentTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                     sourceValpas = null,
                     sourceOther = null,
-                    sourceContact = ""
+                    sourceContact = "",
+                    schoolBackground = emptySet(),
+                    caseBackgroundReasons = emptySet(),
+                    notInSchoolReason = null
                 )
             )
         )
@@ -202,7 +214,10 @@ class StudentTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                     sourceValpas = null,
                     sourceOther = null,
-                    sourceContact = ""
+                    sourceContact = "",
+                    schoolBackground = emptySet(),
+                    caseBackgroundReasons = emptySet(),
+                    notInSchoolReason = null
                 ),
                 studentCase
             )

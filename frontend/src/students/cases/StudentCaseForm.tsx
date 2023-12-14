@@ -2,10 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { EmployeeUser } from '../../employees/api'
 import { formatDate, parseDate } from '../../shared/dates'
+import { Checkbox } from '../../shared/form/Checkbox'
 import { InputField } from '../../shared/form/InputField'
 import { Select } from '../../shared/form/Select'
 import {
   FixedWidthDiv,
+  FlexColWithGaps,
   GroupOfInputRows,
   LabeledInput,
   RowOfInputs
@@ -14,12 +16,20 @@ import { Label } from '../../shared/typography'
 
 import { CaseSourceFields, StudentCase, StudentCaseInput } from './api'
 import {
+  CaseBackgroundReason,
+  caseBackgroundReasonNames, caseBackgroundReasonValues,
   CaseSource,
   caseSourceNames,
   caseSources,
+  NotInSchoolReason,
+  notInSchoolReasonNames,
+  notInSchoolReasons,
   OtherNotifier,
   otherNotifierNames,
   otherNotifiers,
+  SchoolBackground,
+  schoolBackgroundNames,
+  schoolBackgrounds,
   ValpasNotifier,
   valpasNotifierNames,
   valpasNotifiers
@@ -70,6 +80,16 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   const [sourceContact, setSourceContact] = useState<string>(
     props.mode === 'CREATE' ? '' : props.studentCase.sourceContact
   )
+  const [schoolBackground, setSchoolBackground] = useState<SchoolBackground[]>(
+    props.mode === 'CREATE' ? [] : props.studentCase.schoolBackground
+  )
+  const [caseBackgroundReasons, setCaseBackgroundReasons] = useState<
+    CaseBackgroundReason[]
+  >(props.mode === 'CREATE' ? [] : props.studentCase.caseBackgroundReasons)
+  const [notInSchoolReason, setNotInSchoolReason] =
+    useState<NotInSchoolReason | null>(
+      props.mode === 'CREATE' ? null : props.studentCase.notInSchoolReason
+    )
 
   const validInput: StudentCaseInput | null = useMemo(() => {
     const openedAtDate = parseDate(openedAt.trim())
@@ -104,9 +124,22 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
       openedAt: openedAtDate,
       assignedTo: assignedTo?.id ?? null,
       ...validSourceFields,
-      sourceContact
+      sourceContact,
+      schoolBackground,
+      caseBackgroundReasons,
+      notInSchoolReason
     }
-  }, [openedAt, assignedTo, source, sourceValpas, sourceOther, sourceContact])
+  }, [
+    openedAt,
+    assignedTo,
+    source,
+    sourceValpas,
+    sourceOther,
+    sourceContact,
+    schoolBackground,
+    caseBackgroundReasons,
+    notInSchoolReason
+  ])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -117,8 +150,8 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   return (
     <GroupOfInputRows>
       <RowOfInputs>
-        <FixedWidthDiv $cols={6}>
-          <LabeledInput $cols={3}>
+        <FixedWidthDiv $cols={4}>
+          <LabeledInput $cols={2}>
             <Label>Ilmoitettu</Label>
             {props.mode === 'VIEW' ? (
               <span>{formatDate(props.studentCase.openedAt)}</span>
@@ -144,7 +177,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
         </LabeledInput>
       </RowOfInputs>
       <RowOfInputs>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           <Label>Mitä kautta tieto saapunut?</Label>
           {props.mode === 'VIEW' ? (
             <span>{caseSourceNames[props.studentCase.source]}</span>
@@ -158,7 +191,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             />
           )}
         </LabeledInput>
-        <LabeledInput $cols={3}>
+        <LabeledInput $cols={4}>
           {props.mode === 'VIEW' ? (
             <>
               {(props.studentCase.source === 'VALPAS_NOTICE' ||
@@ -200,12 +233,98 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             </>
           )}
         </LabeledInput>
-        <LabeledInput>
+        <LabeledInput $cols={4}>
           <Label>Ilmoitettajan yhteystiedot</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.sourceContact || '-'}</span>
           ) : (
             <InputField onChange={setSourceContact} value={sourceContact} />
+          )}
+        </LabeledInput>
+      </RowOfInputs>
+      <RowOfInputs>
+        <LabeledInput $cols={4}>
+          <Label>Opiskelutausta</Label>
+          {props.mode === 'VIEW' ? (
+            <span>
+              {schoolBackground.length > 0
+                ? (
+                  <ul>
+                    {schoolBackground.map(opt => (
+                      <li key={opt}>{schoolBackgroundNames[opt]}</li>
+                    ))}
+                  </ul>
+                )
+                : '-'}
+            </span>
+          ) : (
+            <FlexColWithGaps>
+              {schoolBackgrounds.map((option) => (
+                <Checkbox
+                  key={option}
+                  label={schoolBackgroundNames[option]}
+                  checked={schoolBackground.includes(option)}
+                  onChange={(checked) =>
+                    setSchoolBackground((prev) =>
+                      checked
+                        ? [...prev, option]
+                        : prev.filter((sb) => sb !== option)
+                    )
+                  }
+                />
+              ))}
+            </FlexColWithGaps>
+          )}
+        </LabeledInput>
+        <LabeledInput $cols={4}>
+          <Label>Ilmoituksen taustasyyt</Label>
+          {props.mode === 'VIEW' ? (
+            <span>
+              {caseBackgroundReasons.length > 0
+                ? (
+                  <ul>
+                    {caseBackgroundReasons.map(opt => (
+                      <li key={opt}>{caseBackgroundReasonNames[opt]}</li>
+                    ))}
+                  </ul>
+                )
+                : '-'}
+            </span>
+          ) : (
+            <FlexColWithGaps>
+              {caseBackgroundReasonValues.map((option) => (
+                <Checkbox
+                  key={option}
+                  label={caseBackgroundReasonNames[option]}
+                  checked={caseBackgroundReasons.includes(option)}
+                  onChange={(checked) =>
+                    setCaseBackgroundReasons((prev) =>
+                      checked
+                        ? [...prev, option]
+                        : prev.filter((cbr) => cbr !== option)
+                    )
+                  }
+                />
+              ))}
+            </FlexColWithGaps>
+          )}
+        </LabeledInput>
+        <LabeledInput $cols={4}>
+          <Label>Ei suorita oppivelvollisuutta, koska</Label>
+          {props.mode === 'VIEW' ? (
+            <span>
+              {props.studentCase.notInSchoolReason
+                ? notInSchoolReasonNames[props.studentCase.notInSchoolReason]
+                : '-'}
+            </span>
+          ) : (
+            <Select<NotInSchoolReason>
+              items={notInSchoolReasons}
+              selectedItem={notInSchoolReason}
+              placeholder="Valitse"
+              getItemLabel={(item) => notInSchoolReasonNames[item]}
+              onChange={(item) => setNotInSchoolReason(item)}
+            />
           )}
         </LabeledInput>
       </RowOfInputs>

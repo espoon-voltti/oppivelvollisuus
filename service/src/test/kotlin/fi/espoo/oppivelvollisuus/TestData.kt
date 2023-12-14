@@ -30,7 +30,10 @@ val minimalStudentCaseTestInput = StudentCaseInput(
     source = CaseSource.VALPAS_AUTOMATIC_CHECK,
     sourceValpas = null,
     sourceOther = null,
-    sourceContact = ""
+    sourceContact = "",
+    schoolBackground = emptySet(),
+    caseBackgroundReasons = emptySet(),
+    notInSchoolReason = null
 )
 val minimalStudentAndCaseTestInput = AppController.StudentAndCaseInput(
     student = minimalStudentTestInput,

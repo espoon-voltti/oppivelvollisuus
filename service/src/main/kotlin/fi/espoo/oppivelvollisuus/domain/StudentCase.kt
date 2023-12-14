@@ -47,13 +47,54 @@ enum class OtherNotifier {
     OTHER
 }
 
+enum class SchoolBackground {
+    PERUSKOULUN_PAATTOTODISTUS,
+    EI_PERUSKOULUN_PAATTOTODISTUSTA,
+    KESKEYTYNEET_TOISEN_ASTEEN_OPINNOT,
+    KESKEYTYNEET_NIVELVAIHEEN_OPINNOT,
+    VSOP_PERUSKOULUSSA,
+    YLEINEN_TUKI_PERUSKOULUSSA,
+    TEHOSTETTU_TUKI_PERUSKOULUSSA,
+    ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA,
+    YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA,
+    PERUSOPETUKSEEN_VALMISTAVA_OPISKELU_SUOMESSA,
+    ULKOMAILLA_SUORITETUT_PERUSOPETUSTA_VASTAAVAT_OPINNOT
+}
+
+enum class CaseBackgroundReason {
+    MOTIVAATION_PUUTE,
+    VAARA_ALAVALINTA,
+    OPPIMISVAIKEUDET,
+    ELAMANHALLINNAN_HAASTEET,
+    POISSAOLOT,
+    TERVEYDELLISET_PERUSTEET,
+    MUUTTO_PAIKKAKUNNALLE,
+    MUUTTO_ULKOMAILLE,
+    MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA,
+    MUU_SYY
+}
+
+enum class NotInSchoolReason {
+    KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+    EI_OLE_VASTAANOTTANUT_SAAMAANSA_OPISKELUPAIKKAA,
+    EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA,
+    EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
+    EI_OPISKELUPAIKKAA_YLEISOPPILAITOKSESSA,
+    EI_OPISKELUPAIKKAA_AMMATILLISESSA_ERITYISOPPILAITOKSESSA,
+    EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI,
+    OPINNOT_ULKOMAILLA
+}
+
 data class StudentCaseInput(
     val openedAt: LocalDate,
     val assignedTo: UUID?,
     val source: CaseSource,
     val sourceValpas: ValpasNotifier?,
     val sourceOther: OtherNotifier?,
-    val sourceContact: String
+    val sourceContact: String,
+    val schoolBackground: Set<SchoolBackground>,
+    val caseBackgroundReasons: Set<CaseBackgroundReason>,
+    val notInSchoolReason: NotInSchoolReason?
 ) {
     init {
         if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
@@ -72,8 +113,8 @@ fun Handle.insertStudentCase(
 ): UUID {
     return createUpdate(
         """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact) 
-                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact)
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
+                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
     )
@@ -131,7 +172,10 @@ data class StudentCase(
     val source: CaseSource,
     val sourceValpas: ValpasNotifier?,
     val sourceOther: OtherNotifier?,
-    val sourceContact: String
+    val sourceContact: String,
+    val schoolBackground: Set<SchoolBackground>,
+    val caseBackgroundReasons: Set<CaseBackgroundReason>,
+    val notInSchoolReason: NotInSchoolReason?
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
@@ -158,7 +202,10 @@ SELECT
     sc.source,
     sc.source_valpas,
     sc.source_other,
-    sc.source_contact
+    sc.source_contact,
+    sc.school_background,
+    sc.case_background_reasons,
+    sc.not_in_school_reason
 FROM student_cases sc
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
@@ -181,7 +228,10 @@ SET
     source = :source,
     source_valpas = :sourceValpas,
     source_other = :sourceOther,
-    source_contact = :sourceContact
+    source_contact = :sourceContact,
+    school_background = :schoolBackground::school_background[],
+    case_background_reasons = :caseBackgroundReasons::case_background_reason[], 
+    not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
     )
