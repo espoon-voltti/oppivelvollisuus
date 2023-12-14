@@ -6,7 +6,6 @@ import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { Button } from '../shared/buttons/Button'
 import { InlineButton } from '../shared/buttons/InlineButton'
 import {
-  BottomActionBar,
   FlexRight,
   PageContainer,
   SectionContainer,
@@ -14,9 +13,10 @@ import {
 } from '../shared/layout'
 import { H2, H3 } from '../shared/typography'
 
-import { StudentCaseForm } from './StudentCaseForm'
 import { StudentForm } from './StudentForm'
-import { apiPostStudent, StudentCaseInput, StudentInput } from './api'
+import { apiPostStudent, StudentInput } from './api'
+import { StudentCaseForm } from './cases/StudentCaseForm'
+import { StudentCaseInput } from './cases/api'
 
 export const CreateStudentPage = React.memo(function CreateStudentPage() {
   const navigate = useNavigate()
@@ -34,60 +34,59 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
   if (!employees) return <div>...</div>
 
   return (
-    <div>
-      <PageContainer>
-        <SectionContainer>
-          <InlineButton
-            text="Takaisin"
-            icon={faChevronLeft}
-            onClick={() => navigate('/oppivelvolliset')}
-          />
-          <VerticalGap $size="m" />
-          <H2>Uusi oppivelvollinen</H2>
-        </SectionContainer>
-
+    <PageContainer>
+      <SectionContainer>
+        <InlineButton
+          text="Takaisin"
+          icon={faChevronLeft}
+          onClick={() => navigate('/oppivelvolliset')}
+        />
         <VerticalGap $size="m" />
+        <H2>Uusi oppivelvollinen</H2>
+      </SectionContainer>
 
-        <SectionContainer>
-          <H3>Oppivelvollisen tiedot</H3>
-          <VerticalGap $size="m" />
-          <StudentForm mode="CREATE" onChange={setStudentInput} />
-        </SectionContainer>
+      <VerticalGap $size="m" />
 
+      <SectionContainer>
+        <H3>Oppivelvollisen tiedot</H3>
         <VerticalGap $size="m" />
+        <StudentForm mode="CREATE" onChange={setStudentInput} />
+      </SectionContainer>
 
-        <SectionContainer>
-          <H3>Ilmoituksen tiedot</H3>
-          <VerticalGap $size="m" />
-          <StudentCaseForm
-            mode="CREATE"
-            onChange={setStudentCaseInput}
-            employees={employees}
+      <VerticalGap $size="m" />
+
+      <SectionContainer>
+        <H3>Ilmoituksen tiedot</H3>
+        <VerticalGap $size="m" />
+        <StudentCaseForm
+          mode="CREATE"
+          onChange={setStudentCaseInput}
+          employees={employees}
+        />
+      </SectionContainer>
+
+      <VerticalGap $size="m" />
+
+      <SectionContainer>
+        <FlexRight>
+          <Button
+            text="Tallenna"
+            primary
+            disabled={submitting || !studentInput || !studentCaseInput}
+            onClick={() => {
+              if (!studentInput || !studentCaseInput) return
+
+              setSubmitting(true)
+              apiPostStudent({
+                student: studentInput,
+                studentCase: studentCaseInput
+              })
+                .then((id) => navigate(`/oppivelvolliset/${id}`))
+                .catch(() => setSubmitting(false))
+            }}
           />
-        </SectionContainer>
-      </PageContainer>
-      <BottomActionBar>
-        <PageContainer>
-          <FlexRight>
-            <Button
-              text="Tallenna"
-              primary
-              disabled={submitting || !studentInput || !studentCaseInput}
-              onClick={() => {
-                if (!studentInput || !studentCaseInput) return
-
-                setSubmitting(true)
-                apiPostStudent({
-                  student: studentInput,
-                  studentCase: studentCaseInput
-                })
-                  .then((id) => navigate(`/oppivelvolliset/${id}`))
-                  .catch(() => setSubmitting(false))
-              }}
-            />
-          </FlexRight>
-        </PageContainer>
-      </BottomActionBar>
-    </div>
+        </FlexRight>
+      </SectionContainer>
+    </PageContainer>
   )
 })

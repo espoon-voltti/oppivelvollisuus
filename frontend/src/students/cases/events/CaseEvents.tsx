@@ -3,10 +3,14 @@ import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import React, { Fragment, useCallback, useEffect, useState } from 'react'
 
-import { IconButton } from '../shared/buttons/IconButton'
-import { InlineButton } from '../shared/buttons/InlineButton'
-import { FlexColWithGaps, FlexRowWithGaps, Separator } from '../shared/layout'
-import { H4 } from '../shared/typography'
+import { IconButton } from '../../../shared/buttons/IconButton'
+import { InlineButton } from '../../../shared/buttons/InlineButton'
+import {
+  FlexColWithGaps,
+  FlexRowWithGaps,
+  Separator
+} from '../../../shared/layout'
+import { H4 } from '../../../shared/typography'
 
 import { CaseEventForm } from './CaseEventForm'
 import {

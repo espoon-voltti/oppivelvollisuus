@@ -5,6 +5,7 @@ import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
+import fi.espoo.oppivelvollisuus.domain.Gender
 import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
@@ -54,7 +55,9 @@ class StudentTests : FullApplicationTest() {
                     dateOfBirth = LocalDate.of(2008, 1, 17),
                     phone = "1234567",
                     email = "a@a.com",
+                    gender = Gender.FEMALE,
                     address = "Katu 1",
+                    municipalityInFinland = false,
                     guardianInfo = "Huoltaja",
                     supportContactsInfo = "Joku muu"
                 ),
@@ -94,7 +97,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
+                gender = Gender.FEMALE,
                 address = "Katu 1",
+                municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Joku muu"
             ),
@@ -134,7 +139,9 @@ class StudentTests : FullApplicationTest() {
                     dateOfBirth = null,
                     phone = "",
                     email = "",
+                    gender = null,
                     address = "",
+                    municipalityInFinland = true,
                     guardianInfo = "",
                     supportContactsInfo = ""
                 ),
@@ -174,7 +181,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = null,
                 phone = "",
                 email = "",
+                gender = null,
                 address = "",
+                municipalityInFinland = true,
                 guardianInfo = "",
                 supportContactsInfo = ""
             ),
@@ -216,7 +225,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
+                gender = Gender.MALE,
                 address = "Katu 1",
+                municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo"
             )
@@ -234,7 +245,9 @@ class StudentTests : FullApplicationTest() {
                 dateOfBirth = LocalDate.of(2008, 1, 17),
                 phone = "1234567",
                 email = "a@a.com",
+                gender = Gender.MALE,
                 address = "Katu 1",
+                municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo"
             ),

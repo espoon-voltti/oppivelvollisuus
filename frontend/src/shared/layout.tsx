@@ -1,4 +1,4 @@
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { colors } from './theme'
 
@@ -61,9 +61,15 @@ export const FlexRight = styled(FlexRow)`
   align-items: center;
 `
 
-export const VerticalGap = styled.div<{ $size?: 's' | 'm' | 'L' }>`
+export const VerticalGap = styled.div<{ $size?: 's' | 'm' | 'L' | 'XL' }>`
   height: ${(p) =>
-    p.$size === 'L' ? '32px' : p.$size === 'm' ? '16px' : '8px'};
+    p.$size === 'XL'
+      ? '62px'
+      : p.$size === 'L'
+        ? '32px'
+        : p.$size === 'm'
+          ? '16px'
+          : '8px'};
 `
 
 export const Table = styled.table`
@@ -80,54 +86,67 @@ export const Table = styled.table`
   }
 `
 
+export const pageWidth = '1152px'
+
 export const PageContainer = styled.div`
-  max-width: 1024px;
+  max-width: ${pageWidth};
   margin: 0 auto;
 `
 
+export const sectionPadding = '16px'
+
 export const SectionContainer = styled.div<{ $minHeight?: string }>`
-  padding: 16px;
+  padding: ${sectionPadding};
   background-color: #fff;
   ${(p) => (p.$minHeight ? `min-height: ${p.$minHeight};` : '')}
 `
 
-export const BottomActionBar = styled.div`
-  padding: 16px;
-  background-color: #fff;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin-top: 16px;
-`
-export const FixedWidthDivS = styled.div`
-  width: 128px;
-`
-export const FixedWidthDivM = styled.div`
-  width: 256px;
-`
-export const FixedWidthDivL = styled.div`
-  width: 400px;
-`
-export const LabeledInputS = styled(FlexColWithGaps)`
-  width: 128px;
-`
-export const LabeledInputM = styled(FlexColWithGaps)`
-  width: 256px;
-`
-export const LabeledInputL = styled(FlexColWithGaps)`
-  width: 400px;
-`
-export const LabeledInputFull = styled(FlexColWithGaps)`
-  flex-grow: 1;
-`
-export const RowOfInputs = styled(FlexRowWithGaps)`
-  align-items: flex-start;
-  flex-grow: 1;
+const widthByTwelveColLayout = (columns: number) => css`
+  width: calc(${columns / 12} * (${pageWidth} - 2 * ${sectionPadding}) - 32px);
+  flex-grow: 0;
+  flex-shrink: 0;
 `
 
-export const GroupOfInputRows = styled(FlexColWithGaps)`
+export const FixedWidthDiv = styled.div<{ $cols: number }>`
+  ${(p) => widthByTwelveColLayout(p.$cols)}
+`
+
+export const LabeledInput = styled(FlexColWithGaps)<{ $cols?: number }>`
+  ${(p) =>
+    p.$cols
+      ? widthByTwelveColLayout(p.$cols)
+      : css`
+          flex-grow: 1;
+        `}
+`
+
+export const RowOfInputs = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   flex-grow: 1;
+
+  > * {
+    margin-right: 32px;
+
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+`
+
+export const GroupOfInputRows = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  > * {
+    margin-bottom: 32px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
 `
 
 export const Separator = styled.div`
