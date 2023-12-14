@@ -3,20 +3,22 @@ import React, { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 
 import { formatDate, parseDate } from '../shared/dates'
+import { Checkbox } from '../shared/form/Checkbox'
 import { InputField } from '../shared/form/InputField'
 import { Select } from '../shared/form/Select'
 import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
 import {
+  FlexCol,
   FlexRowWithGaps,
   GroupOfInputRows,
-  LabeledInputFull,
-  LabeledInputM,
-  LabeledInputS,
-  RowOfInputs
+  LabeledInput,
+  RowOfInputs,
+  VerticalGap
 } from '../shared/layout'
 import { H3, Label } from '../shared/typography'
 
 import { StudentDetails, StudentInput } from './api'
+import { Gender, genderNames, genders } from './enums'
 
 interface CreateProps {
   mode: 'CREATE'
@@ -37,9 +39,11 @@ const commonLanguages = [
   'suomi',
   'ruotsi',
   'englanti',
+  'viro',
   'venäjä',
   'ukraina',
-  'somali'
+  'arabia',
+  'somalia'
 ]
 
 export const StudentForm = React.memo(function StudentForm(props: Props) {
@@ -69,8 +73,14 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   const [email, setEmail] = useState(
     props.mode === 'CREATE' ? '' : props.student.email
   )
+  const [gender, setGender] = useState(
+    props.mode === 'CREATE' ? null : props.student.gender
+  )
   const [address, setAddress] = useState(
     props.mode === 'CREATE' ? '' : props.student.address
+  )
+  const [municipalityInFinland, setMunicipalityInFinland] = useState(
+    props.mode === 'CREATE' ? true : props.student.municipalityInFinland
   )
   const [guardianInfo, setGuardianInfo] = useState(
     props.mode === 'CREATE' ? '' : props.student.guardianInfo
@@ -109,7 +119,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               : null,
             phone: phone.trim(),
             email: email.trim(),
+            gender,
             address: address.trim(),
+            municipalityInFinland,
             guardianInfo,
             supportContactsInfo
           }
@@ -124,7 +136,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       dateOfBirth,
       phone,
       email,
+      gender,
       address,
+      municipalityInFinland,
       guardianInfo,
       supportContactsInfo
     ]
@@ -137,139 +151,174 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   }, [validInput, props])
 
   return (
-    <GroupOfInputRows $gapSize="L">
-      <RowOfInputs $gapSize="m">
-        <LabeledInputS>
-          <Label>Hetu</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.ssn || '-'}</span>
-          ) : (
-            <InputField onChange={setSsn} value={ssn} />
-          )}
-        </LabeledInputS>
-        <LabeledInputS>
-          <Label>Syntymäaika</Label>
-          {props.mode === 'VIEW' ? (
-            <span>
-              {props.student.dateOfBirth
-                ? formatDate(props.student.dateOfBirth)
-                : '-'}
-            </span>
-          ) : (
-            <InputField onChange={setDateOfBirth} value={dateOfBirth} />
-          )}
-        </LabeledInputS>
-        <LabeledInputFull>
-          <Label>Valpas linkki</Label>
-          {props.mode === 'VIEW' ? (
-            props.student.valpasLink ? (
-              <a
-                href={props.student.valpasLink}
-                target="_blank"
-                rel="noreferrer"
-              >
-                {props.student.valpasLink}
-              </a>
+    <FlexCol>
+      <GroupOfInputRows>
+        <RowOfInputs>
+          <LabeledInput $cols={2}>
+            <Label>Hetu</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.ssn || '-'}</span>
             ) : (
-              <span>-</span>
-            )
-          ) : (
-            <InputField onChange={setValpasLink} value={valpasLink} />
-          )}
-        </LabeledInputFull>
-      </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputM>
-          <Label>Sukunimi</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.lastName}</span>
-          ) : (
-            <InputField onChange={setLastName} value={lastName} />
-          )}
-        </LabeledInputM>
-        <LabeledInputM>
-          <Label>Etunimi</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.firstName}</span>
-          ) : (
-            <InputField onChange={setFirstName} value={firstName} />
-          )}
-        </LabeledInputM>
-        {props.mode === 'VIEW' ? (
-          <LabeledInputS>
-            <Label>Kieli</Label>
-            <span>{props.student.language}</span>
-          </LabeledInputS>
-        ) : (
-          <LabeledInputFull>
-            <Label>Kieli</Label>
-            <FlexRowWithGaps>
-              <InputField onChange={setLanguage} value={language} />
-              <InputQuickFill>
-                <Select<string>
-                  items={commonLanguages}
-                  selectedItem={null}
-                  placeholder=" "
-                  onChange={(item) => {
-                    if (item) setLanguage(item)
-                  }}
-                />
-              </InputQuickFill>
-            </FlexRowWithGaps>
-          </LabeledInputFull>
-        )}
-      </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputM>
-          <Label>Puhelinnumero</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.phone || '-'}</span>
-          ) : (
-            <InputField onChange={setPhone} value={phone} />
-          )}
-        </LabeledInputM>
-        <LabeledInputM>
-          <Label>Sähköposti</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.email || '-'}</span>
-          ) : (
-            <InputField onChange={setEmail} value={email} />
-          )}
-        </LabeledInputM>
-        <LabeledInputFull>
-          <Label>Lähiosoite</Label>
-          {props.mode === 'VIEW' ? (
-            <span>{props.student.address || '-'}</span>
-          ) : (
-            <InputField onChange={setAddress} value={address} />
-          )}
-        </LabeledInputFull>
-      </RowOfInputs>
+              <InputField onChange={setSsn} value={ssn} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={2}>
+            <Label>Syntymäaika</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.dateOfBirth
+                  ? formatDate(props.student.dateOfBirth)
+                  : '-'}
+              </span>
+            ) : (
+              <InputField onChange={setDateOfBirth} value={dateOfBirth} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={2}>
+            <Label>Oletettu sukupuoli</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.gender ? genderNames[props.student.gender] : '-'}
+              </span>
+            ) : (
+              <Select<Gender>
+                items={genders}
+                selectedItem={gender}
+                placeholder=" "
+                getItemLabel={(item) => genderNames[item]}
+                onChange={(item) => setGender(item)}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={3}>
+            <Label>Sukunimi</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.lastName}</span>
+            ) : (
+              <InputField onChange={setLastName} value={lastName} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={3}>
+            <Label>Etunimi</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.firstName}</span>
+            ) : (
+              <InputField onChange={setFirstName} value={firstName} />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+        <RowOfInputs>
+          <LabeledInput $cols={2}>
+            <Label>Puhelinnumero</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.phone || '-'}</span>
+            ) : (
+              <InputField onChange={setPhone} value={phone} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={4}>
+            <Label>Sähköposti</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.email || '-'}</span>
+            ) : (
+              <InputField onChange={setEmail} value={email} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={6}>
+            <Label>Valpas linkki</Label>
+            {props.mode === 'VIEW' ? (
+              props.student.valpasLink ? (
+                <a
+                  href={props.student.valpasLink}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {props.student.valpasLink}
+                </a>
+              ) : (
+                <span>-</span>
+              )
+            ) : (
+              <InputField onChange={setValpasLink} value={valpasLink} />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+        <RowOfInputs>
+          <LabeledInput $cols={6}>
+            <Label>Lähiosoite</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.address || '-'}</span>
+            ) : (
+              <InputField onChange={setAddress} value={address} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={3}>
+            <Label>Kotikunta Suomessa</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.municipalityInFinland ? 'Kyllä' : 'Ei'}
+              </span>
+            ) : (
+              <Checkbox
+                label="Kyllä"
+                checked={municipalityInFinland}
+                onChange={setMunicipalityInFinland}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={3}>
+            <Label>Äidinkieli</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.language}</span>
+            ) : (
+              <FlexRowWithGaps>
+                <InputField onChange={setLanguage} value={language} />
+                <InputQuickFill>
+                  <Select<string>
+                    items={commonLanguages}
+                    selectedItem={null}
+                    placeholder=" "
+                    onChange={(item) => {
+                      if (item) setLanguage(item)
+                    }}
+                  />
+                </InputQuickFill>
+              </FlexRowWithGaps>
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+      </GroupOfInputRows>
+
+      <VerticalGap $size="XL" />
+
       <H3>Huoltajat ja tukiverkosto</H3>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputFull>
-          <Label>Huoltajat ja yhteystiedot</Label>
-          {props.mode === 'VIEW' ? (
-            <ReadOnlyTextArea text={props.student.guardianInfo || '-'} />
-          ) : (
-            <TextArea onChange={setGuardianInfo} value={guardianInfo} />
-          )}
-        </LabeledInputFull>
-      </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputFull>
-          <Label>Muut yhteyshenkilöt ja yhteystiedot</Label>
-          {props.mode === 'VIEW' ? (
-            <ReadOnlyTextArea text={props.student.supportContactsInfo || '-'} />
-          ) : (
-            <TextArea
-              onChange={setSupportContactsInfo}
-              value={supportContactsInfo}
-            />
-          )}
-        </LabeledInputFull>
-      </RowOfInputs>
-    </GroupOfInputRows>
+      <VerticalGap $size="m" />
+      <GroupOfInputRows>
+        <RowOfInputs>
+          <LabeledInput $cols={6}>
+            <Label>Huoltajat ja yhteystiedot</Label>
+            {props.mode === 'VIEW' ? (
+              <ReadOnlyTextArea text={props.student.guardianInfo || '-'} />
+            ) : (
+              <TextArea onChange={setGuardianInfo} value={guardianInfo} />
+            )}
+          </LabeledInput>
+          <LabeledInput $cols={6}>
+            <Label>Muut yhteyshenkilöt ja yhteystiedot</Label>
+            {props.mode === 'VIEW' ? (
+              <ReadOnlyTextArea
+                text={props.student.supportContactsInfo || '-'}
+              />
+            ) : (
+              <TextArea
+                onChange={setSupportContactsInfo}
+                value={supportContactsInfo}
+              />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+      </GroupOfInputRows>
+    </FlexCol>
   )
 })
 

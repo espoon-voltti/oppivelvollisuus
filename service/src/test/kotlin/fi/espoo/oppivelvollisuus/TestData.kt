@@ -18,7 +18,9 @@ val minimalStudentTestInput = StudentInput(
     dateOfBirth = null,
     phone = "",
     email = "",
+    gender = null,
     address = "",
+    municipalityInFinland = true,
     guardianInfo = "",
     supportContactsInfo = ""
 )

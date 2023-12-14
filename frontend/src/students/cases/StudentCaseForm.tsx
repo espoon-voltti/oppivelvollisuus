@@ -1,18 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { EmployeeUser } from '../employees/api'
-import { formatDate, parseDate } from '../shared/dates'
-import { InputField } from '../shared/form/InputField'
-import { Select } from '../shared/form/Select'
+import { EmployeeUser } from '../../employees/api'
+import { formatDate, parseDate } from '../../shared/dates'
+import { InputField } from '../../shared/form/InputField'
+import { Select } from '../../shared/form/Select'
 import {
-  FixedWidthDivM,
+  FixedWidthDiv,
   GroupOfInputRows,
-  LabeledInputFull,
-  LabeledInputM,
-  LabeledInputS,
+  LabeledInput,
   RowOfInputs
-} from '../shared/layout'
-import { Label } from '../shared/typography'
+} from '../../shared/layout'
+import { Label } from '../../shared/typography'
 
 import { CaseSourceFields, StudentCase, StudentCaseInput } from './api'
 import {
@@ -117,19 +115,19 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   }, [validInput, props])
 
   return (
-    <GroupOfInputRows $gapSize="m">
-      <RowOfInputs $gapSize="L">
-        <FixedWidthDivM>
-          <LabeledInputS>
+    <GroupOfInputRows>
+      <RowOfInputs>
+        <FixedWidthDiv $cols={6}>
+          <LabeledInput $cols={3}>
             <Label>Ilmoitettu</Label>
             {props.mode === 'VIEW' ? (
               <span>{formatDate(props.studentCase.openedAt)}</span>
             ) : (
               <InputField onChange={setOpenedAt} value={openedAt} />
             )}
-          </LabeledInputS>
-        </FixedWidthDivM>
-        <LabeledInputM>
+          </LabeledInput>
+        </FixedWidthDiv>
+        <LabeledInput $cols={4}>
           <Label>Ohjaaja</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.assignedTo?.name ?? '-'}</span>
@@ -143,10 +141,10 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
               onChange={setAssignedTo}
             />
           )}
-        </LabeledInputM>
+        </LabeledInput>
       </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputM>
+      <RowOfInputs>
+        <LabeledInput $cols={3}>
           <Label>Mitä kautta tieto saapunut?</Label>
           {props.mode === 'VIEW' ? (
             <span>{caseSourceNames[props.studentCase.source]}</span>
@@ -159,18 +157,18 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
               onChange={(item) => setSource(item)}
             />
           )}
-        </LabeledInputM>
-        <LabeledInputM>
-          <Label>Ilmoittanut taho</Label>
+        </LabeledInput>
+        <LabeledInput $cols={3}>
           {props.mode === 'VIEW' ? (
             <>
+              {(props.studentCase.source === 'VALPAS_NOTICE' ||
+                props.studentCase.source === 'OTHER') && (
+                <Label>Ilmoittanut taho</Label>
+              )}
               {props.studentCase.source === 'VALPAS_NOTICE' && (
                 <span>
                   {valpasNotifierNames[props.studentCase.sourceValpas]}
                 </span>
-              )}
-              {props.studentCase.source === 'VALPAS_AUTOMATIC_CHECK' && (
-                <span>-</span>
               )}
               {props.studentCase.source === 'OTHER' && (
                 <span>{otherNotifierNames[props.studentCase.sourceOther]}</span>
@@ -178,6 +176,9 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             </>
           ) : (
             <>
+              {(source === 'VALPAS_NOTICE' || source === 'OTHER') && (
+                <Label>Ilmoittanut taho</Label>
+              )}
               {source === 'VALPAS_NOTICE' && (
                 <Select<ValpasNotifier>
                   items={valpasNotifiers}
@@ -187,7 +188,6 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
                   onChange={(item) => setSourceValpas(item)}
                 />
               )}
-              {source === 'VALPAS_AUTOMATIC_CHECK' && <span>-</span>}
               {source === 'OTHER' && (
                 <Select<OtherNotifier>
                   items={otherNotifiers}
@@ -199,15 +199,15 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
               )}
             </>
           )}
-        </LabeledInputM>
-        <LabeledInputFull>
+        </LabeledInput>
+        <LabeledInput>
           <Label>Ilmoitettajan yhteystiedot</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.sourceContact || '-'}</span>
           ) : (
             <InputField onChange={setSourceContact} value={sourceContact} />
           )}
-        </LabeledInputFull>
+        </LabeledInput>
       </RowOfInputs>
     </GroupOfInputRows>
   )

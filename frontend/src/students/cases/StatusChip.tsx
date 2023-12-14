@@ -1,9 +1,9 @@
 import React from 'react'
 
-import { StaticChip } from '../shared/Chip'
-import { colors } from '../shared/theme'
+import { StaticChip } from '../../shared/Chip'
+import { colors } from '../../shared/theme'
 
-import { CaseStatus, caseStatusNames } from './enums'
+import { CaseStatus, caseStatusNames } from './status/enums'
 
 const chipColors: Record<CaseStatus, string> = {
   TODO: colors.main.m1,

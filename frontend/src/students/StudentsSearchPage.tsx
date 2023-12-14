@@ -14,7 +14,7 @@ import {
   FlexLeftRight,
   FlexRight,
   FlexRowWithGaps,
-  LabeledInputL,
+  LabeledInput,
   PageContainer,
   SectionContainer,
   Table,
@@ -23,9 +23,9 @@ import {
 import { Label } from '../shared/typography'
 import { useDebouncedState } from '../shared/useDebouncedState'
 
-import { StatusChip } from './StatusChip'
 import { apiGetStudents, StudentSummary } from './api'
-import { CaseStatus, caseStatuses, caseStatusNames } from './enums'
+import { StatusChip } from './cases/StatusChip'
+import { CaseStatus, caseStatuses, caseStatusNames } from './cases/status/enums'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
@@ -56,14 +56,14 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
       <SectionContainer $minHeight="600px">
         <FlexColWithGaps $gapSize="m">
           <FlexLeftRight style={{ alignItems: 'flex-start' }}>
-            <LabeledInputL>
+            <LabeledInput $cols={6}>
               <Label>Haku nimellä tai hetulla</Label>
               <InputField
                 value={query}
                 onChange={setQuery}
                 icon={faMagnifyingGlass}
               />
-            </LabeledInputL>
+            </LabeledInput>
             <FlexRight>
               <AddButton
                 text="Lisää oppivelvollinen"
@@ -94,7 +94,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                 ))}
               </FlexRowWithGaps>
             </FlexColWithGaps>
-            <LabeledInputL>
+            <LabeledInput $cols={6}>
               <Label>Ohjaaja</Label>
               {employees ? (
                 <Select<EmployeeUser>
@@ -108,7 +108,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               ) : (
                 <span>...</span>
               )}
-            </LabeledInputL>
+            </LabeledInput>
           </FlexRowWithGaps>
         </FlexColWithGaps>
 

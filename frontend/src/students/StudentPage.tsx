@@ -26,22 +26,23 @@ import {
 import { colors } from '../shared/theme'
 import { H2, H3, H4 } from '../shared/typography'
 
-import { CaseEvents } from './CaseEvents'
-import { CaseStatusForm } from './CaseStatusForm'
-import { StatusChip } from './StatusChip'
-import { StudentCaseForm } from './StudentCaseForm'
 import { StudentForm } from './StudentForm'
 import {
   apiGetStudent,
   apiPutStudent,
   StudentInput,
-  StudentResponse,
-  StudentCaseInput,
+  StudentResponse
+} from './api'
+import { StatusChip } from './cases/StatusChip'
+import { StudentCaseForm } from './cases/StudentCaseForm'
+import {
   apiPostStudentCase,
   apiPutStudentCase,
-  CaseStatusInput,
-  apiPutStudentCaseStatus
-} from './api'
+  StudentCaseInput
+} from './cases/api'
+import { CaseEvents } from './cases/events/CaseEvents'
+import { CaseStatusForm } from './cases/status/CaseStatusForm'
+import { apiPutStudentCaseStatus, CaseStatusInput } from './cases/status/api'
 
 const AccordionRow = styled(FlexLeftRight)<{ $disabled: boolean }>`
   ${(p) => (p.$disabled ? '' : 'cursor: pointer;')}
@@ -137,14 +138,13 @@ export const StudentPage = React.memo(function StudentPage() {
                 onClick={() => setEditingStudent(true)}
               />
             </FlexLeftRight>
-            <VerticalGap $size="L" />
+            <VerticalGap $size="m" />
             <StudentForm
               key={editingStudent ? 'EDIT' : 'VIEW'}
               mode={editingStudent ? 'EDIT' : 'VIEW'}
               student={studentResponse.student}
               onChange={setStudentInput}
             />
-            <VerticalGap $size="m" />
             {editingStudent && (
               <FlexRight>
                 <FlexRowWithGaps>
@@ -276,58 +276,62 @@ export const StudentPage = React.memo(function StudentPage() {
                   </AccordionRow>
                   {expandedCase === studentCase.id && (
                     <FlexColWithGaps $gapSize="XL">
-                      <FlexLeftRight style={{ alignItems: 'flex-start' }}>
-                        <StudentCaseForm
-                          key={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
-                          mode={
-                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
-                          }
-                          studentCase={studentCase}
-                          onChange={setStudentCaseInput}
-                          employees={employees}
-                        />
-                        {editingCase !== studentCase.id && (
-                          <InlineButton
-                            text="Muokkaa"
-                            icon={faPen}
-                            disabled={editingSomething}
-                            onClick={() => setEditingCase(studentCase.id)}
+                      <FlexColWithGaps>
+                        <FlexLeftRight style={{ alignItems: 'flex-start' }}>
+                          <StudentCaseForm
+                            key={
+                              editingCase === studentCase.id ? 'EDIT' : 'VIEW'
+                            }
+                            mode={
+                              editingCase === studentCase.id ? 'EDIT' : 'VIEW'
+                            }
+                            studentCase={studentCase}
+                            onChange={setStudentCaseInput}
+                            employees={employees}
                           />
-                        )}
-                      </FlexLeftRight>
-                      {editingCase === studentCase.id && (
-                        <FlexRight>
-                          <FlexRowWithGaps>
-                            <Button
-                              text="Peruuta"
-                              disabled={submitting}
-                              onClick={() => {
-                                setEditingCase(false)
-                              }}
+                          {editingCase !== studentCase.id && (
+                            <InlineButton
+                              text="Muokkaa"
+                              icon={faPen}
+                              disabled={editingSomething}
+                              onClick={() => setEditingCase(studentCase.id)}
                             />
-                            <Button
-                              text="Tallenna"
-                              primary
-                              disabled={submitting || !studentCaseInput}
-                              onClick={() => {
-                                if (!studentCaseInput) return
+                          )}
+                        </FlexLeftRight>
+                        {editingCase === studentCase.id && (
+                          <FlexRight>
+                            <FlexRowWithGaps>
+                              <Button
+                                text="Peruuta"
+                                disabled={submitting}
+                                onClick={() => {
+                                  setEditingCase(false)
+                                }}
+                              />
+                              <Button
+                                text="Tallenna"
+                                primary
+                                disabled={submitting || !studentCaseInput}
+                                onClick={() => {
+                                  if (!studentCaseInput) return
 
-                                setSubmitting(true)
-                                void apiPutStudentCase(
-                                  id,
-                                  studentCase.id,
-                                  studentCaseInput
-                                )
-                                  .then(() => {
-                                    setEditingCase(false)
-                                    loadStudent()
-                                  })
-                                  .finally(() => setSubmitting(false))
-                              }}
-                            />
-                          </FlexRowWithGaps>
-                        </FlexRight>
-                      )}
+                                  setSubmitting(true)
+                                  void apiPutStudentCase(
+                                    id,
+                                    studentCase.id,
+                                    studentCaseInput
+                                  )
+                                    .then(() => {
+                                      setEditingCase(false)
+                                      loadStudent()
+                                    })
+                                    .finally(() => setSubmitting(false))
+                                }}
+                              />
+                            </FlexRowWithGaps>
+                          </FlexRight>
+                        )}
+                      </FlexColWithGaps>
 
                       <FlexColWithGaps>
                         <H4>Ohjauksen tila</H4>

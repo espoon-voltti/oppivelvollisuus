@@ -11,6 +11,12 @@ import java.time.LocalDate
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
 
+enum class Gender {
+    MALE,
+    FEMALE,
+    OTHER
+}
+
 data class StudentInput(
     val valpasLink: String,
     val ssn: String,
@@ -20,7 +26,9 @@ data class StudentInput(
     val dateOfBirth: LocalDate?,
     val phone: String,
     val email: String,
+    val gender: Gender?,
     val address: String,
+    val municipalityInFinland: Boolean,
     val guardianInfo: String,
     val supportContactsInfo: String
 )
@@ -31,8 +39,8 @@ fun Handle.insertStudent(
 ): UUID {
     return createUpdate(
         """
-INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, address, guardian_info, support_contacts_info) 
-VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :address, :guardianInfo, :supportContactsInfo)
+INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info) 
+VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo)
 RETURNING id
 """
     )
@@ -102,14 +110,16 @@ data class Student(
     val dateOfBirth: LocalDate?,
     val phone: String,
     val email: String,
+    val gender: Gender?,
     val address: String,
+    val municipalityInFinland: Boolean,
     val guardianInfo: String,
     val supportContactsInfo: String
 )
 
 fun Handle.getStudent(id: UUID) = createQuery(
 """
-SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, address, guardian_info, support_contacts_info
+SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info
 FROM students
 WHERE id = :id
 """
@@ -135,7 +145,9 @@ SET
     date_of_birth = :dateOfBirth,
     phone = :phone,
     email = :email,
+    gender = :gender,
     address = :address,
+    municipality_in_finland = :municipalityInFinland, 
     guardian_info = :guardianInfo,
     support_contacts_info = :supportContactsInfo
 WHERE id = :id

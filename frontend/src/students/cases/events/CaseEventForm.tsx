@@ -1,21 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import styled, { css } from 'styled-components'
 
-import { formatDate, parseDate } from '../shared/dates'
-import { InputField } from '../shared/form/InputField'
-import { Select } from '../shared/form/Select'
-import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
+import { formatDate, parseDate } from '../../../shared/dates'
+import { InputField } from '../../../shared/form/InputField'
+import { Select } from '../../../shared/form/Select'
+import { ReadOnlyTextArea, TextArea } from '../../../shared/form/TextArea'
 import {
-  FlexColWithGaps,
-  FlexRowWithGaps,
   GroupOfInputRows,
-  LabeledInputFull,
-  LabeledInputL,
-  LabeledInputS,
+  LabeledInput,
   RowOfInputs
-} from '../shared/layout'
-import { colors } from '../shared/theme'
-import { Label } from '../shared/typography'
+} from '../../../shared/layout'
+import { colors } from '../../../shared/theme'
+import { Label } from '../../../shared/typography'
 
 import { CaseEvent, CaseEventInput } from './api'
 import { CaseEventType, caseEventTypeNames, caseEventTypes } from './enums'
@@ -70,17 +66,14 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
 
   if (props.mode === 'VIEW') {
     return (
-      <FlexRowWithGaps $gapSize="L" style={{ alignItems: 'flex-start' }}>
-        <FlexColWithGaps
-          $gapSize="s"
-          style={{ width: '200px', flexShrink: '0' }}
-        >
+      <RowOfInputs>
+        <LabeledInput $cols={2}>
           <TypeLabel $type={props.caseEvent.type}>
             {formatDate(props.caseEvent.date)}
           </TypeLabel>
           <span>{props.caseEvent.created.name}</span>
-        </FlexColWithGaps>
-        <FlexColWithGaps $gapSize="s" style={{ flexGrow: '1' }}>
+        </LabeledInput>
+        <LabeledInput $cols={9}>
           <TypeLabel $type={props.caseEvent.type}>
             {caseEventTypeNames[props.caseEvent.type]}
           </TypeLabel>
@@ -91,19 +84,19 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
               {props.caseEvent.updated.name})
             </UpdaterInfo>
           )}
-        </FlexColWithGaps>
-      </FlexRowWithGaps>
+        </LabeledInput>
+      </RowOfInputs>
     )
   }
 
   return (
-    <GroupOfInputRows $gapSize="m">
-      <RowOfInputs $gapSize="L">
-        <LabeledInputS>
+    <GroupOfInputRows>
+      <RowOfInputs>
+        <LabeledInput $cols={2}>
           <Label>Päivämäärä</Label>
           <InputField onChange={setDate} value={date} />
-        </LabeledInputS>
-        <LabeledInputL>
+        </LabeledInput>
+        <LabeledInput $cols={4}>
           <Label>Merkinnän tyyppi</Label>
           <Select<CaseEventType>
             items={caseEventTypes}
@@ -111,13 +104,13 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
             getItemLabel={(item) => caseEventTypeNames[item]}
             onChange={(e) => setType(e ?? 'NOTE')}
           />
-        </LabeledInputL>
+        </LabeledInput>
       </RowOfInputs>
-      <RowOfInputs $gapSize="L">
-        <LabeledInputFull>
+      <RowOfInputs>
+        <LabeledInput $cols={9}>
           <Label>Kommentti</Label>
           <TextArea onChange={setNotes} value={notes} />
-        </LabeledInputFull>
+        </LabeledInput>
       </RowOfInputs>
     </GroupOfInputRows>
   )

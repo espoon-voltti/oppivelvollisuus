@@ -1,15 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { Select } from '../shared/form/Select'
-import {
-  FlexRowWithGaps,
-  LabeledInputFull,
-  LabeledInputM
-} from '../shared/layout'
-import { Label } from '../shared/typography'
+import { Select } from '../../../shared/form/Select'
+import { LabeledInput, RowOfInputs } from '../../../shared/layout'
+import { Label } from '../../../shared/typography'
+import { StatusChip } from '../StatusChip'
+import { StudentCase } from '../api'
 
-import { StatusChip } from './StatusChip'
-import { CaseStatusInput, StudentCase } from './api'
+import { CaseStatusInput } from './api'
 import {
   CaseFinishedReason,
   caseFinishedReasonNames,
@@ -73,22 +70,22 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
 
   if (props.mode === 'VIEW') {
     return (
-      <FlexRowWithGaps $gapSize="L">
-        <LabeledInputM>
+      <RowOfInputs>
+        <LabeledInput $cols={3}>
           <Label>Tila</Label>
-          <StatusChip status={props.studentCase.status} />
-        </LabeledInputM>
+          <span>{caseStatusNames[props.studentCase.status]}</span>
+        </LabeledInput>
         {props.studentCase.status === 'FINISHED' && (
-          <LabeledInputM>
+          <LabeledInput $cols={3}>
             <Label>Syy ohjauksen päättymiselle</Label>
             <span>
               {caseFinishedReasonNames[props.studentCase.finishedInfo.reason]}
             </span>
-          </LabeledInputM>
+          </LabeledInput>
         )}
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason === 'BEGAN_STUDIES' && (
-            <LabeledInputM>
+            <LabeledInput $cols={4}>
               <Label>Oppilaitos</Label>
               <span>
                 {
@@ -97,15 +94,15 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
                   ]
                 }
               </span>
-            </LabeledInputM>
+            </LabeledInput>
           )}
-      </FlexRowWithGaps>
+      </RowOfInputs>
     )
   }
 
   return (
-    <FlexRowWithGaps $gapSize="L">
-      <LabeledInputM>
+    <RowOfInputs>
+      <LabeledInput $cols={3}>
         <Label>Tila</Label>
         {props.studentCase.status === 'FINISHED' && props.activeCaseExists ? (
           <StatusChip status={props.studentCase.status} />
@@ -117,9 +114,9 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             onChange={(item) => setStatus(item)}
           />
         )}
-      </LabeledInputM>
+      </LabeledInput>
       {status === 'FINISHED' && (
-        <LabeledInputM>
+        <LabeledInput $cols={3}>
           <Label>Syy ohjauksen päättymiselle</Label>
           <Select<CaseFinishedReason>
             items={caseFinishedReasons}
@@ -128,10 +125,10 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             placeholder="Valitse"
             onChange={(item) => setFinishedReason(item)}
           />
-        </LabeledInputM>
+        </LabeledInput>
       )}
       {status === 'FINISHED' && finishedReason === 'BEGAN_STUDIES' && (
-        <LabeledInputFull>
+        <LabeledInput $cols={4}>
           <Label>Oppilaitos</Label>
           <Select<SchoolType>
             items={schoolTypes}
@@ -140,8 +137,8 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             placeholder="Valitse"
             onChange={(item) => setStartedAtSchool(item)}
           />
-        </LabeledInputFull>
+        </LabeledInput>
       )}
-    </FlexRowWithGaps>
+    </RowOfInputs>
   )
 })
