@@ -277,27 +277,27 @@ export const StudentPage = React.memo(function StudentPage() {
                   {expandedCase === studentCase.id && (
                     <FlexColWithGaps $gapSize="XL">
                       <FlexColWithGaps>
-                        <FlexLeftRight style={{ alignItems: 'flex-start' }}>
-                          <StudentCaseForm
-                            key={
-                              editingCase === studentCase.id ? 'EDIT' : 'VIEW'
-                            }
-                            mode={
-                              editingCase === studentCase.id ? 'EDIT' : 'VIEW'
-                            }
-                            studentCase={studentCase}
-                            onChange={setStudentCaseInput}
-                            employees={employees}
-                          />
-                          {editingCase !== studentCase.id && (
+                        {editingCase !== studentCase.id && (
+                        <FlexRight style={{ marginBottom: '-24px', zIndex: 1 }}>
                             <InlineButton
                               text="Muokkaa"
                               icon={faPen}
                               disabled={editingSomething}
                               onClick={() => setEditingCase(studentCase.id)}
                             />
-                          )}
-                        </FlexLeftRight>
+                        </FlexRight>
+                        )}
+                        <StudentCaseForm
+                          key={
+                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
+                          }
+                          mode={
+                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
+                          }
+                          studentCase={studentCase}
+                          onChange={setStudentCaseInput}
+                          employees={employees}
+                        />
                         {editingCase === studentCase.id && (
                           <FlexRight>
                             <FlexRowWithGaps>
@@ -334,54 +334,8 @@ export const StudentPage = React.memo(function StudentPage() {
                       </FlexColWithGaps>
 
                       <FlexColWithGaps>
-                        <H4>Ohjauksen tila</H4>
-                        <FlexLeftRight style={{ alignItems: 'flex-start' }}>
-                          <div style={{ flexGrow: 1 }}>
-                            {editingCaseStatus === studentCase.id ? (
-                              <FlexColWithGaps>
-                                <CaseStatusForm
-                                  mode="EDIT"
-                                  studentCase={studentCase}
-                                  onChange={setCaseStatusInput}
-                                  activeCaseExists={activeCaseExists}
-                                />
-                                <FlexRight>
-                                  <FlexRowWithGaps>
-                                    <Button
-                                      text="Peruuta"
-                                      disabled={submitting}
-                                      onClick={() => setEditingCaseStatus(null)}
-                                    />
-                                    <Button
-                                      text="Tallenna"
-                                      primary
-                                      disabled={submitting || !caseStatusInput}
-                                      onClick={() => {
-                                        if (!caseStatusInput) return
-
-                                        setSubmitting(true)
-                                        void apiPutStudentCaseStatus(
-                                          studentCase.studentId,
-                                          studentCase.id,
-                                          caseStatusInput
-                                        )
-                                          .then(() => {
-                                            setEditingCaseStatus(null)
-                                            loadStudent()
-                                          })
-                                          .finally(() => setSubmitting(false))
-                                      }}
-                                    />
-                                  </FlexRowWithGaps>
-                                </FlexRight>
-                              </FlexColWithGaps>
-                            ) : (
-                              <CaseStatusForm
-                                mode="VIEW"
-                                studentCase={studentCase}
-                              />
-                            )}
-                          </div>
+                        <FlexLeftRight>
+                          <H4>Ohjauksen tila</H4>
                           {editingCaseStatus !== studentCase.id && (
                             <InlineButton
                               text="Vaihda tilaa"
@@ -393,6 +347,50 @@ export const StudentPage = React.memo(function StudentPage() {
                             />
                           )}
                         </FlexLeftRight>
+                        {editingCaseStatus === studentCase.id ? (
+                          <FlexColWithGaps>
+                            <CaseStatusForm
+                              mode="EDIT"
+                              studentCase={studentCase}
+                              onChange={setCaseStatusInput}
+                              activeCaseExists={activeCaseExists}
+                            />
+                            <FlexRight>
+                              <FlexRowWithGaps>
+                                <Button
+                                  text="Peruuta"
+                                  disabled={submitting}
+                                  onClick={() => setEditingCaseStatus(null)}
+                                />
+                                <Button
+                                  text="Tallenna"
+                                  primary
+                                  disabled={submitting || !caseStatusInput}
+                                  onClick={() => {
+                                    if (!caseStatusInput) return
+
+                                    setSubmitting(true)
+                                    void apiPutStudentCaseStatus(
+                                      studentCase.studentId,
+                                      studentCase.id,
+                                      caseStatusInput
+                                    )
+                                      .then(() => {
+                                        setEditingCaseStatus(null)
+                                        loadStudent()
+                                      })
+                                      .finally(() => setSubmitting(false))
+                                  }}
+                                />
+                              </FlexRowWithGaps>
+                            </FlexRight>
+                          </FlexColWithGaps>
+                        ) : (
+                          <CaseStatusForm
+                            mode="VIEW"
+                            studentCase={studentCase}
+                          />
+                        )}
                       </FlexColWithGaps>
 
                       <CaseEvents

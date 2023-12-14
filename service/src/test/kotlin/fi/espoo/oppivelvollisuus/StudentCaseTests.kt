@@ -4,12 +4,15 @@ import fi.espoo.oppivelvollisuus.common.BadRequest
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
 import fi.espoo.oppivelvollisuus.domain.FinishedInfo
+import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
 import fi.espoo.oppivelvollisuus.domain.OtherNotifier
+import fi.espoo.oppivelvollisuus.domain.SchoolBackground
 import fi.espoo.oppivelvollisuus.domain.SchoolType
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
@@ -52,7 +55,10 @@ class StudentCaseTests : FullApplicationTest() {
                 source = CaseSource.OTHER,
                 sourceValpas = null,
                 sourceOther = OtherNotifier.LASTENSUOJELU,
-                sourceContact = "Lastensuojelu, Minna Mikkola"
+                sourceContact = "Lastensuojelu, Minna Mikkola",
+                schoolBackground = SchoolBackground.entries.toSet(),
+                caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
             )
         )
 
@@ -70,7 +76,10 @@ class StudentCaseTests : FullApplicationTest() {
                     source = CaseSource.OTHER,
                     sourceValpas = null,
                     sourceOther = OtherNotifier.LASTENSUOJELU,
-                    sourceContact = "Lastensuojelu, Minna Mikkola"
+                    sourceContact = "Lastensuojelu, Minna Mikkola",
+                    schoolBackground = SchoolBackground.entries.toSet(),
+                    caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
                 ),
                 studentCase
             )
@@ -98,7 +107,10 @@ class StudentCaseTests : FullApplicationTest() {
                 source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                 sourceValpas = null,
                 sourceOther = null,
-                sourceContact = ""
+                sourceContact = "",
+                schoolBackground = emptySet(),
+                caseBackgroundReasons = emptySet(),
+                notInSchoolReason = null
             )
         )
 
@@ -116,7 +128,10 @@ class StudentCaseTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                     sourceValpas = null,
                     sourceOther = null,
-                    sourceContact = ""
+                    sourceContact = "",
+                    schoolBackground = emptySet(),
+                    caseBackgroundReasons = emptySet(),
+                    notInSchoolReason = null
                 ),
                 studentCase
             )
@@ -132,7 +147,10 @@ class StudentCaseTests : FullApplicationTest() {
                 source = CaseSource.VALPAS_NOTICE,
                 sourceValpas = ValpasNotifier.LUKIO,
                 sourceOther = null,
-                sourceContact = "Espoon lukio"
+                sourceContact = "Espoon lukio",
+                schoolBackground = setOf(SchoolBackground.EI_PERUSKOULUN_PAATTOTODISTUSTA),
+                caseBackgroundReasons = setOf(CaseBackgroundReason.MOTIVAATION_PUUTE, CaseBackgroundReason.MUU_SYY),
+                notInSchoolReason = NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA
             )
         )
 
@@ -150,7 +168,10 @@ class StudentCaseTests : FullApplicationTest() {
                     source = CaseSource.VALPAS_NOTICE,
                     sourceValpas = ValpasNotifier.LUKIO,
                     sourceOther = null,
-                    sourceContact = "Espoon lukio"
+                    sourceContact = "Espoon lukio",
+                    schoolBackground = setOf(SchoolBackground.EI_PERUSKOULUN_PAATTOTODISTUSTA),
+                    caseBackgroundReasons = setOf(CaseBackgroundReason.MOTIVAATION_PUUTE, CaseBackgroundReason.MUU_SYY),
+                    notInSchoolReason = NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA
                 ),
                 studentCase
             )

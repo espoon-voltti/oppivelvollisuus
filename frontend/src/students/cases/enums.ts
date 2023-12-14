@@ -63,3 +63,94 @@ export const otherNotifierNames: Record<OtherNotifier, string> = {
   LASTENSUOJELU: 'Lastensuojelu',
   OTHER: 'Muu taho'
 }
+
+export const schoolBackgrounds = [
+  'PERUSKOULUN_PAATTOTODISTUS',
+  'EI_PERUSKOULUN_PAATTOTODISTUSTA',
+  'KESKEYTYNEET_TOISEN_ASTEEN_OPINNOT',
+  'KESKEYTYNEET_NIVELVAIHEEN_OPINNOT',
+  'VSOP_PERUSKOULUSSA',
+  'YLEINEN_TUKI_PERUSKOULUSSA',
+  'TEHOSTETTU_TUKI_PERUSKOULUSSA',
+  'ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA',
+  'YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA',
+  'PERUSOPETUKSEEN_VALMISTAVA_OPISKELU_SUOMESSA',
+  'ULKOMAILLA_SUORITETUT_PERUSOPETUSTA_VASTAAVAT_OPINNOT'
+]
+
+export type SchoolBackground = (typeof schoolBackgrounds)[number]
+
+export const schoolBackgroundNames: Record<SchoolBackground, string> = {
+  PERUSKOULUN_PAATTOTODISTUS: 'Peruskoulun päättötodistus',
+  EI_PERUSKOULUN_PAATTOTODISTUSTA: 'Ei peruskoulun päättötodistusta',
+  KESKEYTYNEET_TOISEN_ASTEEN_OPINNOT: 'Keskeytyneet 2. asteen opinnot',
+  KESKEYTYNEET_NIVELVAIHEEN_OPINNOT: 'Keskeytyneet nivelvaiheen opinnot',
+  VSOP_PERUSKOULUSSA: 'VSOP (vuosiluokkiin sitomaton opiskelu) peruskoulussa',
+  YLEINEN_TUKI_PERUSKOULUSSA: 'Yleinen tuki peruskoulussa',
+  TEHOSTETTU_TUKI_PERUSKOULUSSA: 'Tehostettu tuki peruskoulussa',
+  ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA: 'Erityisen tuen päätös peruskoulussa',
+  YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA:
+    'Yksilöllistetty oppimäärä sekä äidinkielessä että matematiikassa',
+  PERUSOPETUKSEEN_VALMISTAVA_OPISKELU_SUOMESSA:
+    'Perusopetukseen valmistava opiskelu Suomessa',
+  ULKOMAILLA_SUORITETUT_PERUSOPETUSTA_VASTAAVAT_OPINNOT:
+    'Ulkomailla suoritetut perusopetusta vastaavat opinnot'
+}
+
+export const caseBackgroundReasonValues = [
+  'MOTIVAATION_PUUTE',
+  'VAARA_ALAVALINTA',
+  'OPPIMISVAIKEUDET',
+  'ELAMANHALLINNAN_HAASTEET',
+  'POISSAOLOT',
+  'TERVEYDELLISET_PERUSTEET',
+  'MUUTTO_PAIKKAKUNNALLE',
+  'MUUTTO_ULKOMAILLE',
+  'MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA',
+  'MUU_SYY'
+]
+
+export type CaseBackgroundReason = (typeof caseBackgroundReasonValues)[number]
+
+export const caseBackgroundReasonNames: Record<CaseBackgroundReason, string> = {
+  MOTIVAATION_PUUTE: 'Motivaation puute',
+  VAARA_ALAVALINTA: 'Väärä alavalinta',
+  OPPIMISVAIKEUDET: 'Oppimisvaikeudet',
+  ELAMANHALLINNAN_HAASTEET: 'Elämänhallinnan haasteet',
+  POISSAOLOT: 'Poissaolot',
+  TERVEYDELLISET_PERUSTEET: 'Terveydelliset perusteet',
+  MUUTTO_PAIKKAKUNNALLE: 'Muutto paikkakunnalle',
+  MUUTTO_ULKOMAILLE: 'Muutto ulkomaille',
+  MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA:
+    'Maahan muuttanut nuori ilman opiskelupaikkaa',
+  MUU_SYY: 'Muu syy'
+}
+
+export const notInSchoolReasons = [
+  'KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA',
+  'EI_OLE_VASTAANOTTANUT_SAAMAANSA_OPISKELUPAIKKAA',
+  'EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA',
+  'EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN',
+  'EI_OPISKELUPAIKKAA_YLEISOPPILAITOKSESSA',
+  'EI_OPISKELUPAIKKAA_AMMATILLISESSA_ERITYISOPPILAITOKSESSA',
+  'EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI',
+  'OPINNOT_ULKOMAILLA'
+]
+
+export type NotInSchoolReason = (typeof notInSchoolReasons)[number]
+
+export const notInSchoolReasonNames: Record<NotInSchoolReason, string> = {
+  KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA: 'Katsottu eronneeksi oppilaitoksesta',
+  EI_OLE_VASTAANOTTANUT_SAAMAANSA_OPISKELUPAIKKAA:
+    'Ei ole vastaanottanut saamaansa opiskelupaikkaa',
+  EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA:
+    'Ei ole aloittanut vastaanottamassaan opiskelupaikassa',
+  EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN: 'Ei ole hakeutunut jatko-opintoihin',
+  EI_OPISKELUPAIKKAA_YLEISOPPILAITOKSESSA:
+    'Jäänyt ilman opiskelupaikkaa yleisoppilaitoksessa',
+  EI_OPISKELUPAIKKAA_AMMATILLISESSA_ERITYISOPPILAITOKSESSA:
+    'Jäänyt ilman opiskelupaikkaa ammatillisessa erityisoppilaitoksessa',
+  EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI:
+    'Ei ole saanut opiskelupaikkaa 0-kielitaidon vuoksi',
+  OPINNOT_ULKOMAILLA: 'Opinnot ulkomailla (muu kuin vaihto-opiskelu)'
+}
