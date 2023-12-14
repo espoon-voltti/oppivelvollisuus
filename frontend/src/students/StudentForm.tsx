@@ -1,10 +1,13 @@
 import { parse } from 'date-fns'
 import React, { useEffect, useMemo, useState } from 'react'
+import styled from 'styled-components'
 
 import { formatDate, parseDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
+import { Select } from '../shared/form/Select'
 import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
 import {
+  FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInputFull,
   LabeledInputM,
@@ -30,12 +33,26 @@ interface EditProps {
 }
 type Props = CreateProps | ViewProps | EditProps
 
+const commonLanguages = [
+  'suomi',
+  'ruotsi',
+  'englanti',
+  'venäjä',
+  'ukraina',
+  'somali'
+]
+
 export const StudentForm = React.memo(function StudentForm(props: Props) {
-  const [valpasLink, setValpasLink] = useState(
-    props.mode === 'CREATE' ? '' : props.student.valpasLink
-  )
   const [ssn, setSsn] = useState(
     props.mode === 'CREATE' ? '' : props.student.ssn
+  )
+  const [dateOfBirth, setDateOfBirth] = useState(
+    props.mode === 'CREATE' || !props.student.dateOfBirth
+      ? ''
+      : formatDate(props.student.dateOfBirth)
+  )
+  const [valpasLink, setValpasLink] = useState(
+    props.mode === 'CREATE' ? '' : props.student.valpasLink
   )
   const [firstName, setFirstName] = useState(
     props.mode === 'CREATE' ? '' : props.student.firstName
@@ -43,10 +60,8 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   const [lastName, setLastName] = useState(
     props.mode === 'CREATE' ? '' : props.student.lastName
   )
-  const [dateOfBirth, setDateOfBirth] = useState(
-    props.mode === 'CREATE' || !props.student.dateOfBirth
-      ? ''
-      : formatDate(props.student.dateOfBirth)
+  const [language, setLanguage] = useState(
+    props.mode === 'CREATE' ? '' : props.student.language
   )
   const [phone, setPhone] = useState(
     props.mode === 'CREATE' ? '' : props.student.phone
@@ -88,6 +103,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             ssn: ssn.trim(),
             firstName: firstName.trim(),
             lastName: lastName.trim(),
+            language: language.toLowerCase().trim(),
             dateOfBirth: dateOfBirth.trim()
               ? parseDate(dateOfBirth.trim()) ?? null
               : null,
@@ -104,6 +120,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       ssn,
       firstName,
       lastName,
+      language,
       dateOfBirth,
       phone,
       email,
@@ -178,6 +195,29 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             <InputField onChange={setFirstName} value={firstName} />
           )}
         </LabeledInputM>
+        {props.mode === 'VIEW' ? (
+          <LabeledInputS>
+            <Label>Kieli</Label>
+            <span>{props.student.language}</span>
+          </LabeledInputS>
+        ) : (
+          <LabeledInputFull>
+            <Label>Kieli</Label>
+            <FlexRowWithGaps>
+              <InputField onChange={setLanguage} value={language} />
+              <InputQuickFill>
+                <Select<string>
+                  items={commonLanguages}
+                  selectedItem={null}
+                  placeholder=" "
+                  onChange={(item) => {
+                    if (item) setLanguage(item)
+                  }}
+                />
+              </InputQuickFill>
+            </FlexRowWithGaps>
+          </LabeledInputFull>
+        )}
       </RowOfInputs>
       <RowOfInputs $gapSize="L">
         <LabeledInputM>
@@ -232,3 +272,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     </GroupOfInputRows>
   )
 })
+
+const InputQuickFill = styled.div`
+  select {
+    width: 12px;
+  }
+`

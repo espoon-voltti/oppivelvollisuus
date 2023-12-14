@@ -14,6 +14,7 @@ const Wrapper = styled.div<{ $width: InputWidth | undefined }>`
   position: relative;
   display: inline-block;
   ${(p) => (p.$width ? inputWidthCss(p.$width) : '')}
+  flex-grow: 1;
 `
 
 interface StyledInputProps {
