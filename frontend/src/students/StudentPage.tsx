@@ -278,19 +278,19 @@ export const StudentPage = React.memo(function StudentPage() {
                     <FlexColWithGaps $gapSize="XL">
                       <FlexColWithGaps>
                         {editingCase !== studentCase.id && (
-                        <FlexRight style={{ marginBottom: '-24px', zIndex: 1 }}>
+                          <FlexRight
+                            style={{ marginBottom: '-24px', zIndex: 1 }}
+                          >
                             <InlineButton
                               text="Muokkaa"
                               icon={faPen}
                               disabled={editingSomething}
                               onClick={() => setEditingCase(studentCase.id)}
                             />
-                        </FlexRight>
+                          </FlexRight>
                         )}
                         <StudentCaseForm
-                          key={
-                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
-                          }
+                          key={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
                           mode={
                             editingCase === studentCase.id ? 'EDIT' : 'VIEW'
                           }

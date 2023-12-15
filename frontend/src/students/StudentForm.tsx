@@ -1,7 +1,9 @@
 import { parse } from 'date-fns'
 import React, { useEffect, useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { AlertBox, InfoBox } from '../shared/MessageBoxes'
 import { formatDate, parseDate } from '../shared/dates'
 import { Checkbox } from '../shared/form/Checkbox'
 import { InputField } from '../shared/form/InputField'
@@ -9,6 +11,7 @@ import { Select } from '../shared/form/Select'
 import { ReadOnlyTextArea, TextArea } from '../shared/form/TextArea'
 import {
   FlexCol,
+  FlexColWithGaps,
   FlexRowWithGaps,
   GroupOfInputRows,
   LabeledInput,
@@ -16,8 +19,14 @@ import {
   VerticalGap
 } from '../shared/layout'
 import { H3, Label } from '../shared/typography'
+import { useDebouncedState } from '../shared/useDebouncedState'
 
-import { StudentDetails, StudentInput } from './api'
+import {
+  apiGetPossibleDuplicateStudents,
+  DuplicateStudent,
+  StudentDetails,
+  StudentInput
+} from './api'
 import { Gender, genderNames, genders } from './enums'
 
 interface CreateProps {
@@ -47,22 +56,27 @@ const commonLanguages = [
 ]
 
 export const StudentForm = React.memo(function StudentForm(props: Props) {
-  const [ssn, setSsn] = useState(
-    props.mode === 'CREATE' ? '' : props.student.ssn
+  const duplicateCheckDelay = 1500
+  const [ssn, setSsn, debouncedSsn] = useDebouncedState(
+    props.mode === 'CREATE' ? '' : props.student.ssn,
+    duplicateCheckDelay
   )
   const [dateOfBirth, setDateOfBirth] = useState(
     props.mode === 'CREATE' || !props.student.dateOfBirth
       ? ''
       : formatDate(props.student.dateOfBirth)
   )
-  const [valpasLink, setValpasLink] = useState(
-    props.mode === 'CREATE' ? '' : props.student.valpasLink
+  const [valpasLink, setValpasLink, debouncedValpasLink] = useDebouncedState(
+    props.mode === 'CREATE' ? '' : props.student.valpasLink,
+    duplicateCheckDelay
   )
-  const [firstName, setFirstName] = useState(
-    props.mode === 'CREATE' ? '' : props.student.firstName
+  const [firstName, setFirstName, debouncedFirstName] = useDebouncedState(
+    props.mode === 'CREATE' ? '' : props.student.firstName,
+    duplicateCheckDelay
   )
-  const [lastName, setLastName] = useState(
-    props.mode === 'CREATE' ? '' : props.student.lastName
+  const [lastName, setLastName, debouncedLastName] = useDebouncedState(
+    props.mode === 'CREATE' ? '' : props.student.lastName,
+    duplicateCheckDelay
   )
   const [language, setLanguage] = useState(
     props.mode === 'CREATE' ? '' : props.student.language
@@ -89,16 +103,44 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.supportContactsInfo
   )
 
+  const [duplicateStudents, setDuplicateStudents] = useState<
+    DuplicateStudent[]
+  >([])
+
   useEffect(() => {
     if (ssn.length >= 6) {
       try {
-        const dateFromSsn = parse(ssn, 'ddMMyy', new Date())
+        const dateFromSsn = parse(ssn.substring(0, 6), 'ddMMyy', new Date())
         setDateOfBirth(formatDate(dateFromSsn))
       } catch (e) {
         // ignore
       }
     }
   }, [ssn])
+
+  const creating = props.mode === 'CREATE'
+  useEffect(() => {
+    if (!creating) return
+
+    void apiGetPossibleDuplicateStudents({
+      ssn: debouncedSsn,
+      valpasLink: debouncedValpasLink,
+      firstName: debouncedFirstName,
+      lastName: debouncedLastName
+    }).then(setDuplicateStudents)
+  }, [
+    debouncedSsn,
+    debouncedValpasLink,
+    debouncedFirstName,
+    debouncedLastName,
+    creating
+  ])
+
+  const duplicateSsnStudent = duplicateStudents.find((s) => s.matchingSsn)
+  const duplicateValpasStudent = duplicateStudents.find(
+    (s) => s.matchingValpasLink
+  )
+  const duplicateNameStudents = duplicateStudents.filter((s) => s.matchingName)
 
   const isValid =
     firstName.trim() !== '' &&
@@ -243,6 +285,49 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
         </RowOfInputs>
+        {duplicateStudents.length > 0 && (
+          <div>
+            {duplicateSsnStudent ? (
+              <AlertBox
+                title="Samalla hetulla löytyy jo oppivelvollinen:"
+                message={
+                  <Link to={`/oppivelvolliset/${duplicateSsnStudent.id}`}>
+                    {duplicateSsnStudent.name}
+                  </Link>
+                }
+              />
+            ) : duplicateValpasStudent ? (
+              <AlertBox
+                title="Samalla Valpas linkillä löytyy jo oppivelvollinen:"
+                message={
+                  <Link to={`/oppivelvolliset/${duplicateValpasStudent.id}`}>
+                    {duplicateValpasStudent.name}
+                  </Link>
+                }
+              />
+            ) : (
+              <InfoBox
+                title={`Samalla nimellä löytyy jo ${
+                  duplicateNameStudents.length > 1
+                    ? 'oppivelvollisia'
+                    : 'oppivelvollinen'
+                }. Tarkista onko kyseessä sama henkilö:`}
+                message={
+                  <FlexColWithGaps>
+                    {duplicateNameStudents.map((s) => (
+                      <Link key={s.id} to={`/oppivelvolliset/${s.id}`}>
+                        {s.name}
+                        {s.dateOfBirth
+                          ? ` (s. ${formatDate(s.dateOfBirth)})`
+                          : ''}
+                      </Link>
+                    ))}
+                  </FlexColWithGaps>
+                }
+              />
+            )}
+          </div>
+        )}
         <RowOfInputs>
           <LabeledInput $cols={6}>
             <Label>Lähiosoite</Label>

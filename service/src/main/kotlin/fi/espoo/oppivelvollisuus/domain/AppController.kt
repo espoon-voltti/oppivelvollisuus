@@ -35,6 +35,16 @@ class AppController {
         }
     }
 
+    @PostMapping("/students/duplicates")
+    fun getDuplicateStudents(
+        user: AuthenticatedUser,
+        @RequestBody body: DuplicateStudentCheckInput
+    ): List<DuplicateStudent> {
+        return jdbi.inTransactionUnchecked { tx ->
+            tx.getPossibleDuplicateStudents(body)
+        }
+    }
+
     @PostMapping("/students/search")
     fun getStudents(@RequestBody body: StudentSearchParams): List<StudentSummary> {
         return jdbi.inTransactionUnchecked { tx ->

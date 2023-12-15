@@ -6,6 +6,7 @@ import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
+import fi.espoo.oppivelvollisuus.domain.DuplicateStudentCheckInput
 import fi.espoo.oppivelvollisuus.domain.Gender
 import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
 import fi.espoo.oppivelvollisuus.domain.SchoolBackground
@@ -27,6 +28,7 @@ import testUser
 import testUserName
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class StudentTests : FullApplicationTest() {
@@ -342,5 +344,115 @@ class StudentTests : FullApplicationTest() {
         assertTrue(e.isUniqueConstraintViolation())
 
         assertEquals(1, controller.getStudents(emptySearch).size)
+    }
+
+    @Test
+    fun `duplicate ssn is detected`() {
+        controller.createStudent(
+            user = testUser,
+            body = AppController.StudentAndCaseInput(
+                student = minimalStudentTestInput.copy(
+                    ssn = "170108A927R"
+                ),
+                studentCase = minimalStudentCaseTestInput
+            )
+        )
+        val duplicateStudents = controller.getDuplicateStudents(
+            testUser,
+            DuplicateStudentCheckInput(
+                ssn = "170108A927R",
+                valpasLink = "",
+                firstName = "",
+                lastName = ""
+            )
+        )
+        assertEquals(1, duplicateStudents.size)
+        duplicateStudents.first().let { duplicate ->
+            assertTrue(duplicate.matchingSsn)
+            assertFalse(duplicate.matchingValpasLink)
+            assertFalse(duplicate.matchingName)
+        }
+    }
+
+    @Test
+    fun `duplicate valpasLink is detected`() {
+        controller.createStudent(
+            user = testUser,
+            body = AppController.StudentAndCaseInput(
+                student = minimalStudentTestInput.copy(
+                    valpasLink = "https://valpas.fi/123"
+                ),
+                studentCase = minimalStudentCaseTestInput
+            )
+        )
+        val duplicateStudents = controller.getDuplicateStudents(
+            testUser,
+            DuplicateStudentCheckInput(
+                ssn = "",
+                valpasLink = "https://valpas.fi/123",
+                firstName = "",
+                lastName = ""
+            )
+        )
+        assertEquals(1, duplicateStudents.size)
+        duplicateStudents.first().let { duplicate ->
+            assertFalse(duplicate.matchingSsn)
+            assertTrue(duplicate.matchingValpasLink)
+            assertFalse(duplicate.matchingName)
+        }
+    }
+
+    @Test
+    fun `duplicate name is detected`() {
+        controller.createStudent(
+            user = testUser,
+            body = AppController.StudentAndCaseInput(
+                student = minimalStudentTestInput.copy(
+                    firstName = "Tupu",
+                    lastName = "Ankka"
+                ),
+                studentCase = minimalStudentCaseTestInput
+            )
+        )
+        val duplicateStudents = controller.getDuplicateStudents(
+            testUser,
+            DuplicateStudentCheckInput(
+                ssn = "",
+                valpasLink = "",
+                firstName = "Tupu",
+                lastName = "Ankka"
+            )
+        )
+        assertEquals(1, duplicateStudents.size)
+        duplicateStudents.first().let { duplicate ->
+            assertFalse(duplicate.matchingSsn)
+            assertFalse(duplicate.matchingValpasLink)
+            assertTrue(duplicate.matchingName)
+        }
+    }
+
+    @Test
+    fun `duplicate name is ignored if both students have ssn`() {
+        controller.createStudent(
+            user = testUser,
+            body = AppController.StudentAndCaseInput(
+                student = minimalStudentTestInput.copy(
+                    ssn = "170108A927R",
+                    firstName = "Tupu",
+                    lastName = "Ankka"
+                ),
+                studentCase = minimalStudentCaseTestInput
+            )
+        )
+        val duplicateStudents = controller.getDuplicateStudents(
+            testUser,
+            DuplicateStudentCheckInput(
+                ssn = "100507A967F",
+                valpasLink = "",
+                firstName = "Tupu",
+                lastName = "Ankka"
+            )
+        )
+        assertEquals(0, duplicateStudents.size)
     }
 }

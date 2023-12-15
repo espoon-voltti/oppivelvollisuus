@@ -7,6 +7,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
+import org.jdbi.v3.core.statement.SqlStatements
 import java.time.LocalDate
 import java.util.*
 import kotlin.jvm.optionals.getOrNull
@@ -158,4 +159,56 @@ WHERE id = :id
         .bind("user", user.id)
         .execute()
         .also { if (it != 1) throw NotFound() }
+}
+
+data class DuplicateStudentCheckInput(
+    val ssn: String,
+    val valpasLink: String,
+    val firstName: String,
+    val lastName: String
+)
+
+data class DuplicateStudent(
+    val id: UUID,
+    val name: String,
+    val dateOfBirth: LocalDate?,
+    val matchingSsn: Boolean,
+    val matchingValpasLink: Boolean,
+    val matchingName: Boolean
+)
+
+fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List<DuplicateStudent> {
+    val ssnPredicate = "(lower(ssn) = lower(:ssn))"
+        .takeIf { input.ssn.isNotBlank() }
+
+    val valpasLinkPredicate = "(lower(valpas_link) = lower(:valpasLink))"
+        .takeIf { input.valpasLink.isNotBlank() }
+
+    val namePredicate = """(
+        lower(first_name) = lower(:firstName) AND 
+        lower(last_name) = lower(:lastName) AND 
+        (ssn = '' OR :ssn = '')
+    )"""
+        .takeIf { input.firstName.isNotBlank() && input.lastName.isNotBlank() }
+
+    return createQuery(
+        """
+        WITH match_data AS (
+            SELECT 
+                id,
+                last_name || ' ' || first_name AS name,
+                date_of_birth,
+                ${ssnPredicate ?: "FALSE"} AS matching_ssn,
+                ${valpasLinkPredicate ?: "FALSE"} AS matching_valpas_link,
+                ${namePredicate ?: "FALSE"} AS matching_name
+            FROM students
+        )
+        SELECT * FROM match_data
+        WHERE matching_ssn OR matching_valpas_link OR matching_name
+    """
+    )
+        .configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
+        .bindKotlin(input)
+        .mapTo<DuplicateStudent>()
+        .list()
 }
