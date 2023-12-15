@@ -25,6 +25,20 @@ export const apiPostStudent = (data: StudentAndCaseInput): Promise<string> => {
   return apiClient.post<string>('/students', body).then((res) => res.data)
 }
 
+export const apiGetPossibleDuplicateStudents = (
+  input: DuplicateStudentCheckInput
+): Promise<DuplicateStudent[]> => {
+  const body: JsonOf<DuplicateStudentCheckInput> = input
+  return apiClient
+    .post<JsonOf<DuplicateStudent[]>>('/students/duplicates', body)
+    .then((res) =>
+      res.data.map((s) => ({
+        ...s,
+        dateOfBirth: s.dateOfBirth ? parseISO(s.dateOfBirth) : null
+      }))
+    )
+}
+
 export const apiGetStudents = (
   params: StudentSearchParams
 ): Promise<StudentSummary[]> => {
@@ -110,4 +124,20 @@ export interface StudentSearchParams {
   query: string
   statuses: CaseStatus[]
   assignedTo: string | null
+}
+
+export interface DuplicateStudentCheckInput {
+  ssn: string
+  valpasLink: string
+  firstName: string
+  lastName: string
+}
+
+export interface DuplicateStudent {
+  id: string
+  name: string
+  dateOfBirth: Date | null
+  matchingSsn: boolean
+  matchingValpasLink: boolean
+  matchingName: boolean
 }

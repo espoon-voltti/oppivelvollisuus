@@ -17,7 +17,8 @@ import { Label } from '../../shared/typography'
 import { CaseSourceFields, StudentCase, StudentCaseInput } from './api'
 import {
   CaseBackgroundReason,
-  caseBackgroundReasonNames, caseBackgroundReasonValues,
+  caseBackgroundReasonNames,
+  caseBackgroundReasonValues,
   CaseSource,
   caseSourceNames,
   caseSources,
@@ -247,15 +248,15 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
           <Label>Opiskelutausta</Label>
           {props.mode === 'VIEW' ? (
             <span>
-              {schoolBackground.length > 0
-                ? (
-                  <ul>
-                    {schoolBackground.map(opt => (
-                      <li key={opt}>{schoolBackgroundNames[opt]}</li>
-                    ))}
-                  </ul>
-                )
-                : '-'}
+              {schoolBackground.length > 0 ? (
+                <ul>
+                  {schoolBackground.map((opt) => (
+                    <li key={opt}>{schoolBackgroundNames[opt]}</li>
+                  ))}
+                </ul>
+              ) : (
+                '-'
+              )}
             </span>
           ) : (
             <FlexColWithGaps>
@@ -280,15 +281,15 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
           <Label>Ilmoituksen taustasyyt</Label>
           {props.mode === 'VIEW' ? (
             <span>
-              {caseBackgroundReasons.length > 0
-                ? (
-                  <ul>
-                    {caseBackgroundReasons.map(opt => (
-                      <li key={opt}>{caseBackgroundReasonNames[opt]}</li>
-                    ))}
-                  </ul>
-                )
-                : '-'}
+              {caseBackgroundReasons.length > 0 ? (
+                <ul>
+                  {caseBackgroundReasons.map((opt) => (
+                    <li key={opt}>{caseBackgroundReasonNames[opt]}</li>
+                  ))}
+                </ul>
+              ) : (
+                '-'
+              )}
             </span>
           ) : (
             <FlexColWithGaps>
