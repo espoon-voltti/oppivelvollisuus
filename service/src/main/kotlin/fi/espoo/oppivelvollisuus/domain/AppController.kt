@@ -77,6 +77,16 @@ class AppController {
         }
     }
 
+    @DeleteMapping("/students/{id}")
+    fun deleteStudent(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ) {
+        jdbi.inTransactionUnchecked { tx ->
+            tx.deleteStudent(id = id)
+        }
+    }
+
     @PostMapping("/students/{studentId}/cases")
     fun createStudentCase(user: AuthenticatedUser, @PathVariable studentId: UUID, @RequestBody body: StudentCaseInput): UUID {
         return jdbi.inTransactionUnchecked { tx ->
@@ -93,6 +103,17 @@ class AppController {
     ) {
         jdbi.inTransactionUnchecked { tx ->
             tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
+        }
+    }
+
+    @DeleteMapping("/students/{studentId}/cases/{id}")
+    fun deleteStudentCase(
+        user: AuthenticatedUser,
+        @PathVariable studentId: UUID,
+        @PathVariable id: UUID
+    ) {
+        jdbi.inTransactionUnchecked { tx ->
+            tx.deleteStudentCase(id = id, studentId = studentId)
         }
     }
 
@@ -116,13 +137,6 @@ class AppController {
     ): UUID {
         return jdbi.inTransactionUnchecked { tx ->
             tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
-        }
-    }
-
-    @GetMapping("/student-cases/{studentCaseId}/case-events")
-    fun getCaseEvents(@PathVariable studentCaseId: UUID): List<CaseEvent> {
-        return jdbi.inTransactionUnchecked { tx ->
-            tx.getCaseEventsByStudentCase(studentCaseId = studentCaseId)
         }
     }
 

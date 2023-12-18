@@ -5,6 +5,7 @@ import {
   faPen,
   faPlus
 } from '@fortawesome/free-solid-svg-icons'
+import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -28,6 +29,7 @@ import { H2, H3, H4 } from '../shared/typography'
 
 import { StudentForm } from './StudentForm'
 import {
+  apiDeleteStudent,
   apiGetStudent,
   apiPutStudent,
   StudentInput,
@@ -36,6 +38,7 @@ import {
 import { StatusChip } from './cases/StatusChip'
 import { StudentCaseForm } from './cases/StudentCaseForm'
 import {
+  apiDeleteStudentCase,
   apiPostStudentCase,
   apiPutStudentCase,
   StudentCaseInput
@@ -131,12 +134,36 @@ export const StudentPage = React.memo(function StudentPage() {
           <SectionContainer>
             <FlexLeftRight>
               <H3>Oppivelvollisen tiedot</H3>
-              <InlineButton
-                text="Muokkaa"
-                icon={faPen}
-                disabled={editingSomething}
-                onClick={() => setEditingStudent(true)}
-              />
+              <FlexRowWithGaps $gapSize="m">
+                <InlineButton
+                  text="Muokkaa"
+                  icon={faPen}
+                  disabled={editingSomething}
+                  onClick={() => setEditingStudent(true)}
+                />
+                <InlineButton
+                  text="Poista"
+                  icon={faTrash}
+                  disabled={editingSomething}
+                  onClick={() => {
+                    if (studentResponse.cases.length > 0) {
+                      window.alert(
+                        'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
+                      )
+                    } else {
+                      if (
+                        window.confirm(
+                          'Haluatko varmasti poistaa oppivelvollisen?'
+                        )
+                      ) {
+                        void apiDeleteStudent(id).then(() =>
+                          navigate('/oppivelvolliset')
+                        )
+                      }
+                    }
+                  }}
+                />
+              </FlexRowWithGaps>
             </FlexLeftRight>
             <VerticalGap $size="m" />
             <StudentForm
@@ -281,12 +308,37 @@ export const StudentPage = React.memo(function StudentPage() {
                           <FlexRight
                             style={{ marginBottom: '-24px', zIndex: 1 }}
                           >
-                            <InlineButton
-                              text="Muokkaa"
-                              icon={faPen}
-                              disabled={editingSomething}
-                              onClick={() => setEditingCase(studentCase.id)}
-                            />
+                            <FlexRowWithGaps $gapSize="m">
+                              <InlineButton
+                                text="Muokkaa"
+                                icon={faPen}
+                                disabled={editingSomething}
+                                onClick={() => setEditingCase(studentCase.id)}
+                              />
+                              <InlineButton
+                                text="Poista"
+                                icon={faTrash}
+                                disabled={editingSomething}
+                                onClick={() => {
+                                  if (studentCase.events.length > 0) {
+                                    window.alert(
+                                      'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
+                                    )
+                                  } else {
+                                    if (
+                                      window.confirm(
+                                        'Haluatko varmasti poistaa ilmoituksen?'
+                                      )
+                                    ) {
+                                      void apiDeleteStudentCase(
+                                        id,
+                                        studentCase.id
+                                      ).then(() => loadStudent())
+                                    }
+                                  }
+                                }}
+                              />
+                            </FlexRowWithGaps>
                           </FlexRight>
                         )}
                         <StudentCaseForm
@@ -394,7 +446,9 @@ export const StudentPage = React.memo(function StudentPage() {
                       </FlexColWithGaps>
 
                       <CaseEvents
+                        events={studentCase.events}
                         studentCaseId={studentCase.id}
+                        reload={loadStudent}
                         disabled={editingSomething}
                         onChangeEditState={setEditingCaseEvent}
                       />

@@ -64,7 +64,21 @@ export const apiGetStudent = (id: string): Promise<StudentResponse> =>
     },
     cases: res.data.cases.map((c) => ({
       ...c,
-      openedAt: parseISO(c.openedAt)
+      openedAt: parseISO(c.openedAt),
+      events: c.events.map((e) => ({
+        ...e,
+        date: parseISO(e.date),
+        created: {
+          ...e.created,
+          time: parseISO(e.created.time)
+        },
+        updated: e.updated
+          ? {
+              ...e.updated,
+              time: parseISO(e.updated.time)
+            }
+          : null
+      }))
     }))
   }))
 
@@ -80,6 +94,9 @@ export const apiPutStudent = (
   }
   return apiClient.put(`/students/${id}`, body)
 }
+
+export const apiDeleteStudent = (id: string): Promise<void> =>
+  apiClient.delete(`/students/${id}`)
 
 export interface StudentResponse {
   student: StudentDetails

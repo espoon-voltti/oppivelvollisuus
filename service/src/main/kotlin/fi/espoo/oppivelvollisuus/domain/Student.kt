@@ -212,3 +212,10 @@ fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List
         .mapTo<DuplicateStudent>()
         .list()
 }
+
+fun Handle.deleteStudent(id: UUID) {
+    createUpdate("DELETE FROM students WHERE id = :id")
+        .bind("id", id)
+        .execute()
+        .also { if (it != 1) throw NotFound() }
+}
