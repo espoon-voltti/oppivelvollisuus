@@ -44,7 +44,7 @@ class StudentTests : FullApplicationTest() {
 
     @Test
     fun `get empty list of students`() {
-        assertEquals(emptyList(), controller.getStudents(emptySearch))
+        assertEquals(emptyList(), controller.getStudents(testUser, emptySearch))
     }
 
     @Test
@@ -91,10 +91,10 @@ class StudentTests : FullApplicationTest() {
                     status = CaseStatus.TODO
                 )
             ),
-            actual = controller.getStudents(emptySearch)
+            actual = controller.getStudents(testUser, emptySearch)
         )
 
-        val studentResponse = controller.getStudent(studentId)
+        val studentResponse = controller.getStudent(testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -182,10 +182,10 @@ class StudentTests : FullApplicationTest() {
                     status = CaseStatus.TODO
                 )
             ),
-            actual = controller.getStudents(emptySearch)
+            actual = controller.getStudents(testUser, emptySearch)
         )
 
-        val studentResponse = controller.getStudent(studentId)
+        val studentResponse = controller.getStudent(testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -253,7 +253,7 @@ class StudentTests : FullApplicationTest() {
             )
         )
 
-        val studentResponse = controller.getStudent(studentId)
+        val studentResponse = controller.getStudent(testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -292,7 +292,7 @@ class StudentTests : FullApplicationTest() {
             )
         )
 
-        assertEquals(2, controller.getStudents(emptySearch).size)
+        assertEquals(2, controller.getStudents(testUser, emptySearch).size)
     }
 
     @Test
@@ -319,7 +319,7 @@ class StudentTests : FullApplicationTest() {
         }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(emptySearch).size)
+        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
     }
 
     @Test
@@ -346,7 +346,7 @@ class StudentTests : FullApplicationTest() {
         }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(emptySearch).size)
+        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
     }
 
     @Test
@@ -476,12 +476,12 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body = minimalStudentAndCaseTestInput
         )
-        val caseId = controller.getStudent(studentId).cases.first().id
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
         controller.deleteStudentCase(testUser, studentId, caseId)
 
         controller.deleteStudent(testUser, studentId)
 
-        assertEquals(0, controller.getStudents(emptySearch).size)
-        assertThrows<NotFound> { controller.getStudent(studentId) }
+        assertEquals(0, controller.getStudents(testUser, emptySearch).size)
+        assertThrows<NotFound> { controller.getStudent(testUser, studentId) }
     }
 }

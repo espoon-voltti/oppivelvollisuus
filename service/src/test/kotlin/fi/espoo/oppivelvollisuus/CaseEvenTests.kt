@@ -19,9 +19,9 @@ class CaseEvenTests : FullApplicationTest() {
     @Test
     fun `create new case event, then update it and finally delete it`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(studentId).cases.first().id
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
 
-        var events = controller.getStudent(studentId).cases.first().events
+        var events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(emptyList(), events)
 
         val eventId = controller.createCaseEvent(
@@ -34,7 +34,7 @@ class CaseEvenTests : FullApplicationTest() {
             )
         )
 
-        events = controller.getStudent(studentId).cases.first().events
+        events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(1, events.size)
         events.first().let { event ->
             assertEquals(eventId, event.id)
@@ -55,7 +55,7 @@ class CaseEvenTests : FullApplicationTest() {
             )
         )
 
-        events = controller.getStudent(studentId).cases.first().events
+        events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(1, events.size)
         events.first().let { event ->
             assertEquals(eventId, event.id)
@@ -66,9 +66,9 @@ class CaseEvenTests : FullApplicationTest() {
             assertEquals(testUserName, event.updated?.name)
         }
 
-        controller.deleteCaseEvent(eventId)
+        controller.deleteCaseEvent(testUser, eventId)
 
-        events = controller.getStudent(studentId).cases.first().events
+        events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(0, events.size)
     }
 }
