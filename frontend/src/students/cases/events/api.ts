@@ -1,4 +1,4 @@
-import { formatISO, parseISO } from 'date-fns'
+import { formatISO } from 'date-fns'
 
 import { apiClient } from '../../../api-client'
 import { JsonOf } from '../../../shared/api-utils'
@@ -17,26 +17,6 @@ export const apiPostCaseEvent = (
     .post<string>(`/student-cases/${studentCaseId}/case-events`, body)
     .then((res) => res.data)
 }
-
-export const apiGetCaseEvents = (studentCaseId: string): Promise<CaseEvent[]> =>
-  apiClient
-    .get<JsonOf<CaseEvent[]>>(`/student-cases/${studentCaseId}/case-events`)
-    .then((res) =>
-      res.data.map((e) => ({
-        ...e,
-        date: parseISO(e.date),
-        created: {
-          ...e.created,
-          time: parseISO(e.created.time)
-        },
-        updated: e.updated
-          ? {
-              ...e.updated,
-              time: parseISO(e.updated.time)
-            }
-          : null
-      }))
-    )
 
 export const apiPutCaseEvent = (
   caseEventId: string,

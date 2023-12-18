@@ -1,5 +1,6 @@
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.common.NotFound
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
@@ -129,7 +130,8 @@ class StudentTests : FullApplicationTest() {
                     sourceContact = "Espoon ala-aste",
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
-                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                    events = emptyList()
                 ),
                 studentCase
             )
@@ -219,7 +221,8 @@ class StudentTests : FullApplicationTest() {
                     sourceContact = "",
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
-                    notInSchoolReason = null
+                    notInSchoolReason = null,
+                    events = emptyList()
                 ),
                 studentCase
             )
@@ -454,5 +457,31 @@ class StudentTests : FullApplicationTest() {
             )
         )
         assertEquals(0, duplicateStudents.size)
+    }
+
+    @Test
+    fun `deleting student fails when it has cases`() {
+        val studentId = controller.createStudent(
+            user = testUser,
+            body = minimalStudentAndCaseTestInput
+        )
+        assertThrows<UnableToExecuteStatementException> {
+            controller.deleteStudent(testUser, studentId)
+        }
+    }
+
+    @Test
+    fun `deleting student after deleting its cases`() {
+        val studentId = controller.createStudent(
+            user = testUser,
+            body = minimalStudentAndCaseTestInput
+        )
+        val caseId = controller.getStudent(studentId).cases.first().id
+        controller.deleteStudentCase(testUser, studentId, caseId)
+
+        controller.deleteStudent(testUser, studentId)
+
+        assertEquals(0, controller.getStudents(emptySearch).size)
+        assertThrows<NotFound> { controller.getStudent(studentId) }
     }
 }

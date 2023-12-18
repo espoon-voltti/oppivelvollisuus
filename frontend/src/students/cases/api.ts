@@ -11,6 +11,7 @@ import {
   SchoolBackground,
   ValpasNotifier
 } from './enums'
+import { CaseEvent } from './events/api'
 import { CaseStatusInput } from './status/api'
 
 export const apiPostStudentCase = (
@@ -38,11 +39,17 @@ export const apiPutStudentCase = (
   return apiClient.put(`/students/${studentId}/cases/${caseId}`, body)
 }
 
+export const apiDeleteStudentCase = (
+  studentId: string,
+  caseId: string
+): Promise<void> => apiClient.delete(`/students/${studentId}/cases/${caseId}`)
+
 export type StudentCase = StudentCaseInput &
   CaseStatusInput & {
     id: string
     studentId: string
     assignedTo: EmployeeBasics | null
+    events: CaseEvent[]
   }
 
 export type StudentCaseInput = {

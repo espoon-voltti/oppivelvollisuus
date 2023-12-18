@@ -5,6 +5,8 @@ import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
+import fi.espoo.oppivelvollisuus.domain.CaseEventInput
+import fi.espoo.oppivelvollisuus.domain.CaseEventType
 import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
@@ -79,7 +81,8 @@ class StudentCaseTests : FullApplicationTest() {
                     sourceContact = "Lastensuojelu, Minna Mikkola",
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
-                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                    events = emptyList()
                 ),
                 studentCase
             )
@@ -131,7 +134,8 @@ class StudentCaseTests : FullApplicationTest() {
                     sourceContact = "",
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
-                    notInSchoolReason = null
+                    notInSchoolReason = null,
+                    events = emptyList()
                 ),
                 studentCase
             )
@@ -171,7 +175,8 @@ class StudentCaseTests : FullApplicationTest() {
                     sourceContact = "Espoon lukio",
                     schoolBackground = setOf(SchoolBackground.EI_PERUSKOULUN_PAATTOTODISTUSTA),
                     caseBackgroundReasons = setOf(CaseBackgroundReason.MOTIVAATION_PUUTE, CaseBackgroundReason.MUU_SYY),
-                    notInSchoolReason = NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA
+                    notInSchoolReason = NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA,
+                    events = emptyList()
                 ),
                 studentCase
             )
@@ -345,5 +350,40 @@ class StudentCaseTests : FullApplicationTest() {
                 CaseStatusInput(CaseStatus.TODO, null)
             )
         }.also { assertTrue { it.isUniqueConstraintViolation() } }
+    }
+
+    @Test
+    fun `deleting student case without events`() {
+        val studentId = controller.createStudent(
+            user = testUser,
+            body = minimalStudentAndCaseTestInput
+        )
+        val caseId = controller.getStudent(studentId).cases.first().id
+
+        controller.deleteStudentCase(testUser, studentId, caseId)
+
+        assertEquals(0, controller.getStudent(studentId).cases.size)
+    }
+
+    @Test
+    fun `deleting student case with events fails`() {
+        val studentId = controller.createStudent(
+            user = testUser,
+            body = minimalStudentAndCaseTestInput
+        )
+        val caseId = controller.getStudent(studentId).cases.first().id
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(
+                date = LocalDate.of(2023, 12, 8),
+                type = CaseEventType.NOTE,
+                notes = "test"
+            )
+        )
+
+        assertThrows<UnableToExecuteStatementException> {
+            controller.deleteStudentCase(testUser, studentId, caseId)
+        }
     }
 }

@@ -1,7 +1,7 @@
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
-import React, { Fragment, useCallback, useEffect, useState } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import { IconButton } from '../../../shared/buttons/IconButton'
 import { InlineButton } from '../../../shared/buttons/InlineButton'
@@ -15,7 +15,6 @@ import { H4 } from '../../../shared/typography'
 import { CaseEventForm } from './CaseEventForm'
 import {
   apiDeleteCaseEvent,
-  apiGetCaseEvents,
   apiPostCaseEvent,
   apiPutCaseEvent,
   CaseEvent,
@@ -23,38 +22,31 @@ import {
 } from './api'
 
 export const CaseEvents = React.memo(function CaseEvents({
+  events,
   studentCaseId,
+  reload,
   disabled,
   onChangeEditState
 }: {
+  events: CaseEvent[]
   studentCaseId: string
+  reload: () => void
   disabled: boolean
   onChangeEditState: (editing: boolean) => unknown
 }) {
-  const [caseEventsResponse, setCaseEventsResponse] = useState<
-    CaseEvent[] | null | undefined
-  >(undefined)
-  const loadCaseEvents = useCallback(() => {
-    setCaseEventsResponse(null)
-    void apiGetCaseEvents(studentCaseId).then(setCaseEventsResponse)
-  }, [studentCaseId])
-  useEffect(() => {
-    loadCaseEvents()
-  }, [loadCaseEvents])
-
   // true = creating new, string = id of the edited case event
   const [editingCaseEvent, setEditingCaseEvent] = useState<boolean | string>(
     false
   )
+
   useEffect(() => {
     onChangeEditState(!!editingCaseEvent)
   }, [onChangeEditState, editingCaseEvent])
+
   const [caseEventInput, setCaseEventInput] = useState<CaseEventInput | null>(
     null
   )
   const [submitting, setSubmitting] = useState(false)
-
-  if (!caseEventsResponse) return null
 
   return (
     <FlexColWithGaps $gapSize="L">
@@ -80,7 +72,7 @@ export const CaseEvents = React.memo(function CaseEvents({
                     void apiPostCaseEvent(studentCaseId, caseEventInput)
                       .then(() => {
                         setEditingCaseEvent(false)
-                        loadCaseEvents()
+                        reload()
                       })
                       .finally(() => setSubmitting(false))
                   }}
@@ -100,7 +92,7 @@ export const CaseEvents = React.memo(function CaseEvents({
       </FlexColWithGaps>
 
       <FlexColWithGaps $gapSize="L">
-        {caseEventsResponse.map((caseEvent, idx) => (
+        {events.map((caseEvent, idx) => (
           <Fragment key={caseEvent.id}>
             <FlexRowWithGaps $gapSize="L">
               <div style={{ flexGrow: '1' }}>
@@ -132,7 +124,7 @@ export const CaseEvents = React.memo(function CaseEvents({
                       void apiPutCaseEvent(caseEvent.id, caseEventInput)
                         .then(() => {
                           setEditingCaseEvent(false)
-                          loadCaseEvents()
+                          reload()
                         })
                         .finally(() => setSubmitting(false))
                     }}
@@ -160,7 +152,7 @@ export const CaseEvents = React.memo(function CaseEvents({
                         setSubmitting(true)
                         void apiDeleteCaseEvent(caseEvent.id).finally(() => {
                           setSubmitting(false)
-                          loadCaseEvents()
+                          reload()
                         })
                       }
                     }}
@@ -168,7 +160,7 @@ export const CaseEvents = React.memo(function CaseEvents({
                 </FlexRowWithGaps>
               )}
             </FlexRowWithGaps>
-            {idx < caseEventsResponse.length - 1 && <Separator />}
+            {idx < events.length - 1 && <Separator />}
           </Fragment>
         ))}
       </FlexColWithGaps>

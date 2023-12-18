@@ -9,6 +9,7 @@ import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
+import org.jdbi.v3.json.Json
 import java.time.LocalDate
 import java.util.*
 
@@ -175,7 +176,8 @@ data class StudentCase(
     val sourceContact: String,
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
-    val notInSchoolReason: NotInSchoolReason?
+    val notInSchoolReason: NotInSchoolReason?,
+    @Json val events: List<CaseEvent>
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
@@ -192,9 +194,9 @@ data class StudentCase(
 
 fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> = createQuery(
 """
-SELECT 
-    sc.id, sc.student_id, sc.opened_at, 
-    assignee.id AS assigned_to_id, 
+SELECT
+    sc.id, sc.student_id, sc.opened_at,
+    assignee.id AS assigned_to_id,
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
     sc.status,
     sc.finished_reason AS finished_info_reason,
@@ -205,11 +207,32 @@ SELECT
     sc.source_contact,
     sc.school_background,
     sc.case_background_reasons,
-    sc.not_in_school_reason
+    sc.not_in_school_reason,
+    coalesce((
+        SELECT jsonb_agg(jsonb_build_object(
+            'id', e.id,
+            'studentCaseId', e.student_case_id,
+            'date', e.date,
+            'type', e.type,
+            'notes', e.notes,
+            'created', jsonb_build_object(
+                'name', creator.first_name || ' ' || creator.last_name,
+                'time', e.created
+            ),
+            'updated', (CASE WHEN updater.id IS NOT NULL THEN jsonb_build_object(
+                'name', updater.first_name || ' ' || updater.last_name,
+                'time', e.updated
+            ) END)
+        ) ORDER BY date DESC, e.created DESC)
+        FROM case_events e
+        JOIN users creator ON e.created_by = creator.id
+        LEFT JOIN users updater ON e.updated_by = updater.id
+        WHERE student_case_id = sc.id
+    ), '[]'::jsonb) AS events
 FROM student_cases sc
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
-ORDER BY opened_at DESC, sc.created DESC 
+ORDER BY opened_at DESC, sc.created DESC;
 """
 )
     .bind("studentId", studentId)
@@ -273,6 +296,14 @@ WHERE id = :id AND student_id = :studentId
         .bind("finishedReason", data.finishedInfo?.reason)
         .bind("startedAtSchool", data.finishedInfo?.startedAtSchool)
         .bind("user", user.id)
+        .execute()
+        .also { if (it != 1) throw NotFound() }
+}
+
+fun Handle.deleteStudentCase(id: UUID, studentId: UUID) {
+    createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
+        .bind("id", id)
+        .bind("studentId", studentId)
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
