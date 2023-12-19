@@ -1572,6 +1572,13 @@
   resolved "https://registry.yarnpkg.com/@types/prop-types/-/prop-types-15.7.9.tgz#b6f785caa7ea1fe4414d9df42ee0ab67f23d8a6d"
   integrity sha512-n1yyPsugYNSmHgxDFjicaI2+gCNjsBck8UX9kuofAKlc0h1bL+20oSF72KeNaW2DUlesbEVCFgyV2dPGTiY42g==
 
+"@types/react-csv@^1.1.10":
+  version "1.1.10"
+  resolved "https://registry.yarnpkg.com/@types/react-csv/-/react-csv-1.1.10.tgz#b4e292d7330d2fa12062c579c752f254f559bf56"
+  integrity sha512-PESAyASL7Nfi/IyBR3ufd8qZkyoS+7jOylKmJxRZUZLFASLo4NZaRsJ8rNP8pCcbIziADyWBbLPD1nPddhsL4g==
+  dependencies:
+    "@types/react" "*"
+
 "@types/react-dom@^18.2.14":
   version "18.2.14"
   resolved "https://registry.yarnpkg.com/@types/react-dom/-/react-dom-18.2.14.tgz#c01ba40e5bb57fc1dc41569bb3ccdb19eab1c539"
@@ -4462,6 +4469,11 @@ react-autosize-textarea@^7.1.0:
     autosize "^4.0.2"
     line-height "^0.3.1"
     prop-types "^15.5.6"
+
+react-csv@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-2.2.2.tgz#5bbf0d72a846412221a14880f294da9d6def9bfb"
+  integrity sha512-RG5hOcZKZFigIGE8LxIEV/OgS1vigFQT4EkaHeKgyuCbUAu9Nbd/1RYq++bJcJJ9VOqO/n9TZRADsXNDR4VEpw==
 
 react-dom@^18.2.0:
   version "18.2.0"

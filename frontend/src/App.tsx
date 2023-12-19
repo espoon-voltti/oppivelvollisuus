@@ -11,6 +11,7 @@ import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
 import { StudentPage } from './students/StudentPage'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
+import { ReportsPage } from './reports/ReportsPage'
 
 const Header = styled.nav`
   height: 80px;
@@ -77,6 +78,14 @@ export const appRouter = createBrowserRouter([
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <StudentPage />
+          </AuthGuard>
+        )
+      },
+      {
+        path: '/raportit',
+        element: (
+          <AuthGuard allow="AUTHENTICATED_ONLY">
+            <ReportsPage />
           </AuthGuard>
         )
       },

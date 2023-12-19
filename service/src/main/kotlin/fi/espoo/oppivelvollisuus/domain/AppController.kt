@@ -267,4 +267,14 @@ class AppController {
             )
         }
     }
+
+    @GetMapping("/reports/student-cases")
+    fun getCasesReport(user: AuthenticatedUser): List<CaseReportRow> {
+        return jdbi.inTransactionUnchecked { it.getCasesReport() }.also {
+            logger.audit(
+                user,
+                "GET_CASES_REPORT"
+            )
+        }
+    }
 }
