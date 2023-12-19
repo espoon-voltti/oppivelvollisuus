@@ -31,14 +31,18 @@ class SystemController {
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("/user-login")
-    fun userLogin(@RequestBody adUser: AdUser): AppUser {
+    fun userLogin(
+        @RequestBody adUser: AdUser
+    ): AppUser {
         return jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
             logger.audit(AuthenticatedUser(it.id), "USER_LOGIN")
         }
     }
 
     @GetMapping("/users/{id}")
-    fun getUser(@PathVariable id: UUID): AppUser? {
+    fun getUser(
+        @PathVariable id: UUID
+    ): AppUser? {
         return jdbi.inTransactionUnchecked { it.getAppUser(id) }
     }
 }

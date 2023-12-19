@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
+import java.util.UUID
 
 @RestController
 class AppController {
@@ -30,7 +30,10 @@ class AppController {
     )
 
     @PostMapping("/students")
-    fun createStudent(user: AuthenticatedUser, @RequestBody body: StudentAndCaseInput): UUID {
+    fun createStudent(
+        user: AuthenticatedUser,
+        @RequestBody body: StudentAndCaseInput
+    ): UUID {
         return jdbi.inTransactionUnchecked { tx ->
             val studentId = tx.insertStudent(data = body.student, user = user)
             tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
@@ -60,12 +63,16 @@ class AppController {
     }
 
     @PostMapping("/students/search")
-    fun getStudents(user: AuthenticatedUser, @RequestBody body: StudentSearchParams): List<StudentSummary> {
+    fun getStudents(
+        user: AuthenticatedUser,
+        @RequestBody body: StudentSearchParams
+    ): List<StudentSummary> {
         return jdbi.inTransactionUnchecked { tx ->
             tx.getStudentSummaries(
-                params = body.copy(
-                    query = body.query.takeIf { !it.isNullOrBlank() }
-                )
+                params =
+                    body.copy(
+                        query = body.query.takeIf { !it.isNullOrBlank() }
+                    )
             )
         }.also {
             logger.audit(
@@ -81,7 +88,10 @@ class AppController {
     )
 
     @GetMapping("/students/{id}")
-    fun getStudent(user: AuthenticatedUser, @PathVariable id: UUID): StudentResponse {
+    fun getStudent(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ): StudentResponse {
         return jdbi.inTransactionUnchecked { tx ->
             val studentDetails = tx.getStudent(id = id)
             val cases = tx.getStudentCasesByStudent(studentId = id)
@@ -96,7 +106,11 @@ class AppController {
     }
 
     @PutMapping("/students/{id}")
-    fun updateStudent(user: AuthenticatedUser, @PathVariable id: UUID, @RequestBody body: StudentInput) {
+    fun updateStudent(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID,
+        @RequestBody body: StudentInput
+    ) {
         jdbi.inTransactionUnchecked { tx ->
             tx.updateStudent(id = id, data = body, user = user)
         }.also {
@@ -125,7 +139,11 @@ class AppController {
     }
 
     @PostMapping("/students/{studentId}/cases")
-    fun createStudentCase(user: AuthenticatedUser, @PathVariable studentId: UUID, @RequestBody body: StudentCaseInput): UUID {
+    fun createStudentCase(
+        user: AuthenticatedUser,
+        @PathVariable studentId: UUID,
+        @RequestBody body: StudentCaseInput
+    ): UUID {
         return jdbi.inTransactionUnchecked { tx ->
             tx.insertStudentCase(studentId = studentId, data = body, user = user)
         }.also {
@@ -225,7 +243,10 @@ class AppController {
     }
 
     @DeleteMapping("/case-events/{id}")
-    fun deleteCaseEvent(user: AuthenticatedUser, @PathVariable id: UUID) {
+    fun deleteCaseEvent(
+        user: AuthenticatedUser,
+        @PathVariable id: UUID
+    ) {
         jdbi.inTransactionUnchecked { tx ->
             tx.deleteCaseEvent(id = id)
         }.also {

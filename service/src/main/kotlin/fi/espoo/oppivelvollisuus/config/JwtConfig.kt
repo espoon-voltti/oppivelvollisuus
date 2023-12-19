@@ -28,19 +28,21 @@ class JwtConfig {
     }
 
     @Bean
-    fun jwtVerifier(algorithm: Algorithm): JWTVerifier =
-        JWT.require(algorithm).acceptLeeway(1).build()
+    fun jwtVerifier(algorithm: Algorithm): JWTVerifier = JWT.require(algorithm).acceptLeeway(1).build()
 }
 
 class JwtKeys(private val publicKeys: Map<String, RSAPublicKey>) : RSAKeyProvider {
     override fun getPrivateKeyId(): String? = null
+
     override fun getPrivateKey(): RSAPrivateKey? = null
+
     override fun getPublicKeyById(keyId: String): RSAPublicKey? = publicKeys[keyId]
 }
 
 fun loadPublicKeys(inputStream: InputStream): Map<String, RSAPublicKey> {
     @JsonIgnoreProperties(ignoreUnknown = true)
     class Jwk(val kid: String, val n: ByteArray, val e: ByteArray)
+
     class JwkSet(val keys: List<Jwk>)
 
     val kf = KeyFactory.getInstance("RSA")
@@ -48,11 +50,12 @@ fun loadPublicKeys(inputStream: InputStream): Map<String, RSAPublicKey> {
         .defaultBase64Variant(Base64Variants.MODIFIED_FOR_URL)
         .build()
         .readValue<JwkSet>(inputStream).keys.associate {
-            it.kid to kf.generatePublic(
-                RSAPublicKeySpec(
-                    BigInteger(1, it.n),
-                    BigInteger(1, it.e)
-                )
-            ) as RSAPublicKey
+            it.kid to
+                kf.generatePublic(
+                    RSAPublicKeySpec(
+                        BigInteger(1, it.n),
+                        BigInteger(1, it.e)
+                    )
+                ) as RSAPublicKey
         }
 }

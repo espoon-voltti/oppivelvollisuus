@@ -22,9 +22,10 @@ class JwtToAuthenticatedUser : HttpFilter() {
         response: HttpServletResponse,
         chain: FilterChain
     ) {
-        val user = request.getDecodedJwt()?.subject?.let { subject ->
-            AuthenticatedUser(id = UUID.fromString(subject))
-        }
+        val user =
+            request.getDecodedJwt()?.subject?.let { subject ->
+                AuthenticatedUser(id = UUID.fromString(subject))
+            }
         if (user != null) {
             request.setAttribute(ATTR_USER, user)
         }
@@ -67,7 +68,11 @@ class HttpAccessControl : HttpFilter() {
 class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
     private val logger = KotlinLogging.logger {}
 
-    override fun doFilter(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+    override fun doFilter(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        chain: FilterChain
+    ) {
         try {
             request.getBearerToken()
                 ?.takeIf { it.isNotEmpty() }
@@ -79,8 +84,7 @@ class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
     }
 }
 
-fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? =
-    getAttribute(ATTR_USER) as AuthenticatedUser?
+fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? = getAttribute(ATTR_USER) as AuthenticatedUser?
 
 private const val ATTR_USER = "oppivelvollisuus.user"
 private const val ATTR_JWT = "oppivelvollisuus.jwt"
@@ -89,5 +93,4 @@ private fun HttpServletRequest.getDecodedJwt(): DecodedJWT? = getAttribute(ATTR_
 
 private fun HttpServletRequest.setDecodedJwt(jwt: DecodedJWT) = setAttribute(ATTR_JWT, jwt)
 
-private fun HttpServletRequest.getBearerToken(): String? =
-    getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")
+private fun HttpServletRequest.getBearerToken(): String? = getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")

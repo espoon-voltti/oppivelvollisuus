@@ -9,7 +9,7 @@ import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.statement.SqlStatements
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 enum class Gender {
@@ -67,7 +67,8 @@ data class StudentSearchParams(
     val assignedTo: UUID?
 )
 
-fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> = createQuery(
+fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
+    createQuery(
 """
 SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status,
     assignee.id AS assigned_to_id, 
@@ -84,22 +85,22 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
 ${if (params.assignedTo != null) "AND assignee.id = :assignedTo" else ""}
 ${if (params.query != null) {
-        """
+            """
     AND (lower(s.first_name) LIKE :query || '%' OR 
         lower(s.last_name) LIKE :query || '%' OR 
         lower(s.first_name || ' ' || s.last_name) LIKE :query || '%' OR
         lower(s.last_name || ' ' || s.first_name) LIKE :query || '%' OR
         lower(s.ssn) LIKE :query || '%')
 """
-    } else {
-        ""
-    }}
+        } else {
+            ""
+        }}
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
-)
-    .bindKotlin(params.copy(query = params.query?.trim()?.lowercase()))
-    .mapTo<StudentSummary>()
-    .list()
+    )
+        .bindKotlin(params.copy(query = params.query?.trim()?.lowercase()))
+        .mapTo<StudentSummary>()
+        .list()
 
 data class Student(
     val id: UUID,
@@ -118,20 +119,25 @@ data class Student(
     val supportContactsInfo: String
 )
 
-fun Handle.getStudent(id: UUID) = createQuery(
+fun Handle.getStudent(id: UUID) =
+    createQuery(
 """
 SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info
 FROM students
 WHERE id = :id
 """
-)
-    .bind("id", id)
-    .mapTo<Student>()
-    .findOne()
-    .getOrNull()
-    ?: throw NotFound()
+    )
+        .bind("id", id)
+        .mapTo<Student>()
+        .findOne()
+        .getOrNull()
+        ?: throw NotFound()
 
-fun Handle.updateStudent(id: UUID, data: StudentInput, user: AuthenticatedUser) {
+fun Handle.updateStudent(
+    id: UUID,
+    data: StudentInput,
+    user: AuthenticatedUser
+) {
     createUpdate(
 """
 UPDATE students 
@@ -178,18 +184,21 @@ data class DuplicateStudent(
 )
 
 fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List<DuplicateStudent> {
-    val ssnPredicate = "(lower(ssn) = lower(:ssn))"
-        .takeIf { input.ssn.isNotBlank() }
+    val ssnPredicate =
+        "(lower(ssn) = lower(:ssn))"
+            .takeIf { input.ssn.isNotBlank() }
 
-    val valpasLinkPredicate = "(lower(valpas_link) = lower(:valpasLink))"
-        .takeIf { input.valpasLink.isNotBlank() }
+    val valpasLinkPredicate =
+        "(lower(valpas_link) = lower(:valpasLink))"
+            .takeIf { input.valpasLink.isNotBlank() }
 
-    val namePredicate = """(
+    val namePredicate =
+        """(
         lower(first_name) = lower(:firstName) AND 
         lower(last_name) = lower(:lastName) AND 
         (ssn = '' OR :ssn = '')
     )"""
-        .takeIf { input.firstName.isNotBlank() && input.lastName.isNotBlank() }
+            .takeIf { input.firstName.isNotBlank() && input.lastName.isNotBlank() }
 
     return createQuery(
         """

@@ -6,10 +6,10 @@ export const apiClient = axios.create({
 })
 
 apiClient.interceptors.response.use(
-  res => res,
-  err => {
-    if(err instanceof AxiosError) {
-      if(err.response?.status === 401) {
+  (res) => res,
+  (err) => {
+    if (err instanceof AxiosError) {
+      if (err.response?.status === 401) {
         window.location.reload()
       }
     }

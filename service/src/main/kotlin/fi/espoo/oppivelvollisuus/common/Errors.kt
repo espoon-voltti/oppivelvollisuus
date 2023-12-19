@@ -32,5 +32,4 @@ data class Unauthorized(
     override val cause: Throwable? = null
 ) : RuntimeException(message, cause)
 
-fun UnableToExecuteStatementException.isUniqueConstraintViolation() =
-    message?.contains("violates unique constraint") == true
+fun UnableToExecuteStatementException.isUniqueConstraintViolation() = message?.contains("violates unique constraint") == true
