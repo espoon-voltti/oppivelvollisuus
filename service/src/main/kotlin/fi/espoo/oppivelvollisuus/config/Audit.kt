@@ -12,9 +12,10 @@ fun KLogger.audit(
     eventCode: String,
     meta: Map<String, String> = emptyMap()
 ) {
-    val data = mapOf<String, Any?>(
-        "userId" to user.id,
-        "meta" to meta
-    )
+    val data =
+        mapOf<String, Any?>(
+            "userId" to user.id,
+            "meta" to meta
+        )
     warn(AUDIT_MARKER, eventCode, StructuredArguments.entries(data))
 }

@@ -11,7 +11,7 @@ import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
 import java.time.LocalDate
-import java.util.*
+import java.util.UUID
 
 enum class CaseStatus {
     TODO,
@@ -192,7 +192,8 @@ data class StudentCase(
     }
 }
 
-fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> = createQuery(
+fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> =
+    createQuery(
 """
 SELECT
     sc.id, sc.student_id, sc.opened_at,
@@ -234,12 +235,17 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
 ORDER BY opened_at DESC, sc.created DESC;
 """
-)
-    .bind("studentId", studentId)
-    .mapTo<StudentCase>()
-    .list()
+    )
+        .bind("studentId", studentId)
+        .mapTo<StudentCase>()
+        .list()
 
-fun Handle.updateStudentCase(id: UUID, studentId: UUID, data: StudentCaseInput, user: AuthenticatedUser) {
+fun Handle.updateStudentCase(
+    id: UUID,
+    studentId: UUID,
+    data: StudentCaseInput,
+    user: AuthenticatedUser
+) {
     createUpdate(
 """
 UPDATE student_cases
@@ -277,7 +283,12 @@ data class CaseStatusInput(
     }
 }
 
-fun Handle.updateStudentCaseStatus(id: UUID, studentId: UUID, data: CaseStatusInput, user: AuthenticatedUser) {
+fun Handle.updateStudentCaseStatus(
+    id: UUID,
+    studentId: UUID,
+    data: CaseStatusInput,
+    user: AuthenticatedUser
+) {
     createUpdate(
         """
 UPDATE student_cases
@@ -300,7 +311,10 @@ WHERE id = :id AND student_id = :studentId
         .also { if (it != 1) throw NotFound() }
 }
 
-fun Handle.deleteStudentCase(id: UUID, studentId: UUID) {
+fun Handle.deleteStudentCase(
+    id: UUID,
+    studentId: UUID
+) {
     createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
         .bind("id", id)
         .bind("studentId", studentId)

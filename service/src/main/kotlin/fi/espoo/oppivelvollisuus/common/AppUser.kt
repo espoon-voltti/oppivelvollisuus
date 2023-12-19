@@ -43,13 +43,14 @@ RETURNING id, external_id, first_name, last_name, email
         .mapTo<AppUser>()
         .one()
 
-fun Handle.getAppUsers(): List<AppUser> = createQuery(
-    """
+fun Handle.getAppUsers(): List<AppUser> =
+    createQuery(
+        """
     SELECT id, external_id, first_name, last_name, email
     FROM users
     WHERE NOT system_user
 """
-).mapTo<AppUser>().list()
+    ).mapTo<AppUser>().list()
 
 fun Handle.getAppUser(id: UUID) =
     createQuery(

@@ -7,7 +7,7 @@ import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.*
+import java.util.UUID
 
 enum class CaseEventType {
     NOTE,
@@ -64,7 +64,11 @@ data class ModifyInfo(
     val time: ZonedDateTime
 )
 
-fun Handle.updateCaseEvent(id: UUID, data: CaseEventInput, user: AuthenticatedUser) {
+fun Handle.updateCaseEvent(
+    id: UUID,
+    data: CaseEventInput,
+    user: AuthenticatedUser
+) {
     createUpdate(
         """
 UPDATE case_events

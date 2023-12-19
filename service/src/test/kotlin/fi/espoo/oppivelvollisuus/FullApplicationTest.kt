@@ -8,7 +8,6 @@ import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import testUser
-import java.util.*
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -23,21 +22,21 @@ abstract class FullApplicationTest {
         jdbi.withHandleUnchecked { tx ->
             tx.execute(
                 """
-CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
-BEGIN
-  EXECUTE (
-    SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
-    FROM information_schema.tables
-    WHERE table_schema = 'public'
-    AND table_type = 'BASE TABLE'
-    AND table_name <> 'flyway_schema_history'
-  );
-  EXECUTE (
-    SELECT 'SELECT ' || coalesce(string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', '), '')
-    FROM information_schema.sequences
-    WHERE sequence_schema = 'public'
-  );
-END ${'$'}${'$'} LANGUAGE plpgsql;
+                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
+                BEGIN
+                  EXECUTE (
+                    SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
+                    FROM information_schema.tables
+                    WHERE table_schema = 'public'
+                    AND table_type = 'BASE TABLE'
+                    AND table_name <> 'flyway_schema_history'
+                  );
+                  EXECUTE (
+                    SELECT 'SELECT ' || coalesce(string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', '), '')
+                    FROM information_schema.sequences
+                    WHERE sequence_schema = 'public'
+                  );
+                END ${'$'}${'$'} LANGUAGE plpgsql;
                 """.trimIndent()
             )
         }

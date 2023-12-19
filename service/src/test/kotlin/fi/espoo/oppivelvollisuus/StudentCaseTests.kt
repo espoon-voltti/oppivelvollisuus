@@ -48,21 +48,22 @@ class StudentCaseTests : FullApplicationTest() {
             )
         }
 
-        val caseId = controller.createStudentCase(
-            testUser,
-            studentId,
-            StudentCaseInput(
-                openedAt = LocalDate.of(2023, 12, 8),
-                assignedTo = testUser.id,
-                source = CaseSource.OTHER,
-                sourceValpas = null,
-                sourceOther = OtherNotifier.LASTENSUOJELU,
-                sourceContact = "Lastensuojelu, Minna Mikkola",
-                schoolBackground = SchoolBackground.entries.toSet(),
-                caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
-                notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
+        val caseId =
+            controller.createStudentCase(
+                testUser,
+                studentId,
+                StudentCaseInput(
+                    openedAt = LocalDate.of(2023, 12, 8),
+                    assignedTo = testUser.id,
+                    source = CaseSource.OTHER,
+                    sourceValpas = null,
+                    sourceOther = OtherNotifier.LASTENSUOJELU,
+                    sourceContact = "Lastensuojelu, Minna Mikkola",
+                    schoolBackground = SchoolBackground.entries.toSet(),
+                    caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
+                )
             )
-        )
 
         val studentResponse = controller.getStudent(testUser, studentId)
         assertEquals(2, studentResponse.cases.size)
@@ -101,21 +102,22 @@ class StudentCaseTests : FullApplicationTest() {
             )
         }
 
-        val caseId = controller.createStudentCase(
-            testUser,
-            studentId,
-            StudentCaseInput(
-                openedAt = LocalDate.of(2023, 12, 8),
-                assignedTo = null,
-                source = CaseSource.VALPAS_AUTOMATIC_CHECK,
-                sourceValpas = null,
-                sourceOther = null,
-                sourceContact = "",
-                schoolBackground = emptySet(),
-                caseBackgroundReasons = emptySet(),
-                notInSchoolReason = null
+        val caseId =
+            controller.createStudentCase(
+                testUser,
+                studentId,
+                StudentCaseInput(
+                    openedAt = LocalDate.of(2023, 12, 8),
+                    assignedTo = null,
+                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                    sourceValpas = null,
+                    sourceOther = null,
+                    sourceContact = "",
+                    schoolBackground = emptySet(),
+                    caseBackgroundReasons = emptySet(),
+                    notInSchoolReason = null
+                )
             )
-        )
 
         var studentResponse = controller.getStudent(testUser, studentId)
         assertEquals(2, studentResponse.cases.size)
@@ -354,10 +356,11 @@ class StudentCaseTests : FullApplicationTest() {
 
     @Test
     fun `deleting student case without events`() {
-        val studentId = controller.createStudent(
-            user = testUser,
-            body = minimalStudentAndCaseTestInput
-        )
+        val studentId =
+            controller.createStudent(
+                user = testUser,
+                body = minimalStudentAndCaseTestInput
+            )
         val caseId = controller.getStudent(testUser, studentId).cases.first().id
 
         controller.deleteStudentCase(testUser, studentId, caseId)
@@ -367,10 +370,11 @@ class StudentCaseTests : FullApplicationTest() {
 
     @Test
     fun `deleting student case with events fails`() {
-        val studentId = controller.createStudent(
-            user = testUser,
-            body = minimalStudentAndCaseTestInput
-        )
+        val studentId =
+            controller.createStudent(
+                user = testUser,
+                body = minimalStudentAndCaseTestInput
+            )
         val caseId = controller.getStudent(testUser, studentId).cases.first().id
         controller.createCaseEvent(
             testUser,

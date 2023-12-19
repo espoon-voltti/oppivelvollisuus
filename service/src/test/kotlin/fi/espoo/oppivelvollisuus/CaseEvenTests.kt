@@ -24,15 +24,16 @@ class CaseEvenTests : FullApplicationTest() {
         var events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(emptyList(), events)
 
-        val eventId = controller.createCaseEvent(
-            testUser,
-            caseId,
-            CaseEventInput(
-                date = LocalDate.of(2023, 12, 8),
-                type = CaseEventType.NOTE,
-                notes = "test"
+        val eventId =
+            controller.createCaseEvent(
+                testUser,
+                caseId,
+                CaseEventInput(
+                    date = LocalDate.of(2023, 12, 8),
+                    type = CaseEventType.NOTE,
+                    notes = "test"
+                )
             )
-        )
 
         events = controller.getStudent(testUser, studentId).cases.first().events
         assertEquals(1, events.size)
