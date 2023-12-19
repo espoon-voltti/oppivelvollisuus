@@ -29,7 +29,7 @@
     "passport": "^0.6.0",
     "pino": "^8.17.1",
     "pino-http": "^8.5.0",
-    "pino-pretty": "^10.2.0",
+    "pino-pretty": "^10.3.0",
     "redis": "^4.6.7",
     "query-string": "^8.1.0",
     "source-map-support": "^0.5.21",
