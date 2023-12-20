@@ -8,6 +8,8 @@ plugins {
     kotlin("plugin.spring") version "1.9.20"
     id("org.flywaydb.flyway") version "10.3.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.0.3"
+
+    idea
 }
 
 java {
@@ -16,6 +18,25 @@ java {
 
 repositories {
     mavenCentral()
+}
+
+sourceSets {
+    register("e2eTest") {
+        compileClasspath += main.get().output + test.get().output
+        runtimeClasspath += main.get().output + test.get().output
+    }
+}
+
+val e2eTestImplementation: Configuration by configurations.getting {
+    extendsFrom(configurations.testImplementation.get())
+}
+
+configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
+
+idea {
+    module {
+        testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories
+    }
 }
 
 dependencies {
@@ -54,6 +75,7 @@ dependencies {
     api(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("com.microsoft.playwright:playwright:1.40.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -99,6 +121,15 @@ tasks.register("resolveDependencies") {
 tasks {
     bootRun {
         systemProperty("spring.profiles.active", "local")
+    }
+
+    register("e2eTest", Test::class) {
+        useJUnitPlatform()
+        group = "verification"
+        testClassesDirs = sourceSets["e2eTest"].output.classesDirs
+        classpath = sourceSets["e2eTest"].runtimeClasspath
+        shouldRunAfter("test")
+        outputs.upToDateWhen { false }
     }
 }
 

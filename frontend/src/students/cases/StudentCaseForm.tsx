@@ -184,10 +184,12 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             <span>{caseSourceNames[props.studentCase.source]}</span>
           ) : (
             <Select<CaseSource>
+              data-qa="source-select"
               items={caseSources}
               selectedItem={source}
               placeholder="Valitse"
               getItemLabel={(item) => caseSourceNames[item]}
+              getItemDataQa={(item) => item}
               onChange={(item) => setSource(item)}
             />
           )}

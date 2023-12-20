@@ -13,7 +13,7 @@ export const UserHeader = React.memo(function UserHeader() {
 
   return (
     <FlexRowWithGaps>
-      <span>
+      <span data-qa="logged-in-user">
         {user.firstName} {user.lastName}
       </span>
       <a href={logoutUrl}>Kirjaudu ulos</a>

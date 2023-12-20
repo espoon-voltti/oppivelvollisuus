@@ -55,10 +55,11 @@ function GenericSelect<T>(props: SelectProps<T>) {
   )
 
   return (
-    <Root $width={width} data-qa={dataQa}>
+    <Root $width={width}>
       <Wrapper>
         <StyledSelect
           id={id}
+          data-qa={dataQa}
           name={name}
           value={selectedItem ? getItemValue(selectedItem) : ''}
           onChange={(e) => {

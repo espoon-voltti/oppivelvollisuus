@@ -120,7 +120,7 @@ export const StudentPage = React.memo(function StudentPage() {
           onClick={() => navigate('/oppivelvolliset')}
         />
         <VerticalGap $size="m" />
-        <H2>
+        <H2 data-qa="student-name">
           {studentResponse
             ? `${studentResponse.student.lastName} ${studentResponse.student.firstName}`
             : ''}

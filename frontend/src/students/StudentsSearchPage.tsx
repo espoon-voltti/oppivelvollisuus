@@ -68,6 +68,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <AddButton
                 text="Lisää oppivelvollinen"
                 onClick={() => navigate('/oppivelvolliset/uusi')}
+                data-qa="create-student-button"
               />
             </FlexRight>
           </FlexLeftRight>

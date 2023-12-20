@@ -1,0 +1,9 @@
+app:
+  jwt:
+    public_keys_url: classpath:local-development/jwks.json
+
+spring:
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/oppivelvollisuus_it"
+    username: "oppivelvollisuus"
+    password: "postgres"

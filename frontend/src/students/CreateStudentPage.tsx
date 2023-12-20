@@ -71,6 +71,7 @@ export const CreateStudentPage = React.memo(function CreateStudentPage() {
         <FlexRight>
           <Button
             text="Tallenna"
+            data-qa="save-button"
             primary
             disabled={submitting || !studentInput || !studentCaseInput}
             onClick={() => {
