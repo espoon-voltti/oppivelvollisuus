@@ -1,3 +1,6 @@
 package fi.espoo.oppivelvollisuus
 
-const val BASE_URL = "http://localhost:9000"
+val runningInDocker = System.getenv("E2E_ENV") == "docker"
+val baseUrl = if(runningInDocker) "http://frontend" else "http://localhost:9000"
+
+const val e2eDebugLogging = false

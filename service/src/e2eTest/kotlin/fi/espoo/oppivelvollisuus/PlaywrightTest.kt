@@ -51,7 +51,9 @@ abstract class PlaywrightTest {
         playwright = Playwright.create()
         browser =
             playwright.chromium().launch(
-                BrowserType.LaunchOptions().setHeadless(false).setTimeout(10_000.0)
+                BrowserType.LaunchOptions()
+                    .setHeadless(runningInDocker)
+                    .setTimeout(10_000.0)
             )
     }
 
@@ -70,7 +72,18 @@ abstract class PlaywrightTest {
 
     protected fun getPageWithDefaultOptions(): Page {
         val page = browser.newPage()
-        page.setDefaultTimeout(1000.0)
+        val timeout = if (runningInDocker) 10_000.0 else 2000.0
+        page.setDefaultTimeout(timeout)
+        page.setDefaultNavigationTimeout(timeout)
+        if(e2eDebugLogging) {
+            page.onDOMContentLoaded { println("DOMContentLoaded") }
+            page.onConsoleMessage { println("Cnsole ${it.type()}: ${it.text()}") }
+            page.onPageError { println("PageError") }
+            page.onRequest { println("Request ${it.method()} ${it.url()}") }
+            page.onResponse { println("Response ${it.status()} ${it.url()}") }
+            page.onRequestFailed { println("RequestFailed") }
+            page.onRequestFinished { println("RequestFinished") }
+        }
         return page
     }
 }

@@ -16,6 +16,10 @@ COPY . .
 
 RUN yarn build
 
+FROM builder AS test
+
+RUN yarn lint
+
 FROM nginx:${NGINX_VERSION}
 
 ENV NGINX_ENV=local \

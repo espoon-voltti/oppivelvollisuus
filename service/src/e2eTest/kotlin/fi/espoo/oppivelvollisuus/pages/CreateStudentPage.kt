@@ -2,7 +2,7 @@ package fi.espoo.oppivelvollisuus.pages
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
-import fi.espoo.oppivelvollisuus.BASE_URL
+import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
 
 class CreateStudentPage(private val page: Page) {
@@ -12,6 +12,6 @@ class CreateStudentPage(private val page: Page) {
     val sourceSelect = page.locator(dataQa("source-select"))
 
     fun assertUrl() {
-        assertThat(page).hasURL("$BASE_URL/oppivelvolliset/uusi")
+        assertThat(page).hasURL("$baseUrl/oppivelvolliset/uusi")
     }
 }

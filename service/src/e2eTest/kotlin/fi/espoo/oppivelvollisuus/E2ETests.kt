@@ -34,7 +34,7 @@ class E2ETests : PlaywrightTest() {
     }
 
     private fun doLogin(page: Page) {
-        page.navigate(BASE_URL)
+        page.navigate("$baseUrl/kirjaudu")
         val loginPage = LoginPage(page)
         loginPage.assertUrl()
         loginPage.login()
