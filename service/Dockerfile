@@ -53,9 +53,12 @@ RUN ./gradlew --no-daemon resolveDependencies
 
 COPY . .
 
+
 # --offline is used to be sure that all dependencies are installed in previous steps
-RUN ./gradlew --offline --no-daemon assemble \
+RUN ./gradlew --offline --no-daemon ktlintCheck
+RUN ./gradlew --offline --no-daemon assemble  \
  && unzip -oq build/libs/oppivelvollisuus-service-boot.jar -d target
+
 
 FROM base
 

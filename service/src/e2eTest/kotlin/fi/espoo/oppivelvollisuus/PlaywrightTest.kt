@@ -75,9 +75,11 @@ abstract class PlaywrightTest {
         val timeout = if (runningInDocker) 10_000.0 else 2000.0
         page.setDefaultTimeout(timeout)
         page.setDefaultNavigationTimeout(timeout)
-        if(e2eDebugLogging) {
-            page.onDOMContentLoaded { println("DOMContentLoaded") }
-            page.onConsoleMessage { println("Cnsole ${it.type()}: ${it.text()}") }
+        if (E2E_DEBUG_LOGGING) {
+            page.onDOMContentLoaded {
+                println("DOMContentLoaded")
+            }
+            page.onConsoleMessage { println("Console ${it.type()}: ${it.text()}") }
             page.onPageError { println("PageError") }
             page.onRequest { println("Request ${it.method()} ${it.url()}") }
             page.onResponse { println("Response ${it.status()} ${it.url()}") }
