@@ -1,3 +1,4 @@
+import { faChartPie } from '@fortawesome/free-solid-svg-icons/faChartPie'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
 import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -6,13 +7,13 @@ import styled from 'styled-components'
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { SelectionChip } from '../shared/Chip'
 import { AddButton } from '../shared/buttons/AddButton'
+import { InlineButton } from '../shared/buttons/InlineButton'
 import { formatDate } from '../shared/dates'
 import { InputField } from '../shared/form/InputField'
 import { Select } from '../shared/form/Select'
 import {
   FlexColWithGaps,
   FlexLeftRight,
-  FlexRight,
   FlexRowWithGaps,
   LabeledInput,
   PageContainer,
@@ -55,23 +56,28 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
     <PageContainer>
       <SectionContainer $minHeight="600px">
         <FlexColWithGaps $gapSize="m">
-          <FlexLeftRight style={{ alignItems: 'flex-start' }}>
-            <LabeledInput $cols={6}>
-              <Label>Haku nimellä tai hetulla</Label>
-              <InputField
-                value={query}
-                onChange={setQuery}
-                icon={faMagnifyingGlass}
+          <FlexLeftRight>
+            <FlexRowWithGaps>
+              <InlineButton
+                text="Raportointi"
+                icon={faChartPie}
+                onClick={() => navigate('/raportointi')}
               />
-            </LabeledInput>
-            <FlexRight>
-              <AddButton
-                text="Lisää oppivelvollinen"
-                onClick={() => navigate('/oppivelvolliset/uusi')}
-                data-qa="create-student-button"
-              />
-            </FlexRight>
+            </FlexRowWithGaps>
+            <AddButton
+              text="Lisää oppivelvollinen"
+              onClick={() => navigate('/oppivelvolliset/uusi')}
+              data-qa="create-student-button"
+            />
           </FlexLeftRight>
+          <LabeledInput $cols={6}>
+            <Label>Haku nimellä tai hetulla</Label>
+            <InputField
+              value={query}
+              onChange={setQuery}
+              icon={faMagnifyingGlass}
+            />
+          </LabeledInput>
           <FlexRowWithGaps
             $gapSize="L"
             style={{ justifyContent: 'space-between' }}

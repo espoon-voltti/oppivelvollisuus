@@ -1,9 +1,14 @@
-import { CaseSource } from '../students/cases/enums'
-import { Gender } from '../students/enums'
-import { JsonOf } from '../shared/api-utils'
-import { apiClient } from '../api-client'
 import { parseISO } from 'date-fns'
-import { CaseFinishedReason, CaseStatus, SchoolType } from '../students/cases/status/enums'
+
+import { apiClient } from '../api-client'
+import { JsonOf } from '../shared/api-utils'
+import { CaseSource } from '../students/cases/enums'
+import {
+  CaseFinishedReason,
+  CaseStatus,
+  SchoolType
+} from '../students/cases/status/enums'
+import { Gender } from '../students/enums'
 
 export interface CasesReportRow {
   openedAt: Date
@@ -15,8 +20,8 @@ export interface CasesReportRow {
   startedAtSchool: SchoolType | null
 }
 
-export const apiGetCasesReport = (): Promise<CasesReportRow[]> => {
-  return apiClient
+export const apiGetCasesReport = (): Promise<CasesReportRow[]> =>
+  apiClient
     .get<JsonOf<CasesReportRow[]>>('/reports/student-cases')
     .then((res) =>
       res.data.map((row) => ({
@@ -24,4 +29,3 @@ export const apiGetCasesReport = (): Promise<CasesReportRow[]> => {
         openedAt: parseISO(row.openedAt)
       }))
     )
-}

@@ -14,7 +14,9 @@ data class CaseReportRow(
     val startedAtSchool: SchoolType?
 )
 
-fun Handle.getCasesReport(): List<CaseReportRow> = createQuery("""
+fun Handle.getCasesReport(): List<CaseReportRow> =
+    createQuery(
+        """
     SELECT 
         sc.opened_at,
         sc.source,
@@ -25,4 +27,5 @@ fun Handle.getCasesReport(): List<CaseReportRow> = createQuery("""
         sc.started_at_school
     FROM student_cases sc
     JOIN students s on sc.student_id = s.id
-""").mapTo<CaseReportRow>().list()
+"""
+    ).mapTo<CaseReportRow>().list()

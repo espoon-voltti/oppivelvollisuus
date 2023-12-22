@@ -50,6 +50,7 @@ COPY ./gradle/ ./gradle/
 COPY ./gradlew ./build.gradle.kts ./gradle.properties ./settings.gradle.kts ./
 
 RUN ./gradlew --no-daemon resolveDependencies
+RUN ./gradlew --no-daemon ktlintCheck
 
 COPY . .
 

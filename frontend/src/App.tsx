@@ -7,11 +7,14 @@ import { LoginPage } from './auth/LoginPage'
 import { UserContextProvider } from './auth/UserContext'
 import { UserHeader } from './auth/UserHeader'
 import { useAuthStatus } from './auth/auth-status'
+import { ReportsPage } from './reports/ReportsPage'
+import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
 import { StudentPage } from './students/StudentPage'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
-import { ReportsPage } from './reports/ReportsPage'
+
+const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
 const Header = styled.nav`
   height: 80px;
@@ -35,7 +38,10 @@ function App() {
     <UserContextProvider user={user}>
       <Fragment>
         <Header>
-          <H1>Espoon kaupunki - Oppivelvollisuuden seuranta</H1>
+          <FlexRowWithGaps>
+            <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
+            <H1>Oppivelvollisuuden seuranta</H1>
+          </FlexRowWithGaps>
           <UserHeader />
         </Header>
         <Outlet />
@@ -82,7 +88,7 @@ export const appRouter = createBrowserRouter([
         )
       },
       {
-        path: '/raportit',
+        path: '/raportointi',
         element: (
           <AuthGuard allow="AUTHENTICATED_ONLY">
             <ReportsPage />
