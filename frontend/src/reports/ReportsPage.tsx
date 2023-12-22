@@ -15,7 +15,20 @@ import {
   VerticalGap
 } from '../shared/layout'
 import { H2 } from '../shared/typography'
-import { caseSourceNames } from '../students/cases/enums'
+import {
+  caseBackgroundReasonNames,
+  caseBackgroundReasonValues,
+  caseSourceNames,
+  notInSchoolReasonNames,
+  otherNotifierNames,
+  schoolBackgroundNames,
+  schoolBackgrounds,
+  valpasNotifierNames
+} from '../students/cases/enums'
+import {
+  caseEventTypeNames,
+  caseEventTypes
+} from '../students/cases/events/enums'
 import {
   caseFinishedReasonNames,
   caseStatusNames,
@@ -52,25 +65,87 @@ export const ReportsPage = React.memo(function ReportsPage() {
           <StyledDownloadButton
             data={rows.map((r) => ({
               openedAt: formatDate(r.openedAt),
-              source: caseSourceNames[r.source],
+              birthYear: r.birthYear !== null ? r.birthYear : '',
+              ageAtCaseOpened:
+                r.ageAtCaseOpened !== null ? r.ageAtCaseOpened : '',
               gender: r.gender ? genderNames[r.gender] : '',
               language: r.language,
+              municipalityInFinland: r.municipalityInFinland ? 'Kyllä' : 'Ei',
               status: caseStatusNames[r.status],
               finishedReason: r.finishedReason
                 ? caseFinishedReasonNames[r.finishedReason]
                 : '',
               startedAtSchool: r.startedAtSchool
                 ? schoolTypeNames[r.startedAtSchool]
-                : ''
+                : '',
+              source: caseSourceNames[r.source],
+              sourceDetails: r.sourceValpas
+                ? valpasNotifierNames[r.sourceValpas]
+                : r.sourceOther
+                  ? otherNotifierNames[r.sourceOther]
+                  : '',
+              ...schoolBackgrounds.reduce(
+                (acc, val) => ({
+                  ...acc,
+                  [`schoolBackground_${val}`]: r.schoolBackground.includes(val)
+                    ? 'Kyllä'
+                    : 'Ei'
+                }),
+                {}
+              ),
+              ...caseBackgroundReasonValues.reduce(
+                (acc, val) => ({
+                  ...acc,
+                  [`caseBackgroundReason_${val}`]:
+                    r.caseBackgroundReasons.includes(val) ? 'Kyllä' : 'Ei'
+                }),
+                {}
+              ),
+              notInSchoolReason: r.notInSchoolReason
+                ? notInSchoolReasonNames[r.notInSchoolReason]
+                : '',
+              ...caseEventTypes
+                .filter((t) => t !== 'NOTE')
+                .reduce(
+                  (acc, val) => ({
+                    ...acc,
+                    [`eventType_${val}`]: r.eventTypes.includes(val)
+                      ? 'Kyllä'
+                      : 'Ei'
+                  }),
+                  {}
+                )
             }))}
             headers={[
               { key: 'openedAt', label: 'Vastaanotettu' },
-              { key: 'source', label: 'Lähde' },
+              { key: 'birthYear', label: 'Syntymävuosi' },
+              { key: 'ageAtCaseOpened', label: 'Ikä ilmoitushetkellä' },
               { key: 'gender', label: 'Sukupuoli' },
               { key: 'language', label: 'Äidinkieli' },
+              { key: 'municipalityInFinland', label: 'Kotikunta Suomessa' },
               { key: 'status', label: 'Ohjauksen tila' },
               { key: 'finishedReason', label: 'Ohjauksen päättymisen syy' },
-              { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' }
+              { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' },
+              { key: 'source', label: 'Lähde' },
+              { key: 'sourceDetails', label: 'Lähde tarkennus' },
+              ...schoolBackgrounds.map((val) => ({
+                key: `schoolBackground_${val}`,
+                label: schoolBackgroundNames[val]
+              })),
+              ...caseBackgroundReasonValues.map((val) => ({
+                key: `caseBackgroundReason_${val}`,
+                label: caseBackgroundReasonNames[val]
+              })),
+              {
+                key: 'notInSchoolReason',
+                label: 'Ei suorita oppivelvollisuutta, koska'
+              },
+              ...caseEventTypes
+                .filter((t) => t !== 'NOTE')
+                .map((val) => ({
+                  key: `eventType_${val}`,
+                  label: caseEventTypeNames[val]
+                }))
             ]}
             separator=";"
             filename="oppivelvollisuusilmoitukset.csv"
