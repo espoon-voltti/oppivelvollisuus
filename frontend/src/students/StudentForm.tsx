@@ -237,7 +237,11 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             {props.mode === 'VIEW' ? (
               <span>{props.student.lastName}</span>
             ) : (
-              <InputField onChange={setLastName} value={lastName} />
+              <InputField
+                data-qa="last-name-input"
+                onChange={setLastName}
+                value={lastName}
+              />
             )}
           </LabeledInput>
           <LabeledInput $cols={3}>
@@ -245,7 +249,11 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             {props.mode === 'VIEW' ? (
               <span>{props.student.firstName}</span>
             ) : (
-              <InputField onChange={setFirstName} value={firstName} />
+              <InputField
+                data-qa="first-name-input"
+                onChange={setFirstName}
+                value={firstName}
+              />
             )}
           </LabeledInput>
         </RowOfInputs>

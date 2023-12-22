@@ -44,7 +44,7 @@ export const LoginPage = React.memo(function LoginPage() {
         <Wrapper>
           <FlexColWithGaps $gapSize="L" style={{ alignItems: 'center' }}>
             <H2>Kirjaudu sisään Espoo-AD:lla</H2>
-            <LinkStyledAsButton href={getLoginUrl()}>
+            <LinkStyledAsButton href={getLoginUrl()} data-qa="start-login">
               Kirjaudu sisään
             </LinkStyledAsButton>
           </FlexColWithGaps>
