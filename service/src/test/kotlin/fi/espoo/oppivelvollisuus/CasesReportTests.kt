@@ -2,6 +2,8 @@ package fi.espoo.oppivelvollisuus
 
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
+import fi.espoo.oppivelvollisuus.domain.CaseEventInput
+import fi.espoo.oppivelvollisuus.domain.CaseEventType
 import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
 import fi.espoo.oppivelvollisuus.domain.CaseReportRow
 import fi.espoo.oppivelvollisuus.domain.CaseSource
@@ -68,17 +70,53 @@ class CasesReportTests : FullApplicationTest() {
             listOf(
                 CaseReportRow(
                     openedAt = LocalDate.of(2022, 5, 1),
-                    source = CaseSource.VALPAS_NOTICE,
+                    birthYear = 2007,
+                    ageAtCaseOpened = 15,
                     gender = Gender.MALE,
                     language = "englanti",
+                    municipalityInFinland = false,
                     status = CaseStatus.TODO,
                     finishedReason = null,
-                    startedAtSchool = null
+                    startedAtSchool = null,
+                    source = CaseSource.VALPAS_NOTICE,
+                    sourceValpas = ValpasNotifier.PERUSOPETUS,
+                    sourceOther = null,
+                    schoolBackground = setOf(SchoolBackground.PERUSKOULUN_PAATTOTODISTUS),
+                    caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
+                    notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
+                    eventTypes = emptySet()
                 )
             ),
             controller.getCasesReport(testUser)
         )
 
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(
+                date = LocalDate.of(2022, 5, 15),
+                type = CaseEventType.HEARING_LETTER,
+                notes = ""
+            )
+        )
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(
+                date = LocalDate.of(2022, 5, 22),
+                type = CaseEventType.HEARING,
+                notes = ""
+            )
+        )
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(
+                date = LocalDate.of(2022, 5, 25),
+                type = CaseEventType.HEARING,
+                notes = ""
+            )
+        )
         controller.updateStudentCaseStatus(
             testUser,
             studentId,
@@ -97,6 +135,7 @@ class CasesReportTests : FullApplicationTest() {
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
             assertEquals(SchoolType.LUKIO, row.startedAtSchool)
+            assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
         }
     }
 }
