@@ -24,7 +24,7 @@ data class StudentInput(
     val firstName: String,
     val lastName: String,
     val language: String,
-    val dateOfBirth: LocalDate?,
+    val dateOfBirth: LocalDate,
     val phone: String,
     val email: String,
     val gender: Gender?,
@@ -109,7 +109,7 @@ data class Student(
     val firstName: String,
     val lastName: String,
     val language: String,
-    val dateOfBirth: LocalDate?,
+    val dateOfBirth: LocalDate,
     val phone: String,
     val email: String,
     val gender: Gender?,
@@ -177,7 +177,7 @@ data class DuplicateStudentCheckInput(
 data class DuplicateStudent(
     val id: UUID,
     val name: String,
-    val dateOfBirth: LocalDate?,
+    val dateOfBirth: LocalDate,
     val matchingSsn: Boolean,
     val matchingValpasLink: Boolean,
     val matchingName: Boolean
@@ -227,4 +227,32 @@ fun Handle.deleteStudent(id: UUID) {
         .bind("id", id)
         .execute()
         .also { if (it != 1) throw NotFound() }
+}
+
+fun Handle.deleteOldStudents() {
+    createUpdate(
+        """
+        WITH students_to_delete AS (
+            SELECT id
+            FROM students
+            WHERE date_of_birth < :threshold
+            FOR UPDATE SKIP LOCKED 
+        ), cases_to_delete AS (
+            SELECT sc.id
+            FROM student_cases sc
+            JOIN students_to_delete s ON s.id = sc.student_id
+            FOR UPDATE SKIP LOCKED 
+        ), deleted_events AS (
+            DELETE FROM case_events
+            WHERE student_case_id IN (SELECT id FROM cases_to_delete)
+        ), deleted_cases AS (
+            DELETE FROM student_cases
+            WHERE id IN (SELECT id FROM cases_to_delete)
+        )
+        DELETE FROM students
+        WHERE id IN (SELECT id FROM students_to_delete)
+    """
+    )
+        .bind("threshold", LocalDate.now().minusYears(21))
+        .execute()
 }

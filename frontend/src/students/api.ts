@@ -13,9 +13,9 @@ export const apiPostStudent = (data: StudentAndCaseInput): Promise<string> => {
     ...data,
     student: {
       ...data.student,
-      dateOfBirth: data.student.dateOfBirth
-        ? formatISO(data.student.dateOfBirth, { representation: 'date' })
-        : null
+      dateOfBirth: formatISO(data.student.dateOfBirth, {
+        representation: 'date'
+      })
     },
     studentCase: {
       ...data.studentCase,
@@ -34,7 +34,7 @@ export const apiGetPossibleDuplicateStudents = (
     .then((res) =>
       res.data.map((s) => ({
         ...s,
-        dateOfBirth: s.dateOfBirth ? parseISO(s.dateOfBirth) : null
+        dateOfBirth: parseISO(s.dateOfBirth)
       }))
     )
 }
@@ -58,9 +58,7 @@ export const apiGetStudent = (id: string): Promise<StudentResponse> =>
     ...res.data,
     student: {
       ...res.data.student,
-      dateOfBirth: res.data.student.dateOfBirth
-        ? parseISO(res.data.student.dateOfBirth)
-        : null
+      dateOfBirth: parseISO(res.data.student.dateOfBirth)
     },
     cases: res.data.cases.map((c) => ({
       ...c,
@@ -88,15 +86,16 @@ export const apiPutStudent = (
 ): Promise<void> => {
   const body: JsonOf<StudentInput> = {
     ...data,
-    dateOfBirth: data.dateOfBirth
-      ? formatISO(data.dateOfBirth, { representation: 'date' })
-      : null
+    dateOfBirth: formatISO(data.dateOfBirth, { representation: 'date' })
   }
   return apiClient.put(`/students/${id}`, body)
 }
 
 export const apiDeleteStudent = (id: string): Promise<void> =>
   apiClient.delete(`/students/${id}`)
+
+export const apiDeleteOldStudents = (): Promise<void> =>
+  apiClient.delete(`/old-students`)
 
 export interface StudentResponse {
   student: StudentDetails
@@ -113,7 +112,7 @@ export interface StudentInput {
   firstName: string
   lastName: string
   language: string
-  dateOfBirth: Date | null
+  dateOfBirth: Date
   phone: string
   email: string
   gender: Gender | null
@@ -153,7 +152,7 @@ export interface DuplicateStudentCheckInput {
 export interface DuplicateStudent {
   id: string
   name: string
-  dateOfBirth: Date | null
+  dateOfBirth: Date
   matchingSsn: boolean
   matchingValpasLink: boolean
   matchingName: boolean

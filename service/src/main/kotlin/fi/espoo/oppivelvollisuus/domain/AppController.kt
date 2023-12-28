@@ -277,4 +277,14 @@ class AppController {
             )
         }
     }
+
+    @DeleteMapping("/old-students")
+    fun deleteOldStudents(user: AuthenticatedUser) {
+        return jdbi.inTransactionUnchecked { it.deleteOldStudents() }.also {
+            logger.audit(
+                user,
+                "DELETE_OLD_STUDENTS"
+            )
+        }
+    }
 }

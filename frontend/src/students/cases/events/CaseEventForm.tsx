@@ -93,11 +93,11 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
     <GroupOfInputRows>
       <RowOfInputs>
         <LabeledInput $cols={2}>
-          <Label>Päivämäärä</Label>
+          <Label>Päivämäärä *</Label>
           <InputField onChange={setDate} value={date} />
         </LabeledInput>
         <LabeledInput $cols={4}>
-          <Label>Merkinnän tyyppi</Label>
+          <Label>Merkinnän tyyppi *</Label>
           <Select<CaseEventType>
             items={caseEventTypes}
             selectedItem={type}

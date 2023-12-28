@@ -1,6 +1,7 @@
+import { faBroom } from '@fortawesome/free-solid-svg-icons/faBroom'
 import { faChartPie } from '@fortawesome/free-solid-svg-icons/faChartPie'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -24,7 +25,7 @@ import {
 import { Label } from '../shared/typography'
 import { useDebouncedState } from '../shared/useDebouncedState'
 
-import { apiGetStudents, StudentSummary } from './api'
+import { apiDeleteOldStudents, apiGetStudents, StudentSummary } from './api'
 import { StatusChip } from './cases/StatusChip'
 import { CaseStatus, caseStatuses, caseStatusNames } from './cases/status/enums'
 
@@ -43,7 +44,8 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const [studentsResponse, setStudentsResponse] = useState<
     StudentSummary[] | null
   >(null)
-  useEffect(() => {
+
+  const loadStudents = useCallback(() => {
     setStudentsResponse(null)
     void apiGetStudents({
       query: debouncedQuery,
@@ -52,16 +54,41 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
     }).then(setStudentsResponse)
   }, [debouncedQuery, statuses, assignedTo])
 
+  useEffect(() => {
+    loadStudents()
+  }, [loadStudents])
+
+  const [deletingOldStudents, setDeletingOldStudents] = useState(false)
+
   return (
     <PageContainer>
       <SectionContainer $minHeight="600px">
         <FlexColWithGaps $gapSize="m">
           <FlexLeftRight>
-            <FlexRowWithGaps>
+            <FlexRowWithGaps $gapSize="L">
               <InlineButton
                 text="Raportointi"
                 icon={faChartPie}
                 onClick={() => navigate('/raportointi')}
+              />
+              <InlineButton
+                text="Poista yli 21-vuotiaat"
+                icon={faBroom}
+                disabled={deletingOldStudents}
+                onClick={() => {
+                  setDeletingOldStudents(true)
+                  void apiDeleteOldStudents()
+                    .then(() => window.alert('Siivousoperaatio onnistui'))
+                    .catch(() =>
+                      window.alert(
+                        'Siivousoperaatio epäonnistui: yritä uudelleen'
+                      )
+                    )
+                    .finally(() => {
+                      setDeletingOldStudents(false)
+                      loadStudents()
+                    })
+                }}
               />
             </FlexRowWithGaps>
             <AddButton

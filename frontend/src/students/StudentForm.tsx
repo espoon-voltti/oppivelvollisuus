@@ -142,49 +142,42 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   )
   const duplicateNameStudents = duplicateStudents.filter((s) => s.matchingName)
 
-  const isValid =
-    firstName.trim() !== '' &&
-    lastName.trim() !== '' &&
-    (dateOfBirth === '' || parseDate(dateOfBirth) !== undefined)
+  const validInput: StudentInput | null = useMemo(() => {
+    if (firstName.trim() === '') return null
+    if (lastName.trim() === '') return null
+    const parsedDateOfBirth = parseDate(dateOfBirth.trim())
+    if (!parsedDateOfBirth) return null
 
-  const validInput: StudentInput | null = useMemo(
-    () =>
-      isValid
-        ? {
-            valpasLink: valpasLink.trim(),
-            ssn: ssn.trim(),
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-            language: language.toLowerCase().trim(),
-            dateOfBirth: dateOfBirth.trim()
-              ? parseDate(dateOfBirth.trim()) ?? null
-              : null,
-            phone: phone.trim(),
-            email: email.trim(),
-            gender,
-            address: address.trim(),
-            municipalityInFinland,
-            guardianInfo,
-            supportContactsInfo
-          }
-        : null,
-    [
-      isValid,
-      valpasLink,
-      ssn,
-      firstName,
-      lastName,
-      language,
-      dateOfBirth,
-      phone,
-      email,
+    return {
+      valpasLink: valpasLink.trim(),
+      ssn: ssn.trim(),
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      language: language.toLowerCase().trim(),
+      dateOfBirth: parsedDateOfBirth,
+      phone: phone.trim(),
+      email: email.trim(),
       gender,
-      address,
+      address: address.trim(),
       municipalityInFinland,
       guardianInfo,
       supportContactsInfo
-    ]
-  )
+    }
+  }, [
+    valpasLink,
+    ssn,
+    firstName,
+    lastName,
+    language,
+    dateOfBirth,
+    phone,
+    email,
+    gender,
+    address,
+    municipalityInFinland,
+    guardianInfo,
+    supportContactsInfo
+  ])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -205,7 +198,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
           <LabeledInput $cols={2}>
-            <Label>Syntymäaika</Label>
+            <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>
                 {props.student.dateOfBirth
@@ -213,7 +206,11 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
                   : '-'}
               </span>
             ) : (
-              <InputField onChange={setDateOfBirth} value={dateOfBirth} />
+              <InputField
+                data-qa="date-of-birth-input"
+                onChange={setDateOfBirth}
+                value={dateOfBirth}
+              />
             )}
           </LabeledInput>
           <LabeledInput $cols={2}>
@@ -233,7 +230,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
           <LabeledInput $cols={3}>
-            <Label>Sukunimi</Label>
+            <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.lastName}</span>
             ) : (
@@ -245,7 +242,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
           <LabeledInput $cols={3}>
-            <Label>Etunimi</Label>
+            <Label>Etunimi {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.firstName}</span>
             ) : (

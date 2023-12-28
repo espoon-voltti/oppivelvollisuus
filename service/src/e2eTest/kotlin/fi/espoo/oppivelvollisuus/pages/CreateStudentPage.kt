@@ -7,6 +7,7 @@ import fi.espoo.oppivelvollisuus.dataQa
 
 class CreateStudentPage(private val page: Page) {
     val saveButton = page.locator(dataQa("save-button"))
+    val dateOfBirthInput = page.locator(dataQa("date-of-birth-input"))
     val lastNameInput = page.locator(dataQa("last-name-input"))
     val firstNameInput = page.locator(dataQa("first-name-input"))
     val sourceSelect = page.locator(dataQa("source-select"))
