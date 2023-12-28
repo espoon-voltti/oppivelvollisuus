@@ -22,6 +22,7 @@ class E2ETests : PlaywrightTest() {
         val createStudentPage = CreateStudentPage(page)
         createStudentPage.assertUrl()
         assertThat(createStudentPage.saveButton).isDisabled()
+        createStudentPage.dateOfBirthInput.fill("07.01.2008")
         createStudentPage.lastNameInput.fill("Ankka")
         createStudentPage.firstNameInput.fill("Tupu")
         createStudentPage.sourceSelect.selectOption(CaseSource.VALPAS_AUTOMATIC_CHECK.name)

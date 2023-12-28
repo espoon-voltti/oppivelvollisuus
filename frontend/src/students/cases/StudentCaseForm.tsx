@@ -153,7 +153,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
       <RowOfInputs>
         <FixedWidthDiv $cols={4}>
           <LabeledInput $cols={2}>
-            <Label>Ilmoitettu</Label>
+            <Label>Ilmoitettu {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{formatDate(props.studentCase.openedAt)}</span>
             ) : (
@@ -179,7 +179,9 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
       </RowOfInputs>
       <RowOfInputs>
         <LabeledInput $cols={4}>
-          <Label>Mitä kautta tieto saapunut?</Label>
+          <Label>
+            Mitä kautta tieto saapunut? {props.mode !== 'VIEW' && '*'}
+          </Label>
           {props.mode === 'VIEW' ? (
             <span>{caseSourceNames[props.studentCase.source]}</span>
           ) : (
@@ -213,7 +215,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
           ) : (
             <>
               {(source === 'VALPAS_NOTICE' || source === 'OTHER') && (
-                <Label>Ilmoittanut taho</Label>
+                <Label>Ilmoittanut taho *</Label>
               )}
               {source === 'VALPAS_NOTICE' && (
                 <Select<ValpasNotifier>

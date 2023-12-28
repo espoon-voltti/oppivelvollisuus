@@ -5,6 +5,8 @@ import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
+import fi.espoo.oppivelvollisuus.domain.CaseEventInput
+import fi.espoo.oppivelvollisuus.domain.CaseEventType
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.DuplicateStudentCheckInput
@@ -158,7 +160,7 @@ class StudentTests : FullApplicationTest() {
                                 firstName = "Testi",
                                 lastName = "Testilä",
                                 language = "",
-                                dateOfBirth = null,
+                                dateOfBirth = LocalDate.now(),
                                 phone = "",
                                 email = "",
                                 gender = null,
@@ -205,7 +207,7 @@ class StudentTests : FullApplicationTest() {
                 firstName = "Testi",
                 lastName = "Testilä",
                 language = "",
-                dateOfBirth = null,
+                dateOfBirth = LocalDate.now(),
                 phone = "",
                 email = "",
                 gender = null,
@@ -520,5 +522,42 @@ class StudentTests : FullApplicationTest() {
 
         assertEquals(0, controller.getStudents(testUser, emptySearch).size)
         assertThrows<NotFound> { controller.getStudent(testUser, studentId) }
+    }
+
+    @Test
+    fun `deleting old students`() {
+        val studentId1 =
+            controller.createStudent(
+                user = testUser,
+                body =
+                    AppController.StudentAndCaseInput(
+                        student =
+                            minimalStudentTestInput.copy(
+                                dateOfBirth = LocalDate.now().minusYears(21).minusDays(1)
+                            ),
+                        studentCase = minimalStudentCaseTestInput
+                    )
+            )
+        val studentId2 =
+            controller.createStudent(
+                user = testUser,
+                body =
+                    AppController.StudentAndCaseInput(
+                        student =
+                            minimalStudentTestInput.copy(
+                                dateOfBirth = LocalDate.now().minusYears(21).plusDays(1)
+                            ),
+                        studentCase = minimalStudentCaseTestInput
+                    )
+            )
+        val caseId = controller.getStudent(testUser, studentId1).cases.first().id
+        controller.createCaseEvent(testUser, caseId, CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"))
+
+        controller.deleteOldStudents(testUser)
+
+        val students = controller.getStudents(testUser, emptySearch)
+        assertEquals(1, students.size)
+        assertEquals(studentId2, students.first().id)
+        assertThrows<NotFound> { controller.getStudent(testUser, studentId1) }
     }
 }

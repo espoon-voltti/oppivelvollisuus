@@ -103,7 +103,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
   return (
     <RowOfInputs>
       <LabeledInput $cols={4}>
-        <Label>Tila</Label>
+        <Label>Tila *</Label>
         {props.studentCase.status === 'FINISHED' && props.activeCaseExists ? (
           <StatusChip status={props.studentCase.status} />
         ) : (
@@ -117,7 +117,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
       </LabeledInput>
       {status === 'FINISHED' && (
         <LabeledInput $cols={4}>
-          <Label>Syy ohjauksen päättymiselle</Label>
+          <Label>Syy ohjauksen päättymiselle *</Label>
           <Select<CaseFinishedReason>
             items={caseFinishedReasons}
             selectedItem={finishedReason}
@@ -129,7 +129,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
       )}
       {status === 'FINISHED' && finishedReason === 'BEGAN_STUDIES' && (
         <LabeledInput $cols={4}>
-          <Label>Oppilaitos</Label>
+          <Label>Oppilaitos *</Label>
           <Select<SchoolType>
             items={schoolTypes}
             selectedItem={startedAtSchool}
