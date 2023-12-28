@@ -1,6 +1,9 @@
 import { faBroom } from '@fortawesome/free-solid-svg-icons/faBroom'
 import { faChartPie } from '@fortawesome/free-solid-svg-icons/faChartPie'
 import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyingGlass'
+import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTriangleExclamation'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { isBefore, subWeeks } from 'date-fns'
 import React, { useCallback, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
@@ -22,11 +25,13 @@ import {
   Table,
   VerticalGap
 } from '../shared/layout'
-import { Label } from '../shared/typography'
+import { colors } from '../shared/theme'
+import { Label, P } from '../shared/typography'
 import { useDebouncedState } from '../shared/useDebouncedState'
 
 import { apiDeleteOldStudents, apiGetStudents, StudentSummary } from './api'
 import { StatusChip } from './cases/StatusChip'
+import { caseEventTypeNames } from './cases/events/enums'
 import { CaseStatus, caseStatuses, caseStatusNames } from './cases/status/enums'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
@@ -160,9 +165,10 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <Table style={{ width: '100%' }}>
                 <thead>
                   <tr>
-                    <Th style={{ width: '160px' }}>Ilmoitettu</Th>
-                    <Th style={{ width: '40%' }}>Nimi</Th>
-                    <Th>Ohjaaja</Th>
+                    <Th style={{ width: '140px' }}>Ilmoitettu</Th>
+                    <Th style={{ width: '200px' }}>Nimi</Th>
+                    <Th>Viimeisin tapahtuma</Th>
+                    <Th style={{ width: '200px' }}>Ohjaaja</Th>
                     <Th style={{ width: '200px' }} />
                   </tr>
                 </thead>
@@ -170,12 +176,49 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                   {studentsResponse.map((student) => (
                     <tr key={student.id}>
                       <td>
-                        {student.openedAt ? formatDate(student.openedAt) : '-'}
+                        <FlexRowWithGaps $gapSize="s">
+                          <span>
+                            {student.openedAt
+                              ? formatDate(student.openedAt)
+                              : '-'}
+                          </span>
+                          {student.openedAt &&
+                            isBefore(
+                              student.openedAt,
+                              subWeeks(new Date(), 5)
+                            ) && (
+                              <FontAwesomeIcon
+                                icon={faTriangleExclamation}
+                                color={
+                                  student.source === 'VALPAS_NOTICE'
+                                    ? colors.status.danger
+                                    : colors.status.warning
+                                }
+                              />
+                            )}
+                        </FlexRowWithGaps>
                       </td>
                       <td>
                         <Link to={`/oppivelvolliset/${student.id}`}>
                           {student.lastName} {student.firstName}
                         </Link>
+                      </td>
+                      <td>
+                        {student.lastEvent ? (
+                          <FlexColWithGaps $gapSize="s">
+                            <div>
+                              <span>{formatDate(student.lastEvent.date)} </span>
+                              {student.lastEvent.type !== 'NOTE' && (
+                                <span>
+                                  {caseEventTypeNames[student.lastEvent.type]}
+                                </span>
+                              )}
+                            </div>
+                            <P>{student.lastEvent.notes}</P>
+                          </FlexColWithGaps>
+                        ) : (
+                          <span>-</span>
+                        )}
                       </td>
                       <td>{student.assignedTo?.name ?? 'Ei ohjaajaa'}</td>
                       <td>

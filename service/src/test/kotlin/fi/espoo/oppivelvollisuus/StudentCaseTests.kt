@@ -18,6 +18,8 @@ import fi.espoo.oppivelvollisuus.domain.SchoolBackground
 import fi.espoo.oppivelvollisuus.domain.SchoolType
 import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
+import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
+import fi.espoo.oppivelvollisuus.domain.StudentSummary
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
@@ -366,6 +368,28 @@ class StudentCaseTests : FullApplicationTest() {
         controller.deleteStudentCase(testUser, studentId, caseId)
 
         assertEquals(0, controller.getStudent(testUser, studentId).cases.size)
+        assertEquals(
+            listOf(
+                StudentSummary(
+                    id = studentId,
+                    firstName = minimalStudentAndCaseTestInput.student.firstName,
+                    lastName = minimalStudentAndCaseTestInput.student.lastName,
+                    openedAt = null,
+                    status = null,
+                    source = null,
+                    assignedTo = null,
+                    lastEvent = null
+                )
+            ),
+            controller.getStudents(
+                testUser,
+                StudentSearchParams(
+                    query = "",
+                    statuses = CaseStatus.entries,
+                    assignedTo = null
+                )
+            )
+        )
     }
 
     @Test

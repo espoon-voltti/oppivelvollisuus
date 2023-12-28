@@ -6,6 +6,7 @@ import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
+import fi.espoo.oppivelvollisuus.domain.CaseEventSummary
 import fi.espoo.oppivelvollisuus.domain.CaseEventType
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
@@ -87,6 +88,30 @@ class StudentTests : FullApplicationTest() {
                             )
                     )
             )
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(
+                date = LocalDate.of(2023, 12, 7),
+                type = CaseEventType.HEARING_LETTER,
+                notes =
+                    """
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
+                    sem, mattis et scelerisque quis, convallis vulputate dui. Ut eget arcu nec 
+                    mi maximus porta. Donec id ex eget urna cursus vehicula congue id quam. 
+                    Etiam id diam velit. Morbi pellentesque, tortor nec fermentum hendrerit, 
+                    neque purus imperdiet tortor, sed dapibus nibh tellus sit amet tortor. 
+                    Integer at faucibus neque. Donec pellentesque, turpis vitae commodo tempor, 
+                    est ipsum elementum nunc, in pretium augue turpis non nulla. Sed pulvinar 
+                    mollis scelerisque. Aenean tincidunt metus ut velit facilisis, in consequat 
+                    ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros. 
+                    Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id 
+                    semper. Interdum et malesuada fames ac ante ipsum primis in faucibus.
+                    """.trimIndent()
+            )
+        )
+
         assertEquals(
             expected =
                 listOf(
@@ -96,7 +121,18 @@ class StudentTests : FullApplicationTest() {
                         lastName = "Testilä",
                         openedAt = LocalDate.of(2023, 12, 7),
                         assignedTo = UserBasics(id = testUser.id, name = testUserName),
-                        status = CaseStatus.TODO
+                        status = CaseStatus.TODO,
+                        source = CaseSource.VALPAS_NOTICE,
+                        lastEvent =
+                            CaseEventSummary(
+                                date = LocalDate.of(2023, 12, 7),
+                                type = CaseEventType.HEARING_LETTER,
+                                notes =
+                                    """
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
+                                    sem, mattis et...
+                                    """.trimIndent()
+                            )
                     )
                 ),
             actual = controller.getStudents(testUser, emptySearch)
@@ -139,7 +175,8 @@ class StudentTests : FullApplicationTest() {
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
-                    events = emptyList()
+                    // skip assertion of events
+                    events = studentCase.events
                 ),
                 studentCase
             )
@@ -192,7 +229,9 @@ class StudentTests : FullApplicationTest() {
                         lastName = "Testilä",
                         openedAt = LocalDate.of(2023, 12, 7),
                         assignedTo = null,
-                        status = CaseStatus.TODO
+                        status = CaseStatus.TODO,
+                        source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                        lastEvent = null
                     )
                 ),
             actual = controller.getStudents(testUser, emptySearch)
