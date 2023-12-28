@@ -7,6 +7,7 @@ import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
+import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.core.statement.SqlStatements
 import java.time.LocalDate
 import java.util.UUID
@@ -58,7 +59,15 @@ data class StudentSummary(
     val lastName: String,
     val openedAt: LocalDate?,
     val status: CaseStatus?,
-    @Nested("assignedTo") val assignedTo: UserBasics?
+    val source: CaseSource?,
+    @Nested("assignedTo") val assignedTo: UserBasics?,
+    @Nested("event") val lastEvent: CaseEventSummary?
+)
+
+data class CaseEventSummary(
+    @PropagateNull val date: LocalDate,
+    val type: CaseEventType,
+    val notes: String
 )
 
 data class StudentSearchParams(
@@ -70,17 +79,25 @@ data class StudentSearchParams(
 fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
     createQuery(
 """
-SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status,
+SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status, sc.source,
     assignee.id AS assigned_to_id, 
-    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name
+    assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
+    ce.date AS event_date, ce.type AS event_type, ce.notes AS event_notes
 FROM students s
 LEFT JOIN LATERAL (
-    SELECT opened_at, assigned_to, status
+    SELECT id, opened_at, assigned_to, status, source
     FROM student_cases
     WHERE student_id = s.id
     ORDER BY status != 'FINISHED' DESC, opened_at DESC
     LIMIT 1
 ) sc ON true
+LEFT JOIN LATERAL (
+    SELECT date, type, notes
+    FROM case_events
+    WHERE student_case_id = sc.id
+    ORDER BY date DESC 
+    LIMIT 1
+) ce ON true
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
 ${if (params.assignedTo != null) "AND assignee.id = :assignedTo" else ""}
@@ -101,6 +118,22 @@ ORDER BY opened_at DESC NULLS LAST, last_name, first_name
         .bindKotlin(params.copy(query = params.query?.trim()?.lowercase()))
         .mapTo<StudentSummary>()
         .list()
+        .map {
+            it.copy(
+                lastEvent =
+                    it.lastEvent?.copy(
+                        notes =
+                            if (it.lastEvent.notes.length > 100) {
+                                it.lastEvent.notes.substring(0, 100).let { str ->
+                                    val lastSpace = str.lastIndexOf(' ')
+                                    str.substring(0, lastSpace) + "..."
+                                }
+                            } else {
+                                it.lastEvent.notes
+                            }
+                    )
+            )
+        }
 
 data class Student(
     val id: UUID,

@@ -5,6 +5,8 @@ import { EmployeeBasics } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
 
 import { StudentCase, StudentCaseInput } from './cases/api'
+import { CaseSource } from './cases/enums'
+import { CaseEventType } from './cases/events/enums'
 import { CaseStatus } from './cases/status/enums'
 import { Gender } from './enums'
 
@@ -48,7 +50,13 @@ export const apiGetStudents = (
     .then((res) =>
       res.data.map((s) => ({
         ...s,
-        openedAt: s.openedAt ? parseISO(s.openedAt) : null
+        openedAt: s.openedAt ? parseISO(s.openedAt) : null,
+        lastEvent: s.lastEvent
+          ? {
+              ...s.lastEvent,
+              date: parseISO(s.lastEvent.date)
+            }
+          : null
       }))
     )
 }
@@ -133,7 +141,15 @@ export interface StudentSummary {
   lastName: string
   openedAt: Date | null
   status: CaseStatus | null
+  source: CaseSource | null
   assignedTo: EmployeeBasics | null
+  lastEvent: CaseEventSummary | null
+}
+
+export interface CaseEventSummary {
+  date: Date
+  type: CaseEventType
+  notes: string
 }
 
 export interface StudentSearchParams {
