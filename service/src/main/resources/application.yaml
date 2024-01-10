@@ -6,12 +6,15 @@ spring:
   datasource:
     driver-class-name: "org.postgresql.Driver"
     type: "com.zaxxer.hikari.HikariDataSource"
-
-  servlet:
-    multipart:
-      max-file-size: "10MB"
-      max-request-size: "10MB"
+    hikari:
+      data-source-properties:
+        socketTimeout: 30000
   sql:
     init:
       continue-on-error: false
       encoding: "UTF-8"
+
+logging:
+  level:
+    com.zaxxer.hikari.HikariConfig: DEBUG
+    com.zaxxer.hikari: TRACE
