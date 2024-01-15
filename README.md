@@ -1,4 +1,12 @@
+<!--
+SPDX-FileCopyrightText: 2023-2024 City of Espoo
+
+SPDX-License-Identifier: LGPL-2.1-or-later
+-->
+
 # Oppivelvollisuus
+
+[![REUSE status](https://api.reuse.software/badge/github.com/espoon-voltti/oppivelvollisuus)](https://api.reuse.software/info/github.com/espoon-voltti/oppivelvollisuus)
 
 A tool for tracking the monitoring and guidance cases related to compulsory education.
 
@@ -52,3 +60,43 @@ To start frontend in http://localhost:9000
 
 To lint and format code
 - `yarn lint --fix`
+
+## License
+
+Oppivelvollisuus is published under **LGPL-2.1-or-later** license. Please refer to
+[LICENSE](LICENSE) for further details.
+
+### Bulk-licensing
+
+Bulk-licensing is applied to certain directories that will never contain
+anything but binary-like files (e.g. certificates) with
+[a DEP5 file](./.reuse/dep5) (see
+[docs](https://reuse.software/faq/#bulk-license)).
+
+### Check licensing compliance
+
+This repository targets [REUSE](https://reuse.software/) compliance by utilizing
+the [reuse CLI tool](https://git.fsfe.org/reuse/tool) and the
+[REUSE API](https://api.reuse.software/).
+
+The REUSE API constantly checks this repository's compliance and the status
+can be seen from the badge at the top of this README.
+
+To manually check that the repository is compliant (e.g. before submitting a pull
+request), run:
+
+```sh
+./bin/add-license-headers.sh --lint-only
+```
+
+**NOTE:** The tool has no concept for "no license" -> all files must indicate
+their license explicitly (or using bulk licensing). And if files cannot be
+licensed, they shouldn't be included in this repository at all.
+
+### Automatically add licensing headers
+
+To **attempt** to automatically add licensing headers to all source files, run:
+
+```sh
+./bin/add-license-headers.sh
+```

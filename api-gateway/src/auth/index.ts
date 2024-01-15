@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 import express, { NextFunction, Request, Response } from 'express'
 import { Profile } from '@node-saml/passport-saml'
 import passport, { AuthenticateCallback } from 'passport'

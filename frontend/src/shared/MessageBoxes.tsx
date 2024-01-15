@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 import { IconProp } from '@fortawesome/fontawesome-svg-core'
 import { faExclamation } from '@fortawesome/free-solid-svg-icons/faExclamation'
 import { faInfo } from '@fortawesome/free-solid-svg-icons/faInfo'
