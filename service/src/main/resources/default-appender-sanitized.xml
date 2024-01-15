@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+SPDX-FileCopyrightText: 2023-2024 City of Espoo
+
+SPDX-License-Identifier: LGPL-2.1-or-later
+-->
+
 <included>
   <conversionRule
     conversionWord="stacktrace"

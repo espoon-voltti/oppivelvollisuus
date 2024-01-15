@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 export type JsonOf<T> = T extends string | number | boolean | null | undefined
   ? T
   : T extends Date

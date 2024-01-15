@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 import sourceMapSupport from 'source-map-support'
 import express from 'express'
 import helmet from 'helmet'

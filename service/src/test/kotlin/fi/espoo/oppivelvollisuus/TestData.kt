@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseSource

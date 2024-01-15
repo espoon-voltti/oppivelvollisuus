@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
 import express from 'express'
 import { toRequestHandler } from '../utils/express.js'
 import { AppUser, getUserDetails } from '../clients/service-client.js'
