@@ -13,7 +13,13 @@ class SsnMasker : ValueMasker {
         value: Any?
     ): Any {
         return if (value is String) {
-            value.replace(Regex("(?<!-|[\\dA-z])(\\d{2})(\\d{2})(\\d{2})[Aa+-](\\d{3})[\\dA-z](?!-)"), "REDACTED-SSN")
+            value.replace(
+                Regex(
+                    "(?<!-|[\\dA-z])(\\d{2})(\\d{2})(\\d{2})[-+ABCDEFUVWXY](\\d{3})[\\dA-Z](?!-)",
+                    RegexOption.IGNORE_CASE
+                ),
+                "REDACTED-SSN"
+            )
         } else {
             value ?: "null"
         }
