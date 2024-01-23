@@ -67,3 +67,11 @@ License: Apache-2.0
 Files: */gradle/wrapper/*
 Copyright: 2023-2024 The original author or authors <info@gradle.com>
 License: Apache-2.0
+
+Files: docs/*.drawio
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: docs/*.png
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
