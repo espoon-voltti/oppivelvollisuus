@@ -10,6 +10,11 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 
 A tool for tracking the monitoring and guidance cases related to compulsory education.
 
+## Technical overview
+
+![Entiry diagram](./docs/oppivelvollisuus_entity.png)
+
+
 ## Local environment and development
 
 ### Requirements
