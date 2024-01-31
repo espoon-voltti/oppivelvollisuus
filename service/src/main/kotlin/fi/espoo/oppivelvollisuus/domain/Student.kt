@@ -16,6 +16,7 @@ import org.jdbi.v3.core.statement.SqlStatements
 import java.time.LocalDate
 import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.max
 
 enum class Gender {
     MALE,
@@ -129,7 +130,7 @@ ORDER BY opened_at DESC NULLS LAST, last_name, first_name
                         notes =
                             if (it.lastEvent.notes.length > 100) {
                                 it.lastEvent.notes.substring(0, 100).let { str ->
-                                    val lastSpace = str.lastIndexOf(' ')
+                                    val lastSpace = max(str.lastIndexOf(' '), 50)
                                     str.substring(0, lastSpace) + "..."
                                 }
                             } else {
