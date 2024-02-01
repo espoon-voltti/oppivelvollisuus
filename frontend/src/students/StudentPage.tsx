@@ -51,15 +51,17 @@ import { CaseEvents } from './cases/events/CaseEvents'
 import { CaseStatusForm } from './cases/status/CaseStatusForm'
 import { apiPutStudentCaseStatus, CaseStatusInput } from './cases/status/api'
 
-const AccordionRow = styled(FlexLeftRight)<{ $disabled: boolean }>`
+const CollapsableRow = styled(FlexLeftRight)<{ $disabled: boolean }>`
   ${(p) => (p.$disabled ? '' : 'cursor: pointer;')}
   user-select: none;
 
-  .accordion-chevron {
+  .collapse-icon {
     color: ${colors.grayscale.g35};
     font-size: 16px;
   }
+`
 
+const AccordionRow = styled(CollapsableRow)`
   border-top: 1px solid ${colors.grayscale.g15};
   padding: 8px 0;
 `
@@ -86,6 +88,7 @@ export const StudentPage = React.memo(function StudentPage() {
   }, [id])
   useEffect(loadStudent, [loadStudent])
 
+  const [expandedStudentDetails, setExpandedStudentDetails] = useState(false)
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
@@ -136,72 +139,85 @@ export const StudentPage = React.memo(function StudentPage() {
       {studentResponse && employees && (
         <>
           <SectionContainer>
-            <FlexLeftRight>
+            <CollapsableRow
+              onClick={() => setExpandedStudentDetails((prev) => !prev)}
+            >
               <H3>Oppivelvollisen tiedot</H3>
               <FlexRowWithGaps $gapSize="m">
-                <InlineButton
-                  text="Muokkaa"
-                  icon={faPen}
-                  disabled={editingSomething}
-                  onClick={() => setEditingStudent(true)}
-                />
-                <InlineButton
-                  text="Poista"
-                  icon={faTrash}
-                  disabled={editingSomething}
-                  onClick={() => {
-                    if (studentResponse.cases.length > 0) {
-                      window.alert(
-                        'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
-                      )
-                    } else {
-                      if (
-                        window.confirm(
-                          'Haluatko varmasti poistaa oppivelvollisen?'
-                        )
-                      ) {
-                        void apiDeleteStudent(id).then(() =>
-                          navigate('/oppivelvolliset')
-                        )
-                      }
-                    }
-                  }}
+                <FontAwesomeIcon
+                  icon={expandedStudentDetails ? faChevronUp : faChevronDown}
+                  className="collapse-icon"
                 />
               </FlexRowWithGaps>
-            </FlexLeftRight>
-            <VerticalGap $size="m" />
-            <StudentForm
-              key={editingStudent ? 'EDIT' : 'VIEW'}
-              mode={editingStudent ? 'EDIT' : 'VIEW'}
-              student={studentResponse.student}
-              onChange={setStudentInput}
-            />
-            {editingStudent && (
-              <FlexRight>
-                <FlexRowWithGaps>
-                  <Button
-                    text="Peruuta"
-                    disabled={submitting}
-                    onClick={() => setEditingStudent(false)}
-                  />
-                  <Button
-                    text="Tallenna"
-                    primary
-                    disabled={submitting || !studentInput}
-                    onClick={() => {
-                      if (!studentInput) return
+            </CollapsableRow>
+            {expandedStudentDetails && (
+              <FlexColWithGaps $gapSize="s">
+                <FlexRight>
+                  <FlexRowWithGaps>
+                    <InlineButton
+                      text="Muokkaa"
+                      icon={faPen}
+                      disabled={editingSomething}
+                      onClick={() => setEditingStudent(true)}
+                    />
+                    <InlineButton
+                      text="Poista"
+                      icon={faTrash}
+                      disabled={editingSomething}
+                      onClick={() => {
+                        if (studentResponse.cases.length > 0) {
+                          window.alert(
+                            'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
+                          )
+                        } else {
+                          if (
+                            window.confirm(
+                              'Haluatko varmasti poistaa oppivelvollisen?'
+                            )
+                          ) {
+                            void apiDeleteStudent(id).then(() =>
+                              navigate('/oppivelvolliset')
+                            )
+                          }
+                        }
+                      }}
+                    />
+                  </FlexRowWithGaps>
+                </FlexRight>
+                <StudentForm
+                  key={editingStudent ? 'EDIT' : 'VIEW'}
+                  mode={editingStudent ? 'EDIT' : 'VIEW'}
+                  student={studentResponse.student}
+                  onChange={setStudentInput}
+                />
+                {editingStudent && (
+                  <FlexRight>
+                    <FlexRowWithGaps>
+                      <Button
+                        text="Peruuta"
+                        disabled={submitting}
+                        onClick={() => setEditingStudent(false)}
+                      />
+                      <Button
+                        text="Tallenna"
+                        primary
+                        disabled={submitting || !studentInput}
+                        onClick={() => {
+                          if (!studentInput) return
 
-                      setSubmitting(true)
-                      void apiPutStudent(id, studentInput)
-                        .then(() => {
-                          setEditingStudent(false)
-                          loadStudent()
-                        })
-                        .finally(() => setSubmitting(false))
-                    }}
-                  />
-                </FlexRowWithGaps>
-              </FlexRight>
+                          setSubmitting(true)
+                          void apiPutStudent(id, studentInput)
+                            .then(() => {
+                              setEditingStudent(false)
+                              loadStudent()
+                            })
+                            .finally(() => setSubmitting(false))
+                        }}
+                      />
+                    </FlexRowWithGaps>
+                  </FlexRight>
+                )}
+              </FlexColWithGaps>
             )}
           </SectionContainer>
 
@@ -301,7 +317,7 @@ export const StudentPage = React.memo(function StudentPage() {
                             ? faChevronUp
                             : faChevronDown
                         }
-                        className="accordion-chevron"
+                        className="collapse-icon"
                       />
                     </FlexRowWithGaps>
                   </AccordionRow>
