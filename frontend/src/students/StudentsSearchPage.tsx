@@ -85,18 +85,24 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                 icon={faBroom}
                 disabled={deletingOldStudents}
                 onClick={() => {
-                  setDeletingOldStudents(true)
-                  void apiDeleteOldStudents()
-                    .then(() => window.alert('Siivousoperaatio onnistui'))
-                    .catch(() =>
-                      window.alert(
-                        'Siivousoperaatio epäonnistui: yritä uudelleen'
-                      )
+                  if (
+                    window.confirm(
+                      'Haluatko varmasti poistaa kaikki yli 21-vuotiaat oppivelvolliset?'
                     )
-                    .finally(() => {
-                      setDeletingOldStudents(false)
-                      loadStudents()
-                    })
+                  ) {
+                    setDeletingOldStudents(true)
+                    void apiDeleteOldStudents()
+                      .then(() => window.alert('Siivousoperaatio onnistui'))
+                      .catch(() =>
+                        window.alert(
+                          'Siivousoperaatio epäonnistui: yritä uudelleen'
+                        )
+                      )
+                      .finally(() => {
+                        setDeletingOldStudents(false)
+                        loadStudents()
+                      })
+                  }
                 }}
               />
             </FlexRowWithGaps>
