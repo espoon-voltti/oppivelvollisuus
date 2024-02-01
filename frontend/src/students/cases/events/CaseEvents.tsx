@@ -10,6 +10,7 @@ import React, { Fragment, useEffect, useState } from 'react'
 import { IconButton } from '../../../shared/buttons/IconButton'
 import { InlineButton } from '../../../shared/buttons/InlineButton'
 import {
+  FlexCol,
   FlexColWithGaps,
   FlexRowWithGaps,
   Separator
@@ -53,7 +54,7 @@ export const CaseEvents = React.memo(function CaseEvents({
   const [submitting, setSubmitting] = useState(false)
 
   return (
-    <FlexColWithGaps $gapSize="L">
+    <FlexColWithGaps $gapSize="m">
       <FlexColWithGaps>
         <H4>Muistiinpanot ja toimenpiteet</H4>
         {editingCaseEvent === true ? (
@@ -95,7 +96,7 @@ export const CaseEvents = React.memo(function CaseEvents({
         )}
       </FlexColWithGaps>
 
-      <FlexColWithGaps $gapSize="L">
+      <FlexCol>
         {events.map((caseEvent, idx) => (
           <Fragment key={caseEvent.id}>
             <FlexRowWithGaps $gapSize="L">
@@ -167,7 +168,7 @@ export const CaseEvents = React.memo(function CaseEvents({
             {idx < events.length - 1 && <Separator />}
           </Fragment>
         ))}
-      </FlexColWithGaps>
+      </FlexCol>
     </FlexColWithGaps>
   )
 })

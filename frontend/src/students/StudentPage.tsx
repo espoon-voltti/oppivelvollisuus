@@ -45,21 +45,24 @@ import {
   apiDeleteStudentCase,
   apiPostStudentCase,
   apiPutStudentCase,
+  StudentCase,
   StudentCaseInput
 } from './cases/api'
 import { CaseEvents } from './cases/events/CaseEvents'
 import { CaseStatusForm } from './cases/status/CaseStatusForm'
 import { apiPutStudentCaseStatus, CaseStatusInput } from './cases/status/api'
 
-const AccordionRow = styled(FlexLeftRight)<{ $disabled: boolean }>`
+const CollapsableRow = styled(FlexLeftRight)<{ $disabled?: boolean }>`
   ${(p) => (p.$disabled ? '' : 'cursor: pointer;')}
   user-select: none;
 
-  .accordion-chevron {
+  .collapse-icon {
     color: ${colors.grayscale.g35};
     font-size: 16px;
   }
+`
 
+const AccordionRow = styled(CollapsableRow)`
   border-top: 1px solid ${colors.grayscale.g15};
   padding: 8px 0;
 `
@@ -81,11 +84,14 @@ export const StudentPage = React.memo(function StudentPage() {
     setStudentResponse(null)
     void apiGetStudent(id).then((response) => {
       setStudentResponse(response)
-      setExpandedCase(response.cases.length > 0 ? response.cases[0].id : null)
+      setExpandedCase(
+        response.cases.find((c) => c.status !== 'FINISHED')?.id ?? null
+      )
     })
   }, [id])
   useEffect(loadStudent, [loadStudent])
 
+  const [expandedStudentDetails, setExpandedStudentDetails] = useState(false)
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
@@ -99,8 +105,6 @@ export const StudentPage = React.memo(function StudentPage() {
   const [editingCaseStatus, setEditingCaseStatus] = useState<string | null>(
     null
   )
-  const [caseStatusInput, setCaseStatusInput] =
-    useState<CaseStatusInput | null>(null)
 
   const [editingCaseEvent, setEditingCaseEvent] = useState(false)
 
@@ -112,8 +116,13 @@ export const StudentPage = React.memo(function StudentPage() {
     editingCaseStatus ||
     editingCaseEvent
   )
-  const activeCaseExists =
-    studentResponse?.cases?.some((c) => c.status !== 'FINISHED') ?? false
+
+  const activeCase = studentResponse?.cases?.find(
+    (c) => c.status !== 'FINISHED'
+  )
+  const finishedCases =
+    studentResponse?.cases?.filter((c) => c.status === 'FINISHED') ?? []
+  const activeCaseExists = activeCase !== undefined
 
   return (
     <PageContainer>
@@ -136,72 +145,85 @@ export const StudentPage = React.memo(function StudentPage() {
       {studentResponse && employees && (
         <>
           <SectionContainer>
-            <FlexLeftRight>
+            <CollapsableRow
+              onClick={() => setExpandedStudentDetails((prev) => !prev)}
+            >
               <H3>Oppivelvollisen tiedot</H3>
               <FlexRowWithGaps $gapSize="m">
-                <InlineButton
-                  text="Muokkaa"
-                  icon={faPen}
-                  disabled={editingSomething}
-                  onClick={() => setEditingStudent(true)}
-                />
-                <InlineButton
-                  text="Poista"
-                  icon={faTrash}
-                  disabled={editingSomething}
-                  onClick={() => {
-                    if (studentResponse.cases.length > 0) {
-                      window.alert(
-                        'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
-                      )
-                    } else {
-                      if (
-                        window.confirm(
-                          'Haluatko varmasti poistaa oppivelvollisen?'
-                        )
-                      ) {
-                        void apiDeleteStudent(id).then(() =>
-                          navigate('/oppivelvolliset')
-                        )
-                      }
-                    }
-                  }}
+                <FontAwesomeIcon
+                  icon={expandedStudentDetails ? faChevronUp : faChevronDown}
+                  className="collapse-icon"
                 />
               </FlexRowWithGaps>
-            </FlexLeftRight>
-            <VerticalGap $size="m" />
-            <StudentForm
-              key={editingStudent ? 'EDIT' : 'VIEW'}
-              mode={editingStudent ? 'EDIT' : 'VIEW'}
-              student={studentResponse.student}
-              onChange={setStudentInput}
-            />
-            {editingStudent && (
-              <FlexRight>
-                <FlexRowWithGaps>
-                  <Button
-                    text="Peruuta"
-                    disabled={submitting}
-                    onClick={() => setEditingStudent(false)}
-                  />
-                  <Button
-                    text="Tallenna"
-                    primary
-                    disabled={submitting || !studentInput}
-                    onClick={() => {
-                      if (!studentInput) return
+            </CollapsableRow>
+            {expandedStudentDetails && (
+              <FlexColWithGaps $gapSize="s">
+                <FlexRight>
+                  <FlexRowWithGaps $gapSize="m">
+                    <InlineButton
+                      text="Muokkaa"
+                      icon={faPen}
+                      disabled={editingSomething}
+                      onClick={() => setEditingStudent(true)}
+                    />
+                    <InlineButton
+                      text="Poista"
+                      icon={faTrash}
+                      disabled={editingSomething}
+                      onClick={() => {
+                        if (studentResponse.cases.length > 0) {
+                          window.alert(
+                            'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
+                          )
+                        } else {
+                          if (
+                            window.confirm(
+                              'Haluatko varmasti poistaa oppivelvollisen?'
+                            )
+                          ) {
+                            void apiDeleteStudent(id).then(() =>
+                              navigate('/oppivelvolliset')
+                            )
+                          }
+                        }
+                      }}
+                    />
+                  </FlexRowWithGaps>
+                </FlexRight>
+                <StudentForm
+                  key={editingStudent ? 'EDIT' : 'VIEW'}
+                  mode={editingStudent ? 'EDIT' : 'VIEW'}
+                  student={studentResponse.student}
+                  onChange={setStudentInput}
+                />
+                {editingStudent && (
+                  <FlexRight>
+                    <FlexRowWithGaps>
+                      <Button
+                        text="Peruuta"
+                        disabled={submitting}
+                        onClick={() => setEditingStudent(false)}
+                      />
+                      <Button
+                        text="Tallenna"
+                        primary
+                        disabled={submitting || !studentInput}
+                        onClick={() => {
+                          if (!studentInput) return
 
-                      setSubmitting(true)
-                      void apiPutStudent(id, studentInput)
-                        .then(() => {
-                          setEditingStudent(false)
-                          loadStudent()
-                        })
-                        .finally(() => setSubmitting(false))
-                    }}
-                  />
-                </FlexRowWithGaps>
-              </FlexRight>
+                          setSubmitting(true)
+                          void apiPutStudent(id, studentInput)
+                            .then(() => {
+                              setEditingStudent(false)
+                              loadStudent()
+                            })
+                            .finally(() => setSubmitting(false))
+                        }}
+                      />
+                    </FlexRowWithGaps>
+                  </FlexRight>
+                )}
+              </FlexColWithGaps>
             )}
           </SectionContainer>
 
@@ -263,207 +285,279 @@ export const StudentPage = React.memo(function StudentPage() {
 
             <VerticalGap $size="L" />
 
-            <FlexColWithGaps $gapSize="L">
-              {studentResponse.cases.map((studentCase) => (
-                <FlexColWithGaps key={studentCase.id}>
-                  <AccordionRow
-                    $disabled={
-                      editingCase !== false ||
-                      editingCaseStatus !== null ||
-                      editingCaseEvent
-                    }
-                    onClick={() => {
-                      if (
-                        editingCase !== false ||
-                        editingCaseStatus !== null ||
-                        editingCaseEvent
-                      )
-                        return
+            <CasesList
+              studentId={studentResponse.student.id}
+              cases={activeCase ? [activeCase] : []}
+              employees={employees}
+              expandedCase={expandedCase}
+              setExpandedCase={setExpandedCase}
+              editingCase={editingCase}
+              setEditingCase={setEditingCase}
+              editingCaseStatus={editingCaseStatus}
+              setEditingCaseStatus={setEditingCaseStatus}
+              editingCaseEvent={editingCaseEvent}
+              setEditingCaseEvent={setEditingCaseEvent}
+              editingSomething={editingSomething}
+              activeCaseExists={activeCaseExists}
+              submitting={submitting}
+              setSubmitting={setSubmitting}
+              loadStudent={loadStudent}
+            />
 
-                      if (expandedCase === studentCase.id) {
-                        setExpandedCase(null)
-                      } else {
-                        setExpandedCase(studentCase.id)
-                      }
-                    }}
-                  >
-                    <H3>Ilmoitus {formatDate(studentCase.openedAt)}</H3>
-                    <FlexRowWithGaps $gapSize="m">
-                      <FlexRowWithGaps $gapSize="XL">
-                        <span>
-                          {studentCase.assignedTo?.name ?? 'Ei ohjaajaa'}
-                        </span>
-                        <StatusChip status={studentCase.status} />
-                      </FlexRowWithGaps>
-                      <FontAwesomeIcon
-                        icon={
-                          expandedCase === studentCase.id
-                            ? faChevronUp
-                            : faChevronDown
-                        }
-                        className="accordion-chevron"
-                      />
-                    </FlexRowWithGaps>
-                  </AccordionRow>
-                  {expandedCase === studentCase.id && (
-                    <FlexColWithGaps $gapSize="XL">
-                      <FlexColWithGaps>
-                        {editingCase !== studentCase.id && (
-                          <FlexRight
-                            style={{ marginBottom: '-24px', zIndex: 1 }}
-                          >
-                            <FlexRowWithGaps $gapSize="m">
-                              <InlineButton
-                                text="Muokkaa"
-                                icon={faPen}
-                                disabled={editingSomething}
-                                onClick={() => setEditingCase(studentCase.id)}
-                              />
-                              <InlineButton
-                                text="Poista"
-                                icon={faTrash}
-                                disabled={editingSomething}
-                                onClick={() => {
-                                  if (studentCase.events.length > 0) {
-                                    window.alert(
-                                      'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
-                                    )
-                                  } else {
-                                    if (
-                                      window.confirm(
-                                        'Haluatko varmasti poistaa ilmoituksen?'
-                                      )
-                                    ) {
-                                      void apiDeleteStudentCase(
-                                        id,
-                                        studentCase.id
-                                      ).then(() => loadStudent())
-                                    }
-                                  }
-                                }}
-                              />
-                            </FlexRowWithGaps>
-                          </FlexRight>
-                        )}
-                        <StudentCaseForm
-                          key={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
-                          mode={
-                            editingCase === studentCase.id ? 'EDIT' : 'VIEW'
-                          }
-                          studentCase={studentCase}
-                          onChange={setStudentCaseInput}
-                          employees={employees}
-                        />
-                        {editingCase === studentCase.id && (
-                          <FlexRight>
-                            <FlexRowWithGaps>
-                              <Button
-                                text="Peruuta"
-                                disabled={submitting}
-                                onClick={() => {
-                                  setEditingCase(false)
-                                }}
-                              />
-                              <Button
-                                text="Tallenna"
-                                primary
-                                disabled={submitting || !studentCaseInput}
-                                onClick={() => {
-                                  if (!studentCaseInput) return
+            <VerticalGap $size="L" />
 
-                                  setSubmitting(true)
-                                  void apiPutStudentCase(
-                                    id,
-                                    studentCase.id,
-                                    studentCaseInput
-                                  )
-                                    .then(() => {
-                                      setEditingCase(false)
-                                      loadStudent()
-                                    })
-                                    .finally(() => setSubmitting(false))
-                                }}
-                              />
-                            </FlexRowWithGaps>
-                          </FlexRight>
-                        )}
-                      </FlexColWithGaps>
-
-                      <FlexColWithGaps>
-                        <FlexLeftRight>
-                          <H4>Ohjauksen tila</H4>
-                          {editingCaseStatus !== studentCase.id && (
-                            <InlineButton
-                              text="Vaihda tilaa"
-                              icon={faPen}
-                              disabled={editingSomething}
-                              onClick={() =>
-                                setEditingCaseStatus(studentCase.id)
-                              }
-                            />
-                          )}
-                        </FlexLeftRight>
-                        {editingCaseStatus === studentCase.id ? (
-                          <FlexColWithGaps>
-                            <CaseStatusForm
-                              mode="EDIT"
-                              studentCase={studentCase}
-                              onChange={setCaseStatusInput}
-                              activeCaseExists={activeCaseExists}
-                            />
-                            <FlexRight>
-                              <FlexRowWithGaps>
-                                <Button
-                                  text="Peruuta"
-                                  disabled={submitting}
-                                  onClick={() => setEditingCaseStatus(null)}
-                                />
-                                <Button
-                                  text="Tallenna"
-                                  primary
-                                  disabled={submitting || !caseStatusInput}
-                                  onClick={() => {
-                                    if (!caseStatusInput) return
-
-                                    setSubmitting(true)
-                                    void apiPutStudentCaseStatus(
-                                      studentCase.studentId,
-                                      studentCase.id,
-                                      caseStatusInput
-                                    )
-                                      .then(() => {
-                                        setEditingCaseStatus(null)
-                                        loadStudent()
-                                      })
-                                      .finally(() => setSubmitting(false))
-                                  }}
-                                />
-                              </FlexRowWithGaps>
-                            </FlexRight>
-                          </FlexColWithGaps>
-                        ) : (
-                          <CaseStatusForm
-                            mode="VIEW"
-                            studentCase={studentCase}
-                          />
-                        )}
-                      </FlexColWithGaps>
-
-                      <CaseEvents
-                        events={studentCase.events}
-                        studentCaseId={studentCase.id}
-                        reload={loadStudent}
-                        disabled={editingSomething}
-                        onChangeEditState={setEditingCaseEvent}
-                      />
-                    </FlexColWithGaps>
-                  )}
-                </FlexColWithGaps>
-              ))}
-            </FlexColWithGaps>
+            <H4>Vanhat ilmoitukset ({finishedCases.length})</H4>
+            <VerticalGap $size="m" />
+            <CasesList
+              studentId={studentResponse.student.id}
+              cases={finishedCases}
+              employees={employees}
+              expandedCase={expandedCase}
+              setExpandedCase={setExpandedCase}
+              editingCase={editingCase}
+              setEditingCase={setEditingCase}
+              editingCaseStatus={editingCaseStatus}
+              setEditingCaseStatus={setEditingCaseStatus}
+              editingCaseEvent={editingCaseEvent}
+              setEditingCaseEvent={setEditingCaseEvent}
+              editingSomething={editingSomething}
+              activeCaseExists={activeCaseExists}
+              submitting={submitting}
+              setSubmitting={setSubmitting}
+              loadStudent={loadStudent}
+            />
           </SectionContainer>
         </>
       )}
     </PageContainer>
+  )
+})
+
+const CasesList = React.memo(function CasesList({
+  studentId,
+  cases,
+  employees,
+  expandedCase,
+  setExpandedCase,
+  editingCase,
+  setEditingCase,
+  editingCaseStatus,
+  setEditingCaseStatus,
+  editingCaseEvent,
+  setEditingCaseEvent,
+  editingSomething,
+  activeCaseExists,
+  submitting,
+  setSubmitting,
+  loadStudent
+}: {
+  studentId: string
+  cases: StudentCase[]
+  employees: EmployeeUser[]
+  expandedCase: string | null
+  setExpandedCase: (id: string | null) => void
+  editingCase: boolean | string
+  setEditingCase: (editing: boolean | string) => void
+  editingCaseStatus: string | null
+  setEditingCaseStatus: (editing: string | null) => void
+  editingCaseEvent: boolean
+  setEditingCaseEvent: (editing: boolean) => void
+  editingSomething: boolean
+  activeCaseExists: boolean
+  submitting: boolean
+  setSubmitting: (value: boolean) => void
+  loadStudent: () => void
+}) {
+  const [studentCaseInput, setStudentCaseInput] =
+    useState<StudentCaseInput | null>(null)
+  const [caseStatusInput, setCaseStatusInput] =
+    useState<CaseStatusInput | null>(null)
+
+  return (
+    <FlexColWithGaps $gapSize="L">
+      {cases.map((studentCase) => (
+        <FlexColWithGaps key={studentCase.id}>
+          <AccordionRow
+            $disabled={
+              editingCase !== false ||
+              editingCaseStatus !== null ||
+              editingCaseEvent
+            }
+            onClick={() => {
+              if (
+                editingCase !== false ||
+                editingCaseStatus !== null ||
+                editingCaseEvent
+              )
+                return
+
+              if (expandedCase === studentCase.id) {
+                setExpandedCase(null)
+              } else {
+                setExpandedCase(studentCase.id)
+              }
+            }}
+          >
+            <H3>Ilmoitus {formatDate(studentCase.openedAt)}</H3>
+            <FlexRowWithGaps $gapSize="m">
+              <FlexRowWithGaps $gapSize="XL">
+                <span>{studentCase.assignedTo?.name ?? 'Ei ohjaajaa'}</span>
+                <StatusChip status={studentCase.status} />
+              </FlexRowWithGaps>
+              <FontAwesomeIcon
+                icon={
+                  expandedCase === studentCase.id ? faChevronUp : faChevronDown
+                }
+                className="collapse-icon"
+              />
+            </FlexRowWithGaps>
+          </AccordionRow>
+          {expandedCase === studentCase.id && (
+            <FlexColWithGaps $gapSize="XL">
+              <FlexColWithGaps>
+                {editingCase !== studentCase.id && (
+                  <FlexRight style={{ marginBottom: '-24px', zIndex: 1 }}>
+                    <FlexRowWithGaps $gapSize="m">
+                      <InlineButton
+                        text="Muokkaa"
+                        icon={faPen}
+                        disabled={editingSomething}
+                        onClick={() => setEditingCase(studentCase.id)}
+                      />
+                      <InlineButton
+                        text="Poista"
+                        icon={faTrash}
+                        disabled={editingSomething}
+                        onClick={() => {
+                          if (studentCase.events.length > 0) {
+                            window.alert(
+                              'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
+                            )
+                          } else {
+                            if (
+                              window.confirm(
+                                'Haluatko varmasti poistaa ilmoituksen?'
+                              )
+                            ) {
+                              void apiDeleteStudentCase(
+                                studentId,
+                                studentCase.id
+                              ).then(() => loadStudent())
+                            }
+                          }
+                        }}
+                      />
+                    </FlexRowWithGaps>
+                  </FlexRight>
+                )}
+                <StudentCaseForm
+                  key={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
+                  mode={editingCase === studentCase.id ? 'EDIT' : 'VIEW'}
+                  studentCase={studentCase}
+                  onChange={setStudentCaseInput}
+                  employees={employees}
+                />
+                {editingCase === studentCase.id && (
+                  <FlexRight>
+                    <FlexRowWithGaps>
+                      <Button
+                        text="Peruuta"
+                        disabled={submitting}
+                        onClick={() => {
+                          setEditingCase(false)
+                        }}
+                      />
+                      <Button
+                        text="Tallenna"
+                        primary
+                        disabled={submitting || !studentCaseInput}
+                        onClick={() => {
+                          if (!studentCaseInput) return
+
+                          setSubmitting(true)
+                          void apiPutStudentCase(
+                            studentId,
+                            studentCase.id,
+                            studentCaseInput
+                          )
+                            .then(() => {
+                              setEditingCase(false)
+                              loadStudent()
+                            })
+                            .finally(() => setSubmitting(false))
+                        }}
+                      />
+                    </FlexRowWithGaps>
+                  </FlexRight>
+                )}
+              </FlexColWithGaps>
+
+              <FlexColWithGaps>
+                <FlexLeftRight>
+                  <H4>Ohjauksen tila</H4>
+                  {editingCaseStatus !== studentCase.id && (
+                    <InlineButton
+                      text="Vaihda tilaa"
+                      icon={faPen}
+                      disabled={editingSomething}
+                      onClick={() => setEditingCaseStatus(studentCase.id)}
+                    />
+                  )}
+                </FlexLeftRight>
+                {editingCaseStatus === studentCase.id ? (
+                  <FlexColWithGaps>
+                    <CaseStatusForm
+                      mode="EDIT"
+                      studentCase={studentCase}
+                      onChange={setCaseStatusInput}
+                      activeCaseExists={activeCaseExists}
+                    />
+                    <FlexRight>
+                      <FlexRowWithGaps>
+                        <Button
+                          text="Peruuta"
+                          disabled={submitting}
+                          onClick={() => setEditingCaseStatus(null)}
+                        />
+                        <Button
+                          text="Tallenna"
+                          primary
+                          disabled={submitting || !caseStatusInput}
+                          onClick={() => {
+                            if (!caseStatusInput) return
+
+                            setSubmitting(true)
+                            void apiPutStudentCaseStatus(
+                              studentCase.studentId,
+                              studentCase.id,
+                              caseStatusInput
+                            )
+                              .then(() => {
+                                setEditingCaseStatus(null)
+                                loadStudent()
+                              })
+                              .finally(() => setSubmitting(false))
+                          }}
+                        />
+                      </FlexRowWithGaps>
+                    </FlexRight>
+                  </FlexColWithGaps>
+                ) : (
+                  <CaseStatusForm mode="VIEW" studentCase={studentCase} />
+                )}
+              </FlexColWithGaps>
+
+              <CaseEvents
+                events={studentCase.events}
+                studentCaseId={studentCase.id}
+                reload={loadStudent}
+                disabled={editingSomething}
+                onChangeEditState={setEditingCaseEvent}
+              />
+            </FlexColWithGaps>
+          )}
+        </FlexColWithGaps>
+      ))}
+    </FlexColWithGaps>
   )
 })
