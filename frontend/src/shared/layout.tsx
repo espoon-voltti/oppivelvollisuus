@@ -155,6 +155,6 @@ export const GroupOfInputRows = styled.div`
 
 export const Separator = styled.div`
   border-top: 1px solid ${colors.grayscale.g15};
-  margin: 16px 0;
+  margin: 12px 0;
   width: 100%;
 `
