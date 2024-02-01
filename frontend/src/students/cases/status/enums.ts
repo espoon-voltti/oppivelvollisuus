@@ -60,7 +60,7 @@ export const schoolTypeNames: Record<SchoolType, string> = {
   LUKIO: 'Lukio ',
   AIKUISLUKIO: 'Aikuislukio',
   YLEISOPPILAITOKSEN_TUVA: 'Yleisoppilaitoksen tuva',
-  AMMATILLISEN_OPPILAITOKSEN_TUVA: 'Ammatillisen oppilaitoksen tuva',
+  AMMATILLISEN_OPPILAITOKSEN_TUVA: 'Ammatillisen erityisoppilaitoksen tuva',
   AMMATILLISEN_ERITYISOPPILAITOKSEN_PERUSTUTKINTO:
     'Ammatillisen erityisoppilaitoksen perustutkinto',
   TELMA: 'Telma',

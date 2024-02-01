@@ -243,7 +243,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
           )}
         </LabeledInput>
         <LabeledInput $cols={4}>
-          <Label>Ilmoitettajan yhteystiedot</Label>
+          <Label>Ilmoittajan yhteystiedot</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.sourceContact || '-'}</span>
           ) : (
