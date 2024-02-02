@@ -175,10 +175,10 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <Table style={{ width: '100%' }}>
                 <thead>
                   <tr>
-                    <Th style={{ width: '140px' }}>Ilmoitettu</Th>
-                    <Th style={{ width: '200px' }}>Nimi</Th>
+                    <Th style={{ width: '160px' }}>Ilmoitettu</Th>
+                    <Th style={{ width: '160px' }}>Nimi</Th>
                     <Th>Viimeisin tapahtuma</Th>
-                    <Th style={{ width: '200px' }}>Ohjaaja</Th>
+                    <Th style={{ width: '160px' }}>Ohjaaja</Th>
                     <Th style={{ width: '200px' }} />
                   </tr>
                 </thead>
