@@ -15,7 +15,7 @@ const diameter = '30px'
 
 const Wrapper = styled.div`
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   width: fit-content;
 
   &.disabled {
@@ -43,7 +43,6 @@ const Wrapper = styled.div`
 
 const LabelContainer = styled.div`
   font-size: 1rem;
-  margin-top: 6px;
   margin-left: 16px;
 `
 
@@ -51,7 +50,6 @@ const Box = styled.div`
   position: relative;
   width: ${diameter};
   height: ${diameter};
-  margin-top: 4px;
 `
 
 const CheckboxInput = styled.input`

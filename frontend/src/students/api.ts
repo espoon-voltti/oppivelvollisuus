@@ -159,6 +159,7 @@ export interface CaseEventSummary {
 export interface StudentSearchParams {
   query: string
   statuses: CaseStatus[]
+  sources: CaseSource[]
   assignedTo: string | null
 }
 
