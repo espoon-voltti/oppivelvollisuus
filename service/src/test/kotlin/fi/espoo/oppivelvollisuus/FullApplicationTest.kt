@@ -52,7 +52,7 @@ abstract class FullApplicationTest {
             tx.execute("SELECT reset_database()")
             tx.createUpdate(
                 """
-                INSERT INTO users (id, updated, external_id, first_name, last_name, email) 
+                INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
                 VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
             """
             ).bind("id", testUser.id).execute()

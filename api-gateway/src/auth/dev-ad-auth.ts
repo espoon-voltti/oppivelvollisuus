@@ -37,7 +37,7 @@ const devUsers: AdUser[] = [
   },
   {
     externalId: 'ad:002',
-    firstName: 'Olli',
+    firstName: 'Olli Oiva Otto',
     lastName: 'Ohjaaja'
   }
 ]
