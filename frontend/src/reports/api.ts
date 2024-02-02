@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import { parseISO } from 'date-fns'
+import { formatISO, parseISO } from 'date-fns'
 
 import { apiClient } from '../api-client'
 import { JsonOf } from '../shared/api-utils'
@@ -21,6 +21,11 @@ import {
   SchoolType
 } from '../students/cases/status/enums'
 import { Gender } from '../students/enums'
+
+export interface CasesReportRequest {
+  start: Date | null
+  end: Date | null
+}
 
 export interface CasesReportRow {
   openedAt: Date
@@ -41,12 +46,21 @@ export interface CasesReportRow {
   eventTypes: CaseEventType[]
 }
 
-export const apiGetCasesReport = (): Promise<CasesReportRow[]> =>
-  apiClient
-    .get<JsonOf<CasesReportRow[]>>('/reports/student-cases')
+export const apiGetCasesReport = async (
+  request: CasesReportRequest
+): Promise<CasesReportRow[]> => {
+  const params: JsonOf<CasesReportRequest> = {
+    start: request.start
+      ? formatISO(request.start, { representation: 'date' })
+      : null,
+    end: request.end ? formatISO(request.end, { representation: 'date' }) : null
+  }
+  return apiClient
+    .get<JsonOf<CasesReportRow[]>>('/reports/student-cases', { params })
     .then((res) =>
       res.data.map((row) => ({
         ...row,
         openedAt: parseISO(row.openedAt)
       }))
     )
+}

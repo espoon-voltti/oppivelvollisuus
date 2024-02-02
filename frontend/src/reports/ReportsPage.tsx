@@ -5,20 +5,23 @@
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import React, { useEffect, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { CSVLink } from 'react-csv'
 import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
+import { Button } from '../shared/buttons/Button'
 import { InlineButton } from '../shared/buttons/InlineButton'
-import { formatDate } from '../shared/dates'
+import { formatDate, parseDate } from '../shared/dates'
+import { InputField } from '../shared/form/InputField'
 import {
   FlexRowWithGaps,
+  LabeledInput,
   PageContainer,
   SectionContainer,
   VerticalGap
 } from '../shared/layout'
-import { H2 } from '../shared/typography'
+import { H2, Label, P } from '../shared/typography'
 import {
   caseBackgroundReasonNames,
   caseBackgroundReasonValues,
@@ -40,7 +43,7 @@ import {
 } from '../students/cases/status/enums'
 import { genderNames } from '../students/enums'
 
-import { apiGetCasesReport, CasesReportRow } from './api'
+import { apiGetCasesReport, CasesReportRequest, CasesReportRow } from './api'
 
 const StyledDownloadButton = styled(CSVLink)`
   font-weight: 600;
@@ -49,10 +52,18 @@ const StyledDownloadButton = styled(CSVLink)`
 export const ReportsPage = React.memo(function ReportsPage() {
   const navigate = useNavigate()
 
+  const [startDate, setStartDate] = useState<string>('')
+  const [endDate, setEndDate] = useState<string>('')
+  const [submitting, setSubmitting] = useState(false)
+  const validRequest: CasesReportRequest | null = useMemo(() => {
+    const start = startDate.length > 0 ? parseDate(startDate) : null
+    const end = endDate.length > 0 ? parseDate(endDate) : null
+    if (start === undefined || end === undefined) {
+      return null
+    }
+    return { start, end }
+  }, [startDate, endDate])
   const [rows, setRows] = useState<CasesReportRow[] | null>(null)
-  useEffect(() => {
-    void apiGetCasesReport().then(setRows)
-  }, [])
 
   return (
     <PageContainer>
@@ -64,6 +75,47 @@ export const ReportsPage = React.memo(function ReportsPage() {
         />
         <VerticalGap $size="m" />
         <H2>Ilmoitukset raportti</H2>
+        <VerticalGap $size="L" />
+        <P>
+          Raportti listaa oppivelvollisuusilmoituksia ja niihin liittyviä
+          tietoja. Raportin voi ladata .csv muodossa, avata esimerkiksi
+          Excelissä ja siellä jalostaa tiedoista kulloinkin tarvittavat
+          tilastot.
+        </P>
+        <VerticalGap $size="L" />
+        <FlexRowWithGaps $gapSize="L">
+          <LabeledInput $cols={2}>
+            <Label>Alkupäivä</Label>
+            <InputField
+              value={startDate}
+              onChange={(value) => {
+                setRows(null)
+                setStartDate(value)
+              }}
+            />
+          </LabeledInput>
+          <LabeledInput $cols={2}>
+            <Label>Loppupäivä</Label>
+            <InputField
+              value={endDate}
+              onChange={(value) => {
+                setRows(null)
+                setEndDate(value)
+              }}
+            />
+          </LabeledInput>
+          <Button
+            text="Hae raportti"
+            disabled={submitting || !validRequest}
+            onClick={() => {
+              if (!validRequest) return
+              setSubmitting(true)
+              void apiGetCasesReport(validRequest)
+                .then(setRows)
+                .finally(() => setSubmitting(false))
+            }}
+          />
+        </FlexRowWithGaps>
         <VerticalGap $size="L" />
         {rows && (
           <StyledDownloadButton
