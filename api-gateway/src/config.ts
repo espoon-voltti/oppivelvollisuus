@@ -173,7 +173,8 @@ export function configFromEnv(): Config {
     session: {
       useSecureCookies,
       cookieSecret,
-      sessionTimeoutMinutes: env('SESSION_TIMEOUT_MINUTES', parseInteger) ?? (8 * 60)
+      sessionTimeoutMinutes:
+        env('SESSION_TIMEOUT_MINUTES', parseInteger) ?? 8 * 60
     },
     ad,
     redis: {
