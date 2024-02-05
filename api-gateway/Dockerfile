@@ -26,6 +26,7 @@ FROM builder
 ENV NODE_ENV production
 
 RUN apt-get update \
+ && apt-get -y dist-upgrade \
  && apt-get -y install curl \
  && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/v1.4.1/s3downloader-linux-amd64 \
        -o /bin/s3download \
