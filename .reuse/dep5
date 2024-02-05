@@ -32,6 +32,10 @@ Files: */.nvmrc
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
 
+Files: *.yarnrc.yml
+Copyright: 2023-2024 City of Espoo
+License: LGPL-2.1-or-later
+
 Files: */*.cert
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
