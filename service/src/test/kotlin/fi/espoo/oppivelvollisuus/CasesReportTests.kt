@@ -91,7 +91,11 @@ class CasesReportTests : FullApplicationTest() {
                     eventTypes = emptySet()
                 )
             ),
-            controller.getCasesReport(testUser)
+            controller.getCasesReport(
+                user = testUser,
+                start = LocalDate.of(2022, 1, 1),
+                end = LocalDate.of(2022, 12, 31)
+            )
         )
 
         controller.createCaseEvent(
@@ -135,7 +139,7 @@ class CasesReportTests : FullApplicationTest() {
             )
         )
 
-        controller.getCasesReport(testUser).first().also { row ->
+        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
             assertEquals(SchoolType.LUKIO, row.startedAtSchool)

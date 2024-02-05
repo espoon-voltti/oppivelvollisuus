@@ -35,10 +35,10 @@ fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
     createQuery(
         // language=SQL
         """
-INSERT INTO users (external_id, first_name, last_name, email)
+INSERT INTO users (external_id, first_names, last_name, email)
 VALUES (:externalId, :firstName, :lastName, :email)
 ON CONFLICT (external_id) DO UPDATE
-SET updated = now(), first_name = :firstName, last_name = :lastName, email = :email
+SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
 RETURNING id, external_id, first_name, last_name, email
     """
             .trimIndent()

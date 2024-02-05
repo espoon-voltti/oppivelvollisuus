@@ -13,10 +13,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
-import { SelectionChip } from '../shared/Chip'
 import { AddButton } from '../shared/buttons/AddButton'
 import { InlineButton } from '../shared/buttons/InlineButton'
 import { formatDate } from '../shared/dates'
+import { Checkbox } from '../shared/form/Checkbox'
 import { InputField } from '../shared/form/InputField'
 import { Select } from '../shared/form/Select'
 import {
@@ -35,6 +35,12 @@ import { useDebouncedState } from '../shared/useDebouncedState'
 
 import { apiDeleteOldStudents, apiGetStudents, StudentSummary } from './api'
 import { StatusChip } from './cases/StatusChip'
+import {
+  CaseSource,
+  caseSourceNames,
+  caseSourceNamesShort,
+  caseSources
+} from './cases/enums'
 import { caseEventTypeNames } from './cases/events/enums'
 import { CaseStatus, caseStatuses, caseStatusNames } from './cases/status/enums'
 
@@ -47,6 +53,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   }, [])
 
   const [statuses, setStatuses] = useState<CaseStatus[]>(['TODO', 'ON_HOLD'])
+  const [sources, setSources] = useState<CaseSource[]>([...caseSources])
   const [query, setQuery, debouncedQuery] = useDebouncedState<string>('')
   const [assignedTo, setAssignedTo] = useState<EmployeeUser | null>(null)
 
@@ -58,10 +65,11 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
     setStudentsResponse(null)
     void apiGetStudents({
       query: debouncedQuery,
-      statuses,
+      statuses: statuses.length > 0 ? statuses : [...caseStatuses],
+      sources: sources.length > 0 ? sources : [...caseSources],
       assignedTo: assignedTo?.id ?? null
     }).then(setStudentsResponse)
-  }, [debouncedQuery, statuses, assignedTo])
+  }, [debouncedQuery, statuses, sources, assignedTo])
 
   useEffect(() => {
     loadStudents()
@@ -120,18 +128,15 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               icon={faMagnifyingGlass}
             />
           </LabeledInput>
-          <FlexRowWithGaps
-            $gapSize="L"
-            style={{ justifyContent: 'space-between' }}
-          >
-            <FlexColWithGaps>
+          <FlexRowWithGaps $gapSize="L">
+            <LabeledInput $cols={7}>
               <Label>Näytettävät tilat</Label>
               <FlexRowWithGaps $gapSize="s">
                 {caseStatuses.map((status) => (
-                  <SelectionChip
+                  <StyledCheckbox
                     key={status}
-                    text={caseStatusNames[status]}
-                    selected={statuses.includes(status)}
+                    label={caseStatusNames[status]}
+                    checked={statuses.includes(status)}
                     onChange={(checked) => {
                       if (checked) {
                         setStatuses((prev) => [...prev, status])
@@ -142,8 +147,8 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                   />
                 ))}
               </FlexRowWithGaps>
-            </FlexColWithGaps>
-            <LabeledInput $cols={6}>
+            </LabeledInput>
+            <LabeledInput $cols={3}>
               <Label>Ohjaaja</Label>
               {employees ? (
                 <Select<EmployeeUser>
@@ -159,6 +164,29 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               )}
             </LabeledInput>
           </FlexRowWithGaps>
+
+          <LabeledInput $cols={7}>
+            <Label>Ilmoituksen lähde</Label>
+            <FlexRowWithGaps $gapSize="s" style={{ alignItems: 'baseline' }}>
+              {caseSources.map((source) => (
+                <StyledCheckbox
+                  key={source}
+                  label={caseSourceNamesShort[source]}
+                  checked={sources.includes(source)}
+                  onChange={(checked) => {
+                    if (checked) {
+                      setSources((prev) => [
+                        ...prev.filter((s) => s !== source),
+                        source
+                      ])
+                    } else {
+                      setSources((prev) => prev.filter((s) => s !== source))
+                    }
+                  }}
+                />
+              ))}
+            </FlexRowWithGaps>
+          </LabeledInput>
         </FlexColWithGaps>
 
         <VerticalGap $size="L" />
@@ -175,10 +203,10 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               <Table style={{ width: '100%' }}>
                 <thead>
                   <tr>
-                    <Th style={{ width: '140px' }}>Ilmoitettu</Th>
-                    <Th style={{ width: '200px' }}>Nimi</Th>
+                    <Th style={{ width: '160px' }}>Ilmoitettu</Th>
+                    <Th style={{ width: '160px' }}>Nimi</Th>
                     <Th>Viimeisin tapahtuma</Th>
-                    <Th style={{ width: '200px' }}>Ohjaaja</Th>
+                    <Th style={{ width: '160px' }}>Ohjaaja</Th>
                     <Th style={{ width: '200px' }} />
                   </tr>
                 </thead>
@@ -192,6 +220,13 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                               ? formatDate(student.openedAt)
                               : '-'}
                           </span>
+                          {student.source && (
+                            <SourceLabel
+                              title={caseSourceNames[student.source]}
+                            >
+                              {sourceAbbreviation(student.source)}
+                            </SourceLabel>
+                          )}
                           {student.openedAt &&
                             isBefore(
                               student.openedAt,
@@ -249,6 +284,35 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   )
 })
 
+const StyledCheckbox = styled(Checkbox)`
+  width: 200px;
+`
+
 const Th = styled.th`
   text-align: left;
 `
+
+const SourceLabel = styled.abbr`
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: ${colors.main.m1};
+  color: ${colors.grayscale.g0};
+  user-select: none;
+  text-decoration: none;
+`
+
+const sourceAbbreviation = (source: CaseSource) => {
+  switch (source) {
+    case 'VALPAS_NOTICE':
+      return 'V'
+    case 'VALPAS_AUTOMATIC_CHECK':
+      return 'A'
+    case 'OTHER':
+      return 'M'
+  }
+}

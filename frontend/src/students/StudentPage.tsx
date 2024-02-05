@@ -133,11 +133,37 @@ export const StudentPage = React.memo(function StudentPage() {
           onClick={() => navigate('/oppivelvolliset')}
         />
         <VerticalGap $size="m" />
-        <H2 data-qa="student-name">
-          {studentResponse
-            ? `${studentResponse.student.lastName} ${studentResponse.student.firstName}`
-            : ''}
-        </H2>
+        <FlexLeftRight>
+          <H2 data-qa="student-name">
+            {studentResponse
+              ? `${studentResponse.student.lastName} ${studentResponse.student.firstName}`
+              : ''}
+          </H2>
+          {studentResponse && (
+            <InlineButton
+              text="Poista oppivelvollisen tiedot"
+              icon={faTrash}
+              disabled={editingSomething}
+              onClick={() => {
+                if (studentResponse.cases.length > 0) {
+                  window.alert(
+                    'Jos haluat poistaa oppivelvollisen tiedot, poista ensin kaikki ilmoitukset'
+                  )
+                } else {
+                  if (
+                    window.confirm(
+                      'Haluatko varmasti poistaa oppivelvollisen tiedot?'
+                    )
+                  ) {
+                    void apiDeleteStudent(id).then(() =>
+                      navigate('/oppivelvolliset')
+                    )
+                  }
+                }
+              }}
+            />
+          )}
+        </FlexLeftRight>
       </SectionContainer>
 
       <VerticalGap $size="m" />
@@ -158,6 +184,7 @@ export const StudentPage = React.memo(function StudentPage() {
             </CollapsableRow>
             {expandedStudentDetails && (
               <FlexColWithGaps $gapSize="s">
+                <VerticalGap $size="s" />
                 <FlexRight>
                   <FlexRowWithGaps $gapSize="m">
                     <InlineButton
@@ -165,28 +192,6 @@ export const StudentPage = React.memo(function StudentPage() {
                       icon={faPen}
                       disabled={editingSomething}
                       onClick={() => setEditingStudent(true)}
-                    />
-                    <InlineButton
-                      text="Poista"
-                      icon={faTrash}
-                      disabled={editingSomething}
-                      onClick={() => {
-                        if (studentResponse.cases.length > 0) {
-                          window.alert(
-                            'Jos haluat poistaa oppivelvollisen, poista ensin kaikki ilmoitukset'
-                          )
-                        } else {
-                          if (
-                            window.confirm(
-                              'Haluatko varmasti poistaa oppivelvollisen?'
-                            )
-                          ) {
-                            void apiDeleteStudent(id).then(() =>
-                              navigate('/oppivelvolliset')
-                            )
-                          }
-                        }
-                      }}
                     />
                   </FlexRowWithGaps>
                 </FlexRight>

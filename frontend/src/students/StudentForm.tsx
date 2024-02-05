@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import { parse } from 'date-fns'
+import { differenceInYears } from 'date-fns/differenceInYears'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -205,9 +206,8 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>
-                {props.student.dateOfBirth
-                  ? formatDate(props.student.dateOfBirth)
-                  : '-'}
+                {formatDate(props.student.dateOfBirth)} (
+                {differenceInYears(new Date(), props.student.dateOfBirth)}v)
               </span>
             ) : (
               <InputField

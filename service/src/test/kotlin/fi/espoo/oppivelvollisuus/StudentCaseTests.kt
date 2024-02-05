@@ -390,6 +390,7 @@ class StudentCaseTests : FullApplicationTest() {
                 StudentSearchParams(
                     query = "",
                     statuses = CaseStatus.entries,
+                    sources = CaseSource.entries,
                     assignedTo = null
                 )
             )

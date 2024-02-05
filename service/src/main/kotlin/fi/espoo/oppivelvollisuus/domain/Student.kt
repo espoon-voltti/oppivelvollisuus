@@ -78,6 +78,7 @@ data class CaseEventSummary(
 data class StudentSearchParams(
     val query: String?,
     val statuses: List<CaseStatus>,
+    val sources: List<CaseSource>,
     val assignedTo: UUID?
 )
 
@@ -105,6 +106,7 @@ LEFT JOIN LATERAL (
 ) ce ON true
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
+  AND (source IS NULL OR source = ANY(:sources::case_source[]))
 ${if (params.assignedTo != null) "AND assignee.id = :assignedTo" else ""}
 ${if (params.query != null) {
             """

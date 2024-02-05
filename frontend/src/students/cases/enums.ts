@@ -16,6 +16,12 @@ export const caseSourceNames: Record<CaseSource, string> = {
   OTHER: 'Muu ilmoitus asuinkuntaan'
 }
 
+export const caseSourceNamesShort: Record<CaseSource, string> = {
+  VALPAS_NOTICE: 'Valpas',
+  VALPAS_AUTOMATIC_CHECK: 'Automaattinen tarkistus',
+  OTHER: 'Muu ilmoitus'
+}
+
 export const valpasNotifiers = [
   'PERUSOPETUS',
   'AIKUISTEN_PERUSOPETUS',

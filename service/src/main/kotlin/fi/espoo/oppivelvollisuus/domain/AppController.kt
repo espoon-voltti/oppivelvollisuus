@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 import java.util.UUID
 
 @RestController
@@ -273,8 +275,12 @@ class AppController {
     }
 
     @GetMapping("/reports/student-cases")
-    fun getCasesReport(user: AuthenticatedUser): List<CaseReportRow> {
-        return jdbi.inTransactionUnchecked { it.getCasesReport() }.also {
+    fun getCasesReport(
+        user: AuthenticatedUser,
+        @RequestParam(required = false) start: LocalDate?,
+        @RequestParam(required = false) end: LocalDate?
+    ): List<CaseReportRow> {
+        return jdbi.inTransactionUnchecked { it.getCasesReport(CaseReportRequest(start, end)) }.also {
             logger.audit(
                 user,
                 "GET_CASES_REPORT"
