@@ -60,7 +60,7 @@
     "express-http-proxy": "^2.0.0",
     "postcss": "^8.4.31",
     "postcss-loader": "^8.1.0",
-    "postcss-preset-env": "^9.3.0",
+    "postcss-preset-env": "^9.4.0",
     "prettier": "^3.2.4",
     "react-autosize-textarea": "^7.1.0",
     "style-loader": "^3.3.3",
