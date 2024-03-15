@@ -3572,10 +3572,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^3.3.1":
-  version: 3.3.1
-  resolution: "date-fns@npm:3.3.1"
-  checksum: 98231936765dfb6fc6897676319b500a06a39f051b2c3ecbdd541a07ce9b1344b770277b8bfb1049fb7a2f70bf365ac8e6f1e2bb452b10e1a8101d518ca7f95d
+"date-fns@npm:^3.5.0":
+  version: 3.5.0
+  resolution: "date-fns@npm:3.5.0"
+  checksum: d37eff45f97e6c6745072ff2733c63fffa89e91d4bf407c368641b83c05eaa5222f3f1ba2d7f88862c4fc26fbcf4ad2ffac4526ae6a6414c10fcaea411ab71c3
   languageName: node
   linkType: hard
 
@@ -5982,7 +5982,7 @@ __metadata:
     concurrently: "npm:^8.2.2"
     core-js: "npm:^3.36.0"
     css-loader: "npm:^6.10.0"
-    date-fns: "npm:^3.3.1"
+    date-fns: "npm:^3.5.0"
     esbuild: "npm:^0.20.1"
     eslint: "npm:^8.57.0"
     eslint-config-prettier: "npm:^9.1.0"
