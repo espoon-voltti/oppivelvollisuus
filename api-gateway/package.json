@@ -61,6 +61,9 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.4.3"
   },
+  "resolutions": {
+    "@types/mime": "3.0.4"
+  },
   "prettier": {
     "arrowParens": "always",
     "bracketSpacing": true,
