@@ -12,6 +12,14 @@ A tool for tracking the monitoring and guidance cases related to compulsory educ
 
 ## Technical overview
 
+The application consists of
+- Frontend (React, TypeScript, Nginx)
+- API-Gateway (Node.js, TypeScript, Express)
+  - handles AD SAML authentication and stores the session in a cookie and in redis
+  - proxies other API requests to the service, passing the valid user session as a signed JWT token
+- Service (Spring Boot, Kotlin)
+  - implements the business logic and persists the data in a Postgresql database
+
 ![Entiry diagram](./docs/oppivelvollisuus_entity.png)
 
 
@@ -56,6 +64,8 @@ To start API-gateway in http://localhost:3000
 To lint and format code
 - `yarn lint --fix`
 
+The default config uses dev login with hard coded users, but it is also possible to configure the local development environment to use some real SAML IDP.
+
 ### Frontend
 
 To start frontend in http://localhost:9000
@@ -65,6 +75,14 @@ To start frontend in http://localhost:9000
 
 To lint and format code
 - `yarn lint --fix`
+
+### Version updates
+
+Dependabot runs in Github and creates PRs of new dependency versions.
+
+### Deployment
+
+After merging a PR go to the Github action and approve the deployments after build succeeds. It is recommended to do a quick manual smoke test in staging before deploying to production.
 
 ## License
 
