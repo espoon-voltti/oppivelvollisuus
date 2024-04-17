@@ -84,6 +84,7 @@ export const schoolBackgrounds = [
   'VSOP_PERUSKOULUSSA',
   'YLEINEN_TUKI_PERUSKOULUSSA',
   'TEHOSTETTU_TUKI_PERUSKOULUSSA',
+  'TEHOSTETTU_HENKKOHT_TUKI_PERUSKOULUSSA',
   'ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA',
   'YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA'
 ]
@@ -98,6 +99,8 @@ export const schoolBackgroundNames: Record<SchoolBackground, string> = {
   VSOP_PERUSKOULUSSA: 'VSOP (vuosiluokkiin sitomaton opiskelu) peruskoulussa',
   YLEINEN_TUKI_PERUSKOULUSSA: 'Yleinen tuki peruskoulussa',
   TEHOSTETTU_TUKI_PERUSKOULUSSA: 'Tehostettu tuki peruskoulussa',
+  TEHOSTETTU_HENKKOHT_TUKI_PERUSKOULUSSA:
+    'Tehostettu henkilökohtainen tuki peruskoulussa',
   ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA: 'Erityisen tuen päätös peruskoulussa',
   YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA:
     'Yksilöllistetty oppimäärä sekä äidinkielessä että matematiikassa',
