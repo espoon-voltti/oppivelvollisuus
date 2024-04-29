@@ -3255,7 +3255,7 @@ __metadata:
     source-map-support: "npm:^0.5.21"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^5.4.3"
-    zod: "npm:^3.22.3"
+    zod: "npm:^3.23.4"
   languageName: unknown
   linkType: soft
 
@@ -4615,9 +4615,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.22.3":
-  version: 3.22.4
-  resolution: "zod@npm:3.22.4"
-  checksum: 73622ca36a916f785cf528fe612a884b3e0f183dbe6b33365a7d0fc92abdbedf7804c5e2bd8df0a278e1472106d46674281397a3dd800fa9031dc3429758c6ac
+"zod@npm:^3.23.4":
+  version: 3.23.4
+  resolution: "zod@npm:3.23.4"
+  checksum: 29117ce59f16af155d9a3aab024d18e858e55b4b51c1f848772516ec6f019e617a0cdaf4c6e20f15154360a9f4c160056aba34502ec68072c8f0af31dfd653d6
   languageName: node
   linkType: hard
