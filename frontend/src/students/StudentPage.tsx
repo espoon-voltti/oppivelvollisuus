@@ -30,6 +30,7 @@ import {
 } from '../shared/layout'
 import { colors } from '../shared/theme'
 import { H2, H3, H4 } from '../shared/typography'
+import { useWarnOnUnsavedChanges } from '../shared/useWarnOnUnsavedChanges'
 
 import { StudentForm } from './StudentForm'
 import {
@@ -133,6 +134,8 @@ export const StudentPage = React.memo(function StudentPage() {
     studentResponse?.cases?.filter((c) => c.status === 'FINISHED') ?? []
   const activeCaseExists = activeCase !== undefined
 
+  useWarnOnUnsavedChanges(editingSomething)
+
   return (
     <PageContainer>
       <SectionContainer>
@@ -140,6 +143,7 @@ export const StudentPage = React.memo(function StudentPage() {
           text="Takaisin"
           icon={faChevronLeft}
           onClick={() => navigate('/oppivelvolliset')}
+          disabled={editingSomething}
         />
         <VerticalGap $size="m" />
         <FlexLeftRight>
