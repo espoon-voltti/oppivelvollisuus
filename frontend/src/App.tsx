@@ -16,6 +16,7 @@ import { FlexRowWithGaps } from './shared/layout'
 import { H1 } from './shared/typography'
 import { CreateStudentPage } from './students/CreateStudentPage'
 import { StudentPage } from './students/StudentPage'
+import { StudentSearchProvider } from './students/StudentSearchContext'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
 
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
@@ -40,16 +41,18 @@ function App() {
 
   return (
     <UserContextProvider user={user}>
-      <Fragment>
-        <Header>
-          <FlexRowWithGaps>
-            <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
-            <H1>Oppivelvollisuuden seuranta</H1>
-          </FlexRowWithGaps>
-          <UserHeader />
-        </Header>
-        <Outlet />
-      </Fragment>
+      <StudentSearchProvider>
+        <Fragment>
+          <Header>
+            <FlexRowWithGaps>
+              <img src={EspooLogo} width="100px" alt="Espoon kaupunki" />
+              <H1>Oppivelvollisuuden seuranta</H1>
+            </FlexRowWithGaps>
+            <UserHeader />
+          </Header>
+          <Outlet />
+        </Fragment>
+      </StudentSearchProvider>
     </UserContextProvider>
   )
 }

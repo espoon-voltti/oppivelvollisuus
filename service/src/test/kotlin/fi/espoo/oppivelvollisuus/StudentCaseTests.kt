@@ -391,7 +391,7 @@ class StudentCaseTests : FullApplicationTest() {
                     query = "",
                     statuses = CaseStatus.entries,
                     sources = CaseSource.entries,
-                    assignedTo = null
+                    assignee = null
                 )
             )
         )

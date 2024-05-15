@@ -160,7 +160,9 @@ export interface StudentSearchParams {
   query: string
   statuses: CaseStatus[]
   sources: CaseSource[]
-  assignedTo: string | null
+  assignee: {
+    assignedTo: string | null
+  } | null
 }
 
 export interface DuplicateStudentCheckInput {
