@@ -5,7 +5,7 @@
 import { faPen } from '@fortawesome/free-solid-svg-icons'
 import { faPlus } from '@fortawesome/free-solid-svg-icons/faPlus'
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useState } from 'react'
 
 import { IconButton } from '../../../shared/buttons/IconButton'
 import { InlineButton } from '../../../shared/buttons/InlineButton'
@@ -31,23 +31,16 @@ export const CaseEvents = React.memo(function CaseEvents({
   studentCaseId,
   reload,
   disabled,
-  onChangeEditState
+  editingCaseEvent,
+  setEditingCaseEvent
 }: {
   events: CaseEvent[]
   studentCaseId: string
   reload: () => void
   disabled: boolean
-  onChangeEditState: (editing: boolean) => unknown
+  editingCaseEvent: boolean | string
+  setEditingCaseEvent: (editing: boolean | string) => unknown
 }) {
-  // true = creating new, string = id of the edited case event
-  const [editingCaseEvent, setEditingCaseEvent] = useState<boolean | string>(
-    false
-  )
-
-  useEffect(() => {
-    onChangeEditState(!!editingCaseEvent)
-  }, [onChangeEditState, editingCaseEvent])
-
   const [caseEventInput, setCaseEventInput] = useState<CaseEventInput | null>(
     null
   )

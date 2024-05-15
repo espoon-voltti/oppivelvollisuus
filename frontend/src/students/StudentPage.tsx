@@ -84,9 +84,6 @@ export const StudentPage = React.memo(function StudentPage() {
     setStudentResponse(null)
     void apiGetStudent(id).then((response) => {
       setStudentResponse(response)
-      setExpandedCase(
-        response.cases.find((c) => c.status !== 'FINISHED')?.id ?? null
-      )
     })
   }, [id])
   useEffect(loadStudent, [loadStudent])
@@ -95,7 +92,16 @@ export const StudentPage = React.memo(function StudentPage() {
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
-  const [expandedCase, setExpandedCase] = useState<string | null>(null)
+  const [expandedCase, setExpandedCase] = useState<string | null | undefined>(
+    undefined
+  )
+  useEffect(() => {
+    if (expandedCase === undefined && studentResponse) {
+      setExpandedCase(
+        studentResponse.cases.find((c) => c.status !== 'FINISHED')?.id ?? null
+      )
+    }
+  }, [studentResponse, expandedCase])
 
   // true = creating new, string = id of the edited case
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
@@ -106,7 +112,10 @@ export const StudentPage = React.memo(function StudentPage() {
     null
   )
 
-  const [editingCaseEvent, setEditingCaseEvent] = useState(false)
+  // true = creating new, string = id of the edited case event
+  const [editingCaseEvent, setEditingCaseEvent] = useState<boolean | string>(
+    false
+  )
 
   const [submitting, setSubmitting] = useState(false)
 
@@ -294,7 +303,7 @@ export const StudentPage = React.memo(function StudentPage() {
               studentId={studentResponse.student.id}
               cases={activeCase ? [activeCase] : []}
               employees={employees}
-              expandedCase={expandedCase}
+              expandedCase={expandedCase ?? null}
               setExpandedCase={setExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
@@ -317,7 +326,7 @@ export const StudentPage = React.memo(function StudentPage() {
               studentId={studentResponse.student.id}
               cases={finishedCases}
               employees={employees}
-              expandedCase={expandedCase}
+              expandedCase={expandedCase ?? null}
               setExpandedCase={setExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
@@ -365,8 +374,8 @@ const CasesList = React.memo(function CasesList({
   setEditingCase: (editing: boolean | string) => void
   editingCaseStatus: string | null
   setEditingCaseStatus: (editing: string | null) => void
-  editingCaseEvent: boolean
-  setEditingCaseEvent: (editing: boolean) => void
+  editingCaseEvent: boolean | string
+  setEditingCaseEvent: (editing: boolean | string) => void
   editingSomething: boolean
   activeCaseExists: boolean
   submitting: boolean
@@ -386,13 +395,13 @@ const CasesList = React.memo(function CasesList({
             $disabled={
               editingCase !== false ||
               editingCaseStatus !== null ||
-              editingCaseEvent
+              !!editingCaseEvent
             }
             onClick={() => {
               if (
                 editingCase !== false ||
                 editingCaseStatus !== null ||
-                editingCaseEvent
+                !!editingCaseEvent
               )
                 return
 
@@ -557,7 +566,8 @@ const CasesList = React.memo(function CasesList({
                 studentCaseId={studentCase.id}
                 reload={loadStudent}
                 disabled={editingSomething}
-                onChangeEditState={setEditingCaseEvent}
+                editingCaseEvent={editingCaseEvent}
+                setEditingCaseEvent={setEditingCaseEvent}
               />
             </FlexColWithGaps>
           )}
