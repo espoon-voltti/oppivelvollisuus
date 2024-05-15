@@ -8,7 +8,7 @@ import { faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons/faMagnifyin
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTriangleExclamation'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isBefore, subWeeks } from 'date-fns'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useContext, useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 
@@ -31,8 +31,8 @@ import {
 } from '../shared/layout'
 import { colors } from '../shared/theme'
 import { Label, P } from '../shared/typography'
-import { useDebouncedState } from '../shared/useDebouncedState'
 
+import { StudentSearchContext } from './StudentSearchContext'
 import { apiDeleteOldStudents, apiGetStudents, StudentSummary } from './api'
 import { StatusChip } from './cases/StatusChip'
 import {
@@ -42,7 +42,7 @@ import {
   caseSources
 } from './cases/enums'
 import { caseEventTypeNames } from './cases/events/enums'
-import { CaseStatus, caseStatuses, caseStatusNames } from './cases/status/enums'
+import { caseStatuses, caseStatusNames } from './cases/status/enums'
 
 export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
   const navigate = useNavigate()
@@ -52,10 +52,17 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
     void apiGetEmployees().then(setEmployees)
   }, [])
 
-  const [statuses, setStatuses] = useState<CaseStatus[]>(['TODO', 'ON_HOLD'])
-  const [sources, setSources] = useState<CaseSource[]>([...caseSources])
-  const [query, setQuery, debouncedQuery] = useDebouncedState<string>('')
-  const [assignedTo, setAssignedTo] = useState<EmployeeUser | null>(null)
+  const {
+    statuses,
+    setStatuses,
+    sources,
+    setSources,
+    query,
+    debouncedQuery,
+    setQuery,
+    assignedTo,
+    setAssignedTo
+  } = useContext(StudentSearchContext)
 
   const [studentsResponse, setStudentsResponse] = useState<
     StudentSummary[] | null
