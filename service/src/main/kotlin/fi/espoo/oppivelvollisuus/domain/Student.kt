@@ -75,11 +75,16 @@ data class CaseEventSummary(
     val notes: String
 )
 
+data class AssignedToSearch(
+    // null = not assigned
+    val assignedTo: UUID?
+)
+
 data class StudentSearchParams(
     val query: String?,
     val statuses: List<CaseStatus>,
     val sources: List<CaseSource>,
-    val assignedTo: UUID?
+    val assignee: AssignedToSearch?
 )
 
 fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
@@ -107,7 +112,13 @@ LEFT JOIN LATERAL (
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
   AND (source IS NULL OR source = ANY(:sources::case_source[]))
-${if (params.assignedTo != null) "AND assignee.id = :assignedTo" else ""}
+${if (params.assignee == null) {
+            ""
+        } else if (params.assignee.assignedTo == null) {
+            "AND assignee.id IS NULL"
+        } else {
+            "AND assignee.id = :assignedTo"
+        }}
 ${if (params.query != null) {
             """
     AND (lower(s.first_name) LIKE :query || '%' OR 
@@ -122,7 +133,10 @@ ${if (params.query != null) {
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
     )
-        .bindKotlin(params.copy(query = params.query?.trim()?.lowercase()))
+        .bind("query", params.query?.trim()?.lowercase())
+        .bind("statuses", params.statuses.toTypedArray())
+        .bind("sources", params.sources.toTypedArray())
+        .bind("assignedTo", params.assignee?.assignedTo)
         .mapTo<StudentSummary>()
         .list()
         .map {

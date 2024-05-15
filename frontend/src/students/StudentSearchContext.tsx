@@ -10,6 +10,8 @@ import { useDebouncedState } from '../shared/useDebouncedState'
 import { CaseSource, caseSources } from './cases/enums'
 import { CaseStatus } from './cases/status/enums'
 
+export type Assignee = EmployeeUser | 'NONE'
+
 interface StudentSearchState {
   statuses: CaseStatus[]
   setStatuses: React.Dispatch<React.SetStateAction<CaseStatus[]>>
@@ -18,8 +20,8 @@ interface StudentSearchState {
   query: string
   debouncedQuery: string
   setQuery: React.Dispatch<React.SetStateAction<string>>
-  assignedTo: EmployeeUser | null
-  setAssignedTo: React.Dispatch<React.SetStateAction<EmployeeUser | null>>
+  assignedTo: Assignee | null
+  setAssignedTo: React.Dispatch<React.SetStateAction<Assignee | null>>
 }
 
 const defaultState: StudentSearchState = {
@@ -47,7 +49,9 @@ export const StudentSearchProvider = React.memo(function StudentSearchProvider({
   const [query, setQuery, debouncedQuery] = useDebouncedState<string>(
     defaultState.query
   )
-  const [assignedTo, setAssignedTo] = useState<EmployeeUser | null>(null)
+  const [assignedTo, setAssignedTo] = useState<Assignee | null>(
+    defaultState.assignedTo
+  )
 
   const state = useMemo(
     () => ({
