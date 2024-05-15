@@ -247,7 +247,8 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                             isBefore(
                               student.openedAt,
                               subWeeks(new Date(), 5)
-                            ) && (
+                            ) &&
+                            student.status !== 'FINISHED' && (
                               <FontAwesomeIcon
                                 icon={faTriangleExclamation}
                                 color={
