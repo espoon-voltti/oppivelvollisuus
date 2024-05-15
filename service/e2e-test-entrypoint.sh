@@ -12,4 +12,5 @@ echo 'INFO: Waiting for compose stack to be up ...'
 
 echo "Running tests ..."
 
+./gradlew e2eTestDeps
 ./gradlew e2eTest
