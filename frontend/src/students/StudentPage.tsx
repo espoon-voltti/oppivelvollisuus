@@ -11,6 +11,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons'
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { differenceInYears } from 'date-fns/differenceInYears'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
@@ -149,7 +150,9 @@ export const StudentPage = React.memo(function StudentPage() {
         <FlexLeftRight>
           <H2 data-qa="student-name">
             {studentResponse
-              ? `${studentResponse.student.lastName} ${studentResponse.student.firstName}`
+              ? `${studentResponse.student.lastName} ${studentResponse.student.firstName} 
+              (${formatDate(studentResponse.student.dateOfBirth)} - 
+              ${differenceInYears(new Date(), studentResponse.student.dateOfBirth)}v)`
               : ''}
           </H2>
           {studentResponse && (

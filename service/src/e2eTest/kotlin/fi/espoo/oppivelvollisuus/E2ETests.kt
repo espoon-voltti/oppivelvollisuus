@@ -35,7 +35,7 @@ class E2ETests : PlaywrightTest() {
 
         val studentPage = StudentPage(page)
         studentPage.assertUrl()
-        assertThat(studentPage.studentName).hasText("Ankka Tupu")
+        assertThat(studentPage.studentName).containsText("Ankka Tupu")
     }
 
     private fun doLogin(page: Page) {
