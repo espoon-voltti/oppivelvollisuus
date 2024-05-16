@@ -19,6 +19,7 @@ RUN yarn build
 FROM builder AS test
 
 RUN yarn lint
+RUN yarn type-check
 
 FROM nginx:${NGINX_VERSION}
 
