@@ -80,7 +80,7 @@ dependencies {
     api(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.43.0")
+    testImplementation("com.microsoft.playwright:playwright:1.42.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -126,6 +126,13 @@ tasks.register("resolveDependencies") {
 tasks {
     bootRun {
         systemProperty("spring.profiles.active", "local")
+    }
+
+    register("e2eTestDeps", JavaExec::class) {
+        group = "build"
+        classpath = sourceSets["e2eTest"].runtimeClasspath
+        mainClass = "com.microsoft.playwright.CLI"
+        args("install-deps")
     }
 
     register("e2eTest", Test::class) {
