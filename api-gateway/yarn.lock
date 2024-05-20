@@ -931,14 +931,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.6.0":
-  version: 1.6.2
-  resolution: "axios@npm:1.6.2"
+"axios@npm:^1.7.0":
+  version: 1.7.0
+  resolution: "axios@npm:1.7.0"
   dependencies:
-    follow-redirects: "npm:^1.15.0"
+    follow-redirects: "npm:^1.15.6"
     form-data: "npm:^4.0.0"
     proxy-from-env: "npm:^1.1.0"
-  checksum: 612bc93f8f738a518e7c5f9de9cc782bcd36aac6bae279160ef6a10260378e21c1786520eab3336898e3d66e0839ebdf739f327fb6d0431baa4d3235703a7652
+  checksum: fc97719eb1024626cf3ae716eed136964faea712cd750642c2693c8bf3843d342a9e373704d08319a851931b39ca318d2004f0ab4ca67f434f095754dc4aecee
   languageName: node
   linkType: hard
 
@@ -2010,7 +2010,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"follow-redirects@npm:^1.15.0":
+"follow-redirects@npm:^1.15.6":
   version: 1.15.6
   resolution: "follow-redirects@npm:1.15.6"
   peerDependenciesMeta:
@@ -3227,7 +3227,7 @@ __metadata:
     "@types/source-map-support": "npm:^0.5.10"
     "@typescript-eslint/eslint-plugin": "npm:^7.5.0"
     "@typescript-eslint/parser": "npm:^7.5.0"
-    axios: "npm:^1.6.0"
+    axios: "npm:^1.7.0"
     concurrently: "npm:^8.2.2"
     connect-redis: "npm:^7.1.0"
     cookie-parser: "npm:^1.4.6"
