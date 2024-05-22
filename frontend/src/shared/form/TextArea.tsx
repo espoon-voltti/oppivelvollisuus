@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import autosize from 'autosize'
 import classNames from 'classnames'
-import React, { RefObject, useMemo, useState } from 'react'
-import TextareaAutosize from 'react-autosize-textarea'
+import React, { RefObject, useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 
 import { FlexColWithGaps } from '../layout'
@@ -123,6 +123,33 @@ export const TextArea = React.memo(function TextArea({
         </InputFieldUnderRow>
       )}
     </>
+  )
+})
+
+const TextareaAutosize = React.memo(function TextAreaAutosize({
+  rows = 1,
+  ...props
+}: React.HTMLProps<HTMLTextAreaElement>) {
+  const textarea = useRef<HTMLTextAreaElement | null>(null)
+
+  useEffect(() => {
+    const el = textarea.current
+    if (!el) return
+
+    autosize(el)
+    return () => {
+      autosize.destroy(el)
+    }
+  }, [])
+
+  useEffect(() => {
+    textarea.current && autosize.update(textarea.current)
+  })
+
+  return (
+    <textarea {...props} rows={rows} ref={textarea}>
+      {props.children}
+    </textarea>
   )
 })
 
