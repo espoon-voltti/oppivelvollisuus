@@ -19,6 +19,7 @@
     "strict": true,
     "baseUrl": "src",
     "noEmit": true,
-    "jsx": "react"
+    "jsx": "react",
+    "skipLibCheck": true
   }
 }
