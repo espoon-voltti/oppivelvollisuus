@@ -57,7 +57,19 @@ const commonLanguages = [
   'venäjä',
   'ukraina',
   'arabia',
-  'somalia'
+  'somali',
+  'persia (farsi)',
+  'kurdi',
+  'kiina',
+  'albania',
+  'vietnam',
+  'thai',
+  'turkki',
+  'espanja',
+  'tagalog (pilipino)',
+  'ranska',
+  'saksa',
+  'portugali'
 ]
 
 export const StudentForm = React.memo(function StudentForm(props: Props) {
