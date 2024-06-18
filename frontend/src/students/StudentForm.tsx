@@ -111,7 +111,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.address
   )
   const [municipalityInFinland, setMunicipalityInFinland] = useState(
-    props.mode === 'CREATE' ? true : props.student.municipalityInFinland
+    props.mode === 'CREATE' ? false : props.student.municipalityInFinland
   )
   const [guardianInfo, setGuardianInfo] = useState(
     props.mode === 'CREATE' ? '' : props.student.guardianInfo
