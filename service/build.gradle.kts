@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
@@ -85,9 +86,9 @@ dependencies {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions {
-        freeCompilerArgs += "-Xjsr305=strict"
-        jvmTarget = "17"
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("17")
+        allWarningsAsErrors = true
     }
 }
 
@@ -110,7 +111,11 @@ tasks.register("resolveDependencies") {
     description = "Resolves all dependencies"
     doLast {
         configurations
-            .matching { it.isCanBeResolved }
+            .matching {
+                it.isCanBeResolved &&
+                    // ignore configurations that fetch sources (e.g. Java source code)
+                    !it.name.endsWith("dependencySources", ignoreCase = true)
+            }
             .map {
                 val files = it.resolve()
                 it.name to files.size
