@@ -6,8 +6,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "3.3.0"
+    id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "2.0.0"
     id("org.flywaydb.flyway") version "10.15.0"
@@ -59,7 +59,8 @@ dependencies {
 
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.flywaydb:flyway-core")
-    implementation("org.postgresql:postgresql:42.7.0")
+    implementation("org.flywaydb:flyway-database-postgresql")
+    implementation("org.postgresql:postgresql:42.7.3")
     api(platform("org.jdbi:jdbi3-bom:3.45.0"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
@@ -72,7 +73,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.4.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
-    implementation("ch.qos.logback:logback-access")
+    implementation("ch.qos.logback:logback-access:1.4.14")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
     testImplementation(kotlin("test"))
