@@ -57,7 +57,19 @@ const commonLanguages = [
   'venäjä',
   'ukraina',
   'arabia',
-  'somalia'
+  'somali',
+  'persia (farsi)',
+  'kurdi',
+  'kiina',
+  'albania',
+  'vietnam',
+  'thai',
+  'turkki',
+  'espanja',
+  'tagalog (pilipino)',
+  'ranska',
+  'saksa',
+  'portugali'
 ]
 
 export const StudentForm = React.memo(function StudentForm(props: Props) {
@@ -99,7 +111,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.address
   )
   const [municipalityInFinland, setMunicipalityInFinland] = useState(
-    props.mode === 'CREATE' ? true : props.student.municipalityInFinland
+    props.mode === 'CREATE' ? false : props.student.municipalityInFinland
   )
   const [guardianInfo, setGuardianInfo] = useState(
     props.mode === 'CREATE' ? '' : props.student.guardianInfo
@@ -283,6 +295,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
                   href={props.student.valpasLink}
                   target="_blank"
                   rel="noreferrer"
+                  style={{ wordWrap: 'break-word' }}
                 >
                   {props.student.valpasLink}
                 </a>

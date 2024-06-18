@@ -147,7 +147,8 @@ export const notInSchoolReasons = [
   'EI_OPISKELUPAIKKAA_YLEISOPPILAITOKSESSA',
   'EI_OPISKELUPAIKKAA_AMMATILLISESSA_ERITYISOPPILAITOKSESSA',
   'EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI',
-  'OPINNOT_ULKOMAILLA'
+  'OPINNOT_ULKOMAILLA',
+  'MUU_SYY'
 ]
 
 export type NotInSchoolReason = (typeof notInSchoolReasons)[number]
@@ -165,5 +166,6 @@ export const notInSchoolReasonNames: Record<NotInSchoolReason, string> = {
     'Jäänyt ilman opiskelupaikkaa ammatillisessa erityisoppilaitoksessa',
   EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI:
     'Ei ole saanut opiskelupaikkaa 0-kielitaidon vuoksi',
-  OPINNOT_ULKOMAILLA: 'Opinnot ulkomailla (muu kuin vaihto-opiskelu)'
+  OPINNOT_ULKOMAILLA: 'Opinnot ulkomailla (muu kuin vaihto-opiskelu)',
+  MUU_SYY: 'Muu syy'
 }

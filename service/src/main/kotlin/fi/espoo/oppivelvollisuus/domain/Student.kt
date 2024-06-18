@@ -106,7 +106,7 @@ LEFT JOIN LATERAL (
     SELECT date, type, notes
     FROM case_events
     WHERE student_case_id = sc.id
-    ORDER BY date DESC 
+    ORDER BY date DESC, created DESC
     LIMIT 1
 ) ce ON true
 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
