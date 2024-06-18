@@ -295,6 +295,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
                   href={props.student.valpasLink}
                   target="_blank"
                   rel="noreferrer"
+                  style={{ wordWrap: 'break-word' }}
                 >
                   {props.student.valpasLink}
                 </a>
