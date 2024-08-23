@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM eclipse-temurin:17-jammy as base
+FROM eclipse-temurin:17-jammy AS base
 
 LABEL maintainer="https://github.com/espoon-voltti/oppivelvollisuus"
 
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-ENV LANGUAGE C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV LANG=C.UTF-8
+ENV LANGUAGE=C.UTF-8
+
 RUN apt-get update \
  && apt-get -y dist-upgrade \
  && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -23,7 +24,7 @@ RUN apt-get update \
        -o /bin/s3download \
  && chmod +x /bin/s3download
 
-FROM base as builder
+FROM base AS builder
 
 WORKDIR /app
 
@@ -52,7 +53,7 @@ COPY --from=builder /app/target/ .
 
 ARG build=none
 ARG commit=none
-ENV APP_BUILD "$build"
-ENV APP_COMMIT "$commit"
+ENV APP_BUILD="$build"
+ENV APP_COMMIT="$commit"
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
