@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-ARG NGINX_VERSION=1.25.1
+ARG NGINX_VERSION=1.26.0
 
-FROM node:20.11-bookworm-slim AS builder
+FROM node:20.18.0-bookworm-slim AS builder
 
 WORKDIR /project
 
