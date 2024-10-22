@@ -7,5 +7,7 @@
 !src
 !*.json
 !*.lock
+!.yarn
+!.yarnrc.yml
 !config
 !entrypoint.sh
