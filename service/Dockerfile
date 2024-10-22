@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM eclipse-temurin:17-jammy AS base
+FROM eclipse-temurin:21-jammy AS base
 
 LABEL maintainer="https://github.com/espoon-voltti/oppivelvollisuus"
 
