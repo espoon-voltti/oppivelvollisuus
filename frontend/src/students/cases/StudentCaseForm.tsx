@@ -69,9 +69,9 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   const [assignedTo, setAssignedTo] = useState(
     props.mode === 'CREATE' || !props.studentCase.assignedTo
       ? null
-      : props.employees.find(
+      : (props.employees.find(
           (e) => e.id === props.studentCase.assignedTo?.id
-        ) ?? null
+        ) ?? null)
   )
   const [source, setSource] = useState<CaseSource | null>(
     props.mode === 'CREATE' ? null : props.studentCase.source

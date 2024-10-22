@@ -8,7 +8,8 @@ WORKDIR /app
 
 FROM base AS builder
 
-COPY ./package.json ./yarn.lock ./
+COPY ./.yarn ./.yarn
+COPY ./package.json ./yarn.lock ./.yarnrc.yml ./
 
 RUN yarn install --immutable
 

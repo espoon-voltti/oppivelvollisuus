@@ -7,11 +7,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.3.0"
+    id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.5"
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.spring") version "2.0.0"
-    id("org.flywaydb.flyway") version "10.15.0"
+    id("org.flywaydb.flyway") version "10.20.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
     id("org.owasp.dependencycheck") version "10.0.2"
 
@@ -74,16 +74,16 @@ dependencies {
 
     implementation("com.auth0:java-jwt:4.4.0")
 
-    implementation("net.logstash.logback:logstash-logback-encoder:7.4")
-    implementation("ch.qos.logback:logback-access:1.4.14")
+    implementation("net.logstash.logback:logstash-logback-encoder:8.0")
+    implementation("ch.qos.logback:logback-access:1.5.11")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
-    api(platform("org.junit:junit-bom:5.10.0"))
+    api(platform("org.junit:junit-bom:5.11.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.44.0")
+    testImplementation("com.microsoft.playwright:playwright:1.48.0")
 }
 
 tasks.withType<KotlinCompile> {
