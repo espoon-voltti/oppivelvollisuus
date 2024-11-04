@@ -13,7 +13,7 @@ plugins {
     kotlin("plugin.spring") version "2.0.0"
     id("org.flywaydb.flyway") version "10.20.0"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
-    id("org.owasp.dependencycheck") version "10.0.2"
+    id("org.owasp.dependencycheck") version "11.1.0"
 
     idea
 }
