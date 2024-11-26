@@ -19,6 +19,7 @@ import { StudentPage } from './students/StudentPage'
 import { StudentSearchProvider } from './students/StudentSearchContext'
 import { StudentsSearchPage } from './students/StudentsSearchPage'
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const EspooLogo = require('./images/EspooLogoPrimary.svg') as string
 
 const Header = styled.nav`
