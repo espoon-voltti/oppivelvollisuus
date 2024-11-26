@@ -108,7 +108,7 @@ export function createAdSamlStrategy(
     }
   }
 
-  const loginVerify: VerifyWithRequest = (req, profile, done) => {
+  const loginVerify: VerifyWithRequest = (_req, profile, done) => {
     if (!profile) return done(null, undefined)
     const parseResult = Profile.safeParse(profile)
     if (!parseResult.success) {
