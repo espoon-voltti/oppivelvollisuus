@@ -20,7 +20,7 @@
     "@fortawesome/react-fontawesome": "0.2.2",
     "autosize": "^6.0.1",
     "classnames": "^2.5.1",
-    "core-js": "^3.38.1",
+    "core-js": "^3.39.0",
     "date-fns": "^4.1.0",
     "lodash": "^4.17.21",
     "polished": "^4.3.1",
