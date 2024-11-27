@@ -33,9 +33,10 @@ export default [
   },
   {
     plugins: {
-      import: fixupPluginRules(importPlugin)
+      import: importPlugin
     }
   },
+  importPlugin.flatConfigs.typescript,
   {
     files: ['**/*.{ts,tsx,js,mjs}'],
     rules: {
