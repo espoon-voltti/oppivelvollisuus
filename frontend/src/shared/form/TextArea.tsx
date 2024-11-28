@@ -97,7 +97,7 @@ export const TextArea = React.memo(function TextArea({
         onFocus={onFocus}
         onBlur={(e) => {
           setTouched(true)
-          onBlur && onBlur(e)
+          if (onBlur) onBlur(e)
         }}
         placeholder={placeholder}
         readOnly={readonly}
@@ -143,7 +143,7 @@ const TextareaAutosize = React.memo(function TextAreaAutosize({
   }, [])
 
   useEffect(() => {
-    textarea.current && autosize.update(textarea.current)
+    if (textarea.current) autosize.update(textarea.current)
   })
 
   return (
