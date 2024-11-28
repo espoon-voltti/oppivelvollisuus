@@ -65,7 +65,6 @@ declare global {
       spanId?: string
       samlLogoutRequest: passportSaml.Profile
     }
-    // eslint-disable-next-line @typescript-eslint/no-empty-interface
     interface User extends AppSessionUser {}
   }
 }
@@ -80,7 +79,7 @@ declare global {
 // * `req.secure`: is original request https (true)
 export function trustReverseProxy(app: express.Application) {
   app.set('trust proxy', 3) // private ALB, proxy nginx, public ALB
-  app.use((req, res, next) => {
+  app.use((req, _res, next) => {
     if ('x-original-forwarded-proto' in req.headers) {
       req.headers['x-forwarded-proto'] =
         req.headers['x-original-forwarded-proto']

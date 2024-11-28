@@ -76,7 +76,7 @@ export const logDebug: LogFn = (msg, req?, meta?) =>
 function log(
   level: LogLevel,
   msg: string,
-  req?: Request,
+  _req?: Request,
   meta?: LogMeta,
   err?: Error
 ): void {

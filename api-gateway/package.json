@@ -7,7 +7,7 @@
   "scripts": {
     "clean": "rm -rf ./build ./dist",
     "build": "yarn clean && yarn install && tsc --build .",
-    "lint": "eslint --ext .ts,.tsx --max-warnings 0 .",
+    "lint": "eslint --max-warnings 0 .",
     "dev": "tsc --build . && concurrently --prefix '[{name}]' --names 'tsc,nodemon' 'tsc --build --preserveWatchOutput -w .' 'NODE_ENV=local nodemon dist/index.js'"
   },
   "dependencies": {
@@ -48,16 +48,17 @@
     "@types/passport-strategy": "^0.2.38",
     "@types/redis": "^4.0.11",
     "@types/source-map-support": "^0.5.10",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
     "concurrently": "^9.1.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.15.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "nodemon": "^3.1.7",
     "prettier": "^3.3.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.16.0"
   },
   "resolutions": {
     "@types/mime": "3.0.4"
@@ -68,35 +69,6 @@
     "semi": false,
     "singleQuote": true,
     "trailingComma": "none"
-  },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:@typescript-eslint/recommended",
-      "plugin:@typescript-eslint/stylistic",
-      "plugin:prettier/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-      "ecmaVersion": 2018,
-      "sourceType": "module",
-      "project": "./tsconfig.json",
-      "ecmaFeatures": {
-        "modules": true
-      }
-    },
-    "plugins": [
-      "@typescript-eslint"
-    ],
-    "rules": {
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_"
-        }
-      ]
-    }
   },
   "engines": {
     "node": ">= 20.11.0"

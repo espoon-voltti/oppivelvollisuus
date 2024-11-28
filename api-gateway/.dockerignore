@@ -7,6 +7,7 @@
 !src
 !*.json
 !*.lock
+!*.mjs
 !.yarn
 !.yarnrc.yml
 !config
