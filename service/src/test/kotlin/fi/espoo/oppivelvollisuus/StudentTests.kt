@@ -93,7 +93,12 @@ class StudentTests : FullApplicationTest() {
                             )
                     )
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
         controller.createCaseEvent(
             testUser,
             caseId,
@@ -559,7 +564,12 @@ class StudentTests : FullApplicationTest() {
                 user = testUser,
                 body = minimalStudentAndCaseTestInput
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
         controller.deleteStudentCase(testUser, studentId, caseId)
 
         controller.deleteStudent(testUser, studentId)
@@ -594,7 +604,12 @@ class StudentTests : FullApplicationTest() {
                         studentCase = minimalStudentCaseTestInput
                     )
             )
-        val caseId = controller.getStudent(testUser, studentId1).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId1)
+                .cases
+                .first()
+                .id
         controller.createCaseEvent(testUser, caseId, CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"))
 
         controller.deleteOldStudents(testUser)

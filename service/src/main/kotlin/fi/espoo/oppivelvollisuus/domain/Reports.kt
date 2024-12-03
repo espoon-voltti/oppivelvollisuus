@@ -65,8 +65,7 @@ fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
     ${request.start?.let { "AND sc.opened_at >= :start" } ?: ""}
     ${request.end?.let { "AND sc.opened_at <= :end" } ?: ""}
 """
-    )
-        .also { if (request.start != null) it.bind("start", request.start) }
+    ).also { if (request.start != null) it.bind("start", request.start) }
         .also { if (request.end != null) it.bind("end", request.end) }
         .mapTo<CaseReportRow>()
         .list()

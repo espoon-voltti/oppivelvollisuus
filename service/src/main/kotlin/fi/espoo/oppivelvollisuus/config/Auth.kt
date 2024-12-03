@@ -69,7 +69,9 @@ class HttpAccessControl : HttpFilter() {
         }
 }
 
-class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
+class JwtTokenDecoder(
+    private val jwtVerifier: JWTVerifier
+) : HttpFilter() {
     private val logger = KotlinLogging.logger {}
 
     override fun doFilter(
@@ -78,7 +80,8 @@ class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
         chain: FilterChain
     ) {
         try {
-            request.getBearerToken()
+            request
+                .getBearerToken()
                 ?.takeIf { it.isNotEmpty() }
                 ?.let { request.setDecodedJwt(jwtVerifier.verify(it)) }
         } catch (e: JWTVerificationException) {

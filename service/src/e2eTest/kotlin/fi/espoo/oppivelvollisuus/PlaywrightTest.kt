@@ -55,7 +55,8 @@ abstract class PlaywrightTest {
         playwright = Playwright.create()
         browser =
             playwright.chromium().launch(
-                BrowserType.LaunchOptions()
+                BrowserType
+                    .LaunchOptions()
                     .setHeadless(runningInDocker)
                     .setTimeout(10_000.0)
             )

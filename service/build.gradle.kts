@@ -12,7 +12,7 @@ plugins {
     kotlin("jvm") version "2.1.0"
     kotlin("plugin.spring") version "2.1.0"
     id("org.flywaydb.flyway") version "11.0.0"
-    id("org.jlleitschuh.gradle.ktlint") version "12.1.0"
+    id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
     id("org.owasp.dependencycheck") version "11.1.0"
 
     idea
@@ -43,6 +43,10 @@ idea {
     module {
         testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories
     }
+}
+
+ktlint {
+    version.set("1.4.1")
 }
 
 dependencies {
@@ -116,12 +120,10 @@ tasks.register("resolveDependencies") {
                 it.isCanBeResolved &&
                     // ignore configurations that fetch sources (e.g. Java source code)
                     !it.name.endsWith("dependencySources", ignoreCase = true)
-            }
-            .map {
+            }.map {
                 val files = it.resolve()
                 it.name to files.size
-            }
-            .groupBy({ (_, count) -> count }) { (name, _) -> name }
+            }.groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
