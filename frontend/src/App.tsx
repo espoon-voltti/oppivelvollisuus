@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React, { Fragment } from 'react'
-import { Navigate, createBrowserRouter, Outlet } from 'react-router-dom'
+import { Navigate, createBrowserRouter, Outlet } from 'react-router'
 import styled from 'styled-components'
 
 import { AuthGuard } from './auth/AuthGuard'

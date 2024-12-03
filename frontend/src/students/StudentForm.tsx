@@ -5,7 +5,7 @@
 import { parse } from 'date-fns'
 import { differenceInYears } from 'date-fns/differenceInYears'
 import React, { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 
 import { AlertBox, InfoBox } from '../shared/MessageBoxes'

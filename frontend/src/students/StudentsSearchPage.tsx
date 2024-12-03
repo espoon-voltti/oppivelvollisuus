@@ -9,7 +9,7 @@ import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTrian
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { isBefore, subWeeks } from 'date-fns'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import styled from 'styled-components'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'

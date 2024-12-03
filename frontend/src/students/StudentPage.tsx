@@ -13,7 +13,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { differenceInYears } from 'date-fns/differenceInYears'
 import React, { useCallback, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
