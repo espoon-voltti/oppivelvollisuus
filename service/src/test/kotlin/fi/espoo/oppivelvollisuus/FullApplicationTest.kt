@@ -50,12 +50,14 @@ abstract class FullApplicationTest {
     fun beforeEach() {
         jdbi.withHandleUnchecked { tx ->
             tx.execute("SELECT reset_database()")
-            tx.createUpdate(
-                """
+            tx
+                .createUpdate(
+                    """
                 INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
                 VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
             """
-            ).bind("id", testUser.id).execute()
+                ).bind("id", testUser.id)
+                .execute()
         }
     }
 }

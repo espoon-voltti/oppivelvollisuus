@@ -37,21 +37,19 @@ fun Handle.insertCaseEvent(
     studentCaseId: UUID,
     data: CaseEventInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
                 INSERT INTO case_events (created_by, student_case_id, date, type, notes) 
                 VALUES (:user, :studentCaseId, :date, :type, :notes)
                 RETURNING id
             """
-    )
-        .bind("studentCaseId", studentCaseId)
+    ).bind("studentCaseId", studentCaseId)
         .bindKotlin(data)
         .bind("user", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 data class CaseEvent(
     val id: UUID,
@@ -84,8 +82,7 @@ SET
     notes = :notes
 WHERE id = :id
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bindKotlin(data)
         .bind("user", user.id)
         .execute()
@@ -98,7 +95,6 @@ fun Handle.deleteCaseEvent(id: UUID) {
 DELETE FROM case_events
 WHERE id = :id
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .execute()
 }

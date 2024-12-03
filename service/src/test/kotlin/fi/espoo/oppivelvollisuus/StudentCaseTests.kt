@@ -207,7 +207,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `change status to ON_HOLD`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         controller.updateStudentCaseStatus(testUser, studentId, caseId, CaseStatusInput(CaseStatus.ON_HOLD, null))
 
@@ -219,7 +224,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `change status to FINISHED`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         controller.updateStudentCaseStatus(
             testUser,
@@ -237,7 +247,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `change status to FINISHED with BEGAN_STUDIES`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         controller.updateStudentCaseStatus(
             testUser,
@@ -258,7 +273,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `cannot change status to FINISHED without reason`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         assertThrows<BadRequest> {
             controller.updateStudentCaseStatus(
@@ -276,7 +296,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `cannot change status to FINISHED with BEGAN_STUDIES without school type`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         assertThrows<BadRequest> {
             controller.updateStudentCaseStatus(
@@ -297,7 +322,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `cannot provide startedAtSchool when reason is not BEGAN_STUDIES`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         assertThrows<BadRequest> {
             controller.updateStudentCaseStatus(
@@ -318,7 +348,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `reset status after finishing`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
         controller.updateStudentCaseStatus(
             testUser,
             studentId,
@@ -341,7 +376,12 @@ class StudentCaseTests : FullApplicationTest() {
     @Test
     fun `cannot reset status after finishing if there already is another unfinished case`() {
         val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
         controller.updateStudentCaseStatus(
             testUser,
             studentId,
@@ -367,7 +407,12 @@ class StudentCaseTests : FullApplicationTest() {
                 user = testUser,
                 body = minimalStudentAndCaseTestInput
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         controller.deleteStudentCase(testUser, studentId, caseId)
 
@@ -404,7 +449,12 @@ class StudentCaseTests : FullApplicationTest() {
                 user = testUser,
                 body = minimalStudentAndCaseTestInput
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
         controller.createCaseEvent(
             testUser,
             caseId,

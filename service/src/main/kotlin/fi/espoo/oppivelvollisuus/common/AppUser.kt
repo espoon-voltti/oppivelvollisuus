@@ -40,10 +40,8 @@ VALUES (:externalId, :firstName, :lastName, :email)
 ON CONFLICT (external_id) DO UPDATE
 SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
 RETURNING id, external_id, first_name, last_name, email
-    """
-            .trimIndent()
-    )
-        .bindKotlin(adUser)
+        """.trimIndent()
+    ).bindKotlin(adUser)
         .mapTo<AppUser>()
         .one()
 
@@ -63,10 +61,8 @@ fun Handle.getAppUser(id: UUID) =
 SELECT id, external_id, first_name, last_name, email
 FROM users 
 WHERE id = :id AND NOT system_user
-    """
-            .trimIndent()
-    )
-        .bind("id", id)
+        """.trimIndent()
+    ).bind("id", id)
         .mapTo<AppUser>()
         .findOne()
         .getOrNull()

@@ -35,7 +35,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         ex: BadRequest
     ): ResponseEntity<ErrorResponse> {
         logger.warn("Bad request (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
@@ -45,7 +46,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         ex: NotFound
     ): ResponseEntity<ErrorResponse> {
         logger.warn("Not found (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
@@ -55,7 +57,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         ex: Conflict
     ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Conflict (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
@@ -65,7 +68,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         ex: Unauthorized
     ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Unauthorized (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
@@ -75,7 +79,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         ex: Forbidden
     ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Forbidden (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 

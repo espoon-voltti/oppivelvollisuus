@@ -68,7 +68,12 @@ class CasesReportTests : FullApplicationTest() {
                             )
                     )
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
 
         assertEquals(
             listOf(

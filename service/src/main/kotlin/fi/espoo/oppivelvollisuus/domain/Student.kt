@@ -43,20 +43,18 @@ data class StudentInput(
 fun Handle.insertStudent(
     data: StudentInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
 INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info) 
 VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo)
 RETURNING id
 """
-    )
-        .bindKotlin(data)
+    ).bindKotlin(data)
         .bind("user", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 data class StudentSummary(
     val id: UUID,
@@ -132,8 +130,7 @@ ${if (params.query != null) {
         }}
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
-    )
-        .bind("query", params.query?.trim()?.lowercase())
+    ).bind("query", params.query?.trim()?.lowercase())
         .bind("statuses", params.statuses.toTypedArray())
         .bind("sources", params.sources.toTypedArray())
         .bind("assignedTo", params.assignee?.assignedTo)
@@ -180,8 +177,7 @@ SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, pho
 FROM students
 WHERE id = :id
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .mapTo<Student>()
         .findOne()
         .getOrNull()
@@ -213,8 +209,7 @@ SET
     support_contacts_info = :supportContactsInfo
 WHERE id = :id
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bindKotlin(data)
         .bind("user", user.id)
         .execute()
@@ -251,8 +246,9 @@ fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List
         lower(first_name) = lower(:firstName) AND 
         lower(last_name) = lower(:lastName) AND 
         (ssn = '' OR :ssn = '')
-    )"""
-            .takeIf { input.firstName.isNotBlank() && input.lastName.isNotBlank() }
+    )""".takeIf {
+            input.firstName.isNotBlank() && input.lastName.isNotBlank()
+        }
 
     return createQuery(
         """
@@ -269,8 +265,7 @@ fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List
         SELECT * FROM match_data
         WHERE matching_ssn OR matching_valpas_link OR matching_name
     """
-    )
-        .configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
+    ).configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
         .bindKotlin(input)
         .mapTo<DuplicateStudent>()
         .list()
@@ -306,7 +301,6 @@ fun Handle.deleteOldStudents() {
         DELETE FROM students
         WHERE id IN (SELECT id FROM students_to_delete)
     """
-    )
-        .bind("threshold", LocalDate.now().minusYears(21))
+    ).bind("threshold", LocalDate.now().minusYears(21))
         .execute()
 }

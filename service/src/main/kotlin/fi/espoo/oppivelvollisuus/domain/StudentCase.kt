@@ -117,21 +117,19 @@ fun Handle.insertStudentCase(
     studentId: UUID,
     data: StudentCaseInput,
     user: AuthenticatedUser
-): UUID {
-    return createUpdate(
+): UUID =
+    createUpdate(
         """
                 INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
                 VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
-    )
-        .bind("studentId", studentId)
+    ).bind("studentId", studentId)
         .bindKotlin(data)
         .bind("user", user.id)
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
-}
 
 enum class CaseFinishedReason {
     BEGAN_STUDIES,
@@ -241,8 +239,7 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
 ORDER BY opened_at DESC, sc.created DESC;
 """
-    )
-        .bind("studentId", studentId)
+    ).bind("studentId", studentId)
         .mapTo<StudentCase>()
         .list()
 
@@ -269,8 +266,7 @@ SET
     not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bind("studentId", studentId)
         .bindKotlin(data)
         .bind("user", user.id)
@@ -306,8 +302,7 @@ SET
     started_at_school = :startedAtSchool
 WHERE id = :id AND student_id = :studentId
 """
-    )
-        .bind("id", id)
+    ).bind("id", id)
         .bind("studentId", studentId)
         .bind("status", data.status)
         .bind("finishedReason", data.finishedInfo?.reason)
