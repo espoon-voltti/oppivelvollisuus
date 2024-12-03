@@ -1230,12 +1230,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"connect-redis@npm:^7.1.1":
-  version: 7.1.1
-  resolution: "connect-redis@npm:7.1.1"
+"connect-redis@npm:^8.0.0":
+  version: 8.0.0
+  resolution: "connect-redis@npm:8.0.0"
   peerDependencies:
     express-session: ">=1"
-  checksum: 1a0801356783c977c6467eea5bee1e91690c7ca62b6b699cf6de0aedbeb0e481eeacc32f372eda6530bdf3867259b7230bc00cf13b295abe9349aaa50fe0c8fb
+  checksum: 0203da19f98c468413d029681116ca0512cbf2c97e9d989a9ed38a2241ac085a5ba8e13939f32eb2011ec1c55e447991301253c185fc30bca43c403ef5e6683c
   languageName: node
   linkType: hard
 
@@ -3011,7 +3011,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:^8.16.0"
     axios: "npm:^1.7.7"
     concurrently: "npm:^9.1.0"
-    connect-redis: "npm:^7.1.1"
+    connect-redis: "npm:^8.0.0"
     cookie-parser: "npm:^1.4.7"
     csurf: "npm:^1.11.0"
     date-fns: "npm:^4.1.0"
