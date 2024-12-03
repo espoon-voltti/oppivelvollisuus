@@ -7,7 +7,7 @@ import { faDownload } from '@fortawesome/free-solid-svg-icons/faDownload'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import React, { useMemo, useState } from 'react'
 import { CSVLink } from 'react-csv'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import styled from 'styled-components'
 
 import { Button } from '../shared/buttons/Button'

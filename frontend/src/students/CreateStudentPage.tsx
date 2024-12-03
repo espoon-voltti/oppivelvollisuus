@@ -4,7 +4,7 @@
 
 import { faChevronLeft } from '@fortawesome/free-solid-svg-icons'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { apiGetEmployees, EmployeeUser } from '../employees/api'
 import { Button } from '../shared/buttons/Button'
