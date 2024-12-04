@@ -61,7 +61,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.ws:spring-ws-security")
+    implementation("org.springframework.ws:spring-ws-security") {
+        exclude("org.opensaml")
+    }
 
     implementation("com.zaxxer:HikariCP:6.2.1")
     implementation("org.flywaydb:flyway-core")
