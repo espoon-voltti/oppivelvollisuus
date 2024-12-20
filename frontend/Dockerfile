@@ -5,7 +5,7 @@
 
 ARG NGINX_VERSION=1.26.0
 
-FROM node:20.18.0-bookworm-slim AS builder
+FROM node:22.12.0-bookworm-slim AS builder
 
 WORKDIR /project
 
