@@ -547,12 +547,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:^22.10.1":
-  version: 22.10.1
-  resolution: "@types/node@npm:22.10.1"
+"@types/node@npm:^22.13.0":
+  version: 22.13.0
+  resolution: "@types/node@npm:22.13.0"
   dependencies:
     undici-types: "npm:~6.20.0"
-  checksum: c802a526da2f3fa3ccefd00a71244e7cb825329951719e79e8fec62b1dbc2855388c830489770611584665ce10be23c05ed585982038b24924e1ba2c2cce03fd
+  checksum: a7563e57df48cb7e28f936dbabe228316dcdb4c7c3a88a6c1659fae898ffde2647a7193a9e29e0cbcb7dacc05a91fb3bc30c1a1d6fc9294694a734ff71a5f12e
   languageName: node
   linkType: hard
 
@@ -3002,7 +3002,7 @@ __metadata:
     "@types/express-session": "npm:^1.18.0"
     "@types/jsonwebtoken": "npm:^9.0.7"
     "@types/lodash": "npm:^4.17.12"
-    "@types/node": "npm:^22.10.1"
+    "@types/node": "npm:^22.13.0"
     "@types/passport": "npm:^1.0.16"
     "@types/passport-strategy": "npm:^0.2.38"
     "@types/redis": "npm:^4.0.11"
