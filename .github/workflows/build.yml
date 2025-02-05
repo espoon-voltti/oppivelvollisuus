@@ -162,6 +162,12 @@ jobs:
               ${{ needs.service.outputs.builder_image }} \
               sh -c "./gradlew --no-daemon dependencyCheckUpdate && ./gradlew --no-daemon dependencyCheckAnalyze"
 
+      - name: Force caching dependency-check-data # If job fails cache is not saved without this
+        uses: actions/cache/save@v4
+        if: failure()
+        with:
+          path: dependency-check-data
+          key: dependency-check-data-${{ github.run_id }}-${{ github.run_attempt }}
 
   test:
     runs-on: ubuntu-latest
