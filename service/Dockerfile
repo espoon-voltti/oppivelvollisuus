@@ -4,6 +4,8 @@
 
 FROM eclipse-temurin:21-jammy AS base
 
+ARG CACHE_BUST=2025-W07
+
 LABEL maintainer="https://github.com/espoon-voltti/oppivelvollisuus"
 
 ENV LC_ALL=C.UTF-8

@@ -7,6 +7,8 @@ ARG NGINX_VERSION=1.26.0
 
 FROM node:22.12.0-bookworm-slim AS builder
 
+ARG CACHE_BUST=2025-W07
+
 WORKDIR /project
 
 COPY ./.yarn ./.yarn
@@ -23,6 +25,8 @@ RUN yarn lint
 RUN yarn type-check
 
 FROM nginx:${NGINX_VERSION}
+
+ARG CACHE_BUST=2025-W07
 
 ENV NGINX_ENV=local \
     TZ=UTC

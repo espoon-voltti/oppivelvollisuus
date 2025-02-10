@@ -4,6 +4,8 @@
 
 FROM node:22.12.0-bookworm-slim AS base
 
+ARG CACHE_BUST=2025-W07
+
 WORKDIR /app
 
 FROM base AS builder
