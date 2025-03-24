@@ -78,7 +78,7 @@ dependencies {
     api(platform("com.fasterxml.jackson:jackson-bom:2.18.1"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-    implementation("com.auth0:java-jwt:4.4.0")
+    implementation("com.auth0:java-jwt:4.5.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:8.0")
     implementation("ch.qos.logback:logback-access:1.5.11")
