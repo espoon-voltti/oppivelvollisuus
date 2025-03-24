@@ -89,7 +89,7 @@ dependencies {
     api(platform("org.junit:junit-bom:5.11.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("com.microsoft.playwright:playwright:1.49.0")
+    testImplementation("com.microsoft.playwright:playwright:1.50.0")
 }
 
 tasks.withType<KotlinCompile> {
