@@ -58,7 +58,7 @@
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.7.2",
-    "typescript-eslint": "^8.16.0"
+    "typescript-eslint": "^8.27.0"
   },
   "resolutions": {
     "@types/mime": "3.0.4"
