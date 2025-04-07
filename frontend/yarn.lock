@@ -5673,7 +5673,7 @@ __metadata:
     react: "npm:^18.3.1"
     react-csv: "npm:^2.2.2"
     react-dom: "npm:^18.3.1"
-    react-router: "npm:^7.4.0"
+    react-router: "npm:^7.5.0"
     styled-components: "npm:6.1.13"
     ts-node: "npm:^10.9.2"
     typescript: "npm:~5.8.2"
@@ -6337,9 +6337,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:^7.4.0":
-  version: 7.4.0
-  resolution: "react-router@npm:7.4.0"
+"react-router@npm:^7.5.0":
+  version: 7.5.0
+  resolution: "react-router@npm:7.5.0"
   dependencies:
     "@types/cookie": "npm:^0.6.0"
     cookie: "npm:^1.0.1"
@@ -6351,7 +6351,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10/e7c9fe14d9b624f425ba89b904f47b571087978d46d6d9d865f03619851c8ef43525f4731fccc7bf00896043da208e444a167f5449a38794e70c98aeb78bdbf8
+  checksum: 10/ff1c889a1eb78dbff034bffa9efc29c72031c20b6358d557312ae7aaff58bb8c1596b8dcc8b8c259a30ed9f15806763e5534904a1b44fd33179ed12be9a9aebe
   languageName: node
   linkType: hard
 
