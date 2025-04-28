@@ -75,7 +75,7 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.18.1"))
+    api(platform("com.fasterxml.jackson:jackson-bom:2.19.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
     implementation("com.auth0:java-jwt:4.5.0")
