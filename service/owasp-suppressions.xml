@@ -53,4 +53,11 @@ SPDX-License-Identifier: LGPL-2.1-or-later
        ]]></notes>
         <cve>CVE-2024-1597</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        Tmp dir on container is not accessible to anyone else
+       ]]></notes>
+       <cve>CVE-2020-8908</cve>
+       <cve>CVE-2023-2976</cve>
+    </suppress>
 </suppressions>
