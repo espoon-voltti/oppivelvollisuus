@@ -5,19 +5,36 @@
 import sourceMapSupport from 'source-map-support'
 import express from 'express'
 import helmet from 'helmet'
-import * as redis from 'redis'
-import { configFromEnv, httpPort, toRedisClientOpts } from './config.js'
+import { configFromEnv, httpPort } from './config.js'
 import { fallbackErrorHandler } from './middleware/errors.js'
 import { createRouter } from './router.js'
 import { logError, loggingMiddleware } from './logging/index.js'
-import { assertRedisConnection } from './clients/redis-client.js'
+import { createClient } from 'redis'
 import passport from 'passport'
 import { trustReverseProxy } from './utils/express.js'
 
 sourceMapSupport.install()
 const config = configFromEnv()
 
-const redisClient = redis.createClient(toRedisClientOpts(config.redis))
+const socketOptions = config.redis.disableSecurity
+  ? {
+      host: config.redis.host!,
+      port: config.redis.port!
+    }
+  : {
+      host: config.redis.host!,
+      port: config.redis.port!,
+      tls: true as const,
+      servername: config.redis.tlsServerName!
+    }
+
+const redisClient = createClient({
+  socket: socketOptions,
+  ...(config.redis.disableSecurity ? {} : { password: config.redis.password })
+})
+
+export type VekkuliRedisClient = typeof redisClient
+
 redisClient.on('error', (err) =>
   logError('Redis error', undefined, undefined, err)
 )
@@ -38,7 +55,12 @@ app.use(
   })
 )
 app.get('/health', (_, res) => {
-  assertRedisConnection(redisClient)
+  if (!redisClient.isReady) {
+    throw new Error('not connected to redis')
+  }
+
+  redisClient
+    .ping()
     .then(() => {
       res.status(200).json({ status: 'UP' })
     })

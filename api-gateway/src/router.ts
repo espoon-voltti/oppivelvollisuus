@@ -7,7 +7,7 @@ import expressHttpProxy from 'express-http-proxy'
 
 import { errorHandler } from './middleware/errors.js'
 import { appCommit, Config, serviceUrl } from './config.js'
-import { RedisClient } from './clients/redis-client.js'
+import { VekkuliRedisClient } from './index.js'
 import { sessionSupport } from './auth/session.js'
 import passport from 'passport'
 import cookieParser from 'cookie-parser'
@@ -21,7 +21,10 @@ import createSamlRouter from './auth/saml/saml-routes.js'
 import authStatus from './auth/auth-status.js'
 import { createServiceRequestHeaders } from './clients/service-client.js'
 
-export function createRouter(config: Config, redisClient: RedisClient): Router {
+export function createRouter(
+  config: Config,
+  redisClient: VekkuliRedisClient
+): Router {
   const router = Router()
 
   const sessions = sessionSupport(redisClient, config.session)
@@ -32,7 +35,9 @@ export function createRouter(config: Config, redisClient: RedisClient): Router {
 
   router.use(cacheControl(() => 'forbid-cache'))
 
-  router.all('/system/*', (_, res) => res.sendStatus(404))
+  router.all('/system/*splat', (_, res) => {
+    res.sendStatus(404)
+  })
 
   if (config.ad.type === 'mock') {
     router.use('/auth/saml', createDevAdRouter(sessions))

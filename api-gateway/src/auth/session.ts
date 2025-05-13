@@ -13,7 +13,7 @@ import express from 'express'
 import session from 'express-session'
 import { LogoutToken, toMiddleware } from '../utils/express.js'
 import { fromCallback } from '../utils/promise-utils.js'
-import { RedisClient } from '../clients/redis-client.js'
+import { VekkuliRedisClient } from '../index.js'
 import { SessionConfig } from '../config.js'
 
 const cookieName = 'oppivelvollisuus.session'
@@ -41,7 +41,7 @@ export interface Sessions {
 }
 
 export function sessionSupport(
-  redisClient: RedisClient,
+  redisClient: VekkuliRedisClient,
   config: SessionConfig
 ): Sessions {
   // Base session support middleware from express-session
