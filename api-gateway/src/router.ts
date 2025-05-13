@@ -35,7 +35,9 @@ export function createRouter(
 
   router.use(cacheControl(() => 'forbid-cache'))
 
-  router.all('/system/*', (_, res) => res.sendStatus(404))
+  router.all('/system/*splat', (_, res) => {
+    res.sendStatus(404)
+  })
 
   if (config.ad.type === 'mock') {
     router.use('/auth/saml', createDevAdRouter(sessions))
