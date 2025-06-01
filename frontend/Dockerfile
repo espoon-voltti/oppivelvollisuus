@@ -5,7 +5,7 @@
 
 ARG NGINX_VERSION=1.26.0
 
-FROM node:22.12.0-bookworm-slim AS builder
+FROM node:22.16.0-bookworm-slim AS builder
 
 ARG CACHE_BUST=2025-W07
 
