@@ -183,7 +183,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@node-saml/node-saml@npm:^5.0.0":
+"@node-saml/node-saml@npm:5.0.0, @node-saml/node-saml@npm:^5.0.0":
   version: 5.0.0
   resolution: "@node-saml/node-saml@npm:5.0.0"
   dependencies:
@@ -203,7 +203,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@node-saml/passport-saml@npm:^5.0.0":
+"@node-saml/passport-saml@npm:5.0.0":
   version: 5.0.0
   resolution: "@node-saml/passport-saml@npm:5.0.0"
   dependencies:
@@ -372,7 +372,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cookie-parser@npm:^1.4.7":
+"@types/cookie-parser@npm:1.4.7":
   version: 1.4.7
   resolution: "@types/cookie-parser@npm:1.4.7"
   dependencies:
@@ -381,7 +381,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/csurf@npm:^1.11.5":
+"@types/csurf@npm:1.11.5":
   version: 1.11.5
   resolution: "@types/csurf@npm:1.11.5"
   dependencies:
@@ -406,7 +406,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-http-proxy@npm:^1.6.6":
+"@types/express-http-proxy@npm:1.6.6":
   version: 1.6.6
   resolution: "@types/express-http-proxy@npm:1.6.6"
   dependencies:
@@ -427,7 +427,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/express-session@npm:^1.18.0":
+"@types/express-session@npm:1.18.0":
   version: 1.18.0
   resolution: "@types/express-session@npm:1.18.0"
   dependencies:
@@ -462,7 +462,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jsonwebtoken@npm:^9.0.7":
+"@types/jsonwebtoken@npm:9.0.7":
   version: 9.0.7
   resolution: "@types/jsonwebtoken@npm:9.0.7"
   dependencies:
@@ -471,7 +471,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash@npm:^4.17.12":
+"@types/lodash@npm:4.17.12":
   version: 4.17.12
   resolution: "@types/lodash@npm:4.17.12"
   checksum: 10/3d829f97c0ea713135e6eb48e983feffb315f4cf228d03654ca8a328e3fecd03005bf7dd30bf411f4306967c610d96738d441588283a41456815f2ce1fd7044c
@@ -492,7 +492,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:^22.15.3":
+"@types/node@npm:*, @types/node@npm:22.15.3":
   version: 22.15.3
   resolution: "@types/node@npm:22.15.3"
   dependencies:
@@ -501,7 +501,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport-strategy@npm:^0.2.38":
+"@types/passport-strategy@npm:0.2.38, @types/passport-strategy@npm:^0.2.38":
   version: 0.2.38
   resolution: "@types/passport-strategy@npm:0.2.38"
   dependencies:
@@ -511,7 +511,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/passport@npm:*, @types/passport@npm:^1.0.16":
+"@types/passport@npm:*, @types/passport@npm:1.0.16, @types/passport@npm:^1.0.16":
   version: 1.0.16
   resolution: "@types/passport@npm:1.0.16"
   dependencies:
@@ -534,7 +534,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/redis@npm:^4.0.11":
+"@types/redis@npm:4.0.11":
   version: 4.0.11
   resolution: "@types/redis@npm:4.0.11"
   dependencies:
@@ -564,7 +564,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/source-map-support@npm:^0.5.10":
+"@types/source-map-support@npm:0.5.10":
   version: 0.5.10
   resolution: "@types/source-map-support@npm:0.5.10"
   dependencies:
@@ -612,7 +612,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/eslint-plugin@npm:^8.33.0":
+"@typescript-eslint/eslint-plugin@npm:8.33.0":
   version: 8.33.0
   resolution: "@typescript-eslint/eslint-plugin@npm:8.33.0"
   dependencies:
@@ -649,7 +649,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@typescript-eslint/parser@npm:^8.33.0":
+"@typescript-eslint/parser@npm:8.33.0":
   version: 8.33.0
   resolution: "@typescript-eslint/parser@npm:8.33.0"
   dependencies:
@@ -999,7 +999,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"axios@npm:^1.9.0":
+"axios@npm:1.9.0":
   version: 1.9.0
   resolution: "axios@npm:1.9.0"
   dependencies:
@@ -1237,7 +1237,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"concurrently@npm:^9.1.0":
+"concurrently@npm:9.1.0":
   version: 9.1.0
   resolution: "concurrently@npm:9.1.0"
   dependencies:
@@ -1255,7 +1255,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"connect-redis@npm:^8.1.0":
+"connect-redis@npm:8.1.0":
   version: 8.1.0
   resolution: "connect-redis@npm:8.1.0"
   peerDependencies:
@@ -1280,7 +1280,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"cookie-parser@npm:^1.4.7":
+"cookie-parser@npm:1.4.7":
   version: 1.4.7
   resolution: "cookie-parser@npm:1.4.7"
   dependencies:
@@ -1354,7 +1354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"csurf@npm:^1.11.0":
+"csurf@npm:1.11.0":
   version: 1.11.0
   resolution: "csurf@npm:1.11.0"
   dependencies:
@@ -1366,7 +1366,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"date-fns@npm:^4.1.0":
+"date-fns@npm:4.1.0":
   version: 4.1.0
   resolution: "date-fns@npm:4.1.0"
   checksum: 10/d5f6e9de5bbc52310f786099e18609289ed5e30af60a71e0646784c8185ddd1d0eebcf7c96b7faaaefc4a8366f3a3a4244d099b6d0866ee2bec80d1361e64342
@@ -1590,7 +1590,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-config-prettier@npm:^10.1.1":
+"eslint-config-prettier@npm:10.1.1":
   version: 10.1.1
   resolution: "eslint-config-prettier@npm:10.1.1"
   peerDependencies:
@@ -1601,7 +1601,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint-plugin-prettier@npm:^5.4.0":
+"eslint-plugin-prettier@npm:5.4.0":
   version: 5.4.0
   resolution: "eslint-plugin-prettier@npm:5.4.0"
   dependencies:
@@ -1645,7 +1645,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"eslint@npm:^9.28.0":
+"eslint@npm:9.28.0":
   version: 9.28.0
   resolution: "eslint@npm:9.28.0"
   dependencies:
@@ -1752,7 +1752,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-http-proxy@npm:^2.1.1":
+"express-http-proxy@npm:2.1.1":
   version: 2.1.1
   resolution: "express-http-proxy@npm:2.1.1"
   dependencies:
@@ -1763,7 +1763,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-session@npm:^1.18.1":
+"express-session@npm:1.18.1":
   version: 1.18.1
   resolution: "express-session@npm:1.18.1"
   dependencies:
@@ -1779,7 +1779,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:^5.1.0":
+"express@npm:5.1.0":
   version: 5.1.0
   resolution: "express@npm:5.1.0"
   dependencies:
@@ -1876,7 +1876,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fast-xml-parser@npm:^5.2.0":
+"fast-xml-parser@npm:5.2.0":
   version: 5.2.0
   resolution: "fast-xml-parser@npm:5.2.0"
   dependencies:
@@ -2177,7 +2177,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"helmet@npm:^8.1.0":
+"helmet@npm:8.1.0":
   version: 8.1.0
   resolution: "helmet@npm:8.1.0"
   checksum: 10/262e678d340bb102158f4e6ba1469a7cda1643329a50863f8fe704d5b60d9ebe6ea1e7793ed51224ae464f197dedf2fe8035df278c042e32ebc95b237fa41ad0
@@ -2447,7 +2447,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jsonwebtoken@npm:^9.0.2":
+"jsonwebtoken@npm:9.0.2":
   version: 9.0.2
   resolution: "jsonwebtoken@npm:9.0.2"
   dependencies:
@@ -2570,7 +2570,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.21":
+"lodash@npm:4.17.21, lodash@npm:^4.17.21":
   version: 4.17.21
   resolution: "lodash@npm:4.17.21"
   checksum: 10/c08619c038846ea6ac754abd6dd29d2568aa705feb69339e836dfa8d8b09abbb2f859371e86863eda41848221f9af43714491467b5b0299122431e202bb0c532
@@ -2584,7 +2584,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"make-error-cause@npm:^2.3.0":
+"make-error-cause@npm:2.3.0":
   version: 2.3.0
   resolution: "make-error-cause@npm:2.3.0"
   dependencies:
@@ -2842,7 +2842,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nocache@npm:^4.0.0":
+"nocache@npm:4.0.0":
   version: 4.0.0
   resolution: "nocache@npm:4.0.0"
   checksum: 10/5b018b7900fbc580c327b1a87decb20e8d9d233face8b8dfa286a54304f2cc11bfaea9828d0d4b635ca55a73539269a6b64a85185c4a363cc288fd706f6e3825
@@ -2869,7 +2869,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^3.1.7":
+"nodemon@npm:3.1.7":
   version: 3.1.7
   resolution: "nodemon@npm:3.1.7"
   dependencies:
@@ -2961,52 +2961,52 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "oppivelvollisuus-api-gateway@workspace:."
   dependencies:
-    "@node-saml/node-saml": "npm:^5.0.0"
-    "@node-saml/passport-saml": "npm:^5.0.0"
-    "@types/cookie-parser": "npm:^1.4.7"
-    "@types/csurf": "npm:^1.11.5"
-    "@types/express-http-proxy": "npm:^1.6.6"
-    "@types/express-session": "npm:^1.18.0"
-    "@types/jsonwebtoken": "npm:^9.0.7"
-    "@types/lodash": "npm:^4.17.12"
-    "@types/node": "npm:^22.15.3"
-    "@types/passport": "npm:^1.0.16"
-    "@types/passport-strategy": "npm:^0.2.38"
-    "@types/redis": "npm:^4.0.11"
-    "@types/source-map-support": "npm:^0.5.10"
-    "@typescript-eslint/eslint-plugin": "npm:^8.33.0"
-    "@typescript-eslint/parser": "npm:^8.33.0"
-    axios: "npm:^1.9.0"
-    concurrently: "npm:^9.1.0"
-    connect-redis: "npm:^8.1.0"
-    cookie-parser: "npm:^1.4.7"
-    csurf: "npm:^1.11.0"
-    date-fns: "npm:^4.1.0"
-    eslint: "npm:^9.28.0"
-    eslint-config-prettier: "npm:^10.1.1"
-    eslint-plugin-prettier: "npm:^5.4.0"
-    express: "npm:^5.1.0"
-    express-http-proxy: "npm:^2.1.1"
-    express-session: "npm:^1.18.1"
-    fast-xml-parser: "npm:^5.2.0"
-    helmet: "npm:^8.1.0"
-    jsonwebtoken: "npm:^9.0.2"
-    lodash: "npm:^4.17.21"
-    make-error-cause: "npm:^2.3.0"
-    nocache: "npm:^4.0.0"
-    nodemon: "npm:^3.1.7"
-    passport: "npm:^0.7.0"
-    pino: "npm:^9.7.0"
-    pino-http: "npm:^10.3.0"
-    pino-pretty: "npm:^13.0.0"
-    prettier: "npm:^3.5.3"
-    query-string: "npm:^9.2.0"
-    redis: "npm:^5.1.0"
-    source-map-support: "npm:^0.5.21"
-    ts-node: "npm:^10.9.2"
-    typescript: "npm:^5.8.2"
-    typescript-eslint: "npm:^8.32.0"
-    zod: "npm:^3.25.13"
+    "@node-saml/node-saml": "npm:5.0.0"
+    "@node-saml/passport-saml": "npm:5.0.0"
+    "@types/cookie-parser": "npm:1.4.7"
+    "@types/csurf": "npm:1.11.5"
+    "@types/express-http-proxy": "npm:1.6.6"
+    "@types/express-session": "npm:1.18.0"
+    "@types/jsonwebtoken": "npm:9.0.7"
+    "@types/lodash": "npm:4.17.12"
+    "@types/node": "npm:22.15.3"
+    "@types/passport": "npm:1.0.16"
+    "@types/passport-strategy": "npm:0.2.38"
+    "@types/redis": "npm:4.0.11"
+    "@types/source-map-support": "npm:0.5.10"
+    "@typescript-eslint/eslint-plugin": "npm:8.33.0"
+    "@typescript-eslint/parser": "npm:8.33.0"
+    axios: "npm:1.9.0"
+    concurrently: "npm:9.1.0"
+    connect-redis: "npm:8.1.0"
+    cookie-parser: "npm:1.4.7"
+    csurf: "npm:1.11.0"
+    date-fns: "npm:4.1.0"
+    eslint: "npm:9.28.0"
+    eslint-config-prettier: "npm:10.1.1"
+    eslint-plugin-prettier: "npm:5.4.0"
+    express: "npm:5.1.0"
+    express-http-proxy: "npm:2.1.1"
+    express-session: "npm:1.18.1"
+    fast-xml-parser: "npm:5.2.0"
+    helmet: "npm:8.1.0"
+    jsonwebtoken: "npm:9.0.2"
+    lodash: "npm:4.17.21"
+    make-error-cause: "npm:2.3.0"
+    nocache: "npm:4.0.0"
+    nodemon: "npm:3.1.7"
+    passport: "npm:0.7.0"
+    pino: "npm:9.7.0"
+    pino-http: "npm:10.3.0"
+    pino-pretty: "npm:13.0.0"
+    prettier: "npm:3.5.3"
+    query-string: "npm:9.2.0"
+    redis: "npm:5.1.0"
+    source-map-support: "npm:0.5.21"
+    ts-node: "npm:10.9.2"
+    typescript: "npm:5.8.2"
+    typescript-eslint: "npm:8.32.0"
+    zod: "npm:3.25.13"
   languageName: unknown
   linkType: soft
 
@@ -3074,7 +3074,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"passport@npm:^0.7.0":
+"passport@npm:0.7.0, passport@npm:^0.7.0":
   version: 0.7.0
   resolution: "passport@npm:0.7.0"
   dependencies:
@@ -3139,7 +3139,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-http@npm:^10.3.0":
+"pino-http@npm:10.3.0":
   version: 10.3.0
   resolution: "pino-http@npm:10.3.0"
   dependencies:
@@ -3151,7 +3151,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino-pretty@npm:^13.0.0":
+"pino-pretty@npm:13.0.0":
   version: 13.0.0
   resolution: "pino-pretty@npm:13.0.0"
   dependencies:
@@ -3181,7 +3181,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:^9.0.0, pino@npm:^9.7.0":
+"pino@npm:9.7.0, pino@npm:^9.0.0":
   version: 9.7.0
   resolution: "pino@npm:9.7.0"
   dependencies:
@@ -3218,7 +3218,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:^3.5.3":
+"prettier@npm:3.5.3":
   version: 3.5.3
   resolution: "prettier@npm:3.5.3"
   bin:
@@ -3308,7 +3308,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"query-string@npm:^9.2.0":
+"query-string@npm:9.2.0":
   version: 9.2.0
   resolution: "query-string@npm:9.2.0"
   dependencies:
@@ -3387,7 +3387,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"redis@npm:*, redis@npm:^5.1.0":
+"redis@npm:*, redis@npm:5.1.0":
   version: 5.1.0
   resolution: "redis@npm:5.1.0"
   dependencies:
@@ -3679,7 +3679,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.21":
+"source-map-support@npm:0.5.21":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
@@ -3899,7 +3899,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ts-node@npm:^10.9.2":
+"ts-node@npm:10.9.2":
   version: 10.9.2
   resolution: "ts-node@npm:10.9.2"
   dependencies:
@@ -3971,7 +3971,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript-eslint@npm:^8.32.0":
+"typescript-eslint@npm:8.32.0":
   version: 8.32.0
   resolution: "typescript-eslint@npm:8.32.0"
   dependencies:
@@ -3985,7 +3985,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.8.2":
+"typescript@npm:5.8.2":
   version: 5.8.2
   resolution: "typescript@npm:5.8.2"
   bin:
@@ -3995,7 +3995,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.8.2#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.8.2#optional!builtin<compat/typescript>":
   version: 5.8.2
   resolution: "typescript@patch:typescript@npm%3A5.8.2#optional!builtin<compat/typescript>::version=5.8.2&hash=5786d5"
   bin:
@@ -4251,7 +4251,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:^3.25.13":
+"zod@npm:3.25.13":
   version: 3.25.13
   resolution: "zod@npm:3.25.13"
   checksum: 10/922a74cca46339aadb17dbd2288ecfb5222b630fc973d8b6152416f2dacd6e0d5f02992f7639368586bb7f44711b1f2e62da7f8c15c1af0cd9a659605d279d14
