@@ -5035,7 +5035,7 @@ __metadata:
     react: "npm:18.3.1"
     react-csv: "npm:2.2.2"
     react-dom: "npm:18.3.1"
-    react-router: "npm:7.6.0"
+    react-router: "npm:7.6.2"
     styled-components: "npm:6.1.18"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.8.3"
@@ -5704,9 +5704,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:7.6.0":
-  version: 7.6.0
-  resolution: "react-router@npm:7.6.0"
+"react-router@npm:7.6.2":
+  version: 7.6.2
+  resolution: "react-router@npm:7.6.2"
   dependencies:
     cookie: "npm:^1.0.1"
     set-cookie-parser: "npm:^2.6.0"
@@ -5716,7 +5716,7 @@ __metadata:
   peerDependenciesMeta:
     react-dom:
       optional: true
-  checksum: 10/093ace0b706522ea551d279d18fa320ae904ea47e6b7f80532f0d4badee518d3cd454481b3cb89c3e68222571620c5bccdd52be770c2783c575308a4395d9015
+  checksum: 10/38a8473c7358d873eb60cc6660deae16a629701b8867ee00e67871ff61009b90f73853235ef3b0f2e43ebedee697389afc7bf170df069823dc872be79798965b
   languageName: node
   linkType: hard
 
