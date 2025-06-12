@@ -76,7 +76,9 @@
   "packageManager": "yarn@4.9.2",
   "packageRules": [
     {
-      "packageNames": ["@types/jsonwebtoken"],
+      "packageNames": [
+        "@types/jsonwebtoken"
+      ],
       "allowedVersions": "9.0.7"
     }
   ]
