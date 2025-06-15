@@ -2896,7 +2896,7 @@ __metadata:
     ts-node: "npm:10.9.2"
     typescript: "npm:5.8.3"
     typescript-eslint: "npm:8.34.0"
-    zod: "npm:3.25.51"
+    zod: "npm:3.25.63"
   languageName: unknown
   linkType: soft
 
@@ -4133,9 +4133,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.25.51":
-  version: 3.25.51
-  resolution: "zod@npm:3.25.51"
-  checksum: 10/88172dae4c14194bba23c006ae63dd64b96a0e885d9bdb00f8495d1191a4bfd6ed545ab9c60de579b1979589d52253f1bbca6637813fb6890124784c877baf01
+"zod@npm:3.25.63":
+  version: 3.25.63
+  resolution: "zod@npm:3.25.63"
+  checksum: 10/ef3de3e94b27c94fd9c6b8d8fcd61bf6702494c91dcfb84f585f2822bcdf1d96305c953c264a221af79745795517d9d5b5ce59889d2a8d23967e6096945049bd
   languageName: node
   linkType: hard
