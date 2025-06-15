@@ -73,13 +73,5 @@
   "engines": {
     "node": ">= 20.11.0"
   },
-  "packageManager": "yarn@4.9.2",
-  "packageRules": [
-    {
-      "packageNames": [
-        "@types/jsonwebtoken"
-      ],
-      "allowedVersions": "9.0.7"
-    }
-  ]
+  "packageManager": "yarn@4.9.2"
 }
