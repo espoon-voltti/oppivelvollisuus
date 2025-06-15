@@ -37,7 +37,7 @@
     "zod": "3.25.51"
   },
   "devDependencies": {
-    "@types/cookie-parser": "1.4.8",
+    "@types/cookie-parser": "1.4.9",
     "@types/csurf": "1.11.5",
     "@types/express-http-proxy": "1.6.6",
     "@types/express-session": "1.18.1",
