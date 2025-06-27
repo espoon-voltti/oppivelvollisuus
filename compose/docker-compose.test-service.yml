@@ -2,8 +2,6 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-version: '3.5'
-
 services:
   service-tests:
     image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/service-builder:${TAG:-master}
