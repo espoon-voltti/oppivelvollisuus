@@ -1,12 +1,9 @@
 # SPDX-FileCopyrightText: 2023-2024 City of Espoo
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
-
-version: '3.5'
-
 services:
   oppivelvollisuus-db:
-    image: postgres:15.7-alpine3.18
+    image: postgres:16.3-alpine3.18
     ports:
       - "5432:5432"
     volumes:
