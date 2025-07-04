@@ -48,8 +48,8 @@
     "@types/passport-strategy": "0.2.38",
     "@types/redis": "4.0.11",
     "@types/source-map-support": "0.5.10",
-    "@typescript-eslint/eslint-plugin": "8.35.0",
-    "@typescript-eslint/parser": "8.35.0",
+    "@typescript-eslint/eslint-plugin": "8.35.1",
+    "@typescript-eslint/parser": "8.35.1",
     "concurrently": "9.2.0",
     "eslint": "9.29.0",
     "eslint-config-prettier": "10.1.5",
@@ -58,7 +58,7 @@
     "prettier": "3.6.2",
     "ts-node": "10.9.2",
     "typescript": "5.8.3",
-    "typescript-eslint": "8.35.0"
+    "typescript-eslint": "8.35.1"
   },
   "resolutions": {
     "@types/mime": "3.0.4"
