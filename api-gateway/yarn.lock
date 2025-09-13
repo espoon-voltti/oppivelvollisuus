@@ -2917,7 +2917,7 @@ __metadata:
     nocache: "npm:4.0.0"
     nodemon: "npm:3.1.10"
     passport: "npm:0.7.0"
-    pino: "npm:9.9.2"
+    pino: "npm:9.9.5"
     pino-http: "npm:10.5.0"
     pino-pretty: "npm:13.1.1"
     prettier: "npm:3.6.2"
@@ -3102,9 +3102,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"pino@npm:9.9.2, pino@npm:^9.0.0":
-  version: 9.9.2
-  resolution: "pino@npm:9.9.2"
+"pino@npm:9.9.5, pino@npm:^9.0.0":
+  version: 9.9.5
+  resolution: "pino@npm:9.9.5"
   dependencies:
     atomic-sleep: "npm:^1.0.0"
     fast-redact: "npm:^3.1.1"
@@ -3119,7 +3119,7 @@ __metadata:
     thread-stream: "npm:^3.0.0"
   bin:
     pino: bin.js
-  checksum: 10/a191a12351e944148f766276701ca838983e09dbb6dbaf03ddbff5c7939d8a8b576d325d3b2310bc2833d6feaf4089770c76058d1acc278c71f9d38564c1a8ec
+  checksum: 10/b6cb65bdc92328966561002284cd3902bbfe51b91d72d3b90d1fa85008caa5c4ef35848f2c080962e4688f50c753f06b0cf4ba5e0bd17f33954ae039725d49ed
   languageName: node
   linkType: hard
 
