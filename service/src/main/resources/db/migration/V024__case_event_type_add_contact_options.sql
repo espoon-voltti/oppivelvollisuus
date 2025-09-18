@@ -1,0 +1,6 @@
+ALTER TYPE case_event_type ADD VALUE 'TEXT_MESSAGE';
+ALTER TYPE case_event_type ADD VALUE 'EMAIL';
+ALTER TYPE case_event_type ADD VALUE 'PHONE_CALL';
+ALTER TYPE case_event_type ADD VALUE 'INTRO_VISIT';
+ALTER TYPE case_event_type ADD VALUE 'MEETING';
+ALTER TYPE case_event_type ADD VALUE 'CANCELLED_MEETING';

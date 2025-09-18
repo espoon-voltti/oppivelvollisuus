@@ -13,7 +13,13 @@ export const caseEventTypes = [
   'HEARING',
   'DIRECTED_TO_YLEISOPPILAITOKSEN_TUVA',
   'DIRECTED_TO_ERITYISOPPILAITOKSEN_TUVA',
-  'DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA'
+  'DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA',
+  'TEXT_MESSAGE',
+  'EMAIL',
+  'PHONE_CALL',
+  'INTRO_VISIT',
+  'MEETING',
+  'CANCELLED_MEETING'
 ] as const
 
 export type CaseEventType = (typeof caseEventTypes)[number]
@@ -30,5 +36,12 @@ export const caseEventTypeNames: Record<CaseEventType, string> = {
   HEARING: 'Kuuleminen',
   DIRECTED_TO_YLEISOPPILAITOKSEN_TUVA: 'Osoitus - Yleisoppilaitoksen tuva',
   DIRECTED_TO_ERITYISOPPILAITOKSEN_TUVA: 'Osoitus - Erityisoppilaitoksen tuva',
-  DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA: 'Osoitus - Erityisoppilaitoksen telma'
+  DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA:
+    'Osoitus - Erityisoppilaitoksen telma',
+  TEXT_MESSAGE: 'Tekstiviesti',
+  EMAIL: 'Sähköposti',
+  PHONE_CALL: 'Puhelu',
+  INTRO_VISIT: 'Tutustumiskäynti',
+  MEETING: 'Tapaaminen',
+  CANCELLED_MEETING: 'Peruutettu tapaaminen'
 }
