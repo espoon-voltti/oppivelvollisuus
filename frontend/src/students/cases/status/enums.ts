@@ -20,6 +20,7 @@ export const caseFinishedReasons = [
   'MOVED_TO_ANOTHER_MUNICIPALITY',
   'MOVED_ABROAD',
   'ERRONEOUS_NOTICE',
+  'BASIC_EDUCATION_ADULTS',
   'OTHER'
 ] as const
 
@@ -34,6 +35,7 @@ export const caseFinishedReasonNames: Record<CaseFinishedReason, string> = {
   MOVED_TO_ANOTHER_MUNICIPALITY: 'Muutto toiselle paikkakunnalle',
   MOVED_ABROAD: 'Muutto ulkomaille',
   ERRONEOUS_NOTICE: 'Virheellinen ilmoitus',
+  BASIC_EDUCATION_ADULTS: 'Aikuisten perusopetus Suomeen muuttaneille',
   OTHER: 'Muu'
 }
 
