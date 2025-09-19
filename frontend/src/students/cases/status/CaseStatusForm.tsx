@@ -4,8 +4,13 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 
+import { Checkbox } from 'shared/form/Checkbox'
 import { Select } from '../../../shared/form/Select'
-import { LabeledInput, RowOfInputs } from '../../../shared/layout'
+import {
+  FlexColWithGaps,
+  LabeledInput,
+  RowOfInputs
+} from '../../../shared/layout'
 import { Label } from '../../../shared/typography'
 import { StatusChip } from '../StatusChip'
 import { StudentCase } from '../api'
@@ -18,6 +23,9 @@ import {
   CaseStatus,
   caseStatuses,
   caseStatusNames,
+  FollowUpMeasure,
+  followUpMeasureNames,
+  followUpMeasureValues,
   SchoolType,
   schoolTypeNames,
   schoolTypes
@@ -45,6 +53,10 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
     props.studentCase.finishedInfo?.startedAtSchool ?? null
   )
 
+  const [followUpMeasures, setFollowUpMeasures] = useState<FollowUpMeasure[]>(
+    props.studentCase.finishedInfo?.followUpMeasures ?? []
+  )
+
   const validInput: CaseStatusInput | null = useMemo(() => {
     if (status === 'FINISHED') {
       if (finishedReason === null) return null
@@ -53,18 +65,37 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         if (startedAtSchool === null) return null
         return {
           status,
-          finishedInfo: { reason: finishedReason, startedAtSchool }
+          finishedInfo: {
+            reason: finishedReason,
+            startedAtSchool,
+            followUpMeasures: null
+          }
+        }
+      }
+      if (finishedReason === 'COMPULSORY_EDUCATION_ENDED') {
+        if (followUpMeasures.length === 0) return null
+        return {
+          status,
+          finishedInfo: {
+            reason: finishedReason,
+            followUpMeasures: followUpMeasures,
+            startedAtSchool: null
+          }
         }
       }
 
       return {
         status,
-        finishedInfo: { reason: finishedReason, startedAtSchool: null }
+        finishedInfo: {
+          reason: finishedReason,
+          startedAtSchool: null,
+          followUpMeasures: null
+        }
       }
     }
 
     return { status, finishedInfo: null }
-  }, [status, finishedReason, startedAtSchool])
+  }, [status, finishedReason, startedAtSchool, followUpMeasures])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -97,6 +128,26 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
                     props.studentCase.finishedInfo.startedAtSchool
                   ]
                 }
+              </span>
+            </LabeledInput>
+          )}
+        {props.studentCase.status === 'FINISHED' &&
+          props.studentCase.finishedInfo.reason ===
+            'COMPULSORY_EDUCATION_ENDED' && (
+            <LabeledInput $cols={4}>
+              <Label>Jatkotoimenpiteet</Label>
+              <span>
+                <span>
+                  {followUpMeasures !== null && followUpMeasures.length > 0 ? (
+                    <ul>
+                      {followUpMeasures.map((opt) => (
+                        <li key={opt}>{followUpMeasureNames[opt]}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    '-'
+                  )}
+                </span>
               </span>
             </LabeledInput>
           )}
@@ -143,6 +194,28 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           />
         </LabeledInput>
       )}
+      {status === 'FINISHED' &&
+        finishedReason === 'COMPULSORY_EDUCATION_ENDED' && (
+          <LabeledInput $cols={4}>
+            <Label>Jatkotoimenpiteet *</Label>
+            <FlexColWithGaps>
+              {followUpMeasureValues.map((option) => (
+                <Checkbox
+                  key={option}
+                  label={followUpMeasureNames[option]}
+                  checked={followUpMeasures.includes(option)}
+                  onChange={(checked) =>
+                    setFollowUpMeasures((prev) =>
+                      checked
+                        ? [...prev, option]
+                        : prev?.filter((cbr) => cbr !== option)
+                    )
+                  }
+                />
+              ))}
+            </FlexColWithGaps>
+          </LabeledInput>
+        )}
     </RowOfInputs>
   )
 })

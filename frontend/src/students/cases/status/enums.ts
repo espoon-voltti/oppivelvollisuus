@@ -37,6 +37,28 @@ export const caseFinishedReasonNames: Record<CaseFinishedReason, string> = {
   OTHER: 'Muu'
 }
 
+export const followUpMeasureValues = [
+  'KELA_REHABILITATION_SERVICES',
+  'SOCIAL_SERVICES',
+  'YOUTH_WORK',
+  'JOB_SEARCH_SUPPORT',
+  'LANGUAGE_COURSE',
+  'MISSING',
+  'MOVE_ABROAD'
+] as const
+
+export type FollowUpMeasure = (typeof followUpMeasureValues)[number]
+
+export const followUpMeasureNames: Record<FollowUpMeasure, string> = {
+  KELA_REHABILITATION_SERVICES: 'Kelan kuntouttavat palvelut',
+  SOCIAL_SERVICES: 'Sosiaalitoimen palvelut',
+  YOUTH_WORK: 'Etsivä nuorisotyö',
+  JOB_SEARCH_SUPPORT: 'Työnhaun tukeminen',
+  LANGUAGE_COURSE: 'Kielikurssi',
+  MISSING: 'Kadonnut',
+  MOVE_ABROAD: 'Muutto ulkomaille'
+}
+
 export const schoolTypes = [
   'PERUSOPETUKSEEN_VALMISTAVA',
   'AIKUISTEN_PERUSOPETUS',

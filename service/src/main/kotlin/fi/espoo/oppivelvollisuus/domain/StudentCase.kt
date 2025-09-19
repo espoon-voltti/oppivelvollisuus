@@ -120,8 +120,8 @@ fun Handle.insertStudentCase(
 ): UUID =
     createUpdate(
         """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
-                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason, follow_up_measure) 
+                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason, :followUpMeasure)
                 RETURNING id
             """
     ).bind("studentId", studentId)
@@ -156,13 +156,27 @@ enum class SchoolType {
     OTHER
 }
 
+enum class FollowUpMeasure {
+    KELA_REHABILITATION_SERVICES,
+    SOCIAL_SERVICES,
+    YOUTH_WORK,
+    JOB_SEARCH_SUPPORT,
+    LANGUAGE_COURSE,
+    MISSING,
+    MOVE_ABROAD
+}
+
 data class FinishedInfo(
     @param:PropagateNull val reason: CaseFinishedReason,
-    val startedAtSchool: SchoolType?
+    val startedAtSchool: SchoolType?,
+    val followUpMeasures: Set<FollowUpMeasure>?
 ) {
     init {
         if ((reason == CaseFinishedReason.BEGAN_STUDIES) != (startedAtSchool != null)) {
             throw BadRequest("startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES")
+        }
+        if ((reason == CaseFinishedReason.COMPULSORY_EDUCATION_ENDED) != (followUpMeasures != null)) {
+            throw BadRequest("followUpMeasure must be present if and only if finished reason is COMPULSORY_EDUCATION_ENDED")
         }
     }
 }
@@ -206,6 +220,7 @@ SELECT
     sc.status,
     sc.finished_reason AS finished_info_reason,
     sc.started_at_school AS finished_info_started_at_school,
+    sc.follow_up_measures AS finished_info_follow_up_measures,
     sc.source,
     sc.source_valpas,
     sc.source_other,
@@ -263,7 +278,8 @@ SET
     source_contact = :sourceContact,
     school_background = :schoolBackground::school_background[],
     case_background_reasons = :caseBackgroundReasons::case_background_reason[], 
-    not_in_school_reason = :notInSchoolReason
+    not_in_school_reason = :notInSchoolReason,
+    follow_up_measure = :followUpMeasure
 WHERE id = :id AND student_id = :studentId
 """
     ).bind("id", id)
@@ -293,20 +309,22 @@ fun Handle.updateStudentCaseStatus(
 ) {
     createUpdate(
         """
-UPDATE student_cases
-SET 
-    updated = now(),
-    updated_by = :user,
-    status = :status,
-    finished_reason = :finishedReason,
-    started_at_school = :startedAtSchool
-WHERE id = :id AND student_id = :studentId
+        UPDATE student_cases
+        SET 
+            updated = now(),
+            updated_by = :user,
+            status = :status,
+            finished_reason = :finishedReason,
+            started_at_school = :startedAtSchool,
+            follow_up_measures = :followUpMeasures::follow_up_measure[]
+        WHERE id = :id AND student_id = :studentId
 """
     ).bind("id", id)
         .bind("studentId", studentId)
         .bind("status", data.status)
         .bind("finishedReason", data.finishedInfo?.reason)
         .bind("startedAtSchool", data.finishedInfo?.startedAtSchool)
+        .bind("followUpMeasures", data.finishedInfo?.followUpMeasures?.toTypedArray())
         .bind("user", user.id)
         .execute()
         .also { if (it != 1) throw NotFound() }
