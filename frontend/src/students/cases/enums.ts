@@ -32,7 +32,8 @@ export const valpasNotifiers = [
   'AMMATILLISEN_ERITYISOPPILAITOKSEN_PERUSTUTKINTO',
   'AMMATILLISEN_ERITYISOPPILAITOKSEN_TUVA',
   'TELMA',
-  'TOINEN_ASUINKUNTA'
+  'TOINEN_ASUINKUNTA',
+  'OPISTO'
 ] as const
 
 export type ValpasNotifier = (typeof valpasNotifiers)[number]
@@ -49,7 +50,8 @@ export const valpasNotifierNames: Record<ValpasNotifier, string> = {
   AMMATILLISEN_ERITYISOPPILAITOKSEN_TUVA:
     'Ammatillisen erityisoppilaitoksen tuva',
   TELMA: 'Telma',
-  TOINEN_ASUINKUNTA: 'Toinen asuinkunta'
+  TOINEN_ASUINKUNTA: 'Toinen asuinkunta',
+  OPISTO: 'Opisto'
 }
 
 export const otherNotifiers = [
