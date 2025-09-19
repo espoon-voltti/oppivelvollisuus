@@ -1,0 +1,1 @@
+ALTER TYPE case_finished_reason ADD VALUE 'BASIC_EDUCATION_ADULTS';
