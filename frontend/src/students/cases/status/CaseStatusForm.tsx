@@ -18,6 +18,9 @@ import {
   CaseStatus,
   caseStatuses,
   caseStatusNames,
+  followUpMeasures,
+  FollowUpMeasure,
+  followUpMeasureNames,
   SchoolType,
   schoolTypeNames,
   schoolTypes
@@ -45,6 +48,11 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
     props.studentCase.finishedInfo?.startedAtSchool ?? null
   )
 
+  const [followUpMeasure, setFollowUpMeasure] =
+    useState<FollowUpMeasure | null>(
+      props.studentCase.finishedInfo?.followUpMeasure ?? null
+    )
+
   const validInput: CaseStatusInput | null = useMemo(() => {
     if (status === 'FINISHED') {
       if (finishedReason === null) return null
@@ -53,19 +61,39 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         if (startedAtSchool === null) return null
         return {
           status,
-          finishedInfo: { reason: finishedReason, startedAtSchool }
+          finishedInfo: {
+            reason: finishedReason,
+            startedAtSchool,
+            followUpMeasure: null
+          }
+        }
+      }
+      if (finishedReason === 'COMPULSORY_EDUCATION_ENDED') {
+        if (followUpMeasure === null) return null
+        return {
+          status,
+          finishedInfo: {
+            reason: finishedReason,
+            followUpMeasure,
+            startedAtSchool: null
+          }
         }
       }
 
       return {
         status,
-        finishedInfo: { reason: finishedReason, startedAtSchool: null }
+        finishedInfo: {
+          reason: finishedReason,
+          startedAtSchool: null,
+          followUpMeasure: null
+        }
       }
     }
 
     return { status, finishedInfo: null }
-  }, [status, finishedReason, startedAtSchool])
+  }, [status, finishedReason, startedAtSchool, followUpMeasure])
 
+  console.log(props.studentCase.finishedInfo?.followUpMeasure)
   useEffect(() => {
     if (props.mode !== 'VIEW') {
       props.onChange(validInput)
@@ -95,6 +123,20 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
                 {
                   schoolTypeNames[
                     props.studentCase.finishedInfo.startedAtSchool
+                  ]
+                }
+              </span>
+            </LabeledInput>
+          )}
+        {props.studentCase.status === 'FINISHED' &&
+          props.studentCase.finishedInfo.reason ===
+            'COMPULSORY_EDUCATION_ENDED' && (
+            <LabeledInput $cols={4}>
+              <Label>Jatkotoimenpiteet</Label>
+              <span>
+                {
+                  followUpMeasureNames[
+                    props.studentCase.finishedInfo.followUpMeasure
                   ]
                 }
               </span>
@@ -143,6 +185,19 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           />
         </LabeledInput>
       )}
+      {status === 'FINISHED' &&
+        finishedReason === 'COMPULSORY_EDUCATION_ENDED' && (
+          <LabeledInput $cols={4}>
+            <Label>Jatkotoimenpiteet *</Label>
+            <Select<FollowUpMeasure>
+              items={followUpMeasures}
+              selectedItem={followUpMeasure}
+              getItemLabel={(item) => followUpMeasureNames[item]}
+              placeholder="Valitse"
+              onChange={(item) => setFollowUpMeasure(item)}
+            />
+          </LabeledInput>
+        )}
     </RowOfInputs>
   )
 })
