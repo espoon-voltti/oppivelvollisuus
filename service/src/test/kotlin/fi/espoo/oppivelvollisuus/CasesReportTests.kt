@@ -139,7 +139,8 @@ class CasesReportTests : FullApplicationTest() {
                 finishedInfo =
                     FinishedInfo(
                         reason = CaseFinishedReason.BEGAN_STUDIES,
-                        startedAtSchool = SchoolType.LUKIO
+                        startedAtSchool = SchoolType.LUKIO,
+                        followUpMeasure = null,
                     )
             )
         )

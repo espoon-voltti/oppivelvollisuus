@@ -120,8 +120,8 @@ fun Handle.insertStudentCase(
 ): UUID =
     createUpdate(
         """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason, follow_up_measure) 
-                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason, :followUpMeasure)
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
+                VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
     ).bind("studentId", studentId)
@@ -278,8 +278,7 @@ SET
     source_contact = :sourceContact,
     school_background = :schoolBackground::school_background[],
     case_background_reasons = :caseBackgroundReasons::case_background_reason[], 
-    not_in_school_reason = :notInSchoolReason,
-    follow_up_measure = :followUpMeasure
+    not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
     ).bind("id", id)

@@ -16,6 +16,7 @@ import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
 import fi.espoo.oppivelvollisuus.domain.FinishedInfo
+import fi.espoo.oppivelvollisuus.domain.FollowUpMeasure
 import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
 import fi.espoo.oppivelvollisuus.domain.OtherNotifier
 import fi.espoo.oppivelvollisuus.domain.SchoolBackground
@@ -50,7 +51,7 @@ class StudentCaseTests : FullApplicationTest() {
                 testUser,
                 studentId,
                 firstCaseId,
-                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null))
+                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
             )
         }
 
@@ -104,7 +105,7 @@ class StudentCaseTests : FullApplicationTest() {
                 testUser,
                 studentId,
                 firstCaseId,
-                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null))
+                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
             )
         }
 
@@ -235,7 +236,7 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
         )
 
         val updatedCase = controller.getStudent(testUser, studentId).cases.first()
@@ -260,7 +261,7 @@ class StudentCaseTests : FullApplicationTest() {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO)
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null)
             )
         )
 
@@ -268,6 +269,60 @@ class StudentCaseTests : FullApplicationTest() {
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(CaseFinishedReason.BEGAN_STUDIES, updatedCase.finishedInfo?.reason)
         assertEquals(SchoolType.LUKIO, updatedCase.finishedInfo?.startedAtSchool)
+    }
+
+    @Test
+    fun `change status to FINISHED with COMPULSORY_EDUCATION_ENDED`() {
+        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
+
+        val givenFollowUpMeasure = FollowUpMeasure.SOCIAL_SERVICES
+        controller.updateStudentCaseStatus(
+            testUser,
+            studentId,
+            caseId,
+            CaseStatusInput(
+                CaseStatus.FINISHED,
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, givenFollowUpMeasure)
+            )
+        )
+
+        val updatedCase = controller.getStudent(testUser, studentId).cases.first()
+        assertEquals(CaseStatus.FINISHED, updatedCase.status)
+        assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, updatedCase.finishedInfo?.reason)
+        assertEquals(givenFollowUpMeasure, updatedCase.finishedInfo?.followUpMeasure)
+    }
+
+    @Test
+    fun `cannot change status to COMPULSORY_EDUCATION_ENDED without follow up measure`() {
+        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
+        val caseId =
+            controller
+                .getStudent(testUser, studentId)
+                .cases
+                .first()
+                .id
+
+        assertThrows<BadRequest> {
+            controller.updateStudentCaseStatus(
+                testUser,
+                studentId,
+                caseId,
+                CaseStatusInput(
+                    CaseStatus.FINISHED,
+                    FinishedInfo(
+                        CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
+                        null,
+                        null
+                    )
+                )
+            )
+        }
     }
 
     @Test
@@ -312,6 +367,7 @@ class StudentCaseTests : FullApplicationTest() {
                     CaseStatus.FINISHED,
                     FinishedInfo(
                         CaseFinishedReason.BEGAN_STUDIES,
+                        null,
                         null
                     )
                 )
@@ -338,7 +394,8 @@ class StudentCaseTests : FullApplicationTest() {
                     CaseStatus.FINISHED,
                     FinishedInfo(
                         CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED,
-                        SchoolType.LUKIO
+                        SchoolType.LUKIO,
+                        null
                     )
                 )
             )
@@ -358,7 +415,7 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null))
         )
 
         controller.updateStudentCaseStatus(
@@ -386,7 +443,7 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null))
         )
         controller.createStudentCase(testUser, studentId, minimalStudentCaseTestInput)
 
