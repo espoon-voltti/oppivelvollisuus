@@ -68,5 +68,7 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <cve>CVE-2025-48988</cve>
         <cve>CVE-2025-49125</cve>
         <cve>CVE-2025-41242</cve>
+        <cve>CVE-2025-41248</cve>
+        <cve>CVE-2025-41249</cve>
     </suppress>
 </suppressions>
