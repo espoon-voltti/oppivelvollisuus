@@ -2216,12 +2216,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:22.18.1":
-  version: 22.18.1
-  resolution: "@types/node@npm:22.18.1"
+"@types/node@npm:22.18.6":
+  version: 22.18.6
+  resolution: "@types/node@npm:22.18.6"
   dependencies:
     undici-types: "npm:~6.21.0"
-  checksum: 10/da67f3c3fa4107fbca704e7a71fee36c27f3b6f44af1c466cd5c71eab76a9ffcd6a16f3b97d1e757b9763f1fa1085eebb60cb648c272e36794aca7305b2a15d9
+  checksum: 10/d816882476fa4f2d2db238139e9d65299414ac54bf81aa85dae850589b480cfe0c1722dc845295d446e2babd6ddfe64b79a8c56d771bf5345ddb1c48950f029e
   languageName: node
   linkType: hard
 
@@ -5047,7 +5047,7 @@ __metadata:
     "@fortawesome/react-fontawesome": "npm:3.0.2"
     "@types/autosize": "npm:4.0.3"
     "@types/lodash": "npm:4.17.20"
-    "@types/node": "npm:22.18.1"
+    "@types/node": "npm:22.18.6"
     "@types/react": "npm:19.1.13"
     "@types/react-csv": "npm:1.1.10"
     "@types/react-dom": "npm:19.1.9"
