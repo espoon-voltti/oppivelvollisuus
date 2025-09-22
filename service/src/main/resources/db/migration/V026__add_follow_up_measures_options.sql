@@ -11,3 +11,5 @@ CREATE TYPE follow_up_measure AS ENUM (
 
 ALTER TABLE student_cases ADD COLUMN follow_up_measures follow_up_measure[];
 
+ALTER TABLE student_cases ADD CONSTRAINT check_follow_up_measure_null_or_required
+    CHECK ( (finished_reason = 'COMPULSORY_EDUCATION_ENDED') = (follow_up_measures IS NOT NULL) );
