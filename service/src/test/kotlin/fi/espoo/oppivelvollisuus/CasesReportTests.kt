@@ -14,6 +14,7 @@ import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
 import fi.espoo.oppivelvollisuus.domain.FinishedInfo
+import fi.espoo.oppivelvollisuus.domain.FollowUpMeasure
 import fi.espoo.oppivelvollisuus.domain.Gender
 import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
 import fi.espoo.oppivelvollisuus.domain.SchoolBackground
@@ -93,7 +94,8 @@ class CasesReportTests : FullApplicationTest() {
                     schoolBackground = setOf(SchoolBackground.PERUSKOULUN_PAATTOTODISTUS),
                     caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
                     notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
-                    eventTypes = emptySet()
+                    eventTypes = emptySet(),
+                    followUpMeasures = null
                 )
             ),
             controller.getCasesReport(
@@ -140,15 +142,37 @@ class CasesReportTests : FullApplicationTest() {
                     FinishedInfo(
                         reason = CaseFinishedReason.BEGAN_STUDIES,
                         startedAtSchool = SchoolType.LUKIO,
-                        followUpMeasure = null,
+                        followUpMeasures = null
+                    )
+            )
+        )
+        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
+            assertEquals(CaseStatus.FINISHED, row.status)
+            assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
+            assertEquals(SchoolType.LUKIO, row.startedAtSchool)
+            assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
+        }
+
+
+        controller.updateStudentCaseStatus(
+            testUser,
+            studentId,
+            caseId,
+            CaseStatusInput(
+                status = CaseStatus.FINISHED,
+                finishedInfo =
+                    FinishedInfo(
+                        reason = CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
+                        startedAtSchool = null,
+                        followUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE)
                     )
             )
         )
 
         controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
-            assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
-            assertEquals(SchoolType.LUKIO, row.startedAtSchool)
+            assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
+            assertEquals(setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE), row.followUpMeasures)
             assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
         }
     }

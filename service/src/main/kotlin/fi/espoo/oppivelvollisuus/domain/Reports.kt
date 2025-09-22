@@ -29,6 +29,7 @@ data class CaseReportRow(
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
+    val followUpMeasures: Set<FollowUpMeasure>?,
     val eventTypes: Set<CaseEventType>
 )
 
@@ -46,6 +47,7 @@ fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
         s.municipality_in_finland,
         sc.status,
         sc.finished_reason,
+        sc.follow_up_measures,
         sc.started_at_school,
         sc.source,
         sc.source_valpas,

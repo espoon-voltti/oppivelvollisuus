@@ -281,21 +281,21 @@ class StudentCaseTests : FullApplicationTest() {
                 .first()
                 .id
 
-        val givenFollowUpMeasure = FollowUpMeasure.SOCIAL_SERVICES
+        val givenFollowUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE)
         controller.updateStudentCaseStatus(
             testUser,
             studentId,
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, givenFollowUpMeasure)
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, givenFollowUpMeasures)
             )
         )
 
         val updatedCase = controller.getStudent(testUser, studentId).cases.first()
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, updatedCase.finishedInfo?.reason)
-        assertEquals(givenFollowUpMeasure, updatedCase.finishedInfo?.followUpMeasure)
+        assertEquals(givenFollowUpMeasures, updatedCase.finishedInfo?.followUpMeasures)
     }
 
     @Test

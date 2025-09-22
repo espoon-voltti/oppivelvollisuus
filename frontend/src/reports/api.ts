@@ -18,6 +18,7 @@ import { CaseEventType } from '../students/cases/events/enums'
 import {
   CaseFinishedReason,
   CaseStatus,
+  FollowUpMeasure,
   SchoolType
 } from '../students/cases/status/enums'
 import { Gender } from '../students/enums'
@@ -44,6 +45,7 @@ export interface CasesReportRow {
   caseBackgroundReasons: CaseBackgroundReason[]
   notInSchoolReason: NotInSchoolReason | null
   eventTypes: CaseEventType[]
+  followUpMeasures: FollowUpMeasure[] | null
 }
 
 export const apiGetCasesReport = async (

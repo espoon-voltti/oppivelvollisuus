@@ -39,6 +39,7 @@ import {
 import {
   caseFinishedReasonNames,
   caseStatusNames,
+  followUpMeasureNames,
   schoolTypeNames
 } from '../students/cases/status/enums'
 import { genderNames } from '../students/enums'
@@ -134,6 +135,11 @@ export const ReportsPage = React.memo(function ReportsPage() {
               startedAtSchool: r.startedAtSchool
                 ? schoolTypeNames[r.startedAtSchool]
                 : '',
+              followUpMeasures: r.followUpMeasures
+                ? r.followUpMeasures
+                    .map((m) => m && followUpMeasureNames[m])
+                    .join(', ')
+                : '',
               source: caseSourceNames[r.source],
               sourceDetails: r.sourceValpas
                 ? valpasNotifierNames[r.sourceValpas]
@@ -182,6 +188,7 @@ export const ReportsPage = React.memo(function ReportsPage() {
               { key: 'status', label: 'Ohjauksen tila' },
               { key: 'finishedReason', label: 'Ohjauksen päättymisen syy' },
               { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' },
+              { key: 'followUpMeasures', label: 'Jatkotoimenpiteet' },
               { key: 'source', label: 'Lähde' },
               { key: 'sourceDetails', label: 'Lähde tarkennus' },
               ...schoolBackgrounds.map((val) => ({
