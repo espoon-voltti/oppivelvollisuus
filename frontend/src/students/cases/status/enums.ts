@@ -40,6 +40,7 @@ export const caseFinishedReasonNames: Record<CaseFinishedReason, string> = {
 export const schoolTypes = [
   'PERUSOPETUKSEEN_VALMISTAVA',
   'AIKUISTEN_PERUSOPETUS',
+  'AIKUISTEN_PERUSOPETUS_SUOMEEN_MUUTTANEILLE',
   'AMMATILLINEN_PERUSTUTKINTO',
   'LUKIO',
   'AIKUISLUKIO',
@@ -56,6 +57,8 @@ export type SchoolType = (typeof schoolTypes)[number]
 export const schoolTypeNames: Record<SchoolType, string> = {
   PERUSOPETUKSEEN_VALMISTAVA: 'Perusopetukseen valmistava',
   AIKUISTEN_PERUSOPETUS: 'Aikuisten perusopetus',
+  AIKUISTEN_PERUSOPETUS_SUOMEEN_MUUTTANEILLE:
+    'Aikuisten perusopetus Suomeen muuttaneille',
   AMMATILLINEN_PERUSTUTKINTO: 'Ammatillinen perustutkinto',
   LUKIO: 'Lukio ',
   AIKUISLUKIO: 'Aikuislukio',
