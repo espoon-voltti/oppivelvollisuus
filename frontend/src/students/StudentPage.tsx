@@ -97,14 +97,13 @@ export const StudentPage = React.memo(function StudentPage() {
   const [expandedCases, setExpandedCases] = useState<string[] | undefined>(
     undefined
   )
-  useEffect(() => {
-    if (expandedCases === undefined && studentResponse) {
-      const firstUnfinished = studentResponse.cases.find(
-        (c) => c.status !== 'FINISHED'
-      )
-      setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
-    }
-  }, [studentResponse, expandedCases])
+  // Expand the first unfinished case by default
+  if (expandedCases === undefined && studentResponse) {
+    const firstUnfinished = studentResponse.cases.find(
+      (c) => c.status !== 'FINISHED'
+    )
+    setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
+  }
 
   // true = creating new, string = id of the edited case
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
