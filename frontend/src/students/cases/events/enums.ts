@@ -4,6 +4,12 @@
 
 export const caseEventTypes = [
   'NOTE',
+  'TEXT_MESSAGE',
+  'EMAIL',
+  'PHONE_CALL',
+  'INTRO_VISIT',
+  'MEETING',
+  'CANCELLED_MEETING',
   'EXPLANATION_REQUEST',
   'EDUCATION_SUSPENSION_APPLICATION_RECEIVED',
   'EDUCATION_SUSPENSION_GRANTED',
@@ -20,6 +26,12 @@ export type CaseEventType = (typeof caseEventTypes)[number]
 
 export const caseEventTypeNames: Record<CaseEventType, string> = {
   NOTE: 'Muistiinpano',
+  TEXT_MESSAGE: 'Tekstiviesti',
+  EMAIL: 'Sähköposti',
+  PHONE_CALL: 'Puhelu',
+  INTRO_VISIT: 'Tutustumiskäynti',
+  MEETING: 'Tapaaminen',
+  CANCELLED_MEETING: 'Peruutettu tapaaminen',
   EXPLANATION_REQUEST: 'Selvityspyyntö',
   EDUCATION_SUSPENSION_APPLICATION_RECEIVED:
     'Keskeytyshakemus saapunut asuinkuntaan',
