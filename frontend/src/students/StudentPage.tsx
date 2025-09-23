@@ -94,16 +94,17 @@ export const StudentPage = React.memo(function StudentPage() {
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
-  const [expandedCase, setExpandedCase] = useState<string | null | undefined>(
+  const [expandedCases, setExpandedCases] = useState<string[] | undefined>(
     undefined
   )
   useEffect(() => {
-    if (expandedCase === undefined && studentResponse) {
-      setExpandedCase(
-        studentResponse.cases.find((c) => c.status !== 'FINISHED')?.id ?? null
+    if (expandedCases === undefined && studentResponse) {
+      const firstUnfinished = studentResponse.cases.find(
+        (c) => c.status !== 'FINISHED'
       )
+      setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
     }
-  }, [studentResponse, expandedCase])
+  }, [studentResponse, expandedCases])
 
   // true = creating new, string = id of the edited case
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
@@ -184,7 +185,7 @@ export const StudentPage = React.memo(function StudentPage() {
 
       <VerticalGap $size="m" />
 
-      {studentResponse && employees && (
+      {studentResponse && employees && expandedCases !== undefined && (
         <>
           <SectionContainer>
             <CollapsableRow
@@ -260,7 +261,7 @@ export const StudentPage = React.memo(function StudentPage() {
                   disabled={editingSomething || activeCaseExists}
                   onClick={() => {
                     setEditingCase(true)
-                    setExpandedCase(null)
+                    setExpandedCases([])
                   }}
                 />
               )}
@@ -310,8 +311,14 @@ export const StudentPage = React.memo(function StudentPage() {
               studentId={studentResponse.student.id}
               cases={activeCase ? [activeCase] : []}
               employees={employees}
-              expandedCase={expandedCase ?? null}
-              setExpandedCase={setExpandedCase}
+              expandedCases={expandedCases}
+              toggleExpandedCase={(caseId) =>
+                setExpandedCases(
+                  expandedCases.includes(caseId)
+                    ? expandedCases.filter((id) => id !== caseId)
+                    : [...expandedCases, caseId]
+                )
+              }
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -333,8 +340,14 @@ export const StudentPage = React.memo(function StudentPage() {
               studentId={studentResponse.student.id}
               cases={finishedCases}
               employees={employees}
-              expandedCase={expandedCase ?? null}
-              setExpandedCase={setExpandedCase}
+              expandedCases={expandedCases}
+              toggleExpandedCase={(caseId) =>
+                setExpandedCases(
+                  expandedCases.includes(caseId)
+                    ? expandedCases.filter((id) => id !== caseId)
+                    : [...expandedCases, caseId]
+                )
+              }
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -358,8 +371,8 @@ const CasesList = React.memo(function CasesList({
   studentId,
   cases,
   employees,
-  expandedCase,
-  setExpandedCase,
+  expandedCases,
+  toggleExpandedCase,
   editingCase,
   setEditingCase,
   editingCaseStatus,
@@ -375,8 +388,8 @@ const CasesList = React.memo(function CasesList({
   studentId: string
   cases: StudentCase[]
   employees: EmployeeUser[]
-  expandedCase: string | null
-  setExpandedCase: (id: string | null) => void
+  expandedCases: string[]
+  toggleExpandedCase: (id: string) => void
   editingCase: boolean | string
   setEditingCase: (editing: boolean | string) => void
   editingCaseStatus: string | null
@@ -405,18 +418,18 @@ const CasesList = React.memo(function CasesList({
               !!editingCaseEvent
             }
             onClick={() => {
+              // Should not close a case that is being edited
               if (
-                editingCase !== false ||
-                editingCaseStatus !== null ||
-                !!editingCaseEvent
+                editingCase === studentCase.id ||
+                editingCaseStatus === studentCase.id ||
+                (!!editingCaseEvent &&
+                  studentCase.events.some(
+                    (event) => event.id === editingCaseEvent
+                  ))
               )
                 return
 
-              if (expandedCase === studentCase.id) {
-                setExpandedCase(null)
-              } else {
-                setExpandedCase(studentCase.id)
-              }
+              toggleExpandedCase(studentCase.id)
             }}
           >
             <H3>Ilmoitus {formatDate(studentCase.openedAt)}</H3>
@@ -427,13 +440,15 @@ const CasesList = React.memo(function CasesList({
               </FlexRowWithGaps>
               <FontAwesomeIcon
                 icon={
-                  expandedCase === studentCase.id ? faChevronUp : faChevronDown
+                  expandedCases.includes(studentCase.id)
+                    ? faChevronUp
+                    : faChevronDown
                 }
                 className="collapse-icon"
               />
             </FlexRowWithGaps>
           </AccordionRow>
-          {expandedCase === studentCase.id && (
+          {expandedCases.includes(studentCase.id) && (
             <FlexColWithGaps $gapSize="XL">
               <FlexColWithGaps>
                 {editingCase !== studentCase.id && (
