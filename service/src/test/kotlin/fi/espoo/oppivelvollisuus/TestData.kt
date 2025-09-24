@@ -27,7 +27,8 @@ val minimalStudentTestInput =
         address = "",
         municipalityInFinland = true,
         guardianInfo = "",
-        supportContactsInfo = ""
+        supportContactsInfo = "",
+        partnerOrganisations = emptySet()
     )
 val minimalStudentCaseTestInput =
     StudentCaseInput(

@@ -24,6 +24,14 @@ enum class Gender {
     OTHER
 }
 
+enum class PartnerOrganisation {
+    LASTENSUOJELU,
+    TERVEYDENHUOLTO,
+    MIELENTERVEYSPALVELUT,
+    TUKIHENKILO,
+    TYOPAJATOIMINTA
+}
+
 data class StudentInput(
     val valpasLink: String,
     val ssn: String,
@@ -37,7 +45,8 @@ data class StudentInput(
     val address: String,
     val municipalityInFinland: Boolean,
     val guardianInfo: String,
-    val supportContactsInfo: String
+    val supportContactsInfo: String,
+    val partnerOrganisations: Set<PartnerOrganisation> = emptySet()
 )
 
 fun Handle.insertStudent(
@@ -46,8 +55,8 @@ fun Handle.insertStudent(
 ): UUID =
     createUpdate(
         """
-INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info) 
-VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo)
+INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations) 
+VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo, :partnerOrganisations::partner_organisation[])
 RETURNING id
 """
     ).bindKotlin(data)
@@ -167,13 +176,14 @@ data class Student(
     val address: String,
     val municipalityInFinland: Boolean,
     val guardianInfo: String,
-    val supportContactsInfo: String
+    val supportContactsInfo: String,
+    val partnerOrganisations: Set<PartnerOrganisation> = emptySet()
 )
 
 fun Handle.getStudent(id: UUID) =
     createQuery(
 """
-SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info
+SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
 FROM students
 WHERE id = :id
 """
@@ -206,7 +216,8 @@ SET
     address = :address,
     municipality_in_finland = :municipalityInFinland, 
     guardian_info = :guardianInfo,
-    support_contacts_info = :supportContactsInfo
+    support_contacts_info = :supportContactsInfo,
+    partner_organisations = :partnerOrganisations::partner_organisation[]
 WHERE id = :id
 """
     ).bind("id", id)

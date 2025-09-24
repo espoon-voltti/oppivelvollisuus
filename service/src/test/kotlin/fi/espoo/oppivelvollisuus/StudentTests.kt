@@ -17,6 +17,7 @@ import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.DuplicateStudentCheckInput
 import fi.espoo.oppivelvollisuus.domain.Gender
 import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
+import fi.espoo.oppivelvollisuus.domain.PartnerOrganisation
 import fi.espoo.oppivelvollisuus.domain.SchoolBackground
 import fi.espoo.oppivelvollisuus.domain.Student
 import fi.espoo.oppivelvollisuus.domain.StudentCase
@@ -77,7 +78,8 @@ class StudentTests : FullApplicationTest() {
                                 address = "Katu 1",
                                 municipalityInFinland = false,
                                 guardianInfo = "Huoltaja",
-                                supportContactsInfo = "Joku muu"
+                                supportContactsInfo = "Joku muu",
+                                partnerOrganisations = setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO)
                             ),
                         studentCase =
                             StudentCaseInput(
@@ -164,7 +166,8 @@ class StudentTests : FullApplicationTest() {
                 address = "Katu 1",
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
-                supportContactsInfo = "Joku muu"
+                supportContactsInfo = "Joku muu",
+                partnerOrganisations = setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO)
             ),
             studentResponse.student
         )
@@ -311,7 +314,8 @@ class StudentTests : FullApplicationTest() {
                 address = "Katu 1",
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
-                supportContactsInfo = "Opo"
+                supportContactsInfo = "Opo",
+                partnerOrganisations = setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
             )
         )
 
@@ -331,7 +335,8 @@ class StudentTests : FullApplicationTest() {
                 address = "Katu 1",
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
-                supportContactsInfo = "Opo"
+                supportContactsInfo = "Opo",
+                setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
             ),
             studentResponse.student
         )

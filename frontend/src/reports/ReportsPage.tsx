@@ -28,6 +28,7 @@ import {
   caseSourceNames,
   notInSchoolReasonNames,
   otherNotifierNames,
+  partnerOrganisationNames,
   schoolBackgroundNames,
   schoolBackgrounds,
   valpasNotifierNames
@@ -146,6 +147,11 @@ export const ReportsPage = React.memo(function ReportsPage() {
                 : r.sourceOther
                   ? otherNotifierNames[r.sourceOther]
                   : '',
+              partnerOrganisations: r.partnerOrganisations
+                ? r.partnerOrganisations
+                    .map((po) => partnerOrganisationNames[po])
+                    .join(', ')
+                : '',
               ...schoolBackgrounds.reduce(
                 (acc, val) => ({
                   ...acc,
@@ -185,6 +191,10 @@ export const ReportsPage = React.memo(function ReportsPage() {
               { key: 'gender', label: 'Sukupuoli' },
               { key: 'language', label: 'Äidinkieli' },
               { key: 'municipalityInFinland', label: 'Kotikunta Suomessa' },
+              {
+                key: 'partnerOrganisations',
+                label: 'Yhteistyötahot'
+              },
               { key: 'status', label: 'Ohjauksen tila' },
               { key: 'finishedReason', label: 'Ohjauksen päättymisen syy' },
               { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' },

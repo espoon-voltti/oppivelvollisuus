@@ -11,6 +11,7 @@ import {
   CaseSource,
   NotInSchoolReason,
   OtherNotifier,
+  PartnerOrganisation,
   SchoolBackground,
   ValpasNotifier
 } from '../students/cases/enums'
@@ -44,6 +45,7 @@ export interface CasesReportRow {
   schoolBackground: SchoolBackground[]
   caseBackgroundReasons: CaseBackgroundReason[]
   notInSchoolReason: NotInSchoolReason | null
+  partnerOrganisations: PartnerOrganisation[]
   eventTypes: CaseEventType[]
   followUpMeasures: FollowUpMeasure[] | null
 }

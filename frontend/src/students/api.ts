@@ -9,7 +9,7 @@ import { EmployeeBasics } from '../employees/api'
 import { JsonOf } from '../shared/api-utils'
 
 import { StudentCase, StudentCaseInput } from './cases/api'
-import { CaseSource } from './cases/enums'
+import { CaseSource, PartnerOrganisation } from './cases/enums'
 import { CaseEventType } from './cases/events/enums'
 import { CaseStatus } from './cases/status/enums'
 import { Gender } from './enums'
@@ -132,6 +132,7 @@ export interface StudentInput {
   municipalityInFinland: boolean
   guardianInfo: string
   supportContactsInfo: string
+  partnerOrganisations: PartnerOrganisation[]
 }
 
 export interface StudentAndCaseInput {
