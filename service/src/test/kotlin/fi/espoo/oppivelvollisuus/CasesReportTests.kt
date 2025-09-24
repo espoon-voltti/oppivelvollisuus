@@ -95,7 +95,8 @@ class CasesReportTests : FullApplicationTest() {
                     caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
                     notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
                     eventTypes = emptySet(),
-                    followUpMeasures = null
+                    followUpMeasures = null,
+                    partnerOrganisations = emptySet()
                 )
             ),
             controller.getCasesReport(
