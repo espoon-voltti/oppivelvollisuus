@@ -5,7 +5,12 @@
 import { apiClient } from '../../../api-client'
 import { JsonOf } from '../../../shared/api-utils'
 
-import { CaseFinishedReason, CaseStatus, SchoolType } from './enums'
+import {
+  CaseFinishedReason,
+  CaseStatus,
+  FollowUpMeasure,
+  SchoolType
+} from './enums'
 
 export const apiPutStudentCaseStatus = (
   studentId: string,
@@ -28,10 +33,20 @@ export type CaseStatusInput =
 
 export type FinishedInfo =
   | {
-      reason: Exclude<CaseFinishedReason, 'BEGAN_STUDIES'>
+      reason: Exclude<
+        CaseFinishedReason,
+        'BEGAN_STUDIES' | 'COMPULSORY_EDUCATION_ENDED'
+      >
       startedAtSchool: null
+      followUpMeasures: null
     }
   | {
       reason: 'BEGAN_STUDIES'
       startedAtSchool: SchoolType
+      followUpMeasures: null
+    }
+  | {
+      reason: 'COMPULSORY_EDUCATION_ENDED'
+      startedAtSchool: null
+      followUpMeasures: FollowUpMeasure[]
     }
