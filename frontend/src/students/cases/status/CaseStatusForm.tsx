@@ -3,8 +3,8 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 import React, { useEffect, useMemo, useState } from 'react'
-
 import { Checkbox } from 'shared/form/Checkbox'
+
 import { Select } from '../../../shared/form/Select'
 import {
   FlexColWithGaps,

@@ -153,7 +153,6 @@ class CasesReportTests : FullApplicationTest() {
             assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
         }
 
-
         controller.updateStudentCaseStatus(
             testUser,
             studentId,
