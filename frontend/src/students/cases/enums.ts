@@ -122,6 +122,7 @@ export const caseBackgroundReasonValues = [
   'MUUTTO_PAIKKAKUNNALLE',
   'MUUTTO_ULKOMAILLE',
   'MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA',
+  'JAANYT_ILMAN_OPISKELUPAIKKAA',
   'MUU_SYY'
 ]
 
@@ -138,6 +139,8 @@ export const caseBackgroundReasonNames: Record<CaseBackgroundReason, string> = {
   MUUTTO_ULKOMAILLE: 'Muutto ulkomaille',
   MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA:
     'Maahan muuttanut nuori ilman opiskelupaikkaa',
+  JAANYT_ILMAN_OPISKELUPAIKKAA:
+    'Peruskoulun päättänyt jäänyt ilman opiskelupaikkaa',
   MUU_SYY: 'Muu syy'
 }
 
