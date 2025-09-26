@@ -32,7 +32,6 @@ export function createRouter(
   router.use(sessions.middleware)
   router.use(passport.session())
   router.use(cookieParser(config.session.cookieSecret))
-  router.use(csrf)
 
   router.use(cacheControl(() => 'forbid-cache'))
   router.all('/system/*splat', (_, res) => {
@@ -58,14 +57,14 @@ export function createRouter(
       })
     )
   }
+  router.use(csrf)
 
   router.get('/auth/status', csrf, csrfCookie(), authStatus(sessions))
-
   router.get('/version', (_, res) => {
     res.send({ commitId: appCommit })
   })
-  router.use(requireAuthentication)
 
+  router.use(requireAuthentication)
 
   router.use(
     expressHttpProxy(serviceUrl, {
