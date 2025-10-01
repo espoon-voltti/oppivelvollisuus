@@ -180,7 +180,8 @@ export const partnerOrganisationValues = [
   'TERVEYDENHUOLTO',
   'MIELENTERVEYSPALVELUT',
   'TUKIHENKILO',
-  'TYOPAJATOIMINTA'
+  'TYOPAJATOIMINTA',
+  'KOLMAS_SEKTORI'
 ]
 
 export type PartnerOrganisation = (typeof partnerOrganisationValues)[number]
@@ -190,5 +191,6 @@ export const partnerOrganisationNames: Record<PartnerOrganisation, string> = {
   TERVEYDENHUOLTO: 'Terveydenhuolto',
   MIELENTERVEYSPALVELUT: 'Mielenterveys- ja päihdepalvelut',
   TUKIHENKILO: 'Tukihenkilö',
-  TYOPAJATOIMINTA: 'Työpajatoiminta'
+  TYOPAJATOIMINTA: 'Työpajatoiminta',
+  KOLMAS_SEKTORI: '3. sektori'
 }
