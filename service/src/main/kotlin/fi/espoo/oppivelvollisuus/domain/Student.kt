@@ -29,7 +29,8 @@ enum class PartnerOrganisation {
     TERVEYDENHUOLTO,
     MIELENTERVEYSPALVELUT,
     TUKIHENKILO,
-    TYOPAJATOIMINTA
+    TYOPAJATOIMINTA,
+    KOLMAS_SEKTORI
 }
 
 data class StudentInput(
