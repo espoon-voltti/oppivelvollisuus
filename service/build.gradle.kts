@@ -11,7 +11,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.2.20"
     kotlin("plugin.spring") version "2.2.20"
-    id("org.flywaydb.flyway") version "11.13.0"
+    id("org.flywaydb.flyway") version "11.13.2"
     id("org.jlleitschuh.gradle.ktlint") version "13.1.0"
     id("org.owasp.dependencycheck") version "12.1.6"
 
@@ -56,6 +56,10 @@ dependencies {
     // cve fixes
     api("org.yaml:snakeyaml:2.5")
 
+    // CVE-2025-11226
+    api("ch.qos.logback:logback-classic:1.5.19")
+    api("ch.qos.logback:logback-core:1.5.19")
+
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -69,7 +73,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql:42.7.8")
-    api(platform("org.jdbi:jdbi3-bom:3.49.5"))
+    api(platform("org.jdbi:jdbi3-bom:3.49.6"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
     implementation("org.jdbi:jdbi3-kotlin")
@@ -81,7 +85,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.5.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
-    implementation("ch.qos.logback:logback-access:1.5.18")
+    implementation("ch.qos.logback:logback-access:1.5.19")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
     testImplementation(kotlin("test"))
