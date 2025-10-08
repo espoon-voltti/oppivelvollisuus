@@ -56,6 +56,10 @@ dependencies {
     // cve fixes
     api("org.yaml:snakeyaml:2.5")
 
+    // CVE-2025-11226
+    api("ch.qos.logback:logback-classic:1.5.19")
+    api("ch.qos.logback:logback-core:1.5.19")
+
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -69,7 +73,7 @@ dependencies {
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql:42.7.8")
-    api(platform("org.jdbi:jdbi3-bom:3.49.5"))
+    api(platform("org.jdbi:jdbi3-bom:3.49.6"))
     implementation("org.jdbi:jdbi3-core")
     implementation("org.jdbi:jdbi3-jackson2")
     implementation("org.jdbi:jdbi3-kotlin")
