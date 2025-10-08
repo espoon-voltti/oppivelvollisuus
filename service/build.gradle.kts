@@ -56,6 +56,10 @@ dependencies {
     // cve fixes
     api("org.yaml:snakeyaml:2.5")
 
+    // CVE-2025-11226
+    api("ch.qos.logback:logback-classic:1.5.19")
+    api("ch.qos.logback:logback-core:1.5.19")
+
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
