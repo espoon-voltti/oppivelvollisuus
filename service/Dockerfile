@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM eclipse-temurin:21-jammy AS base
+FROM eclipse-temurin:25-jammy AS base
 
 ARG CACHE_BUST=2025-W07
 
