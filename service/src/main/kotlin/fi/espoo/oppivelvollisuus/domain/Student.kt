@@ -129,7 +129,13 @@ ${if (params.assignee == null) {
         }}
 ${if (params.query != null) {
             """
-    AND (lower(s.first_name) LIKE :query || '%' OR 
+    AND (EXISTS (
+        SELECT 1
+        FROM unnest(regexp_split_to_array(lower(s.first_name), '\s+')) AS t(name)
+        WHERE name LIKE :query || '%'
+            OR lower(name || ' ' || s.last_name) LIKE :query || '%'
+            OR lower(s.last_name || ' ' || name) LIKE :query || '%'
+      ) OR
         lower(s.last_name) LIKE :query || '%' OR 
         lower(s.first_name || ' ' || s.last_name) LIKE :query || '%' OR
         lower(s.last_name || ' ' || s.first_name) LIKE :query || '%' OR
