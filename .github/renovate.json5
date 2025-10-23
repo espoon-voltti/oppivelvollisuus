@@ -49,7 +49,7 @@
     },
     {
       // Automerge patch versions of all dependencies
-      matchUpdateTypes: ['patch'],
+      matchUpdateTypes: ['minor', 'patch'],
       automerge: true,
     },
     {
