@@ -50,7 +50,7 @@ fun Handle.getAppUsers(): List<AppUser> =
         """
     SELECT id, external_id, first_name, last_name, email
     FROM users
-    WHERE NOT system_user
+    WHERE NOT is_system_user
 """
     ).mapTo<AppUser>().list()
 
@@ -60,7 +60,7 @@ fun Handle.getAppUser(id: UUID) =
         """
 SELECT id, external_id, first_name, last_name, email
 FROM users 
-WHERE id = :id AND NOT system_user
+WHERE id = :id AND NOT is_system_user
         """.trimIndent()
     ).bind("id", id)
         .mapTo<AppUser>()
