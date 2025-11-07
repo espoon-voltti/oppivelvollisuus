@@ -11,6 +11,7 @@ import fi.espoo.oppivelvollisuus.pages.CreateStudentPage
 import fi.espoo.oppivelvollisuus.pages.LoginPage
 import fi.espoo.oppivelvollisuus.pages.StudentPage
 import fi.espoo.oppivelvollisuus.pages.StudentsSearchPage
+import org.jdbi.v3.core.kotlin.withHandleUnchecked
 import org.junit.jupiter.api.Test
 
 class E2ETests : PlaywrightTest() {
@@ -36,6 +37,35 @@ class E2ETests : PlaywrightTest() {
         val studentPage = StudentPage(page)
         studentPage.assertUrl()
         assertThat(studentPage.studentName).containsText("Ankka Tupu")
+    }
+
+    @Test
+    fun `deactivated employee is not selectable`() {
+        val page = getPageWithDefaultOptions()
+        doLogin(page)
+
+        val studentsSearchPage = StudentsSearchPage(page)
+        studentsSearchPage.assertUrl()
+        studentsSearchPage.assertEmployeeSelectOptions(listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija"))
+
+        jdbi.withHandleUnchecked { tx ->
+            tx.execute(
+                """
+                UPDATE users SET is_active = false WHERE last_name = 'Suunnittelija'
+                """.trimIndent()
+            )
+        }
+
+        page.reload()
+        studentsSearchPage.employeeSelect.click()
+        studentsSearchPage.assertEmployeeSelectOptions(listOf("Näytä kaikki", "Ei ohjaajaa"))
+
+        studentsSearchPage.createStudentButton.click()
+
+        val createStudentPage = CreateStudentPage(page)
+        createStudentPage.assertUrl()
+        createStudentPage.employeeSelect.click()
+        createStudentPage.assertEmployeeSelectOptions(listOf("Ei ohjaajaa"))
     }
 
     private fun doLogin(page: Page) {

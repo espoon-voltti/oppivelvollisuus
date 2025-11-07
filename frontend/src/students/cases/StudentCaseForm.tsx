@@ -177,6 +177,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
               getItemLabel={(e) => `${e.firstName} ${e.lastName}`}
               placeholder="Ei ohjaajaa"
               onChange={setAssignedTo}
+              data-qa="employee-select"
             />
           )}
         </LabeledInput>

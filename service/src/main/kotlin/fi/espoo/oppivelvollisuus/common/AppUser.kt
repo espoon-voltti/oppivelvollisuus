@@ -46,12 +46,12 @@ RETURNING id, external_id, first_name, last_name, email, is_active
         .mapTo<AppUser>()
         .one()
 
-fun Handle.getAppUsers(): List<AppUser> =
+fun Handle.getActiveAppUsers(): List<AppUser> =
     createQuery(
         """
     SELECT id, external_id, first_name, last_name, email, is_active
     FROM users
-    WHERE NOT is_system_user
+    WHERE NOT is_system_user AND is_active
 """
     ).mapTo<AppUser>().list()
 
