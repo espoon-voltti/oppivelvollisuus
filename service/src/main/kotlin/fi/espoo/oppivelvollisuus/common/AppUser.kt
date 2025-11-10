@@ -23,7 +23,8 @@ data class AppUser(
     val externalId: String,
     val firstName: String,
     val lastName: String,
-    val email: String?
+    val email: String?,
+    val isActive: Boolean
 )
 
 data class UserBasics(
@@ -35,22 +36,22 @@ fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
     createQuery(
         // language=SQL
         """
-INSERT INTO users (external_id, first_names, last_name, email)
-VALUES (:externalId, :firstName, :lastName, :email)
+INSERT INTO users (external_id, first_names, last_name, email, is_active)
+VALUES (:externalId, :firstName, :lastName, :email, true)
 ON CONFLICT (external_id) DO UPDATE
 SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
-RETURNING id, external_id, first_name, last_name, email
+RETURNING id, external_id, first_name, last_name, email, is_active
         """.trimIndent()
     ).bindKotlin(adUser)
         .mapTo<AppUser>()
         .one()
 
-fun Handle.getAppUsers(): List<AppUser> =
+fun Handle.getActiveAppUsers(): List<AppUser> =
     createQuery(
         """
-    SELECT id, external_id, first_name, last_name, email
+    SELECT id, external_id, first_name, last_name, email, is_active
     FROM users
-    WHERE NOT is_system_user
+    WHERE NOT is_system_user AND is_active
 """
     ).mapTo<AppUser>().list()
 
@@ -58,7 +59,7 @@ fun Handle.getAppUser(id: UUID) =
     createQuery(
         // language=SQL
         """
-SELECT id, external_id, first_name, last_name, email
+SELECT id, external_id, first_name, last_name, email, is_active
 FROM users 
 WHERE id = :id AND NOT is_system_user
         """.trimIndent()

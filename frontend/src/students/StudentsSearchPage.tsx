@@ -174,6 +174,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                   }
                   placeholder="Näytä kaikki"
                   onChange={setAssignedTo}
+                  data-qa="employee-select"
                 />
               ) : (
                 <span>...</span>
