@@ -143,7 +143,8 @@ class CasesReportTests : FullApplicationTest() {
                     FinishedInfo(
                         reason = CaseFinishedReason.BEGAN_STUDIES,
                         startedAtSchool = SchoolType.LUKIO,
-                        followUpMeasures = null
+                        followUpMeasures = null,
+                        otherReason = null
                     )
             )
         )
@@ -164,7 +165,8 @@ class CasesReportTests : FullApplicationTest() {
                     FinishedInfo(
                         reason = CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
                         startedAtSchool = null,
-                        followUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE)
+                        followUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
+                        otherReason = null
                     )
             )
         )

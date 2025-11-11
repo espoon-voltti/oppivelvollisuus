@@ -51,7 +51,7 @@ class StudentCaseTests : FullApplicationTest() {
                 testUser,
                 studentId,
                 firstCaseId,
-                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
+                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"))
             )
         }
 
@@ -105,7 +105,7 @@ class StudentCaseTests : FullApplicationTest() {
                 testUser,
                 studentId,
                 firstCaseId,
-                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
+                CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null, ""))
             )
         }
 
@@ -236,12 +236,13 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"))
         )
 
         val updatedCase = controller.getStudent(testUser, studentId).cases.first()
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(CaseFinishedReason.OTHER, updatedCase.finishedInfo?.reason)
+        assertEquals("other reason", updatedCase.finishedInfo?.otherReason)
         assertNull(updatedCase.finishedInfo?.startedAtSchool)
     }
 
@@ -261,7 +262,7 @@ class StudentCaseTests : FullApplicationTest() {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null)
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null)
             )
         )
 
@@ -288,7 +289,7 @@ class StudentCaseTests : FullApplicationTest() {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, givenFollowUpMeasures)
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, givenFollowUpMeasures, null)
             )
         )
 
@@ -317,6 +318,7 @@ class StudentCaseTests : FullApplicationTest() {
                     CaseStatus.FINISHED,
                     FinishedInfo(
                         CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
+                        null,
                         null,
                         null
                     )
@@ -368,6 +370,7 @@ class StudentCaseTests : FullApplicationTest() {
                     FinishedInfo(
                         CaseFinishedReason.BEGAN_STUDIES,
                         null,
+                        null,
                         null
                     )
                 )
@@ -395,6 +398,7 @@ class StudentCaseTests : FullApplicationTest() {
                     FinishedInfo(
                         CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED,
                         SchoolType.LUKIO,
+                        null,
                         null
                     )
                 )
@@ -415,7 +419,7 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null))
         )
 
         controller.updateStudentCaseStatus(
@@ -443,7 +447,7 @@ class StudentCaseTests : FullApplicationTest() {
             testUser,
             studentId,
             caseId,
-            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null))
+            CaseStatusInput(CaseStatus.FINISHED, FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null))
         )
         controller.createStudentCase(testUser, studentId, minimalStudentCaseTestInput)
 
