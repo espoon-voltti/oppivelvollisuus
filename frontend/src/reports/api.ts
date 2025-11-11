@@ -48,6 +48,7 @@ export interface CasesReportRow {
   partnerOrganisations: PartnerOrganisation[]
   eventTypes: CaseEventType[]
   followUpMeasures: FollowUpMeasure[] | null
+  otherReason: string | null
 }
 
 export const apiGetCasesReport = async (

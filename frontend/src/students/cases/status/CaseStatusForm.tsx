@@ -4,6 +4,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 import { Checkbox } from 'shared/form/Checkbox'
+import { InputField } from 'shared/form/InputField'
 
 import { Select } from '../../../shared/form/Select'
 import {
@@ -52,9 +53,11 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
   const [startedAtSchool, setStartedAtSchool] = useState<SchoolType | null>(
     props.studentCase.finishedInfo?.startedAtSchool ?? null
   )
-
   const [followUpMeasures, setFollowUpMeasures] = useState<FollowUpMeasure[]>(
     props.studentCase.finishedInfo?.followUpMeasures ?? []
+  )
+  const [otherReason, setOtherReason] = useState<string>(
+    props.studentCase.finishedInfo?.otherReason ?? ''
   )
 
   const validInput: CaseStatusInput | null = useMemo(() => {
@@ -68,7 +71,8 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           finishedInfo: {
             reason: finishedReason,
             startedAtSchool,
-            followUpMeasures: null
+            followUpMeasures: null,
+            otherReason: null
           }
         }
       }
@@ -79,7 +83,20 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           finishedInfo: {
             reason: finishedReason,
             followUpMeasures: followUpMeasures,
-            startedAtSchool: null
+            startedAtSchool: null,
+            otherReason: null
+          }
+        }
+      }
+      if (finishedReason === 'OTHER') {
+        if (otherReason.trim() === '') return null
+        return {
+          status,
+          finishedInfo: {
+            reason: finishedReason,
+            followUpMeasures: null,
+            startedAtSchool: null,
+            otherReason: otherReason.trim()
           }
         }
       }
@@ -88,14 +105,15 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         status,
         finishedInfo: {
           reason: finishedReason,
+          followUpMeasures: null,
           startedAtSchool: null,
-          followUpMeasures: null
+          otherReason: null
         }
       }
     }
 
     return { status, finishedInfo: null }
-  }, [status, finishedReason, startedAtSchool, followUpMeasures])
+  }, [status, finishedReason, startedAtSchool, followUpMeasures, otherReason])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -149,6 +167,14 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
                   )}
                 </span>
               </span>
+            </LabeledInput>
+          )}
+
+        {props.studentCase.status === 'FINISHED' &&
+          props.studentCase.finishedInfo.reason === 'OTHER' && (
+            <LabeledInput $cols={4}>
+              <Label>Selite</Label>
+              <span>{props.studentCase.finishedInfo.otherReason || '-'}</span>
             </LabeledInput>
           )}
       </RowOfInputs>
@@ -216,6 +242,13 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             </FlexColWithGaps>
           </LabeledInput>
         )}
+
+      {status === 'FINISHED' && finishedReason === 'OTHER' && (
+        <LabeledInput $cols={4}>
+          <Label>Selite</Label>
+          <InputField onChange={setOtherReason} value={otherReason} />
+        </LabeledInput>
+      )}
     </RowOfInputs>
   )
 })

@@ -49,6 +49,7 @@ fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
         s.partner_organisations,
         sc.status,
         sc.finished_reason,
+        sc.other_reason,
         sc.follow_up_measures,
         sc.started_at_school,
         sc.source,
