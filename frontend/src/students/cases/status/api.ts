@@ -35,18 +35,27 @@ export type FinishedInfo =
   | {
       reason: Exclude<
         CaseFinishedReason,
-        'BEGAN_STUDIES' | 'COMPULSORY_EDUCATION_ENDED'
+        'BEGAN_STUDIES' | 'COMPULSORY_EDUCATION_ENDED' | 'OTHER'
       >
       startedAtSchool: null
       followUpMeasures: null
+      otherReason: null
     }
   | {
       reason: 'BEGAN_STUDIES'
       startedAtSchool: SchoolType
       followUpMeasures: null
+      otherReason: null
     }
   | {
       reason: 'COMPULSORY_EDUCATION_ENDED'
       startedAtSchool: null
       followUpMeasures: FollowUpMeasure[]
+      otherReason: null
+    }
+  | {
+      reason: 'OTHER'
+      startedAtSchool: null
+      followUpMeasures: null
+      otherReason: string | null
     }

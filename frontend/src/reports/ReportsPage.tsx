@@ -141,6 +141,7 @@ export const ReportsPage = React.memo(function ReportsPage() {
                     .map((m) => m && followUpMeasureNames[m])
                     .join(', ')
                 : '',
+              otherReason: r.otherReason ? r.otherReason : '',
               source: caseSourceNames[r.source],
               sourceDetails: r.sourceValpas
                 ? valpasNotifierNames[r.sourceValpas]
@@ -197,6 +198,7 @@ export const ReportsPage = React.memo(function ReportsPage() {
               },
               { key: 'status', label: 'Ohjauksen tila' },
               { key: 'finishedReason', label: 'Ohjauksen päättymisen syy' },
+              { key: 'otherReason', label: 'Selite' },
               { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' },
               { key: 'followUpMeasures', label: 'Jatkotoimenpiteet' },
               { key: 'source', label: 'Lähde' },

@@ -172,7 +172,8 @@ enum class FollowUpMeasure {
 data class FinishedInfo(
     @param:PropagateNull val reason: CaseFinishedReason,
     val startedAtSchool: SchoolType?,
-    val followUpMeasures: Set<FollowUpMeasure>?
+    val followUpMeasures: Set<FollowUpMeasure>?,
+    val otherReason: String?
 ) {
     init {
         if ((reason == CaseFinishedReason.BEGAN_STUDIES) != (startedAtSchool != null)) {
@@ -222,6 +223,7 @@ SELECT
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
     sc.status,
     sc.finished_reason AS finished_info_reason,
+    sc.other_reason AS finished_info_other_reason,
     sc.started_at_school AS finished_info_started_at_school,
     sc.follow_up_measures AS finished_info_follow_up_measures,
     sc.source,
@@ -318,7 +320,8 @@ fun Handle.updateStudentCaseStatus(
             status = :status,
             finished_reason = :finishedReason,
             started_at_school = :startedAtSchool,
-            follow_up_measures = :followUpMeasures::follow_up_measure[]
+            follow_up_measures = :followUpMeasures::follow_up_measure[],
+            other_reason = :otherReason
         WHERE id = :id AND student_id = :studentId
 """
     ).bind("id", id)
@@ -327,6 +330,7 @@ fun Handle.updateStudentCaseStatus(
         .bind("finishedReason", data.finishedInfo?.reason)
         .bind("startedAtSchool", data.finishedInfo?.startedAtSchool)
         .bind("followUpMeasures", data.finishedInfo?.followUpMeasures?.toTypedArray())
+        .bind("otherReason", data.finishedInfo?.otherReason)
         .bind("user", user.id)
         .execute()
         .also { if (it != 1) throw NotFound() }
