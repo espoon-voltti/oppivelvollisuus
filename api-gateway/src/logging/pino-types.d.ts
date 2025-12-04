@@ -7,11 +7,10 @@ import pino from 'pino'
 import SerializedResponse = pino.SerializedResponse
 import SerializedRequest = pino.SerializedRequest
 
-export interface PinoRequest
-  extends Omit<
-    SerializedRequest,
-    'id' | 'headers' | 'method' | 'raw' | 'remoteAddress' | 'remotePort'
-  > {
+export interface PinoRequest extends Omit<
+  SerializedRequest,
+  'id' | 'headers' | 'method' | 'raw' | 'remoteAddress' | 'remotePort'
+> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   raw?: any
   // Custom enriched properties
@@ -20,8 +19,10 @@ export interface PinoRequest
   userIdHash?: string
 }
 
-export interface PinoResponse
-  extends Omit<SerializedResponse, 'raw' | 'statusCode'> {
+export interface PinoResponse extends Omit<
+  SerializedResponse,
+  'raw' | 'statusCode'
+> {
   // Custom enriched properties
   contentLength?: number
 }
