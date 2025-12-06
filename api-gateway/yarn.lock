@@ -1669,9 +1669,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express@npm:5.2.0":
-  version: 5.2.0
-  resolution: "express@npm:5.2.0"
+"express@npm:5.2.1":
+  version: 5.2.1
+  resolution: "express@npm:5.2.1"
   dependencies:
     accepts: "npm:^2.0.0"
     body-parser: "npm:^2.2.1"
@@ -1701,7 +1701,7 @@ __metadata:
     statuses: "npm:^2.0.1"
     type-is: "npm:^2.0.1"
     vary: "npm:^1.1.2"
-  checksum: 10/2a793e260fd343c67b038c85dd6b4561483cc277a2c826287ddb9e5baa23500802a0b53237e0113d503e0a181ed5f2334d93facc877d44181608280ae4eebf28
+  checksum: 10/4aa545d89702ac83f645c77abda1b57bcabe288f0b380fb5580fac4e323ea0eb533005c8e666b4e19152fb16d4abf11ba87b22aa9a10857a0485cd86b94639bd
   languageName: node
   linkType: hard
 
@@ -2876,7 +2876,7 @@ __metadata:
     eslint: "npm:9.39.1"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-prettier: "npm:5.5.4"
-    express: "npm:5.2.0"
+    express: "npm:5.2.1"
     express-http-proxy: "npm:2.1.2"
     express-session: "npm:1.18.2"
     fast-xml-parser: "npm:5.3.2"
