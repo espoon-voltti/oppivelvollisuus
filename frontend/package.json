@@ -35,7 +35,7 @@
     "@eslint/compat": "2.0.0",
     "@types/autosize": "4.0.3",
     "@types/lodash": "4.17.21",
-    "@types/node": "24.10.2",
+    "@types/node": "24.10.3",
     "@types/react": "19.2.7",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
