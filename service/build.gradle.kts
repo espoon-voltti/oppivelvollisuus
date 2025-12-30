@@ -19,7 +19,7 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_25
 }
 
 repositories {
@@ -98,7 +98,7 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        jvmTarget = JvmTarget.fromTarget("21")
+        jvmTarget = JvmTarget.fromTarget("25")
         allWarningsAsErrors = true
     }
 }

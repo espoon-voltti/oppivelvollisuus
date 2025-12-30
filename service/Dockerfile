@@ -4,7 +4,7 @@
 
 FROM eclipse-temurin:25-jammy AS base
 
-ARG CACHE_BUST=2025-W44
+ARG CACHE_BUST=2025-W52
 
 LABEL maintainer="https://github.com/espoon-voltti/oppivelvollisuus"
 
