@@ -24,9 +24,9 @@
     "date-fns": "4.1.0",
     "lodash": "4.17.21",
     "polished": "4.3.1",
-    "react": "19.2.1",
+    "react": "19.2.3",
     "react-csv": "2.2.2",
-    "react-dom": "19.2.1",
+    "react-dom": "19.2.3",
     "styled-components": "6.1.19"
   },
   "devDependencies": {
@@ -36,7 +36,7 @@
     "@types/autosize": "4.0.3",
     "@types/lodash": "4.17.21",
     "@types/node": "24.10.4",
-    "@types/react": "19.2.7",
+    "@types/react": "19.2.8",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/styled-components": "5.1.36",
