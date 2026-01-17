@@ -5193,7 +5193,7 @@ __metadata:
     react-csv: "npm:2.2.2"
     react-dom: "npm:19.2.3"
     react-router: "npm:7.12.0"
-    styled-components: "npm:6.3.5"
+    styled-components: "npm:6.3.6"
     ts-node: "npm:10.9.2"
     typescript: "npm:5.9.3"
     typescript-eslint: "npm:8.53.0"
@@ -6480,9 +6480,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styled-components@npm:6.3.5":
-  version: 6.3.5
-  resolution: "styled-components@npm:6.3.5"
+"styled-components@npm:6.3.6":
+  version: 6.3.6
+  resolution: "styled-components@npm:6.3.6"
   dependencies:
     "@emotion/is-prop-valid": "npm:1.4.0"
     "@emotion/unitless": "npm:0.10.0"
@@ -6496,7 +6496,7 @@ __metadata:
   peerDependencies:
     react: ">= 16.8.0"
     react-dom: ">= 16.8.0"
-  checksum: 10/08685b5c6dbfa82f6c1640f0dc0ed4ab8bd7330ab4dc79777325b1031d307a65db74910fd23d01035118a10208b0a95a57ac88acd9d03105f7de5779522d7e65
+  checksum: 10/b3861753a5ceac704610645e5289fa4716a6c6703218f35786ca4824ee6d41098aafc26eb644734aae9a607ca2163ddfe919e65ad6183575b9375ee885a5e80e
   languageName: node
   linkType: hard
 
