@@ -10,7 +10,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
     <suppress>
         <notes><![CDATA[
         CVE-2025-41248: spring security is not used
+        VE-2025-68161 waiting for a fix
        ]]></notes>
         <cve>CVE-2025-11226</cve>
+        <cve>CVE-2025-68161</cve>
     </suppress>
 </suppressions>
