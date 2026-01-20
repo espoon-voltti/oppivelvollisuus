@@ -34,7 +34,7 @@
     "@babel/preset-env": "7.28.6",
     "@eslint/compat": "2.0.0",
     "@types/autosize": "4.0.3",
-    "@types/lodash": "4.17.21",
+    "@types/lodash": "4.17.23",
     "@types/node": "24.10.9",
     "@types/react": "19.2.8",
     "@types/react-csv": "1.1.10",
