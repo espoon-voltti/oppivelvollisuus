@@ -57,8 +57,8 @@ dependencies {
     api("org.yaml:snakeyaml:2.5")
 
     // CVE-2025-11226
-    api("ch.qos.logback:logback-classic:1.5.24")
-    api("ch.qos.logback:logback-core:1.5.24")
+    api("ch.qos.logback:logback-classic:1.5.25")
+    api("ch.qos.logback:logback-core:1.5.25")
 
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
@@ -85,7 +85,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.5.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:8.1")
-    implementation("ch.qos.logback:logback-access:1.5.24")
+    implementation("ch.qos.logback:logback-access:1.5.25")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
 
     testImplementation(kotlin("test"))
