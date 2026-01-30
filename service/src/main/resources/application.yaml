@@ -13,6 +13,9 @@ spring:
     hikari:
       data-source-properties:
         socketTimeout: 30000
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
   sql:
     init:
       continue-on-error: false
