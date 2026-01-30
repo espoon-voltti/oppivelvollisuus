@@ -26,21 +26,31 @@ abstract class FullApplicationTest {
         jdbi.withHandleUnchecked { tx ->
             tx.execute(
                 """
-                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
+                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS $$
+                DECLARE
+                  truncate_query text;
+                  sequence_query text;
                 BEGIN
-                  EXECUTE (
-                    SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
-                    FROM information_schema.tables
-                    WHERE table_schema = 'public'
-                    AND table_type = 'BASE TABLE'
-                    AND table_name <> 'flyway_schema_history'
-                  );
-                  EXECUTE (
-                    SELECT 'SELECT ' || coalesce(string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', '), '')
-                    FROM information_schema.sequences
-                    WHERE sequence_schema = 'public'
-                  );
-                END ${'$'}${'$'} LANGUAGE plpgsql;
+                  SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
+                  INTO truncate_query
+                  FROM information_schema.tables
+                  WHERE table_schema = 'public'
+                  AND table_type = 'BASE TABLE'
+                  AND table_name <> 'flyway_schema_history';
+                  
+                  IF truncate_query IS NOT NULL THEN
+                    EXECUTE truncate_query;
+                  END IF;
+                  
+                  SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
+                  INTO sequence_query
+                  FROM information_schema.sequences
+                  WHERE sequence_schema = 'public';
+                  
+                  IF sequence_query IS NOT NULL THEN
+                    EXECUTE sequence_query;
+                  END IF;
+                END $$ LANGUAGE plpgsql;
                 """.trimIndent()
             )
         }

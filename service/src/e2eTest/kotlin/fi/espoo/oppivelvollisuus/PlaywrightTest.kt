@@ -33,7 +33,7 @@ abstract class PlaywrightTest {
         jdbi.withHandleUnchecked { tx ->
             tx.execute(
                 """
-                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
+                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS $$
                 BEGIN
                   EXECUTE (
                     SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
@@ -42,12 +42,15 @@ abstract class PlaywrightTest {
                     AND table_type = 'BASE TABLE'
                     AND table_name <> 'flyway_schema_history'
                   );
-                  EXECUTE (
-                    SELECT 'SELECT ' || coalesce(string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', '), '')
-                    FROM information_schema.sequences
-                    WHERE sequence_schema = 'public'
-                  );
-                END ${'$'}${'$'} LANGUAGE plpgsql;
+                  
+                  IF (SELECT count(*) FROM information_schema.sequences) > 0 THEN
+                    EXECUTE (
+                      SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
+                      FROM information_schema.sequences
+                      WHERE sequence_schema = 'public'
+                    );
+                  END IF;
+                END $$ LANGUAGE plpgsql;
                 """.trimIndent()
             )
         }
