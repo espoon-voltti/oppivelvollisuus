@@ -4,7 +4,7 @@
 
 package fi.espoo.oppivelvollisuus.config
 
-import com.fasterxml.jackson.databind.json.JsonMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.zaxxer.hikari.HikariDataSource
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
@@ -20,19 +20,19 @@ class DbConfig {
     @Bean
     fun jdbi(
         dataSource: HikariDataSource,
-        jsonMapper: JsonMapper
-    ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
+        objectMapper: ObjectMapper
+    ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
 }
 
 private fun configureJdbi(
     jdbi: Jdbi,
-    jsonMapper: JsonMapper
+    objectMapper: ObjectMapper
 ): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
         .installPlugin(PostgresPlugin())
         .installPlugin(Jackson2Plugin())
     jdbi.getConfig(ColumnMappers::class.java).coalesceNullPrimitivesToDefaults = false
-    jdbi.getConfig(Jackson2Config::class.java).mapper = jsonMapper
+    jdbi.getConfig(Jackson2Config::class.java).mapper = objectMapper
     return jdbi
 }

@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "3.5.10"
+    id("org.springframework.boot") version "4.0.2"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.3.0"
     kotlin("plugin.spring") version "2.3.0"
@@ -64,13 +64,13 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.ws:spring-ws-security") {
         exclude("org.opensaml")
     }
 
     implementation("com.zaxxer:HikariCP:7.0.2")
-    implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     implementation("org.postgresql:postgresql:42.7.9")
     api(platform("org.jdbi:jdbi3-bom:3.51.0"))
@@ -81,6 +81,7 @@ dependencies {
 
     api(platform("com.fasterxml.jackson:jackson-bom:2.21.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.auth0:java-jwt:4.5.0")
 
