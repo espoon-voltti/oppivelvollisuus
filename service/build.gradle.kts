@@ -81,6 +81,7 @@ dependencies {
 
     api(platform("com.fasterxml.jackson:jackson-bom:2.21.0"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
     implementation("com.auth0:java-jwt:4.5.0")
 
