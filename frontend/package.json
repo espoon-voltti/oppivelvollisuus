@@ -36,7 +36,7 @@
     "@types/autosize": "4.0.3",
     "@types/lodash": "4.17.23",
     "@types/node": "24.10.10",
-    "@types/react": "19.2.11",
+    "@types/react": "19.2.13",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/styled-components": "5.1.36",
