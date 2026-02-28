@@ -79,7 +79,7 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.21.0"))
+    api(platform("com.fasterxml.jackson:jackson-bom:2.21.1"))
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
