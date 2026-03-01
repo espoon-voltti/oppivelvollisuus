@@ -54,7 +54,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     // cve fixes
-    api("org.yaml:snakeyaml:2.5")
+    api("org.yaml:snakeyaml:2.6")
 
     // CVE-2025-11226
     api("ch.qos.logback:logback-classic:1.5.32")
