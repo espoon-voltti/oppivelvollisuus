@@ -13,5 +13,6 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         VE-2025-68161 waiting for a fix
        ]]></notes>
         <cve>CVE-2026-24734</cve>
+        <cve>CVE-2026-29062</cve>
     </suppress>
 </suppressions>
