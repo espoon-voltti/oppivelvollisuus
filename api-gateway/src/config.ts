@@ -91,7 +91,7 @@ function env<T>(key: string, parser: (value: string) => T): T | undefined {
     return parser(value)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    throw new Error(`${message}: ${key}=${value}`)
+    throw new Error(`${message}: ${key}=${value}`, { cause: err })
   }
 }
 
@@ -107,7 +107,7 @@ function envArray<T>(
     return values.map(parser)
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    throw new Error(`${message}: ${key}=${value}`)
+    throw new Error(`${message}: ${key}=${value}`, { cause: err })
   }
 }
 
