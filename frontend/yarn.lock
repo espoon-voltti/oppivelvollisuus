@@ -1968,17 +1968,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@eslint/compat@npm:2.0.2":
-  version: 2.0.2
-  resolution: "@eslint/compat@npm:2.0.2"
+"@eslint/compat@npm:2.0.3":
+  version: 2.0.3
+  resolution: "@eslint/compat@npm:2.0.3"
   dependencies:
-    "@eslint/core": "npm:^1.1.0"
+    "@eslint/core": "npm:^1.1.1"
   peerDependencies:
     eslint: ^8.40 || 9 || 10
   peerDependenciesMeta:
     eslint:
       optional: true
-  checksum: 10/027525ddafc0363a82df3ebc82b44214bb32a3e7bec8f4ad9ddb2fc43fa64f1c031f8f39a9164d14ed4a5f431c0abbf4c0b38021e88a5dd36cb19cfd92376acd
+  checksum: 10/9f1fba334228c4e5f181b49d1ed15c395a54aacde63066c21642553182cc1fd4b258b2d2fccc8d1717ea7b23dfa017e3a26c91ef0c482a5b769b57136e9fe9a6
   languageName: node
   linkType: hard
 
@@ -1999,15 +1999,6 @@ __metadata:
   dependencies:
     "@eslint/core": "npm:^1.1.1"
   checksum: 10/3b84df3d13bd9118807602136ee6cfbf98540d5959d1515fc46d96c605859eda978bed69289fb93d290fc1f4b5e339c9e1e2cba3a29d7ac8f1f93adb32a35d1a
-  languageName: node
-  linkType: hard
-
-"@eslint/core@npm:^1.1.0":
-  version: 1.1.0
-  resolution: "@eslint/core@npm:1.1.0"
-  dependencies:
-    "@types/json-schema": "npm:^7.0.15"
-  checksum: 10/f62724beacbb5fdd3560816a4edbbf832485cbec9516b76037fdf2cc2d75011e546e305a22feaa6bed4c1a26d069dc953979aa3c8c28eccf0a746a5ac53483b0
   languageName: node
   linkType: hard
 
@@ -2268,14 +2259,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/estree@npm:^1.0.6":
-  version: 1.0.6
-  resolution: "@types/estree@npm:1.0.6"
-  checksum: 10/9d35d475095199c23e05b431bcdd1f6fec7380612aed068b14b2a08aa70494de8a9026765a5a91b1073f636fb0368f6d8973f518a31391d519e20c59388ed88d
-  languageName: node
-  linkType: hard
-
-"@types/estree@npm:^1.0.8":
+"@types/estree@npm:^1.0.6, @types/estree@npm:^1.0.8":
   version: 1.0.8
   resolution: "@types/estree@npm:1.0.8"
   checksum: 10/25a4c16a6752538ffde2826c2cc0c6491d90e69cd6187bef4a006dd2c3c45469f049e643d7e516c515f21484dc3d48fd5c870be158a5beb72f5baf3dc43e4099
@@ -2598,21 +2582,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"acorn@npm:^8.16.0":
+"acorn@npm:^8.16.0, acorn@npm:^8.4.1":
   version: 8.16.0
   resolution: "acorn@npm:8.16.0"
   bin:
     acorn: bin/acorn
   checksum: 10/690c673bb4d61b38ef82795fab58526471ad7f7e67c0e40c4ff1e10ecd80ce5312554ef633c9995bfc4e6d170cef165711f9ca9e49040b62c0c66fbf2dd3df2b
-  languageName: node
-  linkType: hard
-
-"acorn@npm:^8.4.1":
-  version: 8.15.0
-  resolution: "acorn@npm:8.15.0"
-  bin:
-    acorn: bin/acorn
-  checksum: 10/77f2de5051a631cf1729c090e5759148459cdb76b5f5c70f890503d629cf5052357b0ce783c0f976dd8a93c5150f59f6d18df1def3f502396a20f81282482fa4
   languageName: node
   linkType: hard
 
@@ -5158,7 +5133,7 @@ __metadata:
   dependencies:
     "@babel/core": "npm:7.29.0"
     "@babel/preset-env": "npm:7.29.0"
-    "@eslint/compat": "npm:2.0.2"
+    "@eslint/compat": "npm:2.0.3"
     "@eslint/js": "npm:10.0.1"
     "@fortawesome/fontawesome-svg-core": "npm:7.2.0"
     "@fortawesome/free-regular-svg-icons": "npm:7.2.0"
