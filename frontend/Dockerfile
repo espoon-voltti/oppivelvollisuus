@@ -49,13 +49,18 @@ RUN apt-get update \
        -o /bin/s3download \
  && chmod +x /bin/s3download \
  && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
- && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/* \
+ && rm /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf # prevent accidental usage of default configs
 
 COPY ./nginx/bin/ /bin/
 COPY ./nginx/etc/ /etc/
 
+RUN mkdir -p /nginx && chown nginx:nginx /nginx
+
+VOLUME /nginx
+
 ENTRYPOINT ["/bin/proxy-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-c", "/nginx/config/nginx.conf", "-g", "daemon off;"]
 
 COPY --from=builder /project/dist/esbuild/oppivelvollisuus/ /static/
 
@@ -66,3 +71,5 @@ ENV APP_BUILD="$build" \
     APP_COMMIT="$commit"
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
+
+USER nginx
