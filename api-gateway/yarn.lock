@@ -1989,10 +1989,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globals@npm:14.0.0":
-  version: 14.0.0
-  resolution: "globals@npm:14.0.0"
-  checksum: 10/03939c8af95c6df5014b137cac83aa909090c3a3985caef06ee9a5a669790877af8698ab38007e4c0186873adc14c0b13764acc754b16a754c216cc56aa5f021
+"globals@npm:17.4.0":
+  version: 17.4.0
+  resolution: "globals@npm:17.4.0"
+  checksum: 10/ffad244617e94efcb3da72b7beefc941167c21316148ce378f322db7af72db06468f370e23224b3c7b17b5173a7c75b134e5e7b0949f2828519054a76892508d
   languageName: node
   linkType: hard
 
@@ -2839,7 +2839,7 @@ __metadata:
     express-http-proxy: "npm:2.1.2"
     express-session: "npm:1.19.0"
     fast-xml-parser: "npm:5.5.7"
-    globals: "npm:14.0.0"
+    globals: "npm:17.4.0"
     helmet: "npm:8.1.0"
     jsonwebtoken: "npm:9.0.3"
     lodash: "npm:4.17.23"
