@@ -39,6 +39,13 @@ RUN apt-get update \
  && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
  && chmod +x /bin/s3download
 
+RUN addgroup --gid 1001 oppivelvollisuus \
+ && adduser --uid 1001 --gid 1001 --gecos "" -q --home /home/oppivelvollisuus --disabled-password oppivelvollisuus \
+ && mkdir -p /config \
+ && chown oppivelvollisuus:oppivelvollisuus /config
+
+VOLUME /config
+
 ARG build=none
 ARG commit=none
 
@@ -47,6 +54,8 @@ ENV APP_COMMIT "$commit"
 
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
+
+USER oppivelvollisuus
 
 ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["node", "dist/index.js"]
