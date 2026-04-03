@@ -43,7 +43,7 @@
     "@types/styled-components": "5.1.36",
     "@typescript-eslint/eslint-plugin": "8.57.2",
     "@typescript-eslint/parser": "8.57.2",
-    "axios": "1.13.6",
+    "axios": "1.14.0",
     "concurrently": "9.2.1",
     "esbuild": "0.27.4",
     "eslint": "10.1.0",
