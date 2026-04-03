@@ -41,8 +41,8 @@
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.2.3",
     "@types/styled-components": "5.1.36",
-    "@typescript-eslint/eslint-plugin": "8.57.2",
-    "@typescript-eslint/parser": "8.57.2",
+    "@typescript-eslint/eslint-plugin": "8.58.0",
+    "@typescript-eslint/parser": "8.58.0",
     "axios": "1.14.0",
     "concurrently": "9.2.1",
     "esbuild": "0.27.4",
@@ -64,7 +64,7 @@
     "react-router": "7.13.2",
     "ts-node": "10.9.2",
     "typescript": "5.9.3",
-    "typescript-eslint": "8.57.2",
+    "typescript-eslint": "8.58.0",
     "yargs": "18.0.0"
   },
   "engines": {
