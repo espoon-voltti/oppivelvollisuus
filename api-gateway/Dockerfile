@@ -26,7 +26,7 @@ RUN yarn lint
 
 FROM builder
 
-ENV NODE_ENV production
+ENV NODE_ENV="production"
 
 ARG S3_DOWNLOADER_VERSION=v1.5.1
 ARG S3_DOWNLOADER_SHA256="cb751589ca60749c42b65009671d6076435e7454b8980ee98884e296a1ec6cb8"
@@ -42,8 +42,8 @@ RUN apt-get update \
 ARG build=none
 ARG commit=none
 
-ENV APP_BUILD "$build"
-ENV APP_COMMIT "$commit"
+ENV APP_BUILD="$build" \
+    APP_COMMIT="$commit"
 
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
