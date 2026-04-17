@@ -59,7 +59,7 @@
     "express-http-proxy": "2.1.2",
     "globals": "17.4.0",
     "postcss": "8.5.9",
-    "postcss-preset-env": "11.2.0",
+    "postcss-preset-env": "11.2.1",
     "prettier": "3.8.2",
     "react-router": "7.14.1",
     "ts-node": "10.9.2",
