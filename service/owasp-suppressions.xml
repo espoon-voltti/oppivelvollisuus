@@ -12,16 +12,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         CVE-2025-41248: spring security is not used
         VE-2025-68161 waiting for a fix
        ]]></notes>
-        <cve>CVE-2026-24734</cve>
-        <cve>CVE-2026-29062</cve>
-        <cve>CVE-2020-29582</cve>
-        <cve>CVE-2022-31691</cve>
-        <cve>CVE-2026-1225</cve>
-        <cve>CVE-2026-22737</cve>
-        <cve>CVE-2026-22735</cve>
-        <cve>CVE-2026-34483</cve>
-        <cve>CVE-2026-34500</cve>
-        <cve>CVE-2026-34487</cve>
-        <cve>CVE-2026-34486</cve>
+       <cve>CVE-2026-34483</cve>
+       <cve>CVE-2026-34500</cve>
+       <cve>CVE-2026-34486</cve>
+       <cve>CVE-2026-34487</cve>
     </suppress>
 </suppressions>
