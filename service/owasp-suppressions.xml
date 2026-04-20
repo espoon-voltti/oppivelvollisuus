@@ -19,5 +19,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
         <cve>CVE-2026-1225</cve>
         <cve>CVE-2026-22737</cve>
         <cve>CVE-2026-22735</cve>
+        <cve>CVE-2026-34483</cve>
+        <cve>CVE-2026-34500</cve>
+        <cve>CVE-2026-34487</cve>
+        <cve>CVE-2026-34486</cve>
     </suppress>
 </suppressions>

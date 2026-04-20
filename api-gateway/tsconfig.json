@@ -6,9 +6,11 @@
     "noEmit": false,
     "noEmitOnError": true,
     "outDir": "dist",
+    "rootDir": "src",
     "sourceMap": true,
     "strict": true,
-    "target": "es2023"
+    "target": "es2023",
+    "types": ["node"]
   },
   "include": ["src/**/*.ts"]
 }
