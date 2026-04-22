@@ -169,7 +169,7 @@ jobs:
 
       - name: Load OWASP cache
         id: owasp_cache
-        uses: espoon-voltti/voltti-actions/owasp-cache-get@feature/owasp-cache-get
+        uses: espoon-voltti/voltti-actions/owasp-cache-get@master
         with:
           gh_token: ${{ secrets.VOLTTI_OWASP_TOKEN }}
           t_cache_base: "./"
