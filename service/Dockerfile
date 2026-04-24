@@ -55,6 +55,19 @@ WORKDIR /app
 COPY ./entrypoint.sh entrypoint.sh
 ENTRYPOINT ["./entrypoint.sh"]
 
+ENV USERNAME=oppivelvollisuus
+ENV HOME_DIR=/home/${USERNAME}
+ENV USER_ID=1000
+ENV GROUP_ID=1000
+
+RUN addgroup --gid ${GROUP_ID} ${USERNAME} \
+ && adduser --uid ${USER_ID} --gid ${GROUP_ID} --gecos "" -q --home ${HOME_DIR} --disabled-password ${USERNAME} \
+ && mkdir -p /config \
+ && chown ${USERNAME}:${USERNAME} /config
+
+VOLUME /config
+VOLUME /tmp
+
 COPY --from=builder /app/target/ .
 
 ARG build=none
@@ -63,3 +76,5 @@ ENV APP_BUILD="$build"
 ENV APP_COMMIT="$commit"
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
+
+USER ${USERNAME}
