@@ -83,7 +83,7 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-    implementation("com.auth0:java-jwt:4.5.1")
+    implementation("com.auth0:java-jwt:4.5.2")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.32")
