@@ -25,6 +25,24 @@ The application consists of
 
 ## Local environment and development
 
+### Quick start with mise (recommended)
+
+Tooling is managed by [mise](https://mise.jdx.dev/). Install tools and start
+the full stack with one command:
+
+```sh
+mise install
+mise start      # docker compose + pm2: postgres, redis, api-gateway, frontend, service
+```
+
+Frontend at http://localhost:9000, api-gateway at http://localhost:3000,
+service at http://localhost:8080.
+
+Other tasks: `mise stop`, `mise restart [all|frontend|api-gateway|service]`,
+`mise sandbox exec` (isolated Colima VM, see `.sandbox/README.md`).
+
+The manual flow below remains supported as a fallback.
+
 ### Requirements
 
 - Docker or similar
