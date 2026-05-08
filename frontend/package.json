@@ -57,7 +57,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "express": "5.2.1",
     "express-http-proxy": "2.1.2",
-    "globals": "17.5.0",
+    "globals": "17.6.0",
     "postcss": "8.5.14",
     "postcss-preset-env": "11.2.1",
     "prettier": "3.8.3",
