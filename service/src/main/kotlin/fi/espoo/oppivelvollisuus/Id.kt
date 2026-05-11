@@ -33,6 +33,15 @@ sealed interface DatabaseTable {
     sealed class ProviderUser : DatabaseTable
 
     sealed class ServiceOption : DatabaseTable
+
+    // oppivelvollisuus domain tables
+    sealed class Student : DatabaseTable
+
+    sealed class StudentCase : DatabaseTable
+
+    sealed class CaseEvent : DatabaseTable
+
+    sealed class AppUser : DatabaseTable
 }
 
 typealias AttachmentId = Id<DatabaseTable.Attachment>
@@ -56,6 +65,14 @@ typealias PriceCatalogueRowId = Id<DatabaseTable.PriceCatalogueRow>
 typealias ProviderUserId = Id<DatabaseTable.ProviderUser>
 
 typealias ServiceOptionId = Id<DatabaseTable.ServiceOption>
+
+typealias StudentId = Id<DatabaseTable.Student>
+
+typealias StudentCaseId = Id<DatabaseTable.StudentCase>
+
+typealias CaseEventId = Id<DatabaseTable.CaseEvent>
+
+typealias AppUserId = Id<DatabaseTable.AppUser>
 
 @JsonDeserialize(keyUsing = Id.KeyFromJson::class)
 data class Id<out T : DatabaseTable>(
