@@ -12,27 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.util.UUID
 
 sealed interface DatabaseTable {
-    sealed class Attachment : DatabaseTable
-
-    sealed class AttachmentType : DatabaseTable
-
-    sealed class CompanyAcl : DatabaseTable
-
-    sealed class Company : DatabaseTable
-
-    sealed class Daycare : DatabaseTable
-
-    sealed class DaycareDecision : DatabaseTable
-
     sealed class EspooUser : DatabaseTable
-
-    sealed class PriceCatalogue : DatabaseTable
-
-    sealed class PriceCatalogueRow : DatabaseTable
-
-    sealed class ProviderUser : DatabaseTable
-
-    sealed class ServiceOption : DatabaseTable
 
     // oppivelvollisuus domain tables
     sealed class Student : DatabaseTable
@@ -40,39 +20,15 @@ sealed interface DatabaseTable {
     sealed class StudentCase : DatabaseTable
 
     sealed class CaseEvent : DatabaseTable
-
-    sealed class AppUser : DatabaseTable
 }
 
-typealias AttachmentId = Id<DatabaseTable.Attachment>
-
-typealias AttachmentTypeId = Id<DatabaseTable.AttachmentType>
-
-typealias CompanyAclId = Id<DatabaseTable.CompanyAcl>
-
-typealias CompanyId = Id<DatabaseTable.Company>
-
-typealias DaycareDecisionId = Id<DatabaseTable.DaycareDecision>
-
-typealias DaycareId = Id<DatabaseTable.Daycare>
-
 typealias EspooUserId = Id<DatabaseTable.EspooUser>
-
-typealias PriceCatalogueId = Id<DatabaseTable.PriceCatalogue>
-
-typealias PriceCatalogueRowId = Id<DatabaseTable.PriceCatalogueRow>
-
-typealias ProviderUserId = Id<DatabaseTable.ProviderUser>
-
-typealias ServiceOptionId = Id<DatabaseTable.ServiceOption>
 
 typealias StudentId = Id<DatabaseTable.Student>
 
 typealias StudentCaseId = Id<DatabaseTable.StudentCase>
 
 typealias CaseEventId = Id<DatabaseTable.CaseEvent>
-
-typealias AppUserId = Id<DatabaseTable.AppUser>
 
 @JsonDeserialize(keyUsing = Id.KeyFromJson::class)
 data class Id<out T : DatabaseTable>(

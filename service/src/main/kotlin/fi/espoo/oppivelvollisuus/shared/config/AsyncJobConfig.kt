@@ -15,9 +15,6 @@ import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import java.time.Duration
-
-private fun emailThrottleInterval(maxEmailsPerSecondRate: Int) = Duration.ofSeconds(1).dividedBy(maxEmailsPerSecondRate.toLong())
 
 @Configuration
 class AsyncJobConfig {
@@ -28,13 +25,7 @@ class AsyncJobConfig {
     ): AsyncJobRunner<AsyncJob> =
         AsyncJobRunner(
             AsyncJob::class,
-            listOf(
-                AsyncJob.main,
-                // this is a reasonable default but should probably be configurable
-                AsyncJob.email.withThrottleInterval(
-                    emailThrottleInterval(maxEmailsPerSecondRate = 14)
-                ),
-            ),
+            listOf(AsyncJob.main),
             jdbi,
             tracer,
         )
