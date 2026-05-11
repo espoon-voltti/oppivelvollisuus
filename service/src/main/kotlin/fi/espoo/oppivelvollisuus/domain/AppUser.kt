@@ -4,11 +4,11 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import org.jdbi.v3.core.Handle
+import fi.espoo.oppivelvollisuus.EspooUserId
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.PropagateNull
-import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 
 data class AdUser(
@@ -19,7 +19,7 @@ data class AdUser(
 )
 
 data class AppUser(
-    val id: UUID,
+    val id: EspooUserId,
     val externalId: String,
     val firstName: String,
     val lastName: String,
@@ -28,12 +28,12 @@ data class AppUser(
 )
 
 data class UserBasics(
-    @param:PropagateNull val id: UUID,
+    @param:PropagateNull val id: EspooUserId,
     val name: String
 )
 
-fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
-    createQuery(
+fun Database.Transaction.upsertAppUserFromAd(adUser: AdUser): AppUser =
+    handle.createQuery(
         // language=SQL
         """
 INSERT INTO users (external_id, first_names, last_name, email, is_active)
@@ -46,8 +46,8 @@ RETURNING id, external_id, first_name, last_name, email, is_active
         .mapTo<AppUser>()
         .one()
 
-fun Handle.getActiveAppUsers(): List<AppUser> =
-    createQuery(
+fun Database.Read.getActiveAppUsers(): List<AppUser> =
+    handle.createQuery(
         """
     SELECT id, external_id, first_name, last_name, email, is_active
     FROM users
@@ -55,15 +55,15 @@ fun Handle.getActiveAppUsers(): List<AppUser> =
 """
     ).mapTo<AppUser>().list()
 
-fun Handle.getAppUser(id: UUID) =
-    createQuery(
+fun Database.Read.getAppUser(id: EspooUserId) =
+    handle.createQuery(
         // language=SQL
         """
 SELECT id, external_id, first_name, last_name, email, is_active
-FROM users 
+FROM users
 WHERE id = :id AND NOT is_system_user
         """.trimIndent()
-    ).bind("id", id)
+    ).bind("id", id.raw)
         .mapTo<AppUser>()
         .findOne()
         .getOrNull()

@@ -4,6 +4,7 @@
 
 package fi.espoo.oppivelvollisuus.config
 
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import mu.KLogger
 import net.logstash.logback.argument.StructuredArguments
 import org.slf4j.Marker
@@ -18,7 +19,7 @@ fun KLogger.audit(
 ) {
     val data =
         mapOf<String, Any?>(
-            "userId" to user.id,
+            "userId" to user.rawId(),
             "meta" to meta
         )
     warn(AUDIT_MARKER, eventCode, StructuredArguments.entries(data))

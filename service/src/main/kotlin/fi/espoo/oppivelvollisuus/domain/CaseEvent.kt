@@ -4,14 +4,15 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.CaseEventId
+import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.shared.NotFound
-import org.jdbi.v3.core.Handle
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
 
 enum class CaseEventType {
     NOTE,
@@ -39,27 +40,27 @@ data class CaseEventInput(
     val notes: String
 )
 
-fun Handle.insertCaseEvent(
-    studentCaseId: UUID,
+fun Database.Transaction.insertCaseEvent(
+    studentCaseId: StudentCaseId,
     data: CaseEventInput,
     user: AuthenticatedUser
-): UUID =
-    createUpdate(
+): CaseEventId =
+    handle.createUpdate(
         """
-                INSERT INTO case_events (created_by, student_case_id, date, type, notes) 
+                INSERT INTO case_events (created_by, student_case_id, date, type, notes)
                 VALUES (:user, :studentCaseId, :date, :type, :notes)
                 RETURNING id
             """
-    ).bind("studentCaseId", studentCaseId)
+    ).bind("studentCaseId", studentCaseId.raw)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
-        .mapTo<UUID>()
+        .mapTo<CaseEventId>()
         .one()
 
 data class CaseEvent(
-    val id: UUID,
-    val studentCaseId: UUID,
+    val id: CaseEventId,
+    val studentCaseId: StudentCaseId,
     val date: LocalDate,
     val type: CaseEventType,
     val notes: String,
@@ -72,15 +73,15 @@ data class ModifyInfo(
     val time: ZonedDateTime
 )
 
-fun Handle.updateCaseEvent(
-    id: UUID,
+fun Database.Transaction.updateCaseEvent(
+    id: CaseEventId,
     data: CaseEventInput,
     user: AuthenticatedUser
 ) {
-    createUpdate(
+    handle.createUpdate(
         """
 UPDATE case_events
-SET 
+SET
     updated = now(),
     updated_by = :user,
     date = :date,
@@ -88,19 +89,19 @@ SET
     notes = :notes
 WHERE id = :id
 """
-    ).bind("id", id)
+    ).bind("id", id.raw)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
 
-fun Handle.deleteCaseEvent(id: UUID) {
-    createUpdate(
+fun Database.Transaction.deleteCaseEvent(id: CaseEventId) {
+    handle.createUpdate(
         """
 DELETE FROM case_events
 WHERE id = :id
 """
-    ).bind("id", id)
+    ).bind("id", id.raw)
         .execute()
 }

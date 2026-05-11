@@ -4,6 +4,7 @@
 
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.EspooUserId
 import fi.espoo.oppivelvollisuus.domain.AdUser
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,7 +60,7 @@ class SystemControllerTests : FullApplicationTest() {
 
     @Test
     fun `get user returns null for unknown id`() {
-        val result = controller.getUser(UUID.randomUUID())
+        val result = controller.getUser(EspooUserId(UUID.randomUUID()))
         assertNull(result)
     }
 }

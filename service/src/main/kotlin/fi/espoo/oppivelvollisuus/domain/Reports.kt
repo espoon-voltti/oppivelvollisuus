@@ -4,7 +4,7 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import org.jdbi.v3.core.Handle
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.jdbi.v3.core.kotlin.mapTo
 import java.time.LocalDate
 
@@ -34,14 +34,14 @@ data class CaseReportRow(
     val eventTypes: Set<CaseEventType>
 )
 
-fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
-    createQuery(
+fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
+    handle.createQuery(
         """
-    SELECT 
+    SELECT
         sc.opened_at,
         extract('year' FROM s.date_of_birth) AS birth_year,
-        CASE WHEN s.date_of_birth IS NOT NULL 
-            THEN date_part('year', age(sc.opened_at, s.date_of_birth)) 
+        CASE WHEN s.date_of_birth IS NOT NULL
+            THEN date_part('year', age(sc.opened_at, s.date_of_birth))
         END AS age_at_case_opened,
         s.gender,
         s.language,
@@ -66,7 +66,7 @@ fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
         ) AS event_types
     FROM student_cases sc
     JOIN students s on sc.student_id = s.id
-    WHERE TRUE 
+    WHERE TRUE
     ${request.start?.let { "AND sc.opened_at >= :start" } ?: ""}
     ${request.end?.let { "AND sc.opened_at <= :end" } ?: ""}
 """

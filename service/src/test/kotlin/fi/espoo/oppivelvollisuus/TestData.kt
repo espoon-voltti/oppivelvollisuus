@@ -2,15 +2,16 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.EspooUserId
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import java.time.LocalDate
 import java.util.UUID
 
-val testUser = AuthenticatedUser(UUID.randomUUID())
+val testUser = AuthenticatedUser.EspooUser(EspooUserId(UUID.randomUUID()))
 val testUserName = "Teija Testaaja"
 
 val minimalStudentTestInput =
