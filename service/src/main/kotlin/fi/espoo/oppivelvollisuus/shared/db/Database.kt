@@ -669,10 +669,10 @@ abstract class SqlBuilder {
                 // Use runtime type information for non-null values with inheritance
                 // Otherwise Jackson will serialize only the fields in T which might be a
                 // superclass while the runtime value might be a concrete subclass
+                // Use compile-time type information for other values (including nulls)
                 if (value is Any && value.javaClass != T::class.java) {
                     QualifiedType.of(value.javaClass).with(Json::class.java)
-                } // Use compile-time type information for other values, including nulls
-                else {
+                } else {
                     createQualifiedType(Json::class)
                 },
             )
@@ -810,10 +810,10 @@ data class BatchSql<R>(
                     // Use runtime type information for non-null values with inheritance
                     // Otherwise Jackson will serialize only the fields in T which might be a
                     // superclass while the runtime value might be a concrete subclass
+                    // Use compile-time type information for other values (including nulls)
                     if (value is Any && value.javaClass != T::class.java) {
                         QualifiedType.of(value.javaClass).with(Json::class.java)
-                    } // Use compile-time type information for other values, including nulls
-                    else {
+                    } else {
                         createQualifiedType(Json::class)
                     }
                 }

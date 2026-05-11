@@ -14,6 +14,7 @@ import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.dev.resetDatabase
 import io.opentelemetry.api.trace.Tracer
 import org.jdbi.v3.core.Jdbi
+import org.jdbi.v3.core.kotlin.withHandleUnchecked
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.env.Environment
-import java.net.URL
+import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
@@ -53,9 +54,6 @@ abstract class FullApplicationTest(
 
     protected fun dbInstance(): Database = Database(jdbi, tracer)
 
-    protected val testAttachmentPngFile =
-        this::class.java.getResource("/attachments-fixtures/test-attachment.png") as URL
-
     @BeforeAll
     fun beforeAll() {
         assert(httpPort > 0)
@@ -69,6 +67,17 @@ abstract class FullApplicationTest(
     fun resetBeforeTest() {
         if (resetDbBeforeEach) {
             db.transaction { it.resetDatabase() }
+        }
+        jdbi.withHandleUnchecked { tx ->
+            tx
+                .createUpdate(
+                    """
+                    INSERT INTO users (id, updated, external_id, first_names, last_name, email)
+                    VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
+                    ON CONFLICT DO NOTHING
+                    """
+                ).bind("id", testUser.id)
+                .execute()
         }
     }
 

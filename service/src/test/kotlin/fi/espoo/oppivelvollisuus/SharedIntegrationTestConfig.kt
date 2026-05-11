@@ -10,9 +10,7 @@ import com.zaxxer.hikari.HikariDataSource
 import fi.espoo.oppivelvollisuus.shared.config.JwtKeys
 import fi.espoo.oppivelvollisuus.shared.config.loadPublicKeys
 import fi.espoo.oppivelvollisuus.shared.db.Database
-import fi.espoo.oppivelvollisuus.shared.db.configureJdbi
 import fi.espoo.oppivelvollisuus.shared.dev.resetDatabase
-import fi.espoo.oppivelvollisuus.shared.dev.runDevScript
 import fi.espoo.oppivelvollisuus.shared.noopTracer
 import org.flywaydb.core.Flyway
 import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension
@@ -65,7 +63,6 @@ fun getTestDataSource(env: DatabaseEnv): TestDataSource =
                         .run { migrate() }
                     Database(Jdbi.create(it), noopTracer()).connect { db ->
                         db.transaction { tx ->
-                            tx.runDevScript("reset-database.sql")
                             tx.resetDatabase()
                         }
                     }
@@ -75,16 +72,14 @@ fun getTestDataSource(env: DatabaseEnv): TestDataSource =
 
 @TestConfiguration
 class SharedIntegrationTestConfig(
-    private val env: DatabaseEnv
+    private val env: DatabaseEnv,
 ) {
-    @Bean fun jdbi(dataSource: DataSource) = configureJdbi(Jdbi.create(dataSource))
-
     @Bean fun dataSource(): DataSource = getTestDataSource(env)
 
     @Bean
     fun integrationTestJwtAlgorithm(): Algorithm {
         val publicKeys =
-            this::class.java.getResourceAsStream("/jwks.json").use { loadPublicKeys(it) }
+            this::class.java.getResourceAsStream("/local-development/jwks.json").use { loadPublicKeys(it) }
         return Algorithm.RSA256(JwtKeys(publicKeys))
     }
 }

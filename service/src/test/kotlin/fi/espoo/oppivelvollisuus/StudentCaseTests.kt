@@ -4,9 +4,6 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.domain.UserBasics
-import fi.espoo.oppivelvollisuus.shared.BadRequest
-import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
@@ -25,7 +22,10 @@ import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
 import fi.espoo.oppivelvollisuus.domain.StudentSummary
+import fi.espoo.oppivelvollisuus.domain.UserBasics
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException

@@ -287,7 +287,7 @@ SELECT ${bind(input)} = datemultirange(
         )
 
         data class QueryResult(
-            @field:Json val jsonb: JsonbObject,
+            @param:Json val jsonb: JsonbObject,
         )
 
         val result =
@@ -365,7 +365,7 @@ SELECT ${bind(input)} = datemultirange(
         )
 
         data class QueryResult(
-            @field:Json val jsonb: JsonbObject,
+            @param:Json val jsonb: JsonbObject,
         )
 
         val result =

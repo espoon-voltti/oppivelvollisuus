@@ -4,12 +4,12 @@
 
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.config.audit
 import fi.espoo.oppivelvollisuus.domain.AdUser
 import fi.espoo.oppivelvollisuus.domain.AppUser
 import fi.espoo.oppivelvollisuus.domain.getAppUser
 import fi.espoo.oppivelvollisuus.domain.upsertAppUserFromAd
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import fi.espoo.oppivelvollisuus.config.audit
 import mu.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked

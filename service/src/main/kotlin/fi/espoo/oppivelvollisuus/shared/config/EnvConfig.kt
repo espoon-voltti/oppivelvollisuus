@@ -30,5 +30,4 @@ class EnvConfig {
             "app.job",
             env,
         )
-
 }

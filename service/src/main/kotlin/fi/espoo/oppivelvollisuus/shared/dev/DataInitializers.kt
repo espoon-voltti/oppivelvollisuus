@@ -5,27 +5,32 @@
 package fi.espoo.oppivelvollisuus.shared.dev
 
 import fi.espoo.oppivelvollisuus.shared.db.Database
-import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.core.io.ClassPathResource
-import kotlin.io.bufferedReader
-import kotlin.io.readText
-import kotlin.io.use
-import kotlin.let
 
-private val logger = KotlinLogging.logger {}
-
-fun Database.Transaction.runDevScript(devScriptName: String) {
-    val path = "dev-data/$devScriptName"
-    logger.info { "Running SQL script: $path" }
-    ClassPathResource(path).inputStream.use {
-        it.bufferedReader().readText().let { content -> execute { sql(content) } }
-    }
-}
+private val CREATE_RESET_FUNCTION =
+    """
+    CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS ${'$'}${'$'}
+    BEGIN
+      EXECUTE (
+        SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
+        FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_type = 'BASE TABLE'
+        AND table_name <> 'flyway_schema_history'
+      );
+      IF (SELECT count(*) FROM information_schema.sequences) > 0 THEN
+        EXECUTE (
+          SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
+          FROM information_schema.sequences
+          WHERE sequence_schema = 'public'
+        );
+      END IF;
+    END ${'$'}${'$'} LANGUAGE plpgsql;
+    """.trimIndent()
 
 fun Database.Transaction.resetDatabase() {
+    execute { sql(CREATE_RESET_FUNCTION) }
     execute { sql("SELECT reset_database()") }
 }
 
-// Body intentionally stubbed during Phase 2 — Phase 3.8 rewrites this for
-// oppivelvollisuus's domain entities. The vakaseteli body referenced
-// CompanyId/DaycareId etc. that don't exist here.
+// NOTE: runDevScript was intentionally removed — oppivelvollisuus has no dev-data scripts.
+// resetDatabase() above creates and runs the reset_database() SQL function directly.

@@ -24,7 +24,7 @@ import kotlin.concurrent.write
 import kotlin.math.max
 import kotlin.reflect.KClass
 
-private const val defaultRetryCount =
+private const val DEFAULT_RETRY_COUNT =
     24 * 60 / 5 // 24h when used with default 5 minute retry interval
 private val defaultRetryInterval = Duration.ofMinutes(5)
 
@@ -102,7 +102,7 @@ class AsyncJobRunner<T : Any>(
     fun plan(
         tx: Database.Transaction,
         payloads: Iterable<T>,
-        retryCount: Int = defaultRetryCount,
+        retryCount: Int = DEFAULT_RETRY_COUNT,
         retryInterval: Duration = defaultRetryInterval,
         runAt: HelsinkiDateTime,
     ) = plan(tx, payloads.asSequence(), retryCount, retryInterval, runAt)
@@ -110,7 +110,7 @@ class AsyncJobRunner<T : Any>(
     fun plan(
         tx: Database.Transaction,
         payloads: Sequence<T>,
-        retryCount: Int = defaultRetryCount,
+        retryCount: Int = DEFAULT_RETRY_COUNT,
         retryInterval: Duration = defaultRetryInterval,
         runAt: HelsinkiDateTime,
     ) = plan(
