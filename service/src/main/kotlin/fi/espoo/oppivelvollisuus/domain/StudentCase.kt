@@ -7,6 +7,7 @@ package fi.espoo.oppivelvollisuus.domain
 import fi.espoo.oppivelvollisuus.EspooUserId
 import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
+import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.shared.BadRequest
 import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser

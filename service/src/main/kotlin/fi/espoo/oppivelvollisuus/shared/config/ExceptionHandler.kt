@@ -56,7 +56,7 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         req: HttpServletRequest,
         ex: Conflict
     ): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Conflict (${ex.message})", ex)
+        logger.warn("Conflict (${ex.message})", ex)
         return ResponseEntity
             .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(errorCode = ex.errorCode))
@@ -67,7 +67,7 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         req: HttpServletRequest,
         ex: Unauthorized
     ): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Unauthorized (${ex.message})", ex)
+        logger.warn("Unauthorized (${ex.message})", ex)
         return ResponseEntity
             .status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(errorCode = ex.errorCode))
@@ -78,7 +78,7 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
         req: HttpServletRequest,
         ex: Forbidden
     ): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Forbidden (${ex.message})", ex)
+        logger.warn("Forbidden (${ex.message})", ex)
         return ResponseEntity
             .status(HttpStatus.FORBIDDEN)
             .body(ErrorResponse(errorCode = ex.errorCode))

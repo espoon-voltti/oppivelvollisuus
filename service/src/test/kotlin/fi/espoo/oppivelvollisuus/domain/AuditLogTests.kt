@@ -8,7 +8,8 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
 import fi.espoo.oppivelvollisuus.FullApplicationTest
-import fi.espoo.oppivelvollisuus.shared.logging.AUDIT_MARKER
+import fi.espoo.oppivelvollisuus.TestHttpClient
+import fi.espoo.oppivelvollisuus.makeTestToken
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
 import org.junit.jupiter.api.AfterEach
@@ -24,14 +25,13 @@ import kotlin.test.assertTrue
 /**
  * Locks in audit log emission behavior.
  *
- * Audit events are emitted via [fi.espoo.oppivelvollisuus.config.AUDIT_MARKER] ("AUDIT_EVENT")
- * at WARN level on the logger named "fi.espoo.oppivelvollisuus.domain.AppController".
+ * Audit events are emitted via the AUDIT_EVENT marker at WARN level by the
+ * shared/Audit.kt enum's `log()` method. The structured arguments include
+ * eventCode, targetId, objectId, securityLevel, securityEvent, plus optional meta.
  *
- * The audit() extension function uses:
- *   logger.warn(AUDIT_MARKER, eventCode, StructuredArguments.entries(data))
- * where data = { "userId": user.id, "meta": { ... } }.
- *
- * Phase 2 swaps Audit.kt; these tests must stay green.
+ * The userId is NOT in the structured arguments — it is set on MDC by
+ * `RequestToAuthenticatedUser` (only on real HTTP requests). The MDC test below
+ * exercises that path explicitly.
  */
 class AuditLogTests : FullApplicationTest(resetDbBeforeEach = true) {
     @Autowired private lateinit var controller: AppController
@@ -58,7 +58,7 @@ class AuditLogTests : FullApplicationTest(resetDbBeforeEach = true) {
 
     private fun auditEvents(): List<ILoggingEvent> =
         listAppender.list.filter { event ->
-            event.markerList?.any { it == AUDIT_MARKER } == true
+            event.markerList?.any { it.name == "AUDIT_EVENT" } == true
         }
 
     // -------------------------------------------------------------------------
@@ -74,22 +74,6 @@ class AuditLogTests : FullApplicationTest(resetDbBeforeEach = true) {
 
         val createEvent = events.find { it.message == "CREATE_STUDENT" }
         assertNotNull(createEvent, "Expected CREATE_STUDENT audit event, got: ${events.map { it.message }}")
-    }
-
-    @Test
-    fun `createStudent audit event carries userId in arguments`() {
-        controller.createStudent(testUser, minimalStudentAndCaseTestInput, dbInstance())
-
-        val event =
-            auditEvents().find { it.message == "CREATE_STUDENT" }
-                ?: error("No CREATE_STUDENT event found")
-
-        // The audit helper logs userId via StructuredArguments.entries(data)
-        val argString = event.argumentArray?.joinToString(" ") { it.toString() } ?: ""
-        assertTrue(
-            argString.contains(testUser.id.toString()),
-            "Expected userId ${testUser.id} in audit event arguments: $argString"
-        )
     }
 
     @Test
@@ -157,11 +141,12 @@ class AuditLogTests : FullApplicationTest(resetDbBeforeEach = true) {
     }
 
     // -------------------------------------------------------------------------
-    // Logger name is the AppController class name
+    // Logger name is the shared Audit file (Audit.kt) — events flow through
+    // Audit.X.log() rather than each controller's own logger
     // -------------------------------------------------------------------------
 
     @Test
-    fun `audit event logger name is AppController class name`() {
+    fun `audit event logger name is the shared Audit file`() {
         controller.createStudent(testUser, minimalStudentAndCaseTestInput, dbInstance())
 
         val event =
@@ -169,9 +154,33 @@ class AuditLogTests : FullApplicationTest(resetDbBeforeEach = true) {
                 ?: error("No CREATE_STUDENT event found")
 
         assertEquals(
-            "fi.espoo.oppivelvollisuus.domain.AppController",
+            "fi.espoo.oppivelvollisuus.shared.Audit",
             event.loggerName,
-            "Audit logger name must be the AppController class name"
+            "Audit logger name must be the shared Audit enum"
+        )
+    }
+
+    // -------------------------------------------------------------------------
+    // userId reaches the audit event via MDC, set by RequestToAuthenticatedUser
+    // (only when going through the actual HTTP filter chain)
+    // -------------------------------------------------------------------------
+
+    @Test
+    fun `audit event carries userId via MDC when triggered through HTTP`() {
+        val client = TestHttpClient(httpPort)
+        val token = makeTestToken(testUser.id.raw.toString())
+
+        val response = client.get("/employees", token = token)
+        assertEquals(200, response.statusCode, "GET /employees must succeed")
+
+        val event =
+            auditEvents().find { it.message == "GET_EMPLOYEES" }
+                ?: error("No GET_EMPLOYEES audit event was captured")
+
+        assertEquals(
+            testUser.id.raw.toString(),
+            event.mdcPropertyMap["userId"],
+            "Audit event must carry userId from MDC when emitted during an HTTP request"
         )
     }
 

@@ -18,18 +18,14 @@ import java.util.Locale
  * Spring Boot by default
  */
 data class AppEnv(
-    val frontendBaseUrlFi: String?,
     val mockClock: Boolean,
     val asyncJobRunnerDisabled: Boolean,
-    val skipAttachmentRequirements: Boolean,
 ) {
     companion object {
         fun fromEnvironment(env: Environment): AppEnv =
             AppEnv(
-                frontendBaseUrlFi = env.lookup("app.frontend.base_url.fi"),
                 mockClock = env.lookup("app.clock.mock") ?: false,
                 asyncJobRunnerDisabled = env.lookup("app.async_job_runner.disable_runner") ?: false,
-                skipAttachmentRequirements = env.lookup("app.skip_attachment_requirements") ?: false,
             )
     }
 }

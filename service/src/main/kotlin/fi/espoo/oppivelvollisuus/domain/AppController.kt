@@ -4,16 +4,15 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.AppUser
 import fi.espoo.oppivelvollisuus.CaseEventId
 import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
-import fi.espoo.oppivelvollisuus.config.audit
+import fi.espoo.oppivelvollisuus.getActiveAppUsers
+import fi.espoo.oppivelvollisuus.shared.Audit
+import fi.espoo.oppivelvollisuus.shared.AuditId
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
-import io.opentelemetry.api.trace.Tracer
-import mu.KotlinLogging
-import org.jdbi.v3.core.Jdbi
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -26,16 +25,6 @@ import java.time.LocalDate
 
 @RestController
 class AppController {
-    @Autowired
-    lateinit var jdbi: Jdbi
-
-    @Autowired
-    lateinit var tracer: Tracer
-
-    private val logger = KotlinLogging.logger {}
-
-    private fun db() = Database(jdbi, tracer)
-
     data class StudentAndCaseInput(
         val student: StudentInput,
         val studentCase: StudentCaseInput
@@ -44,45 +33,38 @@ class AppController {
     @PostMapping("/students")
     fun createStudent(
         user: AuthenticatedUser,
-        @RequestBody body: StudentAndCaseInput
+        @RequestBody body: StudentAndCaseInput,
+        db: Database
     ): StudentId =
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     val studentId = tx.insertStudent(data = body.student, user = user)
                     tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
                     studentId
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_STUDENT"
-                )
-            }
+            }.also { Audit.CREATE_STUDENT.log(targetId = AuditId(it)) }
 
     @PostMapping("/students/duplicates")
     fun getDuplicateStudents(
         user: AuthenticatedUser,
-        @RequestBody body: DuplicateStudentCheckInput
+        @RequestBody body: DuplicateStudentCheckInput,
+        db: Database
     ): List<DuplicateStudent> =
-        db()
+        db
             .connect {
                 it.read { tx ->
                     tx.getPossibleDuplicateStudents(body)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "GET_DUPLICATE_STUDENTS"
-                )
-            }
+            }.also { Audit.GET_DUPLICATE_STUDENTS.log() }
 
     @PostMapping("/students/search")
     fun getStudents(
         user: AuthenticatedUser,
-        @RequestBody body: StudentSearchParams
+        @RequestBody body: StudentSearchParams,
+        db: Database
     ): List<StudentSummary> =
-        db()
+        db
             .connect {
                 it.read { tx ->
                     tx.getStudentSummaries(
@@ -92,12 +74,7 @@ class AppController {
                             )
                     )
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "SEARCH_STUDENTS"
-                )
-            }
+            }.also { Audit.SEARCH_STUDENTS.log() }
 
     data class StudentResponse(
         val student: Student,
@@ -107,120 +84,90 @@ class AppController {
     @GetMapping("/students/{id}")
     fun getStudent(
         user: AuthenticatedUser,
-        @PathVariable id: StudentId
+        @PathVariable id: StudentId,
+        db: Database
     ): StudentResponse =
-        db()
+        db
             .connect {
                 it.read { tx ->
                     val studentDetails = tx.getStudent(id = id)
                     val cases = tx.getStudentCasesByStudent(studentId = id)
                     StudentResponse(studentDetails, cases)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "GET_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+            }.also { Audit.GET_STUDENT.log(targetId = AuditId(id)) }
 
     @PutMapping("/students/{id}")
     fun updateStudent(
         user: AuthenticatedUser,
         @PathVariable id: StudentId,
-        @RequestBody body: StudentInput
+        @RequestBody body: StudentInput,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.updateStudent(id = id, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+            }.also { Audit.UPDATE_STUDENT.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/students/{id}")
     fun deleteStudent(
         user: AuthenticatedUser,
-        @PathVariable id: StudentId
+        @PathVariable id: StudentId,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.deleteStudent(id = id)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+            }.also { Audit.DELETE_STUDENT.log(targetId = AuditId(id)) }
     }
 
     @PostMapping("/students/{studentId}/cases")
     fun createStudentCase(
         user: AuthenticatedUser,
         @PathVariable studentId: StudentId,
-        @RequestBody body: StudentCaseInput
+        @RequestBody body: StudentCaseInput,
+        db: Database
     ): StudentCaseId =
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.insertStudentCase(studentId = studentId, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString())
-                )
-            }
+            }.also { Audit.CREATE_STUDENT_CASE.log(targetId = AuditId(it), objectId = AuditId(studentId)) }
 
     @PutMapping("/students/{studentId}/cases/{id}")
     fun updateStudentCase(
         user: AuthenticatedUser,
         @PathVariable studentId: StudentId,
         @PathVariable id: StudentCaseId,
-        @RequestBody body: StudentCaseInput
+        @RequestBody body: StudentCaseInput,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+            }.also { Audit.UPDATE_STUDENT_CASE.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @DeleteMapping("/students/{studentId}/cases/{id}")
     fun deleteStudentCase(
         user: AuthenticatedUser,
         @PathVariable studentId: StudentId,
-        @PathVariable id: StudentCaseId
+        @PathVariable id: StudentCaseId,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.deleteStudentCase(id = id, studentId = studentId)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+            }.also { Audit.DELETE_STUDENT_CASE.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @PutMapping("/students/{studentId}/cases/{id}/status")
@@ -228,108 +175,78 @@ class AppController {
         user: AuthenticatedUser,
         @PathVariable studentId: StudentId,
         @PathVariable id: StudentCaseId,
-        @RequestBody body: CaseStatusInput
+        @RequestBody body: CaseStatusInput,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT_CASE_STATUS",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+            }.also { Audit.UPDATE_STUDENT_CASE_STATUS.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @PostMapping("/student-cases/{studentCaseId}/case-events")
     fun createCaseEvent(
         user: AuthenticatedUser,
         @PathVariable studentCaseId: StudentCaseId,
-        @RequestBody body: CaseEventInput
+        @RequestBody body: CaseEventInput,
+        db: Database
     ): CaseEventId =
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_CASE_EVENT",
-                    mapOf("caseId" to studentCaseId.toString())
-                )
-            }
+            }.also { Audit.CREATE_CASE_EVENT.log(targetId = AuditId(it), objectId = AuditId(studentCaseId)) }
 
     @PutMapping("/case-events/{id}")
     fun updateCaseEvent(
         user: AuthenticatedUser,
         @PathVariable id: CaseEventId,
-        @RequestBody body: CaseEventInput
+        @RequestBody body: CaseEventInput,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.updateCaseEvent(id = id, data = body, user = user)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_CASE_EVENT",
-                    mapOf("eventId" to id.toString())
-                )
-            }
+            }.also { Audit.UPDATE_CASE_EVENT.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/case-events/{id}")
     fun deleteCaseEvent(
         user: AuthenticatedUser,
-        @PathVariable id: CaseEventId
+        @PathVariable id: CaseEventId,
+        db: Database
     ) {
-        db()
+        db
             .connect {
                 it.transaction { tx ->
                     tx.deleteCaseEvent(id = id)
                 }
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_CASE_EVENT",
-                    mapOf("eventId" to id.toString())
-                )
-            }
+            }.also { Audit.DELETE_CASE_EVENT.log(targetId = AuditId(id)) }
     }
 
     @GetMapping("/employees")
-    fun getEmployeeUsers(user: AuthenticatedUser): List<AppUser> =
-        db().connect { it.read { tx -> tx.getActiveAppUsers() } }.also {
-            logger.audit(
-                user,
-                "GET_EMPLOYEES"
-            )
-        }
+    fun getEmployeeUsers(
+        user: AuthenticatedUser,
+        db: Database
+    ): List<AppUser> = db.connect { it.read { tx -> tx.getActiveAppUsers() } }.also { Audit.GET_EMPLOYEES.log() }
 
     @GetMapping("/reports/student-cases")
     fun getCasesReport(
         user: AuthenticatedUser,
         @RequestParam(required = false) start: LocalDate?,
-        @RequestParam(required = false) end: LocalDate?
+        @RequestParam(required = false) end: LocalDate?,
+        db: Database
     ): List<CaseReportRow> =
-        db().connect { it.read { tx -> tx.getCasesReport(CaseReportRequest(start, end)) } }.also {
-            logger.audit(
-                user,
-                "GET_CASES_REPORT"
-            )
-        }
+        db.connect { it.read { tx -> tx.getCasesReport(CaseReportRequest(start, end)) } }.also { Audit.GET_CASES_REPORT.log() }
 
     @DeleteMapping("/old-students")
-    fun deleteOldStudents(user: AuthenticatedUser) =
-        db().connect { it.transaction { tx -> tx.deleteOldStudents() } }.also {
-            logger.audit(
-                user,
-                "DELETE_OLD_STUDENTS"
-            )
-        }
+    fun deleteOldStudents(
+        user: AuthenticatedUser,
+        db: Database
+    ) = db.connect { it.transaction { tx -> tx.deleteOldStudents() } }.also { Audit.DELETE_OLD_STUDENTS.log() }
 }

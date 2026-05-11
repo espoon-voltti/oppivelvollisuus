@@ -88,7 +88,6 @@ dependencies {
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.32")
     implementation("ch.qos.logback.access:logback-access-tomcat:2.0.12")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
 
     // OpenTelemetry (used by shared/Tracing and shared/db tracing spans)

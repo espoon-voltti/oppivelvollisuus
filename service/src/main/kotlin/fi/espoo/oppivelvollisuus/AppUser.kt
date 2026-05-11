@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus.domain
+package fi.espoo.oppivelvollisuus
 
 import fi.espoo.oppivelvollisuus.EspooUserId
 import fi.espoo.oppivelvollisuus.shared.db.Database
