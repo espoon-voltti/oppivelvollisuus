@@ -87,13 +87,26 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.32")
+    implementation("ch.qos.logback.access:logback-access-tomcat:2.0.12")
     implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.7")
+
+    // OpenTelemetry (used by shared/Tracing and shared/db tracing spans)
+    api(platform("io.opentelemetry:opentelemetry-bom:1.61.0"))
+    implementation("io.opentelemetry:opentelemetry-api")
+
+    // Async/scheduled jobs (used by shared/asyncjob)
+    implementation("com.github.kagkarlsson:db-scheduler:16.7.1")
+
+    // Used by shared/auth/AuthenticatedUser.rawIdHash + shared/utils
+    implementation("com.google.guava:guava:33.6.0-jre")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
     api(platform("org.junit:junit-bom:6.0.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("io.kotest:kotest-property:6.1.11")
     testImplementation("com.microsoft.playwright:playwright:1.59.0")
 }
 
