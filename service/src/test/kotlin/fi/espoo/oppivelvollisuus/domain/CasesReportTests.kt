@@ -2,8 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.FullApplicationTest
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
@@ -28,9 +29,8 @@ import testUser
 import java.time.LocalDate
 import kotlin.test.assertEquals
 
-class CasesReportTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
+    @Autowired private lateinit var controller: AppController
 
     @Test
     fun `create new case event, then update it and finally delete it`() {
@@ -67,11 +67,12 @@ class CasesReportTests : FullApplicationTest() {
                                 caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
                                 notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN
                             )
-                    )
+                    ),
+                db = dbInstance()
             )
         val caseId =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .id
@@ -102,7 +103,8 @@ class CasesReportTests : FullApplicationTest() {
             controller.getCasesReport(
                 user = testUser,
                 start = LocalDate.of(2022, 1, 1),
-                end = LocalDate.of(2022, 12, 31)
+                end = LocalDate.of(2022, 12, 31),
+                db = dbInstance()
             )
         )
 
@@ -113,7 +115,8 @@ class CasesReportTests : FullApplicationTest() {
                 date = LocalDate.of(2022, 5, 15),
                 type = CaseEventType.HEARING_LETTER,
                 notes = ""
-            )
+            ),
+            dbInstance()
         )
         controller.createCaseEvent(
             testUser,
@@ -122,7 +125,8 @@ class CasesReportTests : FullApplicationTest() {
                 date = LocalDate.of(2022, 5, 22),
                 type = CaseEventType.HEARING,
                 notes = ""
-            )
+            ),
+            dbInstance()
         )
         controller.createCaseEvent(
             testUser,
@@ -131,7 +135,8 @@ class CasesReportTests : FullApplicationTest() {
                 date = LocalDate.of(2022, 5, 25),
                 type = CaseEventType.HEARING,
                 notes = ""
-            )
+            ),
+            dbInstance()
         )
         controller.updateStudentCaseStatus(
             testUser,
@@ -146,9 +151,10 @@ class CasesReportTests : FullApplicationTest() {
                         followUpMeasures = null,
                         otherReason = null
                     )
-            )
+            ),
+            dbInstance()
         )
-        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
+        controller.getCasesReport(user = testUser, start = null, end = null, db = dbInstance()).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
             assertEquals(SchoolType.LUKIO, row.startedAtSchool)
@@ -168,10 +174,11 @@ class CasesReportTests : FullApplicationTest() {
                         followUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
                         otherReason = null
                     )
-            )
+            ),
+            dbInstance()
         )
 
-        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
+        controller.getCasesReport(user = testUser, start = null, end = null, db = dbInstance()).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
             assertEquals(setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE), row.followUpMeasures)

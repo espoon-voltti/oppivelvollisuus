@@ -47,11 +47,13 @@ class AppController {
         @RequestBody body: StudentAndCaseInput
     ): StudentId =
         db()
-            .connect { it.transaction { tx ->
-                val studentId = tx.insertStudent(data = body.student, user = user)
-                tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
-                studentId
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    val studentId = tx.insertStudent(data = body.student, user = user)
+                    tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
+                    studentId
+                }
+            }.also {
                 logger.audit(
                     user,
                     "CREATE_STUDENT"
@@ -64,9 +66,11 @@ class AppController {
         @RequestBody body: DuplicateStudentCheckInput
     ): List<DuplicateStudent> =
         db()
-            .connect { it.read { tx ->
-                tx.getPossibleDuplicateStudents(body)
-            } }.also {
+            .connect {
+                it.read { tx ->
+                    tx.getPossibleDuplicateStudents(body)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "GET_DUPLICATE_STUDENTS"
@@ -79,14 +83,16 @@ class AppController {
         @RequestBody body: StudentSearchParams
     ): List<StudentSummary> =
         db()
-            .connect { it.read { tx ->
-                tx.getStudentSummaries(
-                    params =
-                        body.copy(
-                            query = body.query.takeIf { !it.isNullOrBlank() }
-                        )
-                )
-            } }.also {
+            .connect {
+                it.read { tx ->
+                    tx.getStudentSummaries(
+                        params =
+                            body.copy(
+                                query = body.query.takeIf { !it.isNullOrBlank() }
+                            )
+                    )
+                }
+            }.also {
                 logger.audit(
                     user,
                     "SEARCH_STUDENTS"
@@ -104,11 +110,13 @@ class AppController {
         @PathVariable id: StudentId
     ): StudentResponse =
         db()
-            .connect { it.read { tx ->
-                val studentDetails = tx.getStudent(id = id)
-                val cases = tx.getStudentCasesByStudent(studentId = id)
-                StudentResponse(studentDetails, cases)
-            } }.also {
+            .connect {
+                it.read { tx ->
+                    val studentDetails = tx.getStudent(id = id)
+                    val cases = tx.getStudentCasesByStudent(studentId = id)
+                    StudentResponse(studentDetails, cases)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "GET_STUDENT",
@@ -123,9 +131,11 @@ class AppController {
         @RequestBody body: StudentInput
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.updateStudent(id = id, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudent(id = id, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "UPDATE_STUDENT",
@@ -140,9 +150,11 @@ class AppController {
         @PathVariable id: StudentId
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.deleteStudent(id = id)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteStudent(id = id)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "DELETE_STUDENT",
@@ -158,9 +170,11 @@ class AppController {
         @RequestBody body: StudentCaseInput
     ): StudentCaseId =
         db()
-            .connect { it.transaction { tx ->
-                tx.insertStudentCase(studentId = studentId, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.insertStudentCase(studentId = studentId, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "CREATE_STUDENT_CASE",
@@ -176,9 +190,11 @@ class AppController {
         @RequestBody body: StudentCaseInput
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "UPDATE_STUDENT_CASE",
@@ -194,9 +210,11 @@ class AppController {
         @PathVariable id: StudentCaseId
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.deleteStudentCase(id = id, studentId = studentId)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteStudentCase(id = id, studentId = studentId)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "DELETE_STUDENT_CASE",
@@ -213,9 +231,11 @@ class AppController {
         @RequestBody body: CaseStatusInput
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "UPDATE_STUDENT_CASE_STATUS",
@@ -231,9 +251,11 @@ class AppController {
         @RequestBody body: CaseEventInput
     ): CaseEventId =
         db()
-            .connect { it.transaction { tx ->
-                tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "CREATE_CASE_EVENT",
@@ -248,9 +270,11 @@ class AppController {
         @RequestBody body: CaseEventInput
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.updateCaseEvent(id = id, data = body, user = user)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.updateCaseEvent(id = id, data = body, user = user)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "UPDATE_CASE_EVENT",
@@ -265,9 +289,11 @@ class AppController {
         @PathVariable id: CaseEventId
     ) {
         db()
-            .connect { it.transaction { tx ->
-                tx.deleteCaseEvent(id = id)
-            } }.also {
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteCaseEvent(id = id)
+                }
+            }.also {
                 logger.audit(
                     user,
                     "DELETE_CASE_EVENT",

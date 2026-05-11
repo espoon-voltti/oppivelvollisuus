@@ -35,8 +35,9 @@ data class CaseReportRow(
 )
 
 fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
-    handle.createQuery(
-        """
+    handle
+        .createQuery(
+            """
     SELECT
         sc.opened_at,
         extract('year' FROM s.date_of_birth) AS birth_year,
@@ -70,7 +71,7 @@ fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow
     ${request.start?.let { "AND sc.opened_at >= :start" } ?: ""}
     ${request.end?.let { "AND sc.opened_at <= :end" } ?: ""}
 """
-    ).also { if (request.start != null) it.bind("start", request.start) }
+        ).also { if (request.start != null) it.bind("start", request.start) }
         .also { if (request.end != null) it.bind("end", request.end) }
         .mapTo<CaseReportRow>()
         .list()

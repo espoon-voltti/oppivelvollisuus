@@ -2,8 +2,10 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.FullApplicationTest
+import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
@@ -22,7 +24,6 @@ import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
 import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
 import fi.espoo.oppivelvollisuus.domain.StudentSummary
-import fi.espoo.oppivelvollisuus.domain.UserBasics
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
@@ -40,9 +41,8 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class StudentTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
+    @Autowired private lateinit var controller: AppController
 
     val emptySearch =
         StudentSearchParams(
@@ -54,7 +54,7 @@ class StudentTests : FullApplicationTest() {
 
     @Test
     fun `get empty list of students`() {
-        assertEquals(emptyList(), controller.getStudents(testUser, emptySearch))
+        assertEquals(emptyList(), controller.getStudents(testUser, emptySearch, dbInstance()))
     }
 
     @Test
@@ -93,11 +93,12 @@ class StudentTests : FullApplicationTest() {
                                 caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                                 notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
                             )
-                    )
+                    ),
+                db = dbInstance()
             )
         val caseId =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .id
@@ -109,19 +110,20 @@ class StudentTests : FullApplicationTest() {
                 type = CaseEventType.HEARING_LETTER,
                 notes =
                     """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
-                    sem, mattis et scelerisque quis, convallis vulputate dui. Ut eget arcu nec 
-                    mi maximus porta. Donec id ex eget urna cursus vehicula congue id quam. 
-                    Etiam id diam velit. Morbi pellentesque, tortor nec fermentum hendrerit, 
-                    neque purus imperdiet tortor, sed dapibus nibh tellus sit amet tortor. 
-                    Integer at faucibus neque. Donec pellentesque, turpis vitae commodo tempor, 
-                    est ipsum elementum nunc, in pretium augue turpis non nulla. Sed pulvinar 
-                    mollis scelerisque. Aenean tincidunt metus ut velit facilisis, in consequat 
-                    ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros. 
-                    Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis
+                    sem, mattis et scelerisque quis, convallis vulputate dui. Ut eget arcu nec
+                    mi maximus porta. Donec id ex eget urna cursus vehicula congue id quam.
+                    Etiam id diam velit. Morbi pellentesque, tortor nec fermentum hendrerit,
+                    neque purus imperdiet tortor, sed dapibus nibh tellus sit amet tortor.
+                    Integer at faucibus neque. Donec pellentesque, turpis vitae commodo tempor,
+                    est ipsum elementum nunc, in pretium augue turpis non nulla. Sed pulvinar
+                    mollis scelerisque. Aenean tincidunt metus ut velit facilisis, in consequat
+                    ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros.
+                    Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id
                     semper. Interdum et malesuada fames ac ante ipsum primis in faucibus.
                     """.trimIndent()
-            )
+            ),
+            dbInstance()
         )
 
         assertEquals(
@@ -141,16 +143,16 @@ class StudentTests : FullApplicationTest() {
                                 type = CaseEventType.HEARING_LETTER,
                                 notes =
                                     """
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis
                                     sem, mattis et...
                                     """.trimIndent()
                             )
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch)
+            actual = controller.getStudents(testUser, emptySearch, dbInstance())
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(testUser, studentId, dbInstance())
         assertEquals(
             Student(
                 id = studentId,
@@ -231,7 +233,8 @@ class StudentTests : FullApplicationTest() {
                                 caseBackgroundReasons = emptySet(),
                                 notInSchoolReason = null
                             )
-                    )
+                    ),
+                db = dbInstance()
             )
         assertEquals(
             expected =
@@ -247,10 +250,10 @@ class StudentTests : FullApplicationTest() {
                         lastEvent = null
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch)
+            actual = controller.getStudents(testUser, emptySearch, dbInstance())
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(testUser, studentId, dbInstance())
         assertEquals(
             Student(
                 id = studentId,
@@ -296,30 +299,32 @@ class StudentTests : FullApplicationTest() {
 
     @Test
     fun `update student data`() {
-        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
+        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput, dbInstance())
 
         controller.updateStudent(
             user = testUser,
             id = studentId,
-            StudentInput(
-                valpasLink = "valpas",
-                ssn = "170108A927R",
-                firstName = "Teppo",
-                lastName = "Testaajainen",
-                language = "ruotsi",
-                dateOfBirth = LocalDate.of(2008, 1, 17),
-                phone = "1234567",
-                email = "a@a.com",
-                gender = Gender.MALE,
-                address = "Katu 1",
-                municipalityInFinland = false,
-                guardianInfo = "Huoltaja",
-                supportContactsInfo = "Opo",
-                partnerOrganisations = setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
-            )
+            body =
+                StudentInput(
+                    valpasLink = "valpas",
+                    ssn = "170108A927R",
+                    firstName = "Teppo",
+                    lastName = "Testaajainen",
+                    language = "ruotsi",
+                    dateOfBirth = LocalDate.of(2008, 1, 17),
+                    phone = "1234567",
+                    email = "a@a.com",
+                    gender = Gender.MALE,
+                    address = "Katu 1",
+                    municipalityInFinland = false,
+                    guardianInfo = "Huoltaja",
+                    supportContactsInfo = "Opo",
+                    partnerOrganisations = setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
+                ),
+            db = dbInstance()
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(testUser, studentId, dbInstance())
         assertEquals(
             Student(
                 id = studentId,
@@ -350,7 +355,8 @@ class StudentTests : FullApplicationTest() {
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         controller.createStudent(
             user = testUser,
@@ -358,10 +364,11 @@ class StudentTests : FullApplicationTest() {
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
 
-        assertEquals(2, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(2, controller.getStudents(testUser, emptySearch, dbInstance()).size)
     }
 
     @Test
@@ -375,7 +382,8 @@ class StudentTests : FullApplicationTest() {
                             ssn = "170108A927R"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val e =
             assertThrows<UnableToExecuteStatementException> {
@@ -388,12 +396,13 @@ class StudentTests : FullApplicationTest() {
                                     ssn = "170108A927R"
                                 ),
                             studentCase = minimalStudentCaseTestInput
-                        )
+                        ),
+                    db = dbInstance()
                 )
             }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(1, controller.getStudents(testUser, emptySearch, dbInstance()).size)
     }
 
     @Test
@@ -407,7 +416,8 @@ class StudentTests : FullApplicationTest() {
                             valpasLink = "http://valpas.fi/123"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val e =
             assertThrows<UnableToExecuteStatementException> {
@@ -420,12 +430,13 @@ class StudentTests : FullApplicationTest() {
                                     valpasLink = "http://valpas.fi/123"
                                 ),
                             studentCase = minimalStudentCaseTestInput
-                        )
+                        ),
+                    db = dbInstance()
                 )
             }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(1, controller.getStudents(testUser, emptySearch, dbInstance()).size)
     }
 
     @Test
@@ -439,7 +450,8 @@ class StudentTests : FullApplicationTest() {
                             ssn = "170108A927R"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -449,7 +461,8 @@ class StudentTests : FullApplicationTest() {
                     valpasLink = "",
                     firstName = "",
                     lastName = ""
-                )
+                ),
+                dbInstance()
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -470,7 +483,8 @@ class StudentTests : FullApplicationTest() {
                             valpasLink = "https://valpas.fi/123"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -480,7 +494,8 @@ class StudentTests : FullApplicationTest() {
                     valpasLink = "https://valpas.fi/123",
                     firstName = "",
                     lastName = ""
-                )
+                ),
+                dbInstance()
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -502,7 +517,8 @@ class StudentTests : FullApplicationTest() {
                             lastName = "Ankka"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -512,7 +528,8 @@ class StudentTests : FullApplicationTest() {
                     valpasLink = "",
                     firstName = "Tupu",
                     lastName = "Ankka"
-                )
+                ),
+                dbInstance()
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -535,7 +552,8 @@ class StudentTests : FullApplicationTest() {
                             lastName = "Ankka"
                         ),
                     studentCase = minimalStudentCaseTestInput
-                )
+                ),
+            db = dbInstance()
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -545,7 +563,8 @@ class StudentTests : FullApplicationTest() {
                     valpasLink = "",
                     firstName = "Tupu",
                     lastName = "Ankka"
-                )
+                ),
+                dbInstance()
             )
         assertEquals(0, duplicateStudents.size)
     }
@@ -555,10 +574,11 @@ class StudentTests : FullApplicationTest() {
         val studentId =
             controller.createStudent(
                 user = testUser,
-                body = minimalStudentAndCaseTestInput
+                body = minimalStudentAndCaseTestInput,
+                db = dbInstance()
             )
         assertThrows<UnableToExecuteStatementException> {
-            controller.deleteStudent(testUser, studentId)
+            controller.deleteStudent(testUser, studentId, dbInstance())
         }
     }
 
@@ -567,20 +587,21 @@ class StudentTests : FullApplicationTest() {
         val studentId =
             controller.createStudent(
                 user = testUser,
-                body = minimalStudentAndCaseTestInput
+                body = minimalStudentAndCaseTestInput,
+                db = dbInstance()
             )
         val caseId =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .id
-        controller.deleteStudentCase(testUser, studentId, caseId)
+        controller.deleteStudentCase(testUser, studentId, caseId, dbInstance())
 
-        controller.deleteStudent(testUser, studentId)
+        controller.deleteStudent(testUser, studentId, dbInstance())
 
-        assertEquals(0, controller.getStudents(testUser, emptySearch).size)
-        assertThrows<NotFound> { controller.getStudent(testUser, studentId) }
+        assertEquals(0, controller.getStudents(testUser, emptySearch, dbInstance()).size)
+        assertThrows<NotFound> { controller.getStudent(testUser, studentId, dbInstance()) }
     }
 
     @Test
@@ -595,7 +616,8 @@ class StudentTests : FullApplicationTest() {
                                 dateOfBirth = LocalDate.now().minusYears(21).minusDays(1)
                             ),
                         studentCase = minimalStudentCaseTestInput
-                    )
+                    ),
+                db = dbInstance()
             )
         val studentId2 =
             controller.createStudent(
@@ -607,21 +629,22 @@ class StudentTests : FullApplicationTest() {
                                 dateOfBirth = LocalDate.now().minusYears(21).plusDays(1)
                             ),
                         studentCase = minimalStudentCaseTestInput
-                    )
+                    ),
+                db = dbInstance()
             )
         val caseId =
             controller
-                .getStudent(testUser, studentId1)
+                .getStudent(testUser, studentId1, dbInstance())
                 .cases
                 .first()
                 .id
-        controller.createCaseEvent(testUser, caseId, CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"))
+        controller.createCaseEvent(testUser, caseId, CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"), dbInstance())
 
-        controller.deleteOldStudents(testUser)
+        controller.deleteOldStudents(testUser, dbInstance())
 
-        val students = controller.getStudents(testUser, emptySearch)
+        val students = controller.getStudents(testUser, emptySearch, dbInstance())
         assertEquals(1, students.size)
         assertEquals(studentId2, students.first().id)
-        assertThrows<NotFound> { controller.getStudent(testUser, studentId1) }
+        assertThrows<NotFound> { controller.getStudent(testUser, studentId1, dbInstance()) }
     }
 }

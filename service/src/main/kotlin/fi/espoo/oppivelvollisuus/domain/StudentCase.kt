@@ -11,7 +11,6 @@ import fi.espoo.oppivelvollisuus.shared.BadRequest
 import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
-import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
@@ -121,13 +120,14 @@ fun Database.Transaction.insertStudentCase(
     data: StudentCaseInput,
     user: AuthenticatedUser
 ): StudentCaseId =
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
                 INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason)
                 VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
-    ).bind("studentId", studentId.raw)
+        ).bind("studentId", studentId.raw)
         .bind("openedAt", data.openedAt)
         .bind("assignedTo", data.assignedTo?.raw)
         .bind("source", data.source)
@@ -224,7 +224,8 @@ data class StudentCase(
 }
 
 fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCase> =
-    handle.createQuery(
+    handle
+        .createQuery(
 """
 SELECT
     sc.id, sc.student_id, sc.opened_at,
@@ -268,7 +269,7 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
 ORDER BY opened_at DESC, sc.created DESC;
 """
-    ).bind("studentId", studentId.raw)
+        ).bind("studentId", studentId.raw)
         .mapTo<StudentCase>()
         .list()
 
@@ -278,7 +279,8 @@ fun Database.Transaction.updateStudentCase(
     data: StudentCaseInput,
     user: AuthenticatedUser
 ) {
-    handle.createUpdate(
+    handle
+        .createUpdate(
 """
 UPDATE student_cases
 SET
@@ -295,7 +297,7 @@ SET
     not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .bind("studentId", studentId.raw)
         .bind("openedAt", data.openedAt)
         .bind("assignedTo", data.assignedTo?.raw)
@@ -328,8 +330,9 @@ fun Database.Transaction.updateStudentCaseStatus(
     data: CaseStatusInput,
     user: AuthenticatedUser
 ) {
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
         UPDATE student_cases
         SET
             updated = now(),
@@ -341,7 +344,7 @@ fun Database.Transaction.updateStudentCaseStatus(
             other_reason = :otherReason
         WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .bind("studentId", studentId.raw)
         .bind("status", data.status)
         .bind("finishedReason", data.finishedInfo?.reason)
@@ -357,7 +360,8 @@ fun Database.Transaction.deleteStudentCase(
     id: StudentCaseId,
     studentId: StudentId
 ) {
-    handle.createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
+    handle
+        .createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
         .bind("id", id.raw)
         .bind("studentId", studentId.raw)
         .execute()

@@ -33,37 +33,41 @@ data class UserBasics(
 )
 
 fun Database.Transaction.upsertAppUserFromAd(adUser: AdUser): AppUser =
-    handle.createQuery(
-        // language=SQL
-        """
+    handle
+        .createQuery(
+            // language=SQL
+            """
 INSERT INTO users (external_id, first_names, last_name, email, is_active)
 VALUES (:externalId, :firstName, :lastName, :email, true)
 ON CONFLICT (external_id) DO UPDATE
 SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
 RETURNING id, external_id, first_name, last_name, email, is_active
-        """.trimIndent()
-    ).bindKotlin(adUser)
+            """.trimIndent()
+        ).bindKotlin(adUser)
         .mapTo<AppUser>()
         .one()
 
 fun Database.Read.getActiveAppUsers(): List<AppUser> =
-    handle.createQuery(
-        """
+    handle
+        .createQuery(
+            """
     SELECT id, external_id, first_name, last_name, email, is_active
     FROM users
     WHERE NOT is_system_user AND is_active
 """
-    ).mapTo<AppUser>().list()
+        ).mapTo<AppUser>()
+        .list()
 
 fun Database.Read.getAppUser(id: EspooUserId) =
-    handle.createQuery(
-        // language=SQL
-        """
+    handle
+        .createQuery(
+            // language=SQL
+            """
 SELECT id, external_id, first_name, last_name, email, is_active
 FROM users
 WHERE id = :id AND NOT is_system_user
-        """.trimIndent()
-    ).bind("id", id.raw)
+            """.trimIndent()
+        ).bind("id", id.raw)
         .mapTo<AppUser>()
         .findOne()
         .getOrNull()

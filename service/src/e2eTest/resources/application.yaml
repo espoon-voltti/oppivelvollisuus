@@ -5,9 +5,10 @@
 app:
   jwt:
     public_keys_url: classpath:local-development/jwks.json
-
-spring:
-  datasource:
+  database:
     url: "jdbc:postgresql://localhost:5432/oppivelvollisuus_it"
     username: "oppivelvollisuus"
     password: "postgres"
+    flyway:
+      username: "oppivelvollisuus"
+      password: "postgres"

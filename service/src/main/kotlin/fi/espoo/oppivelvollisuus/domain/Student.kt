@@ -54,13 +54,14 @@ fun Database.Transaction.insertStudent(
     data: StudentInput,
     user: AuthenticatedUser
 ): StudentId =
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
 INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
 VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo, :partnerOrganisations::partner_organisation[])
 RETURNING id
 """
-    ).bindKotlin(data)
+        ).bindKotlin(data)
         .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
         .mapTo<StudentId>()
@@ -96,7 +97,8 @@ data class StudentSearchParams(
 )
 
 fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
-    handle.createQuery(
+    handle
+        .createQuery(
 """
 SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status, sc.source,
     assignee.id AS assigned_to_id,
@@ -121,14 +123,14 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
   AND (source IS NULL OR source = ANY(:sources::case_source[]))
 ${if (params.assignee == null) {
-            ""
-        } else if (params.assignee.assignedTo == null) {
-            "AND assignee.id IS NULL"
-        } else {
-            "AND assignee.id = :assignedTo"
-        }}
+                ""
+            } else if (params.assignee.assignedTo == null) {
+                "AND assignee.id IS NULL"
+            } else {
+                "AND assignee.id = :assignedTo"
+            }}
 ${if (params.query != null) {
-            """
+                """
     AND (EXISTS (
         SELECT 1
         FROM unnest(regexp_split_to_array(lower(s.first_name), '\s+')) AS t(name)
@@ -141,12 +143,12 @@ ${if (params.query != null) {
         lower(s.last_name || ' ' || s.first_name) LIKE :query || '%' OR
         lower(s.ssn) LIKE :query || '%')
 """
-        } else {
-            ""
-        }}
+            } else {
+                ""
+            }}
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
-    ).bind("query", params.query?.trim()?.lowercase())
+        ).bind("query", params.query?.trim()?.lowercase())
         .bind("statuses", params.statuses.toTypedArray())
         .bind("sources", params.sources.toTypedArray())
         .bind("assignedTo", params.assignee?.assignedTo?.raw)
@@ -188,13 +190,14 @@ data class Student(
 )
 
 fun Database.Read.getStudent(id: StudentId) =
-    handle.createQuery(
+    handle
+        .createQuery(
 """
 SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
 FROM students
 WHERE id = :id
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .mapTo<Student>()
         .findOne()
         .getOrNull()
@@ -205,7 +208,8 @@ fun Database.Transaction.updateStudent(
     data: StudentInput,
     user: AuthenticatedUser
 ) {
-    handle.createUpdate(
+    handle
+        .createUpdate(
 """
 UPDATE students
 SET
@@ -227,7 +231,7 @@ SET
     partner_organisations = :partnerOrganisations::partner_organisation[]
 WHERE id = :id
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .execute()
@@ -268,8 +272,9 @@ fun Database.Read.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput
             input.firstName.isNotBlank() && input.lastName.isNotBlank()
         }
 
-    return handle.createQuery(
-        """
+    return handle
+        .createQuery(
+            """
         WITH match_data AS (
             SELECT
                 id,
@@ -283,22 +288,24 @@ fun Database.Read.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput
         SELECT * FROM match_data
         WHERE matching_ssn OR matching_valpas_link OR matching_name
     """
-    ).configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
+        ).configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
         .bindKotlin(input)
         .mapTo<DuplicateStudent>()
         .list()
 }
 
 fun Database.Transaction.deleteStudent(id: StudentId) {
-    handle.createUpdate("DELETE FROM students WHERE id = :id")
+    handle
+        .createUpdate("DELETE FROM students WHERE id = :id")
         .bind("id", id.raw)
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
 
 fun Database.Transaction.deleteOldStudents() {
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
         WITH students_to_delete AS (
             SELECT id
             FROM students
@@ -319,6 +326,6 @@ fun Database.Transaction.deleteOldStudents() {
         DELETE FROM students
         WHERE id IN (SELECT id FROM students_to_delete)
     """
-    ).bind("threshold", LocalDate.now().minusYears(21))
+        ).bind("threshold", LocalDate.now().minusYears(21))
         .execute()
 }

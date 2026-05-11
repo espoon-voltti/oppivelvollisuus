@@ -45,13 +45,14 @@ fun Database.Transaction.insertCaseEvent(
     data: CaseEventInput,
     user: AuthenticatedUser
 ): CaseEventId =
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
                 INSERT INTO case_events (created_by, student_case_id, date, type, notes)
                 VALUES (:user, :studentCaseId, :date, :type, :notes)
                 RETURNING id
             """
-    ).bind("studentCaseId", studentCaseId.raw)
+        ).bind("studentCaseId", studentCaseId.raw)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
@@ -78,8 +79,9 @@ fun Database.Transaction.updateCaseEvent(
     data: CaseEventInput,
     user: AuthenticatedUser
 ) {
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
 UPDATE case_events
 SET
     updated = now(),
@@ -89,7 +91,7 @@ SET
     notes = :notes
 WHERE id = :id
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .execute()
@@ -97,11 +99,12 @@ WHERE id = :id
 }
 
 fun Database.Transaction.deleteCaseEvent(id: CaseEventId) {
-    handle.createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
 DELETE FROM case_events
 WHERE id = :id
 """
-    ).bind("id", id.raw)
+        ).bind("id", id.raw)
         .execute()
 }

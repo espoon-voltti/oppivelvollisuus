@@ -5,6 +5,7 @@
 dist
 build
 node_modules
+*.tsbuildinfo
 
 .idea
 *.iml

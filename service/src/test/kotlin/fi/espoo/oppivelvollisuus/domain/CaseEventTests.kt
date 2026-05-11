@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.domain.AppController
+import fi.espoo.oppivelvollisuus.FullApplicationTest
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
 import fi.espoo.oppivelvollisuus.domain.CaseEventType
 import minimalStudentAndCaseTestInput
@@ -16,23 +16,22 @@ import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class CaseEvenTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+class CaseEventTests : FullApplicationTest(resetDbBeforeEach = true) {
+    @Autowired private lateinit var controller: AppController
 
     @Test
     fun `create new case event, then update it and finally delete it`() {
-        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
+        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput, dbInstance())
         val caseId =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .id
 
         var events =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .events
@@ -46,12 +45,13 @@ class CaseEvenTests : FullApplicationTest() {
                     date = LocalDate.of(2023, 12, 8),
                     type = CaseEventType.NOTE,
                     notes = "test"
-                )
+                ),
+                dbInstance()
             )
 
         events =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .events
@@ -72,12 +72,13 @@ class CaseEvenTests : FullApplicationTest() {
                 date = LocalDate.of(2023, 12, 7),
                 type = CaseEventType.EXPLANATION_REQUEST,
                 notes = "test2"
-            )
+            ),
+            dbInstance()
         )
 
         events =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .events
@@ -91,11 +92,11 @@ class CaseEvenTests : FullApplicationTest() {
             assertEquals(testUserName, event.updated?.name)
         }
 
-        controller.deleteCaseEvent(testUser, eventId)
+        controller.deleteCaseEvent(testUser, eventId, dbInstance())
 
         events =
             controller
-                .getStudent(testUser, studentId)
+                .getStudent(testUser, studentId, dbInstance())
                 .cases
                 .first()
                 .events

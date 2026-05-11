@@ -2,21 +2,21 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.FullApplicationTest
 import fi.espoo.oppivelvollisuus.domain.AppController
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import testUser
 import kotlin.test.assertEquals
 
-class AppControllerTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+class AppControllerTests : FullApplicationTest(resetDbBeforeEach = true) {
+    @Autowired private lateinit var controller: AppController
 
     @Test
     fun `get employee users returns the test user`() {
-        val employees = controller.getEmployeeUsers(testUser)
+        val employees = controller.getEmployeeUsers(testUser, dbInstance())
         assertEquals(1, employees.size)
         employees.first().let { user ->
             assertEquals(testUser.id, user.id)
