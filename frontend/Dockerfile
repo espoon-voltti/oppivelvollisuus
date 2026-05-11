@@ -40,6 +40,7 @@ ARG S3_DOWNLOADER_SHA256="cb751589ca60749c42b65009671d6076435e7454b8980ee98884e2
 
 RUN apt-get update \
  && apt-get -y dist-upgrade \
+ && apt-get install -y --no-install-recommends libcap2-bin \
  && apt-get remove --auto-remove -y nginx-module-image-filter \
  && curl -sSfL "https://github.com/hairyhenderson/gomplate/releases/download/${GOMPLATE_VERSION}/gomplate_linux-amd64" \
        -o /bin/gomplate \
@@ -49,13 +50,19 @@ RUN apt-get update \
        -o /bin/s3download \
  && chmod +x /bin/s3download \
  && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
- && rm -rf /var/lib/apt/lists/*
+ && setcap 'cap_net_bind_service=+ep' /usr/sbin/nginx \
+ && rm -rf /var/lib/apt/lists/* \
+ && rm /etc/nginx/conf.d/default.conf /etc/nginx/nginx.conf # prevent accidental usage of default configs
 
 COPY ./nginx/bin/ /bin/
 COPY ./nginx/etc/ /etc/
 
+RUN mkdir -p /nginx && chown nginx:nginx /nginx
+
+VOLUME /nginx
+
 ENTRYPOINT ["/bin/proxy-entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["nginx", "-c", "/nginx/config/nginx.conf", "-g", "daemon off;"]
 
 COPY --from=builder /project/dist/esbuild/oppivelvollisuus/ /static/
 
@@ -66,3 +73,5 @@ ENV APP_BUILD="$build" \
     APP_COMMIT="$commit"
 LABEL fi.espoo.build="$build" \
       fi.espoo.commit="$commit"
+
+USER nginx
