@@ -26,23 +26,20 @@ Service: http://localhost:8080.
 
 ## E2E tests (service)
 
-The e2e test starts its own Spring Boot service instance, so stop the pm2 `service` app first if it's running on the same port:
+Before running, make sure the dev stack is up (`mise start` if not). The e2e test starts its own Spring Boot service instance, so the pm2 `frontend` and `api-gateway` apps must be running but `service` must be stopped:
 
 ```
 mise exec -- pm2 stop service
 ```
 
-The test talks to the already-running frontend + api-gateway.
-
 ```
 cd service
-./gradlew e2eTestDeps     # one-time: installs Playwright browser system deps
 xvfb-run -a ./gradlew e2eTest
 ```
 
 On macOS with a display, `./gradlew e2eTest` works without xvfb.
 
-## Unit / integration tests
+`xvfb` and the Playwright browser system packages (`./gradlew e2eTestDeps`) are pre-installed by the sandbox `.sandbox/post-create.sh`, so no extra setup is needed in a fresh sandbox.## Unit / integration tests
 
 ```
 cd service && ./gradlew test
