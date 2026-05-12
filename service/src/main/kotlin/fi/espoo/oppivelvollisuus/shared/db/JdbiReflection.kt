@@ -4,18 +4,17 @@
 
 package fi.espoo.oppivelvollisuus.shared.db
 
+import org.jdbi.v3.core.generic.GenericTypes
+import org.jdbi.v3.core.qualifier.QualifiedType
+import org.jdbi.v3.core.qualifier.Qualifier
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 import kotlin.reflect.KType
 import kotlin.reflect.full.hasAnnotation
 import kotlin.reflect.typeOf
-import org.jdbi.v3.core.generic.GenericTypes
-import org.jdbi.v3.core.qualifier.QualifiedType
-import org.jdbi.v3.core.qualifier.Qualifier
 
-inline fun <reified T> createQualifiedType(
-    vararg annotations: KClass<out Annotation>
-): QualifiedType<T> = createQualifiedType(typeOf<T>(), *annotations)
+inline fun <reified T> createQualifiedType(vararg annotations: KClass<out Annotation>): QualifiedType<T> =
+    createQualifiedType(typeOf<T>(), *annotations)
 
 fun <T> createQualifiedType(
     type: KType,
@@ -71,18 +70,19 @@ fun KType.asJdbiJavaType(): Type =
             val javaClass = classifier.javaObjectType
             if (
                 classifier.typeParameters.isEmpty() ||
-                    javaClass.isArray ||
-                    this.arguments.all { it.type == null }
+                javaClass.isArray ||
+                this.arguments.all { it.type == null }
             ) {
                 javaClass
             } else {
                 GenericTypes.parameterizeClass(
                     javaClass,
-                    *(this.arguments
-                        .map {
-                            it.type?.asJdbiJavaType() ?: error("Star projections are not supported")
-                        }
-                        .toTypedArray()),
+                    *(
+                        this.arguments
+                            .map {
+                                it.type?.asJdbiJavaType() ?: error("Star projections are not supported")
+                            }.toTypedArray()
+                    ),
                 )
             }
         }

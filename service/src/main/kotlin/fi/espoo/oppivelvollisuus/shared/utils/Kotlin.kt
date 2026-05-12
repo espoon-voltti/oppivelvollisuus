@@ -18,25 +18,25 @@ import kotlin.jvm.java
  */
 fun <T> T.exhaust(): T = this
 
-inline fun <T> T.applyIf(condition: Boolean, block: T.() -> Unit): T =
-    if (condition) this.apply(block) else this
+inline fun <T> T.applyIf(
+    condition: Boolean,
+    block: T.() -> Unit
+): T = if (condition) this.apply(block) else this
 
-inline fun <T> T.letIf(condition: Boolean, block: (T) -> T): T =
-    if (condition) this.let(block) else this
+inline fun <T> T.letIf(
+    condition: Boolean,
+    block: (T) -> T
+): T = if (condition) this.let(block) else this
 
-inline fun <reified T : Enum<T>> Array<out T>.toEnumSet(): EnumSet<T> =
-    emptyEnumSet<T>().also { it += this }
+inline fun <reified T : Enum<T>> Array<out T>.toEnumSet(): EnumSet<T> = emptyEnumSet<T>().also { it += this }
 
-inline fun <reified T : Enum<T>> Iterable<T>.toEnumSet(): EnumSet<T> =
-    emptyEnumSet<T>().also { it += this }
+inline fun <reified T : Enum<T>> Iterable<T>.toEnumSet(): EnumSet<T> = emptyEnumSet<T>().also { it += this }
 
-inline fun <reified T : Enum<T>> Sequence<T>.toEnumSet(): EnumSet<T> =
-    emptyEnumSet<T>().also { it += this }
+inline fun <reified T : Enum<T>> Sequence<T>.toEnumSet(): EnumSet<T> = emptyEnumSet<T>().also { it += this }
 
 inline fun <reified T : Enum<T>> emptyEnumSet(): EnumSet<T> = EnumSet.noneOf(T::class.java)
 
-inline fun <reified T : Enum<T>> enumSetOf(vararg elements: T): EnumSet<T> =
-    emptyEnumSet<T>().also { it += elements }
+inline fun <reified T : Enum<T>> enumSetOf(vararg elements: T): EnumSet<T> = emptyEnumSet<T>().also { it += elements }
 
 fun <K, V> mapOfNotNullValues(vararg pairs: Pair<K, V?>): Map<K, V> =
     pairs.mapNotNull { if (it.second != null) Pair(it.first, it.second!!) else null }.toMap()
@@ -47,20 +47,19 @@ fun <K, V> mapOfNotNullValues(vararg pairs: Pair<K, V?>): Map<K, V> =
  * Nullable result types are not supported to prevent confusion between "not found" and "found but
  * null".
  */
-fun <T, R : Any> memoize(f: (T) -> R): (T) -> R = run {
-    val originalThread = Thread.currentThread().threadId()
-    val cache: MutableMap<T, R> = mutableMapOf()
-    return@run { input ->
-        assert(Thread.currentThread().threadId() == originalThread) {
-            "Memoized function accessed from the wrong thread"
+fun <T, R : Any> memoize(f: (T) -> R): (T) -> R =
+    run {
+        val originalThread = Thread.currentThread().threadId()
+        val cache: MutableMap<T, R> = mutableMapOf()
+        return@run { input ->
+            assert(Thread.currentThread().threadId() == originalThread) {
+                "Memoized function accessed from the wrong thread"
+            }
+            cache.getOrPut(input) { f(input) }
         }
-        cache.getOrPut(input) { f(input) }
     }
-}
 
-inline fun <T> Iterable<T>.partitionIndexed(
-    predicate: (index: Int, T) -> Boolean
-): Pair<List<T>, List<T>> {
+inline fun <T> Iterable<T>.partitionIndexed(predicate: (index: Int, T) -> Boolean): Pair<List<T>, List<T>> {
     val first = kotlin.collections.ArrayList<T>()
     val second = kotlin.collections.ArrayList<T>()
     forEachIndexed { index, element ->

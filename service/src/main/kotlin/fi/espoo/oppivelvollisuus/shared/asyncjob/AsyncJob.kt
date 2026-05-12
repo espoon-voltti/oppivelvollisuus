@@ -13,23 +13,30 @@ import java.time.Duration
 import java.util.UUID
 import kotlin.reflect.KClass
 
-data class AsyncJobType<T : Any>(val payloadClass: KClass<T>) {
+data class AsyncJobType<T : Any>(
+    val payloadClass: KClass<T>
+) {
     val name: String = payloadClass.simpleName!!
 
     override fun toString(): String = name
 
     companion object {
-        fun <T : Any> ofPayload(payload: T): AsyncJobType<T> =
-            AsyncJobType(payload.javaClass.kotlin)
+        fun <T : Any> ofPayload(payload: T): AsyncJobType<T> = AsyncJobType(payload.javaClass.kotlin)
     }
 }
 
 sealed interface AsyncJob {
-    data class DeleteOrphanAttachment(val id: AttachmentId) : AsyncJob
+    data class DeleteOrphanAttachment(
+        val id: AttachmentId
+    ) : AsyncJob
 
-    data class RunScheduledJob(val job: String) : AsyncJob
+    data class RunScheduledJob(
+        val job: String
+    ) : AsyncJob
 
-    data class SendEspooNotificationNewCompanyApplication(val companyId: CompanyId) : AsyncJob
+    data class SendEspooNotificationNewCompanyApplication(
+        val companyId: CompanyId
+    ) : AsyncJob
 
     data class SendProviderNotificationNewCompanyApplication(
         val companyId: CompanyId,
@@ -194,4 +201,6 @@ data class ClaimedJobRef<T : Any>(
     val remainingAttempts: Int,
 )
 
-data class WorkPermit(val availableAt: HelsinkiDateTime)
+data class WorkPermit(
+    val availableAt: HelsinkiDateTime
+)

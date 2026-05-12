@@ -9,40 +9,41 @@ import com.zaxxer.hikari.HikariDataSource
 import fi.espoo.oppivelvollisuus.DatabaseEnv
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.db.configureJdbi
-import java.util.concurrent.TimeUnit
-import javax.sql.DataSource
 import org.flywaydb.core.Flyway
 import org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension
 import org.jdbi.v3.core.Jdbi
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.util.concurrent.TimeUnit
+import javax.sql.DataSource
 
 @Configuration
 class DatabaseConfig {
     @Bean
-    fun jdbi(dataSource: DataSource, env: DatabaseEnv) =
-        configureJdbi(Jdbi.create(dataSource)).apply {
-            if (env.logSql) {
-                setSqlLogger(Database.sqlLogger)
-            }
+    fun jdbi(
+        dataSource: DataSource,
+        env: DatabaseEnv
+    ) = configureJdbi(Jdbi.create(dataSource)).apply {
+        if (env.logSql) {
+            setSqlLogger(Database.sqlLogger)
         }
+    }
 
     @Bean
     fun dataSource(env: DatabaseEnv): DataSource {
-        Flyway.configure()
+        Flyway
+            .configure()
             .apply {
                 pluginRegister
                     .getExact(PostgreSQLConfigurationExtension::class.java)
                     .isTransactionalLock = false
-            }
-            .ignoreMigrationPatterns(
+            }.ignoreMigrationPatterns(
                 if (env.flywayIgnoreFutureMigrations) {
                     "*:future"
                 } else {
                     ""
                 }
-            )
-            .validateMigrationNaming(true)
+            ).validateMigrationNaming(true)
             .dataSource(env.url, env.flywayUsername, env.flywayPassword.value)
             .locations(*env.flywayLocations.toTypedArray())
             .load()

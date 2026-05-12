@@ -4,9 +4,9 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.common.BadRequest
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
+import fi.espoo.oppivelvollisuus.domain.UserBasics
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput

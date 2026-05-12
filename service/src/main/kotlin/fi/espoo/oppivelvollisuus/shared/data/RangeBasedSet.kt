@@ -19,7 +19,9 @@ abstract class RangeBasedSet<
     Point : Comparable<Point>,
     Range : BoundedRange<Point, Range>,
     This : RangeBasedSet<Point, Range, This>,
->(protected val ranges: List<Range>) {
+>(
+    protected val ranges: List<Range>
+) {
     /** Returns a sequence of all non-adjacent ranges in the set, sorted in ascending order */
     fun ranges(): Sequence<Range> = this.ranges.asSequence()
 
@@ -49,8 +51,7 @@ abstract class RangeBasedSet<
      *
      * The sequence is empty if the set is empty or has only one range.
      */
-    fun gaps(): Sequence<Range> =
-        this.ranges().windowed(2).mapNotNull { pair -> pair[0].gap(pair[1]) }
+    fun gaps(): Sequence<Range> = this.ranges().windowed(2).mapNotNull { pair -> pair[0].gap(pair[1]) }
 
     /** Returns true if the set is empty. */
     fun isEmpty(): Boolean = this.ranges.isEmpty()
@@ -68,8 +69,7 @@ abstract class RangeBasedSet<
      * Returns a new set containing all the ranges in the given set and all currently contained
      * ranges.
      */
-    fun addAll(set: RangeBasedSet<Point, Range, This>): This =
-        set.ranges.fold(this.ranges, ::add).toThis()
+    fun addAll(set: RangeBasedSet<Point, Range, This>): This = set.ranges.fold(this.ranges, ::add).toThis()
 
     /** Returns a new set containing all the given ranges and all currently contained ranges. */
     fun addAll(ranges: Iterable<Range>): This = ranges.fold(this.ranges, ::add).toThis()
@@ -95,8 +95,7 @@ abstract class RangeBasedSet<
      * Returns a new set with all the ranges in the given set removed from the currently contained
      * ranges.
      */
-    fun removeAll(set: RangeBasedSet<Point, Range, This>): This =
-        set.ranges.fold(this.ranges, ::remove).toThis()
+    fun removeAll(set: RangeBasedSet<Point, Range, This>): This = set.ranges.fold(this.ranges, ::remove).toThis()
 
     /** Returns a new set with all the given ranges removed from the currently contained ranges. */
     fun removeAll(ranges: Iterable<Range>): This = ranges.fold(this.ranges, ::remove).toThis()
@@ -132,21 +131,22 @@ abstract class RangeBasedSet<
      * Returns a new set representing the intersections of currently contained ranges and the given
      * ranges.
      */
-    fun intersection(other: Iterable<Range>): This =
-        intersection(this.ranges.iterator(), other.iterator()).toThis()
+    fun intersection(other: Iterable<Range>): This = intersection(this.ranges.iterator(), other.iterator()).toThis()
 
     /**
      * Returns a new set representing the intersections of currently contained ranges and the given
      * ranges.
      */
-    fun intersection(other: Sequence<Range>): This =
-        intersection(this.ranges.iterator(), other.iterator()).toThis()
+    fun intersection(other: Sequence<Range>): This = intersection(this.ranges.iterator(), other.iterator()).toThis()
 
     /** Converts a raw sorted list of ranges to a concrete `RangeBasedSet` subclass object. */
     protected abstract fun List<Range>.toThis(): This
 
     /** Constructs a range from endpoints. */
-    protected abstract fun range(start: Point, end: Point): Range
+    protected abstract fun range(
+        start: Point,
+        end: Point
+    ): Range
 
     /** Constructs the smallest range that includes the given point. */
     protected abstract fun range(point: Point): Range
@@ -161,7 +161,11 @@ abstract class RangeBasedSet<
         private fun <T> List<T>.sliceView(range: IntRange): List<T> =
             if (range.isEmpty()) emptyList() else subList(range.first, range.last + 1)
 
-        data class Partition<T>(val left: List<T>, val center: List<T>, val right: List<T>)
+        data class Partition<T>(
+            val left: List<T>,
+            val center: List<T>,
+            val right: List<T>
+        )
 
         /**
          * Partitions a sorted list of ranges into left/center/right list views depending on

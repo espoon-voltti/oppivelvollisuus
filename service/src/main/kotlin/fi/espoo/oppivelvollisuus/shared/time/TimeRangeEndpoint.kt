@@ -18,7 +18,9 @@ sealed interface TimeRangeEndpoint : Comparable<TimeRangeEndpoint> {
     fun toDbString(): String
 
     /** 00:00:00 means midnight in the same day */
-    data class Start(override val inner: LocalTime) : TimeRangeEndpoint {
+    data class Start(
+        override val inner: LocalTime
+    ) : TimeRangeEndpoint {
         override fun compareTo(other: TimeRangeEndpoint): Int =
             when (other) {
                 is Start -> {
@@ -47,7 +49,9 @@ sealed interface TimeRangeEndpoint : Comparable<TimeRangeEndpoint> {
     }
 
     /** 00:00:00 means midnight in the next day */
-    data class End(override val inner: LocalTime) : TimeRangeEndpoint {
+    data class End(
+        override val inner: LocalTime
+    ) : TimeRangeEndpoint {
         override fun compareTo(other: TimeRangeEndpoint): Int =
             when (other) {
                 is Start -> {

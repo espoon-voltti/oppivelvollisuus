@@ -5,13 +5,13 @@
 package fi.espoo.oppivelvollisuus.shared.db
 
 import fi.espoo.oppivelvollisuus.PureJdbiTest
+import org.junit.jupiter.api.Test
 import kotlin.reflect.KClass
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class JdbiReflectionTest : PureJdbiTest(resetDbBeforeEach = false) {
     private inline fun <reified T> mapOneValue(

@@ -5,13 +5,13 @@
 package fi.espoo.oppivelvollisuus.shared.data
 
 import fi.espoo.oppivelvollisuus.shared.time.FiniteDateRange
+import org.junit.jupiter.api.RepeatedTest
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.RepeatedTest
-import org.junit.jupiter.api.Test
 
 class DateMapTest {
     @Test
@@ -126,14 +126,13 @@ class DateMapTest {
         val resolve = { _: FiniteDateRange, old: Int, new: Int -> old + new }
         val entries =
             listOf(
-                    testEntry(1..2, 1),
-                    testEntry(2..4, 1),
-                    testEntry(4..6, 1),
-                    testEntry(2..5, 1),
-                    testEntry(5..6, 1),
-                    testEntry(1..3, 1),
-                )
-                .shuffled()
+                testEntry(1..2, 1),
+                testEntry(2..4, 1),
+                testEntry(4..6, 1),
+                testEntry(2..5, 1),
+                testEntry(5..6, 1),
+                testEntry(1..3, 1),
+            ).shuffled()
         val set = DateMap.empty<Int>().update(entries, resolve)
         assertTrue(entries.all { set.contains(it.first) })
         assertEquals(
@@ -163,8 +162,10 @@ class DateMapTest {
 
     private fun testDate(day: Int) = LocalDate.of(2019, 1, day)
 
-    private fun testRange(range: IntRange) =
-        FiniteDateRange(testDate(range.first), testDate(range.last))
+    private fun testRange(range: IntRange) = FiniteDateRange(testDate(range.first), testDate(range.last))
 
-    private fun <T> testEntry(range: IntRange, value: T) = testRange(range) to value
+    private fun <T> testEntry(
+        range: IntRange,
+        value: T
+    ) = testRange(range) to value
 }

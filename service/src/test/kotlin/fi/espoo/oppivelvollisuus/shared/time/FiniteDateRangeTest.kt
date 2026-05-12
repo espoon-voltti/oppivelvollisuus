@@ -5,14 +5,14 @@
 package fi.espoo.oppivelvollisuus.shared.time
 
 import fi.espoo.oppivelvollisuus.shared.data.BoundedRange
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class FiniteDateRangeTest {
     @Test
@@ -434,5 +434,8 @@ class FiniteDateRangeTest {
 
     private fun testDate(day: Int) = LocalDate.of(2019, 1, day)
 
-    private fun testRange(from: Int, to: Int) = FiniteDateRange(testDate(from), testDate(to))
+    private fun testRange(
+        from: Int,
+        to: Int
+    ) = FiniteDateRange(testDate(from), testDate(to))
 }

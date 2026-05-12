@@ -6,13 +6,13 @@ package fi.espoo.oppivelvollisuus.shared.data
 
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTimeRange
+import org.junit.jupiter.api.RepeatedTest
+import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.RepeatedTest
-import org.junit.jupiter.api.Test
 
 class DateTimeMapTest {
     @Test
@@ -82,7 +82,8 @@ class DateTimeMapTest {
         // =  AABB_C_
         val result = listOf(testEntry(1 to 3, "A"), testEntry(3 to 5, "B"), testEntry(6 to 7, "C"))
         val set =
-            DateTimeMap.of(testEntry(1 to 4, "A"))
+            DateTimeMap
+                .of(testEntry(1 to 4, "A"))
                 .set(testEntry(3 to 5, "B"))
                 .set(testEntry(6 to 7, "C"))
         assertEquals(result, set.entries().toList())
@@ -133,14 +134,13 @@ class DateTimeMapTest {
         val resolve = { _: HelsinkiDateTimeRange, old: Int, new: Int -> old + new }
         val entries =
             listOf(
-                    testEntry(1 to 3, 1),
-                    testEntry(2 to 5, 1),
-                    testEntry(4 to 7, 1),
-                    testEntry(2 to 6, 1),
-                    testEntry(5 to 7, 1),
-                    testEntry(1 to 4, 1),
-                )
-                .shuffled()
+                testEntry(1 to 3, 1),
+                testEntry(2 to 5, 1),
+                testEntry(4 to 7, 1),
+                testEntry(2 to 6, 1),
+                testEntry(5 to 7, 1),
+                testEntry(1 to 4, 1),
+            ).shuffled()
         val set = DateTimeMap.empty<Int>().update(entries, resolve)
         assertTrue(entries.all { set.contains(it.first) })
         assertEquals(
@@ -177,8 +177,10 @@ class DateTimeMapTest {
 
     private fun testDateTime(hour: Int) = HelsinkiDateTime.of(LocalDateTime.of(2019, 1, 1, hour, 0))
 
-    private fun testRange(range: Pair<Int, Int>) =
-        HelsinkiDateTimeRange(testDateTime(range.first), testDateTime(range.second))
+    private fun testRange(range: Pair<Int, Int>) = HelsinkiDateTimeRange(testDateTime(range.first), testDateTime(range.second))
 
-    private fun <T> testEntry(range: Pair<Int, Int>, value: T) = testRange(range) to value
+    private fun <T> testEntry(
+        range: Pair<Int, Int>,
+        value: T
+    ) = testRange(range) to value
 }

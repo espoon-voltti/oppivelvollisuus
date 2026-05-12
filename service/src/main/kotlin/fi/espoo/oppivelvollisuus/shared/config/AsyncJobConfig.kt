@@ -10,20 +10,22 @@ import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import io.opentelemetry.api.trace.Tracer
-import java.time.Duration
 import org.jdbi.v3.core.Jdbi
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import java.time.Duration
 
-private fun emailThrottleInterval(maxEmailsPerSecondRate: Int) =
-    Duration.ofSeconds(1).dividedBy(maxEmailsPerSecondRate.toLong())
+private fun emailThrottleInterval(maxEmailsPerSecondRate: Int) = Duration.ofSeconds(1).dividedBy(maxEmailsPerSecondRate.toLong())
 
 @Configuration
 class AsyncJobConfig {
     @Bean
-    fun asyncJobRunner(jdbi: Jdbi, tracer: Tracer): AsyncJobRunner<AsyncJob> =
+    fun asyncJobRunner(
+        jdbi: Jdbi,
+        tracer: Tracer
+    ): AsyncJobRunner<AsyncJob> =
         AsyncJobRunner(
             AsyncJob::class,
             listOf(
@@ -42,18 +44,17 @@ class AsyncJobConfig {
         asyncJobRunners: List<AsyncJobRunner<*>>,
         appEnv: AppEnv,
         meterRegistry: MeterRegistry,
-    ) =
-        ApplicationListener<ApplicationReadyEvent> {
-            val logger = KotlinLogging.logger {}
-            if (appEnv.asyncJobRunnerDisabled) {
-                logger.info { "Async job runners disabled" }
-            } else {
-                asyncJobRunners.forEach {
-                    it.registerMeters(meterRegistry)
-                    it.enableAfterCommitHooks()
-                    it.startBackgroundPolling()
-                    logger.info { "Async job runner ${it.name} started" }
-                }
+    ) = ApplicationListener<ApplicationReadyEvent> {
+        val logger = KotlinLogging.logger {}
+        if (appEnv.asyncJobRunnerDisabled) {
+            logger.info { "Async job runners disabled" }
+        } else {
+            asyncJobRunners.forEach {
+                it.registerMeters(meterRegistry)
+                it.enableAfterCommitHooks()
+                it.startBackgroundPolling()
+                logger.info { "Async job runner ${it.name} started" }
             }
         }
+    }
 }

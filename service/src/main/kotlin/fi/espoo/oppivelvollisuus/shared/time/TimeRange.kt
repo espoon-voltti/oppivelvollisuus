@@ -4,18 +4,18 @@
 
 package fi.espoo.oppivelvollisuus.shared.time
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.ser.std.StdSerializer
 import fi.espoo.oppivelvollisuus.shared.data.BoundedRange
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
-import tools.jackson.core.JsonGenerator
-import tools.jackson.core.JsonParser
-import tools.jackson.databind.DeserializationContext
-import tools.jackson.databind.SerializationContext
-import tools.jackson.databind.ValueDeserializer
-import tools.jackson.databind.ValueSerializer
-import tools.jackson.databind.annotation.JsonDeserialize
-import tools.jackson.databind.annotation.JsonSerialize
 
 /** `end` is exclusive */
 @JsonSerialize(using = TimeRangeJsonSerializer::class)
@@ -40,8 +40,7 @@ data class TimeRange(
         }
     }
 
-    override fun overlaps(other: TimeRange): Boolean =
-        this.start < other.end && other.start < this.end
+    override fun overlaps(other: TimeRange): Boolean = this.start < other.end && other.start < this.end
 
     override fun leftAdjacentTo(other: TimeRange): Boolean = this.end.compareTo(other.start) == 0
 
@@ -51,11 +50,9 @@ data class TimeRange(
 
     override fun strictlyRightTo(other: TimeRange): Boolean = other.end <= this.start
 
-    override fun intersection(other: TimeRange): TimeRange? =
-        tryCreate(maxOf(this.start, other.start), minOf(this.end, other.end))
+    override fun intersection(other: TimeRange): TimeRange? = tryCreate(maxOf(this.start, other.start), minOf(this.end, other.end))
 
-    override fun gap(other: TimeRange): TimeRange? =
-        tryCreate(minOf(this.end, other.end), maxOf(this.start, other.start))
+    override fun gap(other: TimeRange): TimeRange? = tryCreate(minOf(this.end, other.end), maxOf(this.start, other.start))
 
     override fun subtract(other: TimeRange): BoundedRange.SubtractResult<TimeRange> =
         if (this.overlaps(other)) {
@@ -78,8 +75,7 @@ data class TimeRange(
             BoundedRange.SubtractResult.Original(this)
         }
 
-    override fun merge(other: TimeRange): TimeRange =
-        TimeRange(minOf(this.start, other.start), maxOf(this.end, other.end))
+    override fun merge(other: TimeRange): TimeRange = TimeRange(minOf(this.start, other.start), maxOf(this.end, other.end))
 
     override fun relationTo(other: TimeRange): BoundedRange.Relation<TimeRange> =
         when {
@@ -142,8 +138,7 @@ data class TimeRange(
 
     fun includes(point: LocalTime) = this.includes(TimeRangeEndpoint.Start(point))
 
-    override fun contains(other: TimeRange): Boolean =
-        this.start <= other.start && other.end <= this.end
+    override fun contains(other: TimeRange): Boolean = this.start <= other.start && other.end <= this.end
 
     fun toDbString(): String = "(${this.start.toDbString()},${this.end.toDbString()})"
 
@@ -175,7 +170,10 @@ data class TimeRange(
         }
 
     companion object {
-        private fun tryCreate(start: TimeRangeEndpoint, end: TimeRangeEndpoint): TimeRange? =
+        private fun tryCreate(
+            start: TimeRangeEndpoint,
+            end: TimeRangeEndpoint
+        ): TimeRange? =
             try {
                 TimeRange(start.asStart(), end.asEnd())
             } catch (e: IllegalArgumentException) {
@@ -184,17 +182,31 @@ data class TimeRange(
     }
 }
 
-private data class SerializableTimeRange(val start: LocalTime, val end: LocalTime)
+private data class SerializableTimeRange(
+    val start: LocalTime,
+    val end: LocalTime
+)
 
-class TimeRangeJsonSerializer : ValueSerializer<TimeRange>() {
-    override fun serialize(value: TimeRange, gen: JsonGenerator, ctxt: SerializationContext) {
-        val serializer = ctxt.findValueSerializer(SerializableTimeRange::class.java)
-        serializer.serialize(SerializableTimeRange(value.start.inner, value.end.inner), gen, ctxt)
+class TimeRangeJsonSerializer : StdSerializer<TimeRange>(TimeRange::class.java) {
+    override fun serialize(
+        value: TimeRange,
+        gen: JsonGenerator,
+        provider: SerializerProvider
+    ) {
+        val serializer = provider.findValueSerializer(SerializableTimeRange::class.java)
+        serializer.serialize(
+            SerializableTimeRange(value.start.inner, value.end.inner),
+            gen,
+            provider,
+        )
     }
 }
 
-class TimeRangeJsonDeserializer : ValueDeserializer<TimeRange>() {
-    override fun deserialize(parser: JsonParser, ctx: DeserializationContext): TimeRange {
+class TimeRangeJsonDeserializer : StdDeserializer<TimeRange>(TimeRange::class.java) {
+    override fun deserialize(
+        parser: JsonParser,
+        ctx: DeserializationContext
+    ): TimeRange {
         val value = parser.readValueAs(SerializableTimeRange::class.java)
         return TimeRange(value.start, value.end)
     }

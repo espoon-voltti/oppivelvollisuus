@@ -6,7 +6,9 @@ package fi.espoo.oppivelvollisuus.shared.logging
 
 import org.slf4j.MDC
 
-enum class MdcKey(val key: String) {
+enum class MdcKey(
+    val key: String
+) {
     SPAN_ID("spanId"),
     REQ_IP("userIp"),
     HTTP_METHOD("httpMethod"),

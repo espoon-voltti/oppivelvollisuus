@@ -11,16 +11,18 @@ import fi.espoo.oppivelvollisuus.shared.db.configureJdbi
 import fi.espoo.oppivelvollisuus.shared.dev.resetDatabase
 import fi.espoo.oppivelvollisuus.shared.noopTracer
 import io.opentelemetry.api.trace.Tracer
-import javax.sql.DataSource
 import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.slf4j.LoggerFactory
+import javax.sql.DataSource
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-abstract class PureJdbiTest(private val resetDbBeforeEach: Boolean) {
+abstract class PureJdbiTest(
+    private val resetDbBeforeEach: Boolean
+) {
     protected lateinit var dataSource: DataSource
     protected lateinit var jdbi: Jdbi
     protected lateinit var db: Database.Connection

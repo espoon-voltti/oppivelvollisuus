@@ -23,6 +23,7 @@ object Tracing {
     val oppivelvollisuusTraceId = AttributeKey.stringKey("oppivelvollisuus.traceid")
     val asyncJobId = ToStringAttributeKey<UUID>("asyncjob.id")
     val asyncJobRemainingAttempts = AttributeKey.longKey("asyncjob.remainingattempts")
+
     // OTEL standard attribute:
     // https://opentelemetry.io/docs/specs/semconv/attributes-registry/exception/
     val exceptionEscaped = AttributeKey.booleanKey("exception.escaped")
@@ -32,22 +33,31 @@ object Tracing {
 inline infix fun <T> AttributeKey<T>.withValue(value: T) = AttributeValue(this, value)
 
 @Suppress("NOTHING_TO_INLINE")
-inline infix fun <T> ToStringAttributeKey<T>.withValue(value: T) =
-    AttributeValue(this.key, value.toString())
+inline infix fun <T> ToStringAttributeKey<T>.withValue(value: T) = AttributeValue(this.key, value.toString())
 
-class ToStringAttributeKey<T>(key: String) {
+class ToStringAttributeKey<T>(
+    key: String
+) {
     val key: AttributeKey<String> = AttributeKey.stringKey(key)
 }
 
-data class AttributeValue<T>(val key: AttributeKey<T>, val value: T)
+data class AttributeValue<T>(
+    val key: AttributeKey<T>,
+    val value: T
+)
 
-fun <T> Span.setAttribute(attribute: ToStringAttributeKey<T>, value: T): Span =
-    value?.let { setAttribute(attribute.key, it.toString()) } ?: this
+fun <T> Span.setAttribute(
+    attribute: ToStringAttributeKey<T>,
+    value: T
+): Span = value?.let { setAttribute(attribute.key, it.toString()) } ?: this
 
 fun <T> SpanBuilder.withAttribute(attribute: AttributeValue<T>): SpanBuilder =
     attribute.value?.let { setAttribute(attribute.key, it) } ?: this
 
-inline fun <T> withSpan(span: Span, crossinline f: () -> T): T =
+inline fun <T> withSpan(
+    span: Span,
+    crossinline f: () -> T
+): T =
     span.makeCurrent().use {
         try {
             f()

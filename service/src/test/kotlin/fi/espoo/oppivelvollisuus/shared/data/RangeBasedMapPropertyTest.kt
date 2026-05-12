@@ -9,19 +9,18 @@ import io.kotest.property.arbitrary.int
 import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.positiveInt
 import io.kotest.property.checkAll
+import kotlinx.coroutines.runBlocking
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlinx.coroutines.runBlocking
 
 abstract class RangeBasedMapPropertyTest<
     Point : Comparable<Point>,
     Range : BoundedRange<Point, Range>,
     RangeMap : RangeBasedMap<Int, Point, Range, RangeMap>,
 > {
-
     protected abstract fun emptyMap(): RangeMap
 
     protected abstract fun arbitraryMap(value: Arb<Int> = Arb.int()): Arb<RangeMap>
@@ -57,8 +56,10 @@ abstract class RangeBasedMapPropertyTest<
                     entries.withIndex().any { (index, entry) ->
                         entries.withIndex().any { (index2, entry2) ->
                             index != index2 &&
-                                (entry.first.adjacentTo(entry2.first) &&
-                                    entry.second == entry2.second)
+                                (
+                                    entry.first.adjacentTo(entry2.first) &&
+                                        entry.second == entry2.second
+                                )
                         }
                     }
                 )

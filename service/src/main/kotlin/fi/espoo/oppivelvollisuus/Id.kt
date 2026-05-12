@@ -6,10 +6,10 @@ package fi.espoo.oppivelvollisuus
 
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.KeyDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.util.UUID
-import tools.jackson.databind.DeserializationContext
-import tools.jackson.databind.KeyDeserializer
-import tools.jackson.databind.annotation.JsonDeserialize
 
 sealed interface DatabaseTable {
     sealed class Attachment : DatabaseTable
@@ -58,7 +58,9 @@ typealias ProviderUserId = Id<DatabaseTable.ProviderUser>
 typealias ServiceOptionId = Id<DatabaseTable.ServiceOption>
 
 @JsonDeserialize(keyUsing = Id.KeyFromJson::class)
-data class Id<out T : DatabaseTable>(val raw: UUID) : Comparable<Id<*>> {
+data class Id<out T : DatabaseTable>(
+    val raw: UUID
+) : Comparable<Id<*>> {
     @JsonValue override fun toString(): String = raw.toString()
 
     override fun compareTo(other: Id<*>): Int = this.raw.compareTo(other.raw)
@@ -70,7 +72,9 @@ data class Id<out T : DatabaseTable>(val raw: UUID) : Comparable<Id<*>> {
     }
 
     class KeyFromJson : KeyDeserializer() {
-        override fun deserializeKey(key: String, ctxt: DeserializationContext): Any =
-            Id<DatabaseTable>(UUID.fromString(key))
+        override fun deserializeKey(
+            key: String,
+            ctxt: DeserializationContext
+        ): Any = Id<DatabaseTable>(UUID.fromString(key))
     }
 }

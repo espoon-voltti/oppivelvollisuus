@@ -4,15 +4,15 @@
 
 package fi.espoo.oppivelvollisuus
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
 import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJob
 import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
 import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJobs
-import fi.espoo.oppivelvollisuus.shared.config.defaultJsonMapperBuilder
+import fi.espoo.oppivelvollisuus.shared.config.defaultJsonMapper
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.dev.resetDatabase
-import fi.espoo.oppivelvollisuus.shared.email.MockEmailClient
 import io.opentelemetry.api.trace.Tracer
-import java.net.URL
 import org.jdbi.v3.core.Jdbi
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -22,21 +22,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.core.env.Environment
-import tools.jackson.databind.DeserializationFeature
-import tools.jackson.databind.json.JsonMapper
+import java.net.URL
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     classes = [SharedIntegrationTestConfig::class],
 )
-abstract class FullApplicationTest(private val resetDbBeforeEach: Boolean) {
+abstract class FullApplicationTest(
+    private val resetDbBeforeEach: Boolean = true,
+) {
     @LocalServerPort protected var httpPort: Int = 0
 
-    protected val jsonMapper: JsonMapper =
-        defaultJsonMapperBuilder()
-            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            .build()
+    protected val jsonMapper: ObjectMapper =
+        defaultJsonMapper().apply {
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        }
 
     @Autowired private lateinit var jdbi: Jdbi
 
@@ -69,7 +70,6 @@ abstract class FullApplicationTest(private val resetDbBeforeEach: Boolean) {
         if (resetDbBeforeEach) {
             db.transaction { it.resetDatabase() }
         }
-        MockEmailClient.clear()
     }
 
     @AfterAll

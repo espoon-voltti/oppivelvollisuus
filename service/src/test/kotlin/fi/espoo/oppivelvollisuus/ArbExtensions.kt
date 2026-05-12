@@ -32,8 +32,7 @@ fun Arb.Companion.finiteDateRange(
         FiniteDateRange(startDate, startDate.plusDays(days))
     }
 
-fun Arb.Companion.dateSet(): Arb<DateSet> =
-    Arb.list(Arb.finiteDateRange()).map { ranges -> DateSet.of(ranges) }
+fun Arb.Companion.dateSet(): Arb<DateSet> = Arb.list(Arb.finiteDateRange()).map { ranges -> DateSet.of(ranges) }
 
 fun <T> Arb.Companion.dateMap(value: Arb<T>): Arb<DateMap<T>> =
     Arb.list(Arb.pair(Arb.finiteDateRange(), value)).map { entries -> DateMap.of(entries) }
@@ -47,8 +46,7 @@ fun Arb.Companion.helsinkiDateTime(
     min: HelsinkiDateTime = HelsinkiDateTime.of(LocalDateTime.of(2019, 1, 1, 12, 0)),
     max: HelsinkiDateTime = HelsinkiDateTime.of(LocalDateTime.of(2030, 12, 31, 12, 0)),
 ): Arb<HelsinkiDateTime> =
-    Arb.long(min = 0, max = Duration.between(min.toInstant(), max.toInstant()).toNanos()).map {
-        nanosSinceMin ->
+    Arb.long(min = 0, max = Duration.between(min.toInstant(), max.toInstant()).toNanos()).map { nanosSinceMin ->
         min.plus(Duration.ofNanos(nanosSinceMin))
     }
 
@@ -60,5 +58,4 @@ fun Arb.Companion.helsinkiDateTimeRange(
         HelsinkiDateTimeRange(startTimestamp, startTimestamp.plus(duration))
     }
 
-fun Arb.Companion.dateTimeSet(): Arb<DateTimeSet> =
-    Arb.list(Arb.helsinkiDateTimeRange()).map { ranges -> DateTimeSet.of(ranges) }
+fun Arb.Companion.dateTimeSet(): Arb<DateTimeSet> = Arb.list(Arb.helsinkiDateTimeRange()).map { ranges -> DateTimeSet.of(ranges) }

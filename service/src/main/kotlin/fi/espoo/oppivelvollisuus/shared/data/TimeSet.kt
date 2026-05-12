@@ -12,12 +12,15 @@ import java.util.Objects
  * An immutable data structure that is conceptually similar to a `Set<LocalTime>` but provides batch
  * operations that use `TimeRange` parameters.
  */
-class TimeSet private constructor(ranges: List<TimeRange>) :
-    RangeBasedSet<TimeRangeEndpoint, TimeRange, TimeSet>(ranges) {
+class TimeSet private constructor(
+    ranges: List<TimeRange>
+) : RangeBasedSet<TimeRangeEndpoint, TimeRange, TimeSet>(ranges) {
     override fun List<TimeRange>.toThis(): TimeSet = if (isEmpty()) EMPTY else TimeSet(this)
 
-    override fun range(start: TimeRangeEndpoint, end: TimeRangeEndpoint): TimeRange =
-        TimeRange(start, end)
+    override fun range(
+        start: TimeRangeEndpoint,
+        end: TimeRangeEndpoint
+    ): TimeRange = TimeRange(start, end)
 
     override fun range(point: TimeRangeEndpoint): TimeRange =
         point.asStart().let { start ->
@@ -28,8 +31,7 @@ class TimeSet private constructor(ranges: List<TimeRange>) :
 
     override fun hashCode(): Int = Objects.hash(ranges)
 
-    override fun toString(): String =
-        ranges.joinToString(separator = ",", prefix = "{", postfix = "}")
+    override fun toString(): String = ranges.joinToString(separator = ",", prefix = "{", postfix = "}")
 
     companion object {
         private val EMPTY = TimeSet(emptyList())

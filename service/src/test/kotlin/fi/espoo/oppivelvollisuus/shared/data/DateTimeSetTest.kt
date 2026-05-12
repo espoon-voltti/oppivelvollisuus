@@ -6,13 +6,13 @@ package fi.espoo.oppivelvollisuus.shared.data
 
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTimeRange
+import org.junit.jupiter.api.RepeatedTest
+import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.RepeatedTest
-import org.junit.jupiter.api.Test
 
 class DateTimeSetTest {
     @Test
@@ -145,6 +145,8 @@ class DateTimeSetTest {
 
     private fun testDateTime(hour: Int) = HelsinkiDateTime.of(LocalDateTime.of(2019, 1, 1, hour, 0))
 
-    private fun testRange(from: Int, to: Int) =
-        HelsinkiDateTimeRange(testDateTime(from), testDateTime(to))
+    private fun testRange(
+        from: Int,
+        to: Int
+    ) = HelsinkiDateTimeRange(testDateTime(from), testDateTime(to))
 }

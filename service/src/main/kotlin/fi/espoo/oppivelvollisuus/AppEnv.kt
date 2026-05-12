@@ -7,12 +7,11 @@ package fi.espoo.oppivelvollisuus
 import com.fasterxml.jackson.annotation.JsonValue
 import fi.espoo.oppivelvollisuus.shared.asyncjob.JobSchedule
 import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJobSettings
-import fi.espoo.oppivelvollisuus.shared.email.FromAddress
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.core.env.Environment
 import java.net.URI
 import java.time.Duration
 import java.util.Locale
-import org.springframework.core.env.Environment
 
 /**
  * A type-safe configuration parsed from environment variables / other property sources supported by
@@ -25,21 +24,21 @@ data class AppEnv(
     val skipAttachmentRequirements: Boolean,
 ) {
     companion object {
-        fun fromEnvironment(env: Environment): AppEnv {
-            return AppEnv(
+        fun fromEnvironment(env: Environment): AppEnv =
+            AppEnv(
                 frontendBaseUrlFi = env.lookup("app.frontend.base_url.fi"),
                 mockClock = env.lookup("app.clock.mock") ?: false,
                 asyncJobRunnerDisabled = env.lookup("app.async_job_runner.disable_runner") ?: false,
                 skipAttachmentRequirements = env.lookup("app.skip_attachment_requirements") ?: false,
             )
-        }
     }
 }
 
-data class JwtEnv(val publicKeysUrl: URI) {
+data class JwtEnv(
+    val publicKeysUrl: URI,
+) {
     companion object {
-        fun fromEnvironment(env: Environment) =
-            JwtEnv(publicKeysUrl = env.lookup("app.jwt.public_keys_url"))
+        fun fromEnvironment(env: Environment) = JwtEnv(publicKeysUrl = env.lookup("app.jwt.public_keys_url"))
     }
 }
 
@@ -95,78 +94,40 @@ data class DatabaseEnv(
     }
 }
 
-data class ScheduledJobsEnv<T : Enum<T>>(val jobs: Map<T, ScheduledJobSettings>) {
+data class ScheduledJobsEnv<T : Enum<T>>(
+    val jobs: Map<T, ScheduledJobSettings>,
+) {
     companion object {
         fun <T : Enum<T>> fromEnvironment(
             defaults: Map<T, ScheduledJobSettings>,
             prefix: String,
             env: Environment,
-        ) =
-            ScheduledJobsEnv(
-                defaults.mapValues { (job, default) ->
-                    val envPrefix = "$prefix.${snakeCaseName(job)}"
-                    logger.info { "Creating ScheduledJobSettings for $envPrefix" }
-                    ScheduledJobSettings(
-                        enabled = env.lookup("$envPrefix.enabled") ?: default.enabled,
-                        schedule =
-                            env.lookup<String?>("$envPrefix.cron")?.let(JobSchedule::cron)
-                                ?: default.schedule,
-                        retryCount = env.lookup("$envPrefix.retry_count") ?: default.retryCount,
-                    )
-                }
-            )
+        ) = ScheduledJobsEnv(
+            defaults.mapValues { (job, default) ->
+                val envPrefix = "$prefix.${snakeCaseName(job)}"
+                logger.info { "Creating ScheduledJobSettings for $envPrefix" }
+                ScheduledJobSettings(
+                    enabled = env.lookup("$envPrefix.enabled") ?: default.enabled,
+                    schedule =
+                        env.lookup<String?>("$envPrefix.cron")?.let(JobSchedule::cron)
+                            ?: default.schedule,
+                    retryCount = env.lookup("$envPrefix.retry_count") ?: default.retryCount,
+                )
+            }
+        )
     }
 }
 
-data class EmailEnv(
-    val enabled: Boolean,
-    val awsRegion: String?,
-    val senderAddress: String,
-    val senderAddressArn: String?,
-    val senderName: String,
-    val subjectPostfix: String?,
-    val espooNotificationsAddress: String?,
+data class Sensitive<T>(
+    @JsonValue val value: T,
 ) {
-    val sender = FromAddress("$senderName <$senderAddress>", senderAddressArn)
-
-    companion object {
-        fun fromEnvironment(env: Environment) =
-            EmailEnv(
-                enabled = env.lookup("app.email.enabled") ?: false,
-                awsRegion = env.lookup("app.email.region"),
-                senderAddress = env.lookup("app.email.sender_address"),
-                senderAddressArn = env.lookup("app.email.sender_address_arn"),
-                senderName = env.lookup("app.email.sender_name"),
-                subjectPostfix = env.lookup("app.email.subject_postfix"),
-                espooNotificationsAddress = env.lookup("app.email.espoo_notifications_address"),
-            )
-    }
-}
-
-data class BucketEnv(
-    val localS3Url: URI,
-    val localS3AccessKeyId: String,
-    val localS3SecretAccessKey: String,
-    val proxyThroughNginx: Boolean,
-    val dataBucketName: String,
-) {
-    companion object {
-        fun fromEnvironment(env: Environment) =
-            BucketEnv(
-                localS3Url = env.lookup("app.local_s3.url"),
-                localS3AccessKeyId = env.lookup("app.local_s3.access_key_id"),
-                localS3SecretAccessKey = env.lookup("app.local_s3.secret_access_key"),
-                proxyThroughNginx = env.lookup("app.bucket.proxy_through_nginx") ?: true,
-                dataBucketName = env.lookup("app.bucket.data_bucket_name"),
-            )
-    }
-}
-
-data class Sensitive<T>(@JsonValue val value: T) {
     override fun toString(): String = "**REDACTED**"
 }
 
-inline fun <reified T> Environment.lookup(key: String, vararg deprecatedKeys: String): T {
+inline fun <reified T> Environment.lookup(
+    key: String,
+    vararg deprecatedKeys: String,
+): T {
     val value = lookup(key, deprecatedKeys, T::class.java)
     if (value == null && null !is T) {
         error("Missing required configuration: $key (environment variable ${key.toSystemEnvKey()})")
@@ -194,16 +155,17 @@ fun <T> Environment.lookup(
             } catch (e: Exception) {
                 throw EnvLookupException(legacyKey, e)
             }
-        }
-        .firstOrNull()
+        }.firstOrNull()
         ?: try {
             getProperty(key, clazz)
         } catch (e: Exception) {
             throw EnvLookupException(key, e)
         }
 
-class EnvLookupException(key: String, cause: Throwable) :
-    RuntimeException(
+class EnvLookupException(
+    key: String,
+    cause: Throwable,
+) : RuntimeException(
         "Failed to lookup configuration key $key (environment variable ${key.toSystemEnvKey()})",
         cause,
     )
@@ -219,5 +181,4 @@ private fun snakeCaseName(job: Enum<*>): String =
                 ch.isUpperCase() -> listOf('_', ch.lowercaseChar())
                 else -> listOf(ch)
             }
-        }
-        .joinToString(separator = "")
+        }.joinToString(separator = "")

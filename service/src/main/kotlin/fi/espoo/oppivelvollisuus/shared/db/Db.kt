@@ -8,11 +8,6 @@ import fi.espoo.oppivelvollisuus.Id
 import fi.espoo.oppivelvollisuus.shared.config.defaultJsonMapper
 import fi.espoo.oppivelvollisuus.shared.time.FiniteDateRange
 import fi.espoo.oppivelvollisuus.shared.time.TimeRange
-import java.lang.reflect.Type
-import java.time.LocalDate
-import java.util.Optional
-import java.util.UUID
-import java.util.function.Function
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.array.SqlArrayType
 import org.jdbi.v3.core.generic.GenericTypes
@@ -22,10 +17,15 @@ import org.jdbi.v3.core.mapper.ColumnMapperFactory
 import org.jdbi.v3.core.mapper.ColumnMappers
 import org.jdbi.v3.core.mapper.RowMapperFactory
 import org.jdbi.v3.core.mapper.SingleColumnMapper
-import org.jdbi.v3.jackson3.Jackson3Config
-import org.jdbi.v3.jackson3.Jackson3Plugin
+import org.jdbi.v3.jackson2.Jackson2Config
+import org.jdbi.v3.jackson2.Jackson2Plugin
 import org.jdbi.v3.postgres.PostgresPlugin
 import org.postgresql.util.PGobject
+import java.lang.reflect.Type
+import java.time.LocalDate
+import java.util.Optional
+import java.util.UUID
+import java.util.function.Function
 
 /**
  * Registers the given JDBI column mapper, which will be used to map data from database to values of
@@ -34,8 +34,7 @@ import org.postgresql.util.PGobject
  * This works fine for simple types where there are no extra shenanigans (inheritance, type
  * parameters).
  */
-private inline fun <reified T> Jdbi.register(columnMapper: ColumnMapper<T>) =
-    register(columnMapper) { type -> type == T::class.java }
+private inline fun <reified T> Jdbi.register(columnMapper: ColumnMapper<T>) = register(columnMapper) { type -> type == T::class.java }
 
 /**
  * Registers the given JDBI column mapper, using the given function to decide when the mapper will
@@ -67,8 +66,8 @@ fun configureJdbi(jdbi: Jdbi): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
         .installPlugin(PostgresPlugin())
-        .installPlugin(Jackson3Plugin())
-    jdbi.getConfig(Jackson3Config::class.java).mapper = jsonMapper
+        .installPlugin(Jackson2Plugin())
+    jdbi.getConfig(Jackson2Config::class.java).mapper = jsonMapper
     jdbi.getConfig(ColumnMappers::class.java).coalesceNullPrimitivesToDefaults = false
     jdbi.registerArgument(finiteDateRangeArgumentFactory)
     jdbi.registerArgument(dateRangeArgumentFactory)
@@ -125,7 +124,8 @@ fun configureJdbi(jdbi: Jdbi): Jdbi {
     }
     jdbi.registerArrayType { elementType, _ ->
         Optional.ofNullable(
-            SqlArrayType.of<Id<*>>("uuid") { it.raw }
+            SqlArrayType
+                .of<Id<*>>("uuid") { it.raw }
                 .takeIf { Id::class.java.isAssignableFrom(GenericTypes.getErasedType(elementType)) }
         )
     }

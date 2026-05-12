@@ -7,10 +7,6 @@ package fi.espoo.oppivelvollisuus.shared.db
 import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.withSpan
 import io.opentelemetry.api.trace.Tracer
-import java.time.Duration
-import kotlin.reflect.KClass
-import kotlin.reflect.KType
-import kotlin.reflect.typeOf
 import org.intellij.lang.annotations.Language
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.Jdbi
@@ -21,6 +17,10 @@ import org.jdbi.v3.core.result.RowView
 import org.jdbi.v3.core.statement.Slf4JSqlLogger
 import org.jdbi.v3.json.Json
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import kotlin.reflect.KClass
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 // What does it mean when a function accepts a Database/Database.* parameter?
 //
@@ -47,7 +47,10 @@ import org.slf4j.LoggerFactory
  * Tied to the thread that created it, and throws `IllegalStateException` if used in the wrong
  * thread.
  */
-class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
+class Database(
+    private val jdbi: Jdbi,
+    private val tracer: Tracer
+) {
     private val threadId = ThreadId()
     private var hasOpenHandle = false
 
@@ -88,61 +91,60 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
      * handle.
      */
     open class Connection
-    internal constructor(
-        private val threadId: ThreadId,
-        private val tracer: Tracer,
-        private val openRawHandle: () -> Handle,
-    ) : AutoCloseable {
-        private var rawHandle: Handle? = null
+        internal constructor(
+            private val threadId: ThreadId,
+            private val tracer: Tracer,
+            private val openRawHandle: () -> Handle,
+        ) : AutoCloseable {
+            private var rawHandle: Handle? = null
 
-        private fun getRawHandle(): Handle = rawHandle ?: openRawHandle().also { rawHandle = it }
+            private fun getRawHandle(): Handle = rawHandle ?: openRawHandle().also { rawHandle = it }
 
-        /**
-         * Enters read mode, runs the given function, and exits read mode regardless of any
-         * exceptions the function may have thrown.
-         *
-         * Throws `IllegalStateException` if this database connection is already in read mode or a
-         * transaction
-         */
-        fun <T> read(f: (db: Read) -> T): T {
-            threadId.assertCurrentThread()
-            val handle = this.getRawHandle()
-            check(!handle.isInTransaction) { "Already in a transaction" }
-            handle.isReadOnly = true
-            try {
-                return tracer.withSpan("db.transaction read") {
-                    handle.inTransaction<T, Exception> { f(Read(handle)) }
+            /**
+             * Enters read mode, runs the given function, and exits read mode regardless of any
+             * exceptions the function may have thrown.
+             *
+             * Throws `IllegalStateException` if this database connection is already in read mode or a
+             * transaction
+             */
+            fun <T> read(f: (db: Read) -> T): T {
+                threadId.assertCurrentThread()
+                val handle = this.getRawHandle()
+                check(!handle.isInTransaction) { "Already in a transaction" }
+                handle.isReadOnly = true
+                try {
+                    return tracer.withSpan("db.transaction read") {
+                        handle.inTransaction<T, Exception> { f(Read(handle)) }
+                    }
+                } finally {
+                    handle.isReadOnly = false
                 }
-            } finally {
-                handle.isReadOnly = false
+            }
+
+            /**
+             * Starts a transaction, runs the given function, and commits or rolls back the transaction
+             * depending on whether the function threw an exception or not.
+             *
+             * Throws `IllegalStateException` if this database connection is already in read mode or a
+             * transaction.
+             */
+            fun <T> transaction(f: (db: Transaction) -> T): T {
+                threadId.assertCurrentThread()
+                val handle = this.getRawHandle()
+                check(!handle.isInTransaction) { "Already in a transaction" }
+                val hooks = TransactionHooks()
+                return tracer
+                    .withSpan("db.transaction read/write") {
+                        handle.inTransaction<T, Exception> { f(Transaction(it, hooks)) }
+                    }.also { hooks.afterCommit.forEach { it() } }
+            }
+
+            override fun close() {
+                threadId.assertCurrentThread()
+                this.rawHandle?.close()
+                this.rawHandle = null
             }
         }
-
-        /**
-         * Starts a transaction, runs the given function, and commits or rolls back the transaction
-         * depending on whether the function threw an exception or not.
-         *
-         * Throws `IllegalStateException` if this database connection is already in read mode or a
-         * transaction.
-         */
-        fun <T> transaction(f: (db: Transaction) -> T): T {
-            threadId.assertCurrentThread()
-            val handle = this.getRawHandle()
-            check(!handle.isInTransaction) { "Already in a transaction" }
-            val hooks = TransactionHooks()
-            return tracer
-                .withSpan("db.transaction read/write") {
-                    handle.inTransaction<T, Exception> { f(Transaction(it, hooks)) }
-                }
-                .also { hooks.afterCommit.forEach { it() } }
-        }
-
-        override fun close() {
-            threadId.assertCurrentThread()
-            this.rawHandle?.close()
-            this.rawHandle = null
-        }
-    }
 
     /**
      * A single database connection in read mode.
@@ -150,9 +152,10 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
      * Tied to the thread that created it, and throws `IllegalStateException` if used in the wrong
      * thread.
      */
-    open class Read internal constructor(val handle: Handle) {
-        fun createQuery(f: QuerySql.Builder.() -> QuerySql): Query =
-            createQuery(QuerySql.Builder().run { f(this) })
+    open class Read internal constructor(
+        val handle: Handle
+    ) {
+        fun createQuery(f: QuerySql.Builder.() -> QuerySql): Query = createQuery(QuerySql.Builder().run { f(this) })
 
         fun createQuery(fragment: QuerySql): Query {
             val raw = handle.createQuery(fragment.sql.toString())
@@ -162,11 +165,9 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
             return Query(raw)
         }
 
-        fun setLockTimeout(duration: Duration) =
-            handle.execute("SET LOCAL lock_timeout = '${duration.toMillis()}ms'")
+        fun setLockTimeout(duration: Duration) = handle.execute("SET LOCAL lock_timeout = '${duration.toMillis()}ms'")
 
-        fun setStatementTimeout(duration: Duration) =
-            handle.execute("SET LOCAL statement_timeout = '${duration.toMillis()}ms'")
+        fun setStatementTimeout(duration: Duration) = handle.execute("SET LOCAL statement_timeout = '${duration.toMillis()}ms'")
     }
 
     /**
@@ -175,14 +176,15 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
      * Tied to the thread that created it, and throws `IllegalStateException` if used in the wrong
      * thread.
      */
-    class Transaction internal constructor(handle: Handle, private val hooks: TransactionHooks) :
-        Read(handle) {
+    class Transaction internal constructor(
+        handle: Handle,
+        private val hooks: TransactionHooks
+    ) : Read(handle) {
         private var savepointId: Long = 0
 
         private fun nextSavepoint(): String = "savepoint-${savepointId++}"
 
-        fun createUpdate(f: QuerySql.Builder.() -> QuerySql): Update =
-            createUpdate(QuerySql.Builder().run { f(this) })
+        fun createUpdate(f: QuerySql.Builder.() -> QuerySql): Update = createUpdate(QuerySql.Builder().run { f(this) })
 
         fun createUpdate(fragment: QuerySql): Update {
             val raw = handle.createUpdate(fragment.sql.toString())
@@ -192,8 +194,7 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
             return Update(raw)
         }
 
-        fun execute(f: QuerySql.Builder.() -> QuerySql): Int =
-            createUpdate(QuerySql.Builder().run { f(this) }).execute()
+        fun execute(f: QuerySql.Builder.() -> QuerySql): Int = createUpdate(QuerySql.Builder().run { f(this) }).execute()
 
         fun <R> prepareBatch(f: BatchSql.Builder<R>.() -> BatchSql<R>): PreparedBatch<R> {
             val batch = BatchSql.Builder<R>().run { f(this) }
@@ -269,13 +270,17 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
 
         protected abstract val raw: org.jdbi.v3.core.statement.SqlStatement<*>
 
-        inline fun <reified T> bind(name: String, value: T): This =
-            bindByType(name, value, createQualifiedType(*defaultQualifiers<T>()))
+        inline fun <reified T> bind(
+            name: String,
+            value: T
+        ): This = bindByType(name, value, createQualifiedType(*defaultQualifiers<T>()))
 
-        inline fun <reified T> registerColumnMapper(mapper: ColumnMapper<T>): This =
-            registerColumnMapper(createQualifiedType(), mapper)
+        inline fun <reified T> registerColumnMapper(mapper: ColumnMapper<T>): This = registerColumnMapper(createQualifiedType(), mapper)
 
-        fun <T> registerColumnMapper(type: QualifiedType<T>, mapper: ColumnMapper<T>): This {
+        fun <T> registerColumnMapper(
+            type: QualifiedType<T>,
+            mapper: ColumnMapper<T>
+        ): This {
             raw.registerColumnMapper(type, mapper)
             return self()
         }
@@ -299,14 +304,21 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
             return self()
         }
 
-        fun bindJson(name: String, value: Any): This =
+        fun bindJson(
+            name: String,
+            value: Any
+        ): This =
             bindByType(
                 name,
                 value,
                 QualifiedType.of(value.javaClass).withAnnotationClasses(listOf(Json::class.java)),
             )
 
-        fun <T> bindByType(name: String, value: T, type: QualifiedType<T>): This {
+        fun <T> bindByType(
+            name: String,
+            value: T,
+            type: QualifiedType<T>
+        ): This {
             raw.bindByType(name, value, type)
             return self()
         }
@@ -316,7 +328,10 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
             return self()
         }
 
-        fun bindKotlin(name: String, value: Any): This {
+        fun bindKotlin(
+            name: String,
+            value: Any
+        ): This {
             raw.bindKotlin(name, value)
             return self()
         }
@@ -327,47 +342,45 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
         }
     }
 
-    class Query internal constructor(override val raw: org.jdbi.v3.core.statement.Query) :
-        SqlStatement<Query>(), ResultBearing {
+    class Query internal constructor(
+        override val raw: org.jdbi.v3.core.statement.Query
+    ) : SqlStatement<Query>(),
+        ResultBearing {
         override fun self(): Query = this
 
         fun setFetchSize(fetchSize: Int): Query = this.also { raw.setFetchSize(fetchSize) }
 
         /** Runs the query and maps the results automatically to a list */
-        inline fun <reified T> toList(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): List<T> = mapTo(createQualifiedType<T>(*qualifiers)).toList()
+        inline fun <reified T> toList(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): List<T> =
+            mapTo(createQualifiedType<T>(*qualifiers)).toList()
 
         /** Runs the query and maps the results automatically to a set */
-        inline fun <reified T> toSet(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): Set<T> = mapTo(createQualifiedType<T>(*qualifiers)).toSet()
+        inline fun <reified T> toSet(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): Set<T> =
+            mapTo(createQualifiedType<T>(*qualifiers)).toSet()
 
         /** Runs the query, checks that it returns exactly one row, and maps it automatically */
-        inline fun <reified T> exactlyOne(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): T = mapTo(createQualifiedType<T>(*qualifiers)).exactlyOne()
+        inline fun <reified T> exactlyOne(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): T =
+            mapTo(createQualifiedType<T>(*qualifiers)).exactlyOne()
 
         /**
          * Runs the query, checks that it returns at most one row, and maps it automatically if it
          * exists
          */
-        inline fun <reified T> exactlyOneOrNull(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): T? = mapTo(createQualifiedType<T>(*qualifiers)).exactlyOneOrNull()
+        inline fun <reified T> exactlyOneOrNull(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): T? =
+            mapTo(createQualifiedType<T>(*qualifiers)).exactlyOneOrNull()
 
-        inline fun <reified T> mapTo(
-            qualifiers: Array<KClass<out Annotation>> = defaultQualifiers<T>()
-        ): Result<T> = mapTo(createQualifiedType(*qualifiers))
+        inline fun <reified T> mapTo(qualifiers: Array<KClass<out Annotation>> = defaultQualifiers<T>()): Result<T> =
+            mapTo(createQualifiedType(*qualifiers))
 
         override fun <T> mapTo(type: QualifiedType<T>): Result<T> = Result(raw.mapTo(type))
 
-        override fun <T> map(mapper: Row.() -> T): Result<T> =
-            Result(raw.map { row -> mapper(Row(row)) })
+        override fun <T> map(mapper: Row.() -> T): Result<T> = Result(raw.map { row -> mapper(Row(row)) })
     }
 
     @JvmInline
-    value class Result<T> private constructor(private val rows: ResultSequence<T>) {
+    value class Result<T> private constructor(
+        private val rows: ResultSequence<T>
+    ) {
         internal constructor(
             inner: org.jdbi.v3.core.result.ResultIterable<T>
         ) : this(ResultSequence(inner))
@@ -406,34 +419,36 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
 
         fun toSet(): Set<T> = rows.use { it.toSet() }
 
-        fun exactlyOne(): T = rows.use {
-            val iterator = it.iterator()
-            if (!iterator.hasNext()) error("Expected exactly one result, got none")
-            val result = iterator.next()
-            if (iterator.hasNext()) error("Expected exactly one result, got more than one")
-            result
-        }
-
-        fun exactlyOneOrNull(): T? = rows.use {
-            val iterator = it.iterator()
-            if (!iterator.hasNext()) {
-                null
-            } else {
+        fun exactlyOne(): T =
+            rows.use {
+                val iterator = it.iterator()
+                if (!iterator.hasNext()) error("Expected exactly one result, got none")
                 val result = iterator.next()
-                if (iterator.hasNext()) error("Expected 0-1 results, got more than one")
+                if (iterator.hasNext()) error("Expected exactly one result, got more than one")
                 result
             }
-        }
+
+        fun exactlyOneOrNull(): T? =
+            rows.use {
+                val iterator = it.iterator()
+                if (!iterator.hasNext()) {
+                    null
+                } else {
+                    val result = iterator.next()
+                    if (iterator.hasNext()) error("Expected 0-1 results, got more than one")
+                    result
+                }
+            }
     }
 
-    class Update internal constructor(override val raw: org.jdbi.v3.core.statement.Update) :
-        SqlStatement<Update>() {
+    class Update internal constructor(
+        override val raw: org.jdbi.v3.core.statement.Update
+    ) : SqlStatement<Update>() {
         override fun self(): Update = this
 
         fun execute() = raw.execute()
 
-        fun executeAndReturnGeneratedKeys(): UpdateResult =
-            UpdateResult(raw.executeAndReturnGeneratedKeys())
+        fun executeAndReturnGeneratedKeys(): UpdateResult = UpdateResult(raw.executeAndReturnGeneratedKeys())
 
         fun updateExactlyOne(
             notFoundMsg: String = "Not found",
@@ -452,96 +467,91 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
     }
 
     class PreparedBatch<R>
-    internal constructor(
-        private val raw: org.jdbi.v3.core.statement.PreparedBatch,
-        private val bindings: List<BatchBinding<R, *>>,
-    ) {
-        fun execute(): IntArray = raw.execute()
+        internal constructor(
+            private val raw: org.jdbi.v3.core.statement.PreparedBatch,
+            private val bindings: List<BatchBinding<R, *>>,
+        ) {
+            fun execute(): IntArray = raw.execute()
 
-        fun executeAndReturn(): UpdateResult = UpdateResult(raw.executePreparedBatch())
+            fun executeAndReturn(): UpdateResult = UpdateResult(raw.executePreparedBatch())
 
-        inline fun <reified T> registerColumnMapper(mapper: ColumnMapper<T>): PreparedBatch<R> =
-            registerColumnMapper(createQualifiedType(), mapper)
+            inline fun <reified T> registerColumnMapper(mapper: ColumnMapper<T>): PreparedBatch<R> =
+                registerColumnMapper(createQualifiedType(), mapper)
 
-        fun <T> registerColumnMapper(
-            type: QualifiedType<T>,
-            mapper: ColumnMapper<T>,
-        ): PreparedBatch<R> {
-            raw.registerColumnMapper(type, mapper)
-            return this
-        }
+            fun <T> registerColumnMapper(
+                type: QualifiedType<T>,
+                mapper: ColumnMapper<T>,
+            ): PreparedBatch<R> {
+                raw.registerColumnMapper(type, mapper)
+                return this
+            }
 
-        private fun bindAll(row: R) {
-            for ((idx, binding) in bindings.withIndex()) {
-                when (binding) {
-                    is ValueBinding<*> -> {
-                        raw.bindByType(idx, binding.value, binding.type)
-                    }
+            private fun bindAll(row: R) {
+                for ((idx, binding) in bindings.withIndex()) {
+                    when (binding) {
+                        is ValueBinding<*> -> {
+                            raw.bindByType(idx, binding.value, binding.type)
+                        }
 
-                    is LazyBinding<R, *> -> {
-                        raw.bindByType(idx, binding.getValue(row), binding.getType(row))
+                        is LazyBinding<R, *> -> {
+                            raw.bindByType(idx, binding.getValue(row), binding.getType(row))
+                        }
                     }
                 }
             }
-        }
 
-        fun add(row: R): PreparedBatch<R> {
-            bindAll(row)
-            raw.add()
-            return this
-        }
-
-        fun addAll(rows: Iterable<R>): PreparedBatch<R> {
-            for (row in rows) {
+            fun add(row: R): PreparedBatch<R> {
                 bindAll(row)
                 raw.add()
+                return this
             }
-            return this
-        }
 
-        fun addAll(rows: Sequence<R>): PreparedBatch<R> {
-            for (row in rows) {
-                bindAll(row)
-                raw.add()
+            fun addAll(rows: Iterable<R>): PreparedBatch<R> {
+                for (row in rows) {
+                    bindAll(row)
+                    raw.add()
+                }
+                return this
             }
-            return this
+
+            fun addAll(rows: Sequence<R>): PreparedBatch<R> {
+                for (row in rows) {
+                    bindAll(row)
+                    raw.add()
+                }
+                return this
+            }
         }
-    }
 
     @JvmInline
-    value class UpdateResult(private val raw: org.jdbi.v3.core.result.ResultBearing) :
-        ResultBearing {
+    value class UpdateResult(
+        private val raw: org.jdbi.v3.core.result.ResultBearing
+    ) : ResultBearing {
         /** Runs the query and maps the results automatically to a list */
-        inline fun <reified T : Any> toList(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): List<T> = mapTo(createQualifiedType<T>(*qualifiers)).toList()
+        inline fun <reified T : Any> toList(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): List<T> =
+            mapTo(createQualifiedType<T>(*qualifiers)).toList()
 
         /** Runs the query and maps the results automatically to a set */
-        inline fun <reified T : Any> toSet(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): Set<T> = mapTo(createQualifiedType<T>(*qualifiers)).toSet()
+        inline fun <reified T : Any> toSet(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): Set<T> =
+            mapTo(createQualifiedType<T>(*qualifiers)).toSet()
 
         /** Runs the query, checks that it returns exactly one row, and maps it automatically */
-        inline fun <reified T : Any> exactlyOne(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): T = mapTo(createQualifiedType<T>(*qualifiers)).exactlyOne()
+        inline fun <reified T : Any> exactlyOne(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): T =
+            mapTo(createQualifiedType<T>(*qualifiers)).exactlyOne()
 
         /**
          * Runs the query, checks that it returns at most one row, and maps it automatically if it
          * exists
          */
-        inline fun <reified T : Any> exactlyOneOrNull(
-            vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()
-        ): T? = mapTo(createQualifiedType<T>(*qualifiers)).exactlyOneOrNull()
+        inline fun <reified T : Any> exactlyOneOrNull(vararg qualifiers: KClass<out Annotation> = defaultQualifiers<T>()): T? =
+            mapTo(createQualifiedType<T>(*qualifiers)).exactlyOneOrNull()
 
-        inline fun <reified T> mapTo(
-            qualifiers: Array<out KClass<out Annotation>> = defaultQualifiers<T>()
-        ): Result<T> = mapTo(createQualifiedType(*qualifiers))
+        inline fun <reified T> mapTo(qualifiers: Array<out KClass<out Annotation>> = defaultQualifiers<T>()): Result<T> =
+            mapTo(createQualifiedType(*qualifiers))
 
         override fun <T> mapTo(type: QualifiedType<T>): Result<T> = Result(raw.mapTo(type))
 
-        override fun <T> map(mapper: Row.() -> T): Result<T> =
-            Result(raw.map { row -> mapper(Row(row)) })
+        override fun <T> map(mapper: Row.() -> T): Result<T> = Result(raw.map { row -> mapper(Row(row)) })
     }
 
     interface ResultBearing {
@@ -556,8 +566,7 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
         fun <T> toSet(mapper: Row.() -> T): Set<T> = map(mapper).toSet()
 
         /** Runs the query and maps the results to a map using the given mapper */
-        fun <K, V> toMap(mapper: Row.() -> Pair<K, V>): Map<K, V> =
-            map(mapper).useIterable { it.toMap() }
+        fun <K, V> toMap(mapper: Row.() -> Pair<K, V>): Map<K, V> = map(mapper).useIterable { it.toMap() }
 
         /**
          * Runs the query, checks that it returns exactly one row, and maps it using the given
@@ -573,16 +582,24 @@ class Database(private val jdbi: Jdbi, private val tracer: Tracer) {
     }
 }
 
-internal data class TransactionHooks(val afterCommit: LinkedHashSet<() -> Unit> = LinkedHashSet())
+internal data class TransactionHooks(
+    val afterCommit: LinkedHashSet<() -> Unit> = LinkedHashSet()
+)
 
-internal data class ThreadId(val id: Long = Thread.currentThread().threadId()) {
+internal data class ThreadId(
+    val id: Long = Thread.currentThread().threadId()
+) {
     fun assertCurrentThread() =
         assert(Thread.currentThread().threadId() == id) {
             "Database accessed from the wrong thread"
         }
 }
 
-data class Binding<T>(val name: String, val value: T, val type: QualifiedType<T>) {
+data class Binding<T>(
+    val name: String,
+    val value: T,
+    val type: QualifiedType<T>
+) {
     companion object {
         inline fun <reified T> of(
             name: String,
@@ -608,7 +625,10 @@ data class LazyBinding<R, T>(
     }
 }
 
-data class ValueBinding<T>(val value: T, val type: QualifiedType<T>) : BatchBinding<Nothing, T> {
+data class ValueBinding<T>(
+    val value: T,
+    val type: QualifiedType<T>
+) : BatchBinding<Nothing, T> {
     companion object {
         inline fun <reified T> of(
             value: T,
@@ -618,7 +638,9 @@ data class ValueBinding<T>(val value: T, val type: QualifiedType<T>) : BatchBind
 }
 
 @JvmInline
-value class QuerySqlString(@Language("sql") private val sql: String) {
+value class QuerySqlString(
+    @field:Language("sql") private val sql: String,
+) {
     override fun toString(): String = sql
 }
 
@@ -632,8 +654,7 @@ abstract class SqlBuilder {
      * This function scans default qualifiers specified on the type, so types annotated with `@Json`
      * are automatically always serialized as JSON.
      */
-    inline fun <reified T> bind(value: T): Binding =
-        bind(ValueBinding.of(value, defaultQualifiers<T>()))
+    inline fun <reified T> bind(value: T): Binding = bind(ValueBinding.of(value, defaultQualifiers<T>()))
 
     /**
      * Binds the given value as a query parameter using JSON serialization.
@@ -648,10 +669,12 @@ abstract class SqlBuilder {
                 // Use runtime type information for non-null values with inheritance
                 // Otherwise Jackson will serialize only the fields in T which might be a
                 // superclass while the runtime value might be a concrete subclass
-                if (value is Any && value.javaClass != T::class.java)
+                if (value is Any && value.javaClass != T::class.java) {
                     QualifiedType.of(value.javaClass).with(Json::class.java)
-                // Use compile-time type information for other values, including nulls
-                else createQualifiedType(Json::class),
+                } // Use compile-time type information for other values, including nulls
+                else {
+                    createQualifiedType(Json::class)
+                },
             )
         )
 
@@ -669,8 +692,7 @@ abstract class SqlBuilder {
         return fragment.sql
     }
 
-    fun subqueryNotNull(fragment: QuerySql?): QuerySqlString =
-        if (fragment != null) subquery(fragment) else QuerySqlString("")
+    fun subqueryNotNull(fragment: QuerySql?): QuerySqlString = if (fragment != null) subquery(fragment) else QuerySqlString("")
 
     /** A marker type used for bound parameters that can be used in a template string */
     sealed interface Binding
@@ -685,7 +707,10 @@ abstract class SqlBuilder {
 }
 
 /** A builder for SQL, including bound parameter values. */
-data class QuerySql(val sql: QuerySqlString, val bindings: List<ValueBinding<out Any?>>) {
+data class QuerySql(
+    val sql: QuerySqlString,
+    val bindings: List<ValueBinding<out Any?>>
+) {
     companion object {
         operator fun invoke(f: Builder.() -> QuerySql): QuerySql = Builder().run { f(this) }
 
@@ -700,7 +725,10 @@ data class QuerySql(val sql: QuerySqlString, val bindings: List<ValueBinding<out
             this.bindings += binding
         }
 
-        private fun combine(separator: String, queries: Iterable<QuerySql>): QuerySql {
+        private fun combine(
+            separator: String,
+            queries: Iterable<QuerySql>
+        ): QuerySql {
             check(!used) { "builder has already been used" }
             this.used = true
             for (query in queries) {
@@ -712,8 +740,10 @@ data class QuerySql(val sql: QuerySqlString, val bindings: List<ValueBinding<out
             )
         }
 
-        fun union(all: Boolean, queries: Iterable<QuerySql>): QuerySql =
-            combine(if (all) "\nUNION ALL\n" else "\nUNION\n", queries)
+        fun union(
+            all: Boolean,
+            queries: Iterable<QuerySql>
+        ): QuerySql = combine(if (all) "\nUNION ALL\n" else "\nUNION\n", queries)
 
         fun ctes(queries: List<Pair<String, QuerySql>>): QuerySql =
             if (queries.isEmpty()) {
@@ -734,7 +764,9 @@ data class QuerySql(val sql: QuerySqlString, val bindings: List<ValueBinding<out
         fun ctesNotNull(vararg queries: Pair<String, QuerySql?>): QuerySql =
             ctes(queries.mapNotNull { (name, query) -> if (query != null) name to query else null })
 
-        fun sql(@Language("sql") sql: String): QuerySql {
+        fun sql(
+            @Language("sql") sql: String
+        ): QuerySql {
             check(!used) { "builder has already been used" }
             this.used = true
             return QuerySql(QuerySqlString(sql), bindings)
@@ -742,7 +774,10 @@ data class QuerySql(val sql: QuerySqlString, val bindings: List<ValueBinding<out
     }
 }
 
-data class BatchSql<R>(val sql: QuerySqlString, val bindings: List<BatchBinding<R, out Any?>>) {
+data class BatchSql<R>(
+    val sql: QuerySqlString,
+    val bindings: List<BatchBinding<R, out Any?>>
+) {
     companion object {
         fun <R> of(f: Builder<R>.() -> BatchSql<R>): BatchSql<R> = Builder<R>().run { f(this) }
     }
@@ -760,8 +795,7 @@ data class BatchSql<R>(val sql: QuerySqlString, val bindings: List<BatchBinding<
             return PositionalBinding
         }
 
-        inline fun <reified T> bind(noinline getValue: (row: R) -> T): Binding =
-            bind(LazyBinding.of(getValue))
+        inline fun <reified T> bind(noinline getValue: (row: R) -> T): Binding = bind(LazyBinding.of(getValue))
 
         /**
          * Binds a value returned by the given getter as a query parameter using JSON serialization.
@@ -785,7 +819,9 @@ data class BatchSql<R>(val sql: QuerySqlString, val bindings: List<BatchBinding<
                 }
             )
 
-        fun sql(@Language("sql") sql: String): BatchSql<R> {
+        fun sql(
+            @Language("sql") sql: String
+        ): BatchSql<R> {
             check(!used) { "builder has already been used" }
             this.used = true
             return BatchSql(QuerySqlString(sql), bindings)
@@ -794,13 +830,18 @@ data class BatchSql<R>(val sql: QuerySqlString, val bindings: List<BatchBinding<
 }
 
 @JvmInline
-value class Row(private val row: RowView) {
+value class Row(
+    private val row: RowView
+) {
     inline fun <reified K, reified V> columnPair(
         firstColumn: String,
         secondColumn: String,
     ): Pair<K, V> = column<K>(firstColumn) to column<V>(secondColumn)
 
-    inline fun <reified T> column(name: String, vararg annotations: KClass<out Annotation>): T {
+    inline fun <reified T> column(
+        name: String,
+        vararg annotations: KClass<out Annotation>
+    ): T {
         val type = createQualifiedType<T>(*annotations)
         val value = column(name, type)
         if (null !is T && value == null) {
@@ -809,7 +850,10 @@ value class Row(private val row: RowView) {
         return value
     }
 
-    fun <T> column(name: String, type: QualifiedType<T>): T = row.getColumn(name, type)
+    fun <T> column(
+        name: String,
+        type: QualifiedType<T>
+    ): T = row.getColumn(name, type)
 
     inline fun <reified T> jsonColumn(name: String): T = column(name, Json::class)
 
@@ -824,12 +868,13 @@ value class Row(private val row: RowView) {
  * The original JDBI implementation allows getting multiple iterators which all use the underlying
  * JDBC ResultSet, leading to unexpected behaviour.
  */
-private class ResultSequence<T>(iterable: org.jdbi.v3.core.result.ResultIterable<T>) :
-    Sequence<T>, AutoCloseable {
+private class ResultSequence<T>(
+    iterable: org.jdbi.v3.core.result.ResultIterable<T>
+) : Sequence<T>,
+    AutoCloseable {
     private var iterator: ResultIterator<T>? = ResultIterator(iterable.iterator())
 
-    override fun iterator(): Iterator<T> =
-        iterator.also { iterator = null } ?: error("The iterator has already been taken")
+    override fun iterator(): Iterator<T> = iterator.also { iterator = null } ?: error("The iterator has already been taken")
 
     override fun close() {
         iterator?.close()
@@ -841,15 +886,15 @@ private class ResultSequence<T>(iterable: org.jdbi.v3.core.result.ResultIterable
  *
  * The original JDBI implementation just silently stops returning results if closed.
  */
-private class ResultIterator<T>(private val inner: org.jdbi.v3.core.result.ResultIterator<T>) :
-    Iterator<T>, AutoCloseable {
+private class ResultIterator<T>(
+    private val inner: org.jdbi.v3.core.result.ResultIterator<T>
+) : Iterator<T>,
+    AutoCloseable {
     private var closed = false
 
-    override fun hasNext(): Boolean =
-        if (closed) error("The iterator has already been closed") else inner.hasNext()
+    override fun hasNext(): Boolean = if (closed) error("The iterator has already been closed") else inner.hasNext()
 
-    override fun next(): T =
-        if (closed) error("The iterator has already been closed") else inner.next()
+    override fun next(): T = if (closed) error("The iterator has already been closed") else inner.next()
 
     override fun close() {
         closed = true

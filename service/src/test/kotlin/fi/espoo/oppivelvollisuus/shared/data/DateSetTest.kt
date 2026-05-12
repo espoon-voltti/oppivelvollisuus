@@ -5,13 +5,13 @@
 package fi.espoo.oppivelvollisuus.shared.data
 
 import fi.espoo.oppivelvollisuus.shared.time.FiniteDateRange
+import org.junit.jupiter.api.RepeatedTest
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.RepeatedTest
-import org.junit.jupiter.api.Test
 
 class DateSetTest {
     @Test
@@ -148,5 +148,8 @@ class DateSetTest {
 
     private fun testDate(day: Int) = LocalDate.of(2019, 1, day)
 
-    private fun testRange(from: Int, to: Int) = FiniteDateRange(testDate(from), testDate(to))
+    private fun testRange(
+        from: Int,
+        to: Int
+    ) = FiniteDateRange(testDate(from), testDate(to))
 }

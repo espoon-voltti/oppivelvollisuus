@@ -5,9 +5,7 @@
 package fi.espoo.oppivelvollisuus.shared.config
 
 import fi.espoo.oppivelvollisuus.AppEnv
-import fi.espoo.oppivelvollisuus.BucketEnv
 import fi.espoo.oppivelvollisuus.DatabaseEnv
-import fi.espoo.oppivelvollisuus.EmailEnv
 import fi.espoo.oppivelvollisuus.JwtEnv
 import fi.espoo.oppivelvollisuus.ScheduledJobsEnv
 import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJob
@@ -23,8 +21,6 @@ class EnvConfig {
 
     @Bean fun databaseEnv(env: Environment): DatabaseEnv = DatabaseEnv.fromEnvironment(env)
 
-    @Bean fun bucketEnv(env: Environment): BucketEnv = BucketEnv.fromEnvironment(env)
-
     @Bean fun jwtEnv(env: Environment): JwtEnv = JwtEnv.fromEnvironment(env)
 
     @Bean
@@ -35,5 +31,4 @@ class EnvConfig {
             env,
         )
 
-    @Bean fun emailEnv(env: Environment): EmailEnv = EmailEnv.fromEnvironment(env)
 }

@@ -4,23 +4,24 @@
 
 package fi.espoo.oppivelvollisuus.shared.auth
 
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
 import fi.espoo.oppivelvollisuus.EspooUserId
-import fi.espoo.oppivelvollisuus.ProviderUserId
 import java.util.UUID
-import tools.jackson.core.JsonParser
-import tools.jackson.databind.DeserializationContext
-import tools.jackson.databind.ValueDeserializer
 
-class AuthenticatedUserJsonDeserializer : ValueDeserializer<AuthenticatedUser>() {
-    private data class AllFields(val type: AuthenticatedUserType? = null, val id: UUID? = null)
+class AuthenticatedUserJsonDeserializer : JsonDeserializer<AuthenticatedUser>() {
+    private data class AllFields(
+        val type: AuthenticatedUserType? = null,
+        val id: UUID? = null
+    )
 
-    override fun deserialize(p: JsonParser, ctx: DeserializationContext): AuthenticatedUser {
+    override fun deserialize(
+        p: JsonParser,
+        ctx: DeserializationContext
+    ): AuthenticatedUser {
         val user = p.readValueAs(AllFields::class.java)
         return when (user.type!!) {
-            AuthenticatedUserType.providerUser -> {
-                AuthenticatedUser.ProviderUser(ProviderUserId(user.id!!))
-            }
-
             AuthenticatedUserType.espooUser -> {
                 AuthenticatedUser.EspooUser(EspooUserId(user.id!!))
             }

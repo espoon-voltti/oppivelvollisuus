@@ -12,9 +12,13 @@ import java.util.UUID
 sealed interface AuditId {
     val value: Any
 
-    @JvmInline value class One(override val value: Any) : AuditId
+    @JvmInline value class One(
+        override val value: Any
+    ) : AuditId
 
-    @JvmInline value class Many(override val value: List<Any>) : AuditId
+    @JvmInline value class Many(
+        override val value: List<Any>
+    ) : AuditId
 
     companion object {
         operator fun invoke(value: Id<*>): AuditId = One(value)
@@ -26,8 +30,8 @@ sealed interface AuditId {
         operator fun invoke(value: Collection<Id<*>>): AuditId = Many(value.toList())
     }
 
-    operator fun plus(other: AuditId): AuditId {
-        return when (this) {
+    operator fun plus(other: AuditId): AuditId =
+        when (this) {
             is One -> {
                 when (other) {
                     is One -> Many(listOf(value, other.value))
@@ -42,7 +46,6 @@ sealed interface AuditId {
                 }
             }
         }
-    }
 }
 
 enum class Audit(

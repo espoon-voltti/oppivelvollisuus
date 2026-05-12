@@ -4,9 +4,8 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.BadRequest
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.common.UserBasics
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin

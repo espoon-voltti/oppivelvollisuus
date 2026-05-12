@@ -4,13 +4,13 @@
 
 package fi.espoo.oppivelvollisuus.shared.data
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.util.StdConverter
 import fi.espoo.oppivelvollisuus.shared.time.FiniteDateRange
 import fi.espoo.oppivelvollisuus.shared.time.toFiniteDateRange
 import java.time.LocalDate
 import java.util.Objects
-import tools.jackson.databind.annotation.JsonDeserialize
-import tools.jackson.databind.annotation.JsonSerialize
-import tools.jackson.databind.util.StdConverter
 
 /**
  * An immutable data structure that is conceptually similar to a `Set<LocalDate>` but provides batch
@@ -18,12 +18,15 @@ import tools.jackson.databind.util.StdConverter
  */
 @JsonSerialize(converter = DateSet.ToJson::class)
 @JsonDeserialize(converter = DateSet.FromJson::class)
-class DateSet private constructor(ranges: List<FiniteDateRange>) :
-    RangeBasedSet<LocalDate, FiniteDateRange, DateSet>(ranges) {
+class DateSet private constructor(
+    ranges: List<FiniteDateRange>
+) : RangeBasedSet<LocalDate, FiniteDateRange, DateSet>(ranges) {
     override fun List<FiniteDateRange>.toThis(): DateSet = if (isEmpty()) EMPTY else DateSet(this)
 
-    override fun range(start: LocalDate, end: LocalDate): FiniteDateRange =
-        FiniteDateRange(start, end)
+    override fun range(
+        start: LocalDate,
+        end: LocalDate
+    ): FiniteDateRange = FiniteDateRange(start, end)
 
     override fun range(point: LocalDate): FiniteDateRange = FiniteDateRange(point, point)
 
@@ -31,8 +34,7 @@ class DateSet private constructor(ranges: List<FiniteDateRange>) :
 
     override fun hashCode(): Int = Objects.hash(ranges)
 
-    override fun toString(): String =
-        ranges.joinToString(separator = ",", prefix = "{", postfix = "}")
+    override fun toString(): String = ranges.joinToString(separator = ",", prefix = "{", postfix = "}")
 
     companion object {
         private val EMPTY = DateSet(emptyList())
@@ -56,8 +58,7 @@ class DateSet private constructor(ranges: List<FiniteDateRange>) :
          * you have a large amount of dates that cannot be joined into a smaller amount of ranges,
          * consider using `Set<LocalDate>` instead.
          */
-        fun ofDates(vararg dates: LocalDate): DateSet =
-            empty().addAll(dates.asSequence().map { it.toFiniteDateRange() })
+        fun ofDates(vararg dates: LocalDate): DateSet = empty().addAll(dates.asSequence().map { it.toFiniteDateRange() })
 
         /**
          * Returns a new date set containing all the given dates.
@@ -66,8 +67,7 @@ class DateSet private constructor(ranges: List<FiniteDateRange>) :
          * you have a large amount of dates that cannot be joined into a smaller amount of ranges,
          * consider using `Set<LocalDate>` instead.
          */
-        fun ofDates(dates: Iterable<LocalDate>): DateSet =
-            empty().addAll(dates.asSequence().map { it.toFiniteDateRange() })
+        fun ofDates(dates: Iterable<LocalDate>): DateSet = empty().addAll(dates.asSequence().map { it.toFiniteDateRange() })
 
         /**
          * Returns a new date set containing all the given dates.
@@ -76,8 +76,7 @@ class DateSet private constructor(ranges: List<FiniteDateRange>) :
          * you have a large amount of dates that cannot be joined into a smaller amount of ranges,
          * consider using `Set<LocalDate>` instead.
          */
-        fun ofDates(dates: Sequence<LocalDate>): DateSet =
-            empty().addAll(dates.map { it.toFiniteDateRange() })
+        fun ofDates(dates: Sequence<LocalDate>): DateSet = empty().addAll(dates.map { it.toFiniteDateRange() })
 
         /**
          * Returns a new date set containing all the given ranges. The list must be ordered and the

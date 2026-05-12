@@ -11,6 +11,7 @@ import fi.espoo.oppivelvollisuus.shared.time.RealAppClock
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micrometer.core.instrument.MeterRegistry
 import io.opentelemetry.api.trace.Tracer
+import org.jdbi.v3.core.Jdbi
 import java.time.Duration
 import java.time.Instant
 import java.util.Timer
@@ -22,7 +23,6 @@ import kotlin.concurrent.read
 import kotlin.concurrent.write
 import kotlin.math.max
 import kotlin.reflect.KClass
-import org.jdbi.v3.core.Jdbi
 
 private const val defaultRetryCount =
     24 * 60 / 5 // 24h when used with default 5 minute retry interval
@@ -39,8 +39,7 @@ class AsyncJobRunner<T : Any>(
         val config: AsyncJobPool.Config,
         val jobs: Set<KClass<out T>>,
     ) {
-        fun withThrottleInterval(throttleInterval: Duration?) =
-            copy(config = config.copy(throttleInterval = throttleInterval))
+        fun withThrottleInterval(throttleInterval: Duration?) = copy(config = config.copy(throttleInterval = throttleInterval))
     }
 
     val name = "${AsyncJobRunner::class.simpleName}.${payloadType.simpleName}"
@@ -50,21 +49,25 @@ class AsyncJobRunner<T : Any>(
     private var handlers: Map<AsyncJobType<out T>, AsyncJobPool.Handler<*>> = emptyMap()
     private var afterCommitHooks: Map<AsyncJobType<out T>, () -> Unit> = emptyMap()
 
-    private val pools: List<AsyncJobPool<T>> = pools.map {
-        AsyncJobPool(it.id, it.config, jdbi, tracer, PoolRegistration(it.id))
-    }
+    private val pools: List<AsyncJobPool<T>> =
+        pools.map {
+            AsyncJobPool(it.id, it.config, jdbi, tracer, PoolRegistration(it.id))
+        }
     private val jobsPerPool: Map<AsyncJobPool.Id<T>, Set<AsyncJobType<out T>>> =
         pools.associate { pool ->
             pool.id to pool.jobs.map { AsyncJobType(it) }.toSet()
         }
     private val backgroundTimer: AtomicReference<Timer> = AtomicReference()
 
-    inner class PoolRegistration(val id: AsyncJobPool.Id<T>) : AsyncJobPool.Registration<T> {
+    inner class PoolRegistration(
+        val id: AsyncJobPool.Id<T>
+    ) : AsyncJobPool.Registration<T> {
         override fun jobTypes() = jobsPerPool[id] ?: emptySet()
 
-        override fun handlerFor(jobType: AsyncJobType<out T>) = stateLock.read {
-            requireNotNull(handlers[jobType]) { "No handler found for $jobType" }
-        }
+        override fun handlerFor(jobType: AsyncJobType<out T>) =
+            stateLock.read {
+                requireNotNull(handlers[jobType]) { "No handler found for $jobType" }
+            }
     }
 
     private val isBusy: Boolean
@@ -72,9 +75,7 @@ class AsyncJobRunner<T : Any>(
 
     fun registerMeters(registry: MeterRegistry) = pools.forEach { it.registerMeters(registry) }
 
-    inline fun <reified P : T> registerHandler(
-        noinline handler: (db: Database.Connection, clock: AppClock, msg: P) -> Unit
-    ) =
+    inline fun <reified P : T> registerHandler(noinline handler: (db: Database.Connection, clock: AppClock, msg: P) -> Unit) =
         registerHandler(AsyncJobType(P::class)) { db, clock, msg ->
             db.connect { handler(it, clock, msg) }
         }
@@ -82,20 +83,21 @@ class AsyncJobRunner<T : Any>(
     fun <P : T> registerHandler(
         jobType: AsyncJobType<out P>,
         handler: (db: Database, clock: AppClock, msg: P) -> Unit,
-    ): Unit = stateLock.write {
-        require(jobsPerPool.values.any { it.contains(jobType) }) {
-            "No job pool defined for $jobType"
-        }
-        val ambiguousKey = handlers.keys.find { it.name == jobType.name }
-        require(ambiguousKey == null) {
-            "handlers for $jobType and $ambiguousKey have a name conflict"
-        }
+    ): Unit =
+        stateLock.write {
+            require(jobsPerPool.values.any { it.contains(jobType) }) {
+                "No job pool defined for $jobType"
+            }
+            val ambiguousKey = handlers.keys.find { it.name == jobType.name }
+            require(ambiguousKey == null) {
+                "handlers for $jobType and $ambiguousKey have a name conflict"
+            }
 
-        require(!handlers.containsKey(jobType)) {
-            "handler for $jobType has already been registered"
+            require(!handlers.containsKey(jobType)) {
+                "handler for $jobType has already been registered"
+            }
+            handlers = handlers + mapOf(jobType to AsyncJobPool.Handler(handler))
         }
-        handlers = handlers + mapOf(jobType to AsyncJobPool.Handler(handler))
-    }
 
     fun plan(
         tx: Database.Transaction,
@@ -111,23 +113,27 @@ class AsyncJobRunner<T : Any>(
         retryCount: Int = defaultRetryCount,
         retryInterval: Duration = defaultRetryInterval,
         runAt: HelsinkiDateTime,
-    ) =
-        plan(
-            tx,
-            payloads.map { payload ->
-                JobParams(
-                    payload = payload,
-                    retryCount = retryCount,
-                    retryInterval = retryInterval,
-                    runAt = runAt,
-                )
-            },
-        )
+    ) = plan(
+        tx,
+        payloads.map { payload ->
+            JobParams(
+                payload = payload,
+                retryCount = retryCount,
+                retryInterval = retryInterval,
+                runAt = runAt,
+            )
+        },
+    )
 
-    fun plan(tx: Database.Transaction, jobs: Iterable<JobParams<out T>>) =
-        plan(tx, jobs.asSequence())
+    fun plan(
+        tx: Database.Transaction,
+        jobs: Iterable<JobParams<out T>>
+    ) = plan(tx, jobs.asSequence())
 
-    fun plan(tx: Database.Transaction, jobs: Sequence<JobParams<out T>>) = stateLock.read {
+    fun plan(
+        tx: Database.Transaction,
+        jobs: Sequence<JobParams<out T>>
+    ) = stateLock.read {
         jobs.forEach { job ->
             val jobType = AsyncJobType.ofPayload(job.payload)
             val id = tx.insertJob(job)
@@ -153,19 +159,22 @@ class AsyncJobRunner<T : Any>(
         backgroundTimer.getAndSet(null)?.cancel()
     }
 
-    fun enableAfterCommitHooks(clock: AppClock = RealAppClock()) = stateLock.write {
-        afterCommitHooks =
-            pools
-                .flatMap { pool ->
-                    val hook = { pool.runPendingJobs(clock, maxCount = 1_000) }
-                    (jobsPerPool[pool.id] ?: emptySet()).map { jobType -> jobType to hook }
-                }
-                .toMap()
-    }
+    fun enableAfterCommitHooks(clock: AppClock = RealAppClock()) =
+        stateLock.write {
+            afterCommitHooks =
+                pools
+                    .flatMap { pool ->
+                        val hook = { pool.runPendingJobs(clock, maxCount = 1_000) }
+                        (jobsPerPool[pool.id] ?: emptySet()).map { jobType -> jobType to hook }
+                    }.toMap()
+        }
 
     fun disableAfterCommitHooks() = stateLock.write { afterCommitHooks = emptyMap() }
 
-    fun runPendingJobsSync(clock: AppClock, maxCount: Int = 1_000): Int {
+    fun runPendingJobsSync(
+        clock: AppClock,
+        maxCount: Int = 1_000
+    ): Int {
         var totalCount = 0
         do {
             val executed =

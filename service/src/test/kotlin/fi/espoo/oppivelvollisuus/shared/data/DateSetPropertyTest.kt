@@ -13,18 +13,17 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.positiveInt
 import io.kotest.property.arbitrary.positiveLong
 import io.kotest.property.checkAll
+import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import kotlinx.coroutines.runBlocking
 
 class DateSetPropertyTest : RangeBasedSetPropertyTest<LocalDate, FiniteDateRange, DateSet>() {
     @Test
     fun `it includes every date of every range added to it`() {
         runBlocking {
-            checkAll(Arb.list(Arb.finiteDateRange(durationDays = Arb.positiveLong(max = 10)))) {
-                ranges ->
+            checkAll(Arb.list(Arb.finiteDateRange(durationDays = Arb.positiveLong(max = 10)))) { ranges ->
                 val set = emptySet().addAll(ranges)
                 assertTrue(set.ranges().flatMap { it.dates() }.all { set.includes(it) })
             }
@@ -48,8 +47,7 @@ class DateSetPropertyTest : RangeBasedSetPropertyTest<LocalDate, FiniteDateRange
 
     override fun arbitrarySet(): Arb<DateSet> = Arb.dateSet()
 
-    override fun arbitraryRange(duration: Arb<Int>): Arb<FiniteDateRange> =
-        Arb.finiteDateRange(durationDays = duration.map { it.toLong() })
+    override fun arbitraryRange(duration: Arb<Int>): Arb<FiniteDateRange> = Arb.finiteDateRange(durationDays = duration.map { it.toLong() })
 
     override fun defaultDuration(): Arb<Int> = Arb.positiveInt(max = 3650)
 }

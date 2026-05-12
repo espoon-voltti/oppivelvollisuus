@@ -4,28 +4,24 @@
 
 package fi.espoo.oppivelvollisuus.shared.auth
 
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
 import fi.espoo.oppivelvollisuus.shared.utils.exhaust
-import tools.jackson.core.JsonGenerator
-import tools.jackson.databind.SerializationContext
-import tools.jackson.databind.ValueSerializer
 
 // Custom serializer to avoid Jackson serializing "fields" that are actually helper functions (e.g.
 // isAdmin)
-class AuthenticatedUserJsonSerializer : ValueSerializer<AuthenticatedUser>() {
+class AuthenticatedUserJsonSerializer : JsonSerializer<AuthenticatedUser>() {
     override fun serialize(
         value: AuthenticatedUser,
         gen: JsonGenerator,
-        ctxt: SerializationContext,
+        provider: SerializerProvider,
     ) {
         gen.writeStartObject()
-        gen.writePOJOProperty("type", value.type.toString())
+        gen.writePOJOField("type", value.type.toString())
         when (value) {
-            is AuthenticatedUser.ProviderUser -> {
-                gen.writePOJOProperty("id", value.id.toString())
-            }
-
             is AuthenticatedUser.EspooUser -> {
-                gen.writePOJOProperty("id", value.id.toString())
+                gen.writePOJOField("id", value.id.toString())
             }
 
             is AuthenticatedUser.SystemInternalUser -> {}

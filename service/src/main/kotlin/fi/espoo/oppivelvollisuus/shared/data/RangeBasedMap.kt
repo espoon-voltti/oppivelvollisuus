@@ -20,7 +20,9 @@ abstract class RangeBasedMap<
     Point : Comparable<Point>,
     Range : BoundedRange<Point, Range>,
     This : RangeBasedMap<T, Point, Range, This>,
->(protected val entries: List<Pair<Range, T>>) {
+>(
+    protected val entries: List<Pair<Range, T>>
+) {
     /**
      * Returns a sequence of all ranges in the map, sorted in ascending order.
      *
@@ -38,7 +40,8 @@ abstract class RangeBasedMap<
      * never extend outside the given range.
      */
     fun intersectRanges(range: Range): Sequence<Range> =
-        RangeBasedSet.partition(entries, range, adjacentBelongToCenter = false) { it.first }
+        RangeBasedSet
+            .partition(entries, range, adjacentBelongToCenter = false) { it.first }
             .center
             .asSequence()
             .mapNotNull { it.first.intersection(range) }
@@ -57,7 +60,8 @@ abstract class RangeBasedMap<
      * Duplicates are possible if the same value exists in multiple ranges in the original map.
      */
     fun intersectValues(range: Range): Sequence<T> =
-        RangeBasedSet.partition(entries, range, adjacentBelongToCenter = false) { it.first }
+        RangeBasedSet
+            .partition(entries, range, adjacentBelongToCenter = false) { it.first }
             .center
             .asSequence()
             .map { it.second }
@@ -73,7 +77,8 @@ abstract class RangeBasedMap<
      * returned that continues outside the given clamp range.
      */
     fun intersectEntries(range: Range): Sequence<Pair<Range, T>> =
-        RangeBasedSet.partition(entries, range, adjacentBelongToCenter = false) { it.first }
+        RangeBasedSet
+            .partition(entries, range, adjacentBelongToCenter = false) { it.first }
             .center
             .asSequence()
             .mapNotNull { Pair(it.first.intersection(range) ?: return@mapNotNull null, it.second) }
@@ -110,26 +115,34 @@ abstract class RangeBasedMap<
      * Returns a new map with the given range set to the given value. Any existing values
      * overlapping in any way with the given range are *overwritten*.
      */
-    fun set(range: Range, value: T): This = update(range, value) { _, _, new -> new }
+    fun set(
+        range: Range,
+        value: T
+    ): This = update(range, value) { _, _, new -> new }
 
     /**
      * Returns a new map with all the given ranges set to the given value. Any existing values
      * overlapping in any way with the given ranges are *overwritten*.
      */
-    fun set(ranges: Iterable<Range>, value: T): This = update(ranges, value) { _, _, new -> new }
+    fun set(
+        ranges: Iterable<Range>,
+        value: T
+    ): This = update(ranges, value) { _, _, new -> new }
 
     /**
      * Returns a new map with all the given ranges set to the given value. Any existing values
      * overlapping in any way with the given ranges are *overwritten*.
      */
-    fun set(ranges: Sequence<Range>, value: T): This = update(ranges, value) { _, _, new -> new }
+    fun set(
+        ranges: Sequence<Range>,
+        value: T
+    ): This = update(ranges, value) { _, _, new -> new }
 
     /**
      * Returns a new map with all the ranges in the given map set to the given values. Any existing
      * values overlapping in any way with the given ranges are *overwritten*.
      */
-    fun setAll(map: RangeBasedMap<T, Point, Range, This>): This =
-        update(map.entries) { _, _, new -> new }
+    fun setAll(map: RangeBasedMap<T, Point, Range, This>): This = update(map.entries) { _, _, new -> new }
 
     /**
      * Returns a new map with all the given ranges set to the given values. Any existing values
@@ -190,8 +203,7 @@ abstract class RangeBasedMap<
         ranges: Iterable<Range>,
         value: T,
         resolve: (range: Range, old: T, new: T) -> T,
-    ): This =
-        ranges.fold(this.entries) { acc, range -> update(acc, range, value, resolve) }.toThis()
+    ): This = ranges.fold(this.entries) { acc, range -> update(acc, range, value, resolve) }.toThis()
 
     /**
      * Returns a new map with all the given ranges updated with the given value. Any existing values
@@ -201,15 +213,17 @@ abstract class RangeBasedMap<
         ranges: Sequence<Range>,
         value: T,
         resolve: (range: Range, old: T, new: T) -> T,
-    ): This =
-        ranges.fold(this.entries) { acc, range -> update(acc, range, value, resolve) }.toThis()
+    ): This = ranges.fold(this.entries) { acc, range -> update(acc, range, value, resolve) }.toThis()
 
     /**
      * Returns a new map with the given range updated with the given value. Any existing values
      * overlapping in any way with the given range are resolved using the given resolve function.
      */
-    fun update(range: Range, value: T, resolve: (range: Range, old: T, new: T) -> T): This =
-        update(entries, range, value, resolve).toThis()
+    fun update(
+        range: Range,
+        value: T,
+        resolve: (range: Range, old: T, new: T) -> T
+    ): This = update(entries, range, value, resolve).toThis()
 
     /** Returns a new map with the given range removed from the current contained ranges. */
     fun remove(range: Range): This = remove(entries, range).toThis()
@@ -233,7 +247,8 @@ abstract class RangeBasedMap<
      * about whether one or more values can be found for the whole range.
      */
     fun contains(range: Range): Boolean =
-        RangeBasedSet.partition(this.entries, range, adjacentBelongToCenter = false) { it.first }
+        RangeBasedSet
+            .partition(this.entries, range, adjacentBelongToCenter = false) { it.first }
             .center
             .fold(emptyList<Range>()) { acc, entry ->
                 entry.first.intersection(range)?.let { overlap -> RangeBasedSet.add(acc, overlap) }
@@ -244,17 +259,20 @@ abstract class RangeBasedMap<
     protected abstract fun List<Pair<Range, T>>.toThis(): This
 
     /** Constructs a range from endpoints. */
-    protected abstract fun range(start: Point, end: Point): Range
+    protected abstract fun range(
+        start: Point,
+        end: Point
+    ): Range
 
     /** Constructs the smallest range that includes the given point. */
     protected abstract fun range(point: Point): Range
 
     /** Gets value at given point or null if not exists */
     fun getValue(at: Point): T? =
-        RangeBasedSet.partition(this.entries, range(at), adjacentBelongToCenter = false) {
+        RangeBasedSet
+            .partition(this.entries, range(at), adjacentBelongToCenter = false) {
                 it.first
-            }
-            .center
+            }.center
             .find { it.first.includes(at) }
             ?.second
 

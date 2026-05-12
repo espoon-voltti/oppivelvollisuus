@@ -4,7 +4,7 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.common.AdUser
+import fi.espoo.oppivelvollisuus.domain.AdUser
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.UUID

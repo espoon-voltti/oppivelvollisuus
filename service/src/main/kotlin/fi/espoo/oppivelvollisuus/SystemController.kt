@@ -4,10 +4,10 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.common.AdUser
-import fi.espoo.oppivelvollisuus.common.AppUser
-import fi.espoo.oppivelvollisuus.common.getAppUser
-import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
+import fi.espoo.oppivelvollisuus.domain.AdUser
+import fi.espoo.oppivelvollisuus.domain.AppUser
+import fi.espoo.oppivelvollisuus.domain.getAppUser
+import fi.espoo.oppivelvollisuus.domain.upsertAppUserFromAd
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.config.audit
 import mu.KotlinLogging

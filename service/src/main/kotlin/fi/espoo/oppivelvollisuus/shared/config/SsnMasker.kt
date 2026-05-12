@@ -8,7 +8,10 @@ import net.logstash.logback.mask.ValueMasker
 import tools.jackson.core.TokenStreamContext
 
 class SsnMasker : ValueMasker {
-    override fun mask(context: TokenStreamContext?, value: Any?): Any =
+    override fun mask(
+        context: TokenStreamContext?,
+        value: Any?
+    ): Any =
         if (value is String) {
             value.replace(
                 Regex(

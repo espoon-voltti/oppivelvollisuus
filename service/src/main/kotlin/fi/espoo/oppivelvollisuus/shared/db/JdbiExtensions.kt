@@ -13,6 +13,14 @@ import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTimeRange
 import fi.espoo.oppivelvollisuus.shared.time.TimeRange
 import fi.espoo.oppivelvollisuus.shared.time.TimeRangeEndpoint
+import org.jdbi.v3.core.argument.Argument
+import org.jdbi.v3.core.argument.ArgumentFactory
+import org.jdbi.v3.core.argument.NullArgument
+import org.jdbi.v3.core.config.ConfigRegistry
+import org.jdbi.v3.core.generic.GenericTypes
+import org.jdbi.v3.core.mapper.ColumnMapper
+import org.jdbi.v3.core.statement.StatementContext
+import org.postgresql.util.PGobject
 import java.lang.reflect.Type
 import java.sql.PreparedStatement
 import java.sql.ResultSet
@@ -26,14 +34,6 @@ import java.time.format.DateTimeFormatter
 import java.util.Optional
 import java.util.UUID
 import java.util.function.Function
-import org.jdbi.v3.core.argument.Argument
-import org.jdbi.v3.core.argument.ArgumentFactory
-import org.jdbi.v3.core.argument.NullArgument
-import org.jdbi.v3.core.config.ConfigRegistry
-import org.jdbi.v3.core.generic.GenericTypes
-import org.jdbi.v3.core.mapper.ColumnMapper
-import org.jdbi.v3.core.statement.StatementContext
-import org.postgresql.util.PGobject
 
 val finiteDateRangeArgumentFactory =
     pgObjectArgumentFactory<FiniteDateRange> {
@@ -61,8 +61,7 @@ val dateSetArgumentFactory =
             type = "datemultirange"
             if (it != null) {
                 value =
-                    it.ranges().joinToString(separator = ",", prefix = "{", postfix = "}") { range
-                        ->
+                    it.ranges().joinToString(separator = ",", prefix = "{", postfix = "}") { range ->
                         "[${range.start},${range.end}]"
                     }
             }
@@ -113,28 +112,31 @@ val helsinkiDateTimeRangeArgumentFactory =
 val yearMonthArgumentFactory =
     customArgumentFactory<YearMonth>(Types.DATE) { CustomObjectArgument(it.atDay(1)) }
 
-val databaseEnumArgumentFactory = ArgumentFactory.Preparable { type, _ ->
-    val erasedType = GenericTypes.getErasedType(type)
-    if (DatabaseEnum::class.java.isAssignableFrom(erasedType) && erasedType.isEnum) {
-        val sqlType = (erasedType.enumConstants[0] as DatabaseEnum).sqlType
-        Optional.of(
-            Function { nullableValue ->
-                CustomObjectArgument(
-                    PGobject().apply {
-                        this.type = sqlType
-                        if (nullableValue != null) {
-                            this.value = nullableValue.toString()
+val databaseEnumArgumentFactory =
+    ArgumentFactory.Preparable { type, _ ->
+        val erasedType = GenericTypes.getErasedType(type)
+        if (DatabaseEnum::class.java.isAssignableFrom(erasedType) && erasedType.isEnum) {
+            val sqlType = (erasedType.enumConstants[0] as DatabaseEnum).sqlType
+            Optional.of(
+                Function { nullableValue ->
+                    CustomObjectArgument(
+                        PGobject().apply {
+                            this.type = sqlType
+                            if (nullableValue != null) {
+                                this.value = nullableValue.toString()
+                            }
                         }
-                    }
-                )
-            }
-        )
-    } else {
-        Optional.empty()
+                    )
+                }
+            )
+        } else {
+            Optional.empty()
+        }
     }
-}
 
-private class Parser(private var text: CharSequence) {
+private class Parser(
+    private var text: CharSequence
+) {
     fun peekChar(): Char? = this.text.firstOrNull()
 
     fun parseChar(): Char =
@@ -256,46 +258,52 @@ private class Parser(private var text: CharSequence) {
     }
 }
 
-val dateSetColumnMapper = PgObjectColumnMapper { obj ->
-    assert(obj.type == "datemultirange")
-    obj.value
-        ?.let(::Parser)
-        ?.parseMultiRange { it.parseFiniteDateRange() }
-        ?.let { DateSet.unsafeRaw(it) }
-}
-
-val finiteDateRangeColumnMapper = PgObjectColumnMapper { obj ->
-    assert(obj.type == "daterange")
-    obj.value?.let(::Parser)?.parseFiniteDateRange()
-}
-
-val dateRangeColumnMapper = PgObjectColumnMapper { obj ->
-    assert(obj.type == "daterange")
-    obj.value?.let(::Parser)?.parseDateRange()
-}
-
-val timeRangeColumnMapper = PgObjectColumnMapper {
-    assert(it.type == "timerange" || it.type == "timerange_non_nullable_range")
-    it.value?.let { value: String ->
-        val parts = value.trim('(', ')').split(',')
-        TimeRange(LocalTime.parse(parts[0]), LocalTime.parse(parts[1]))
+val dateSetColumnMapper =
+    PgObjectColumnMapper { obj ->
+        assert(obj.type == "datemultirange")
+        obj.value
+            ?.let(::Parser)
+            ?.parseMultiRange { it.parseFiniteDateRange() }
+            ?.let { DateSet.unsafeRaw(it) }
     }
-}
+
+val finiteDateRangeColumnMapper =
+    PgObjectColumnMapper { obj ->
+        assert(obj.type == "daterange")
+        obj.value?.let(::Parser)?.parseFiniteDateRange()
+    }
+
+val dateRangeColumnMapper =
+    PgObjectColumnMapper { obj ->
+        assert(obj.type == "daterange")
+        obj.value?.let(::Parser)?.parseDateRange()
+    }
+
+val timeRangeColumnMapper =
+    PgObjectColumnMapper {
+        assert(it.type == "timerange" || it.type == "timerange_non_nullable_range")
+        it.value?.let { value: String ->
+            val parts = value.trim('(', ')').split(',')
+            TimeRange(LocalTime.parse(parts[0]), LocalTime.parse(parts[1]))
+        }
+    }
 
 val idColumnMapper =
     ColumnMapper<Id<*>> { r, columnNumber, _ ->
         r.getObject(columnNumber, UUID::class.java)?.let { Id<DatabaseTable>(it) }
     }
 
-val helsinkiDateTimeColumnMapper = ColumnMapper { r, columnNumber, _ ->
-    r.getObject(columnNumber, OffsetDateTime::class.java)?.let {
-        HelsinkiDateTime.from(it.toInstant())
+val helsinkiDateTimeColumnMapper =
+    ColumnMapper { r, columnNumber, _ ->
+        r.getObject(columnNumber, OffsetDateTime::class.java)?.let {
+            HelsinkiDateTime.from(it.toInstant())
+        }
     }
-}
 
-val yearMonthColumnMapper = ColumnMapper { r, columnNumber, _ ->
-    r.getObject(columnNumber, LocalDate::class.java)?.let { YearMonth.from(it) }
-}
+val yearMonthColumnMapper =
+    ColumnMapper { r, columnNumber, _ ->
+        r.getObject(columnNumber, LocalDate::class.java)?.let { YearMonth.from(it) }
+    }
 
 class CustomArgumentFactory<T>(
     private val clazz: Class<T>,
@@ -308,7 +316,10 @@ class CustomArgumentFactory<T>(
         }
     }
 
-    override fun prepare(type: Type, config: ConfigRegistry): Optional<Function<Any?, Argument>> =
+    override fun prepare(
+        type: Type,
+        config: ConfigRegistry
+    ): Optional<Function<Any?, Argument>> =
         Optional.ofNullable(
             if (clazz.isAssignableFrom(GenericTypes.getErasedType(type))) {
                 Function { nullableValue ->
@@ -320,9 +331,14 @@ class CustomArgumentFactory<T>(
         )
 }
 
-class PgObjectArgumentFactory<T>(private val clazz: Class<T>, private val f: (T?) -> PGobject) :
-    ArgumentFactory.Preparable {
-    override fun prepare(type: Type, config: ConfigRegistry): Optional<Function<Any?, Argument>> =
+class PgObjectArgumentFactory<T>(
+    private val clazz: Class<T>,
+    private val f: (T?) -> PGobject
+) : ArgumentFactory.Preparable {
+    override fun prepare(
+        type: Type,
+        config: ConfigRegistry
+    ): Optional<Function<Any?, Argument>> =
         Optional.ofNullable(
             if (clazz.isAssignableFrom(GenericTypes.getErasedType(type))) {
                 Function { nullableValue -> CustomObjectArgument(f(clazz.cast(nullableValue))) }
@@ -332,16 +348,26 @@ class PgObjectArgumentFactory<T>(private val clazz: Class<T>, private val f: (T?
         )
 }
 
-class CustomObjectArgument(val value: Any) : Argument {
-    override fun apply(position: Int, statement: PreparedStatement, ctx: StatementContext) =
-        statement.setObject(position, value)
+class CustomObjectArgument(
+    val value: Any
+) : Argument {
+    override fun apply(
+        position: Int,
+        statement: PreparedStatement,
+        ctx: StatementContext
+    ) = statement.setObject(position, value)
 
     override fun toString(): String = value.toString()
 }
 
-class CustomStringArgument(val value: String) : Argument {
-    override fun apply(position: Int, statement: PreparedStatement, ctx: StatementContext) =
-        statement.setString(position, value)
+class CustomStringArgument(
+    val value: String
+) : Argument {
+    override fun apply(
+        position: Int,
+        statement: PreparedStatement,
+        ctx: StatementContext
+    ) = statement.setString(position, value)
 
     override fun toString(): String = value
 }
@@ -351,13 +377,16 @@ inline fun <reified T> customArgumentFactory(
     noinline f: (T) -> Argument?,
 ): CustomArgumentFactory<T> = CustomArgumentFactory(T::class.java, sqlType, f)
 
-inline fun <reified T> pgObjectArgumentFactory(noinline serializer: (T?) -> PGobject) =
-    PgObjectArgumentFactory(T::class.java, serializer)
+inline fun <reified T> pgObjectArgumentFactory(noinline serializer: (T?) -> PGobject) = PgObjectArgumentFactory(T::class.java, serializer)
 
-inline fun <reified T> toStringArgumentFactory() =
-    customArgumentFactory<T>(Types.VARCHAR) { CustomStringArgument(it.toString()) }
+inline fun <reified T> toStringArgumentFactory() = customArgumentFactory<T>(Types.VARCHAR) { CustomStringArgument(it.toString()) }
 
-class PgObjectColumnMapper<T>(val deserializer: (PGobject) -> T?) : ColumnMapper<T> {
-    override fun map(r: ResultSet, columnNumber: Int, ctx: StatementContext): T? =
-        r.getObject(columnNumber)?.let { deserializer(it as PGobject) }
+class PgObjectColumnMapper<T>(
+    val deserializer: (PGobject) -> T?
+) : ColumnMapper<T> {
+    override fun map(
+        r: ResultSet,
+        columnNumber: Int,
+        ctx: StatementContext
+    ): T? = r.getObject(columnNumber)?.let { deserializer(it as PGobject) }
 }

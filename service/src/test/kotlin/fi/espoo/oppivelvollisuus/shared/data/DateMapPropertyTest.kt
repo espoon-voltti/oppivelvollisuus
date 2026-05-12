@@ -12,19 +12,18 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.positiveInt
 import io.kotest.property.checkAll
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import kotlin.sequences.map
 import kotlin.test.assertNull
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
 
 class DateMapPropertyTest : RangeBasedMapPropertyTest<LocalDate, FiniteDateRange, DateMap<Int>>() {
     override fun emptyMap(): DateMap<Int> = DateMap.empty()
 
     override fun arbitraryMap(value: Arb<Int>): Arb<DateMap<Int>> = Arb.dateMap(value)
 
-    override fun arbitraryRange(duration: Arb<Int>): Arb<FiniteDateRange> =
-        Arb.finiteDateRange(durationDays = duration.map { it.toLong() })
+    override fun arbitraryRange(duration: Arb<Int>): Arb<FiniteDateRange> = Arb.finiteDateRange(durationDays = duration.map { it.toLong() })
 
     override fun defaultDuration(): Arb<Int> = Arb.positiveInt(max = 3650)
 

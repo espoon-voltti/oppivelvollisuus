@@ -11,9 +11,6 @@ import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.Unauthorized
 import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import jakarta.servlet.http.HttpServletRequest
-import java.io.IOException
-import java.lang.Exception
-import java.time.Instant
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException
 import org.springframework.core.Ordered
 import org.springframework.core.annotation.Order
@@ -25,42 +22,65 @@ import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import java.io.IOException
+import java.lang.Exception
+import java.time.Instant
 
 @Order(Ordered.HIGHEST_PRECEDENCE)
 @ControllerAdvice
 class ExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(value = [BadRequest::class])
-    fun badRequest(req: HttpServletRequest, ex: BadRequest): ResponseEntity<ErrorResponse> {
+    fun badRequest(
+        req: HttpServletRequest,
+        ex: BadRequest
+    ): ResponseEntity<ErrorResponse> {
         logger.warn("Bad request (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity
+            .status(HttpStatus.BAD_REQUEST)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [NotFound::class])
-    fun notFound(req: HttpServletRequest, ex: NotFound): ResponseEntity<ErrorResponse> {
+    fun notFound(
+        req: HttpServletRequest,
+        ex: NotFound
+    ): ResponseEntity<ErrorResponse> {
         logger.warn("Not found (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [Conflict::class])
-    fun conflict(req: HttpServletRequest, ex: Conflict): ResponseEntity<ErrorResponse> {
+    fun conflict(
+        req: HttpServletRequest,
+        ex: Conflict
+    ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Conflict (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.CONFLICT)
+        return ResponseEntity
+            .status(HttpStatus.CONFLICT)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [Unauthorized::class])
-    fun unauthorized(req: HttpServletRequest, ex: Unauthorized): ResponseEntity<ErrorResponse> {
+    fun unauthorized(
+        req: HttpServletRequest,
+        ex: Unauthorized
+    ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Unauthorized (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [Forbidden::class])
-    fun forbidden(req: HttpServletRequest, ex: Forbidden): ResponseEntity<ErrorResponse> {
+    fun forbidden(
+        req: HttpServletRequest,
+        ex: Forbidden
+    ): ResponseEntity<ErrorResponse> {
         logger.warn("fi.espoo.oppivelvollisuus.common.Forbidden (${ex.message})", ex)
-        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+        return ResponseEntity
+            .status(HttpStatus.FORBIDDEN)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
@@ -71,7 +91,8 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     ): ResponseEntity<ErrorResponse> {
         if (ex.isUniqueConstraintViolation()) {
             logger.warn("Unique constraint violation (${ex.message})", ex)
-            return ResponseEntity.status(HttpStatus.CONFLICT)
+            return ResponseEntity
+                .status(HttpStatus.CONFLICT)
                 .body(ErrorResponse("UniqueConstraintViolation"))
         }
         return unexpectedError(req, ex)
@@ -79,7 +100,10 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
 
     // We don't want alerts from ClientAbortExceptions or return any http responses to them
     @ExceptionHandler(value = [IOException::class])
-    fun ioExceptions(req: HttpServletRequest, ex: IOException): ResponseEntity<ErrorResponse>? {
+    fun ioExceptions(
+        req: HttpServletRequest,
+        ex: IOException
+    ): ResponseEntity<ErrorResponse>? {
         if (ex.toString().contains("ClientAbortException", true)) {
             logger.warn("ClientAbortException", ex)
             return null
@@ -100,7 +124,10 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(value = [Throwable::class])
-    fun unexpectedError(req: HttpServletRequest, ex: Throwable): ResponseEntity<ErrorResponse> {
+    fun unexpectedError(
+        req: HttpServletRequest,
+        ex: Throwable
+    ): ResponseEntity<ErrorResponse> {
         val message = "Unexpected error (${ex.message})"
         logger.error(message, ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse())

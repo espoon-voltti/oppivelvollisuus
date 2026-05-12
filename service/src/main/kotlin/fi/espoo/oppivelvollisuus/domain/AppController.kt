@@ -4,8 +4,6 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.AppUser
-import fi.espoo.oppivelvollisuus.common.getActiveAppUsers
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.config.audit
 import mu.KotlinLogging

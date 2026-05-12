@@ -7,6 +7,8 @@ package fi.espoo.oppivelvollisuus.shared.asyncjob
 import fi.espoo.oppivelvollisuus.PureJdbiTest
 import fi.espoo.oppivelvollisuus.shared.time.RealAppClock
 import fi.espoo.oppivelvollisuus.shared.time.europeHelsinki
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.Instant
 import java.time.LocalTime
@@ -16,8 +18,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import kotlin.use
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
 
 class ScheduledJobRunnerTest : PureJdbiTest(resetDbBeforeEach = true) {
     enum class TestScheduledJob {

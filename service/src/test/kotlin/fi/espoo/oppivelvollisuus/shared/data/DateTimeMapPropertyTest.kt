@@ -13,14 +13,13 @@ import io.kotest.property.arbitrary.list
 import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.positiveInt
 import io.kotest.property.checkAll
+import kotlinx.coroutines.runBlocking
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import kotlin.sequences.map
 import kotlin.test.assertNull
-import kotlinx.coroutines.runBlocking
-import org.junit.jupiter.api.Test
 
-class DateTimeMapPropertyTest :
-    RangeBasedMapPropertyTest<HelsinkiDateTime, HelsinkiDateTimeRange, DateTimeMap<Int>>() {
+class DateTimeMapPropertyTest : RangeBasedMapPropertyTest<HelsinkiDateTime, HelsinkiDateTimeRange, DateTimeMap<Int>>() {
     override fun emptyMap(): DateTimeMap<Int> = DateTimeMap.empty()
 
     override fun arbitraryMap(value: Arb<Int>): Arb<DateTimeMap<Int>> = Arb.dateTimeMap(value)
@@ -31,11 +30,13 @@ class DateTimeMapPropertyTest :
     override fun defaultDuration(): Arb<Int> = Arb.positiveInt(max = 48 * 60 * 60)
 
     override fun pointsOfRange(range: HelsinkiDateTimeRange): Sequence<HelsinkiDateTime> =
-        if (range.start == range.end) emptySequence()
-        else
+        if (range.start == range.end) {
+            emptySequence()
+        } else {
             generateSequence(range.start) { t ->
                 t.plus(Duration.ofNanos(1000)).takeIf { it < range.end }
             }
+        }
 
     @Test
     fun `it returns null for every endpoint of every gap`() {
@@ -45,8 +46,9 @@ class DateTimeMapPropertyTest :
                 val map = emptyMap().setAll(ranges.asSequence().map { it to value })
                 for (gap in map.gaps()) {
                     assertNull(map.getValue(gap.start))
-                    if (gap.end > gap.start)
+                    if (gap.end > gap.start) {
                         assertNull(map.getValue(gap.end.minus(Duration.ofNanos(1000))))
+                    }
                 }
             }
         }

@@ -13,9 +13,7 @@ import io.kotest.property.arbitrary.map
 import io.kotest.property.arbitrary.positiveInt
 import java.time.Duration
 
-class DateTimeSetPropertyTest :
-    RangeBasedSetPropertyTest<HelsinkiDateTime, HelsinkiDateTimeRange, DateTimeSet>() {
-
+class DateTimeSetPropertyTest : RangeBasedSetPropertyTest<HelsinkiDateTime, HelsinkiDateTimeRange, DateTimeSet>() {
     override fun emptySet(): DateTimeSet = DateTimeSet.empty()
 
     override fun arbitrarySet(): Arb<DateTimeSet> = Arb.dateTimeSet()

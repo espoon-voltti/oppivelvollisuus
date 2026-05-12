@@ -16,8 +16,6 @@ import fi.espoo.oppivelvollisuus.shared.time.MockAppClock
 import fi.espoo.oppivelvollisuus.shared.time.RealAppClock
 import io.opentelemetry.api.trace.Tracer
 import jakarta.servlet.http.HttpServletRequest
-import java.time.ZonedDateTime
-import java.util.UUID
 import org.jdbi.v3.core.Jdbi
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.MethodParameter
@@ -35,14 +33,16 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 import org.springframework.web.servlet.config.annotation.ContentNegotiationConfigurer
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import java.time.ZonedDateTime
+import java.util.UUID
 
 @Configuration
-class SpringMvcConfig(private val jdbi: Jdbi, private val tracer: Tracer, private val env: AppEnv) :
-    WebMvcConfigurer {
+class SpringMvcConfig(
+    private val jdbi: Jdbi,
+    private val tracer: Tracer,
+    private val env: AppEnv
+) : WebMvcConfigurer {
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
-        resolvers.add(
-            asArgumentResolver<AuthenticatedUser.ProviderUser?>(::resolveAuthenticatedUser)
-        )
         resolvers.add(asArgumentResolver<AuthenticatedUser.EspooUser?>(::resolveAuthenticatedUser))
         resolvers.add(
             asArgumentResolver<AuthenticatedUser.SystemInternalUser?>(::resolveAuthenticatedUser)
@@ -67,8 +67,7 @@ class SpringMvcConfig(private val jdbi: Jdbi, private val tracer: Tracer, privat
         converters.removeIf { it is StringHttpMessageConverter }
     }
 
-    private fun WebRequest.getDatabaseInstance(): Database =
-        getDatabase() ?: Database(jdbi, tracer).also(::setDatabase)
+    private fun WebRequest.getDatabaseInstance(): Database = getDatabase() ?: Database(jdbi, tracer).also(::setDatabase)
 
     private inline fun <reified T : AuthenticatedUser> resolveAuthenticatedUser(
         parameter: MethodParameter,
@@ -99,8 +98,7 @@ private inline fun <reified T> asArgumentResolver(
     crossinline f: (parameter: MethodParameter, webRequest: NativeWebRequest) -> T
 ): HandlerMethodArgumentResolver =
     object : HandlerMethodArgumentResolver {
-        override fun supportsParameter(parameter: MethodParameter): Boolean =
-            T::class.java.isAssignableFrom(parameter.parameterType)
+        override fun supportsParameter(parameter: MethodParameter): Boolean = T::class.java.isAssignableFrom(parameter.parameterType)
 
         override fun resolveArgument(
             parameter: MethodParameter,
@@ -110,9 +108,7 @@ private inline fun <reified T> asArgumentResolver(
         ) = f(parameter, webRequest)
     }
 
-private inline fun <reified I, reified O> convertFrom(
-    crossinline f: (source: I) -> O
-): GenericConverter =
+private inline fun <reified I, reified O> convertFrom(crossinline f: (source: I) -> O): GenericConverter =
     object : GenericConverter {
         override fun getConvertibleTypes(): Set<GenericConverter.ConvertiblePair> =
             setOf(GenericConverter.ConvertiblePair(I::class.java, O::class.java))

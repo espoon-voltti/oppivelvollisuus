@@ -14,9 +14,9 @@ import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.withDetachedSpan
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.opentelemetry.api.trace.Tracer
+import org.jdbi.v3.core.Jdbi
 import java.time.Duration
 import javax.sql.DataSource
-import org.jdbi.v3.core.Jdbi
 
 private const val SCHEDULER_THREADS = 1
 private const val ASYNC_JOB_RETRY_COUNT = 12
@@ -33,19 +33,26 @@ class ScheduledJobRunner(
 
     init {
         val jobsByName =
-            schedules.asSequence().flatMap { it.jobs }.map { it.job }.groupBy { it.name }.values
+            schedules
+                .asSequence()
+                .flatMap { it.jobs }
+                .map { it.job }
+                .groupBy { it.name }
+                .values
         val notUnique = jobsByName.filterNot { it.count() == 1 }
         require(notUnique.isEmpty()) {
-            val jobNames = notUnique.joinToString { jobs ->
-                jobs.joinToString(prefix = "[", postfix = "]") { "${it.javaClass.name}.${it.name}" }
-            }
+            val jobNames =
+                notUnique.joinToString { jobs ->
+                    jobs.joinToString(prefix = "[", postfix = "]") { "${it.javaClass.name}.${it.name}" }
+                }
             "Scheduled job name conflict: $jobNames"
         }
         asyncJobRunner.registerHandler(::runJob)
     }
 
     val scheduler: Scheduler =
-        Scheduler.create(dataSource)
+        Scheduler
+            .create(dataSource)
             .startTasks(
                 schedules
                     .asSequence()
@@ -60,7 +67,8 @@ class ScheduledJobRunner(
                             logger.info(logMeta) {
                                 "Scheduling job ${definition.job.name}: ${definition.settings.schedule}"
                             }
-                            Tasks.recurring(definition.job.name, definition.settings.schedule)
+                            Tasks
+                                .recurring(definition.job.name, definition.settings.schedule)
                                 .execute { _, _ ->
                                     Database(jdbi, tracer).connect {
                                         this.planAsyncJob(it, definition)
@@ -68,14 +76,16 @@ class ScheduledJobRunner(
                                 }
                         }
                     }
-            )
-            .threads(SCHEDULER_THREADS)
+            ).threads(SCHEDULER_THREADS)
             .pollingInterval(POLLING_INTERVAL)
             .pollUsingLockAndFetch(0.5, 1.0)
             .deleteUnresolvedAfter(Duration.ofHours(1))
             .build()
 
-    private fun planAsyncJob(db: Database.Connection, definition: ScheduledJobDefinition) {
+    private fun planAsyncJob(
+        db: Database.Connection,
+        definition: ScheduledJobDefinition
+    ) {
         val (job, settings, _) = definition
         val logMeta = mapOf("jobName" to job.name)
         logger.info(logMeta) { "Planning scheduled job ${job.name}" }
@@ -90,7 +100,11 @@ class ScheduledJobRunner(
         }
     }
 
-    private fun runJob(db: Database.Connection, clock: AppClock, msg: AsyncJob.RunScheduledJob) {
+    private fun runJob(
+        db: Database.Connection,
+        clock: AppClock,
+        msg: AsyncJob.RunScheduledJob
+    ) {
         val jobName = msg.job
         val spanNamePrefix = "scheduledjob"
         val definition =

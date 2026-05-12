@@ -4,10 +4,10 @@
 
 package fi.espoo.oppivelvollisuus.shared.time
 
+import org.junit.jupiter.api.Test
 import java.time.LocalTime
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class TimeIntervalTest {
     @Test
@@ -162,6 +162,8 @@ class TimeIntervalTest {
 
     private fun testTime(hour: Int) = LocalTime.of(hour, 0)
 
-    private fun testRange(from: Int, to: Int?) =
-        TimeInterval(testTime(from), to?.let { testTime(it) })
+    private fun testRange(
+        from: Int,
+        to: Int?
+    ) = TimeInterval(testTime(from), to?.let { testTime(it) })
 }

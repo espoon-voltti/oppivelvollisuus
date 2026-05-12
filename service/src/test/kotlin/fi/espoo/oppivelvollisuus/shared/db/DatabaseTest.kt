@@ -5,15 +5,15 @@
 package fi.espoo.oppivelvollisuus.shared.db
 
 import fi.espoo.oppivelvollisuus.PureJdbiTest
-import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 private class TestException : RuntimeException()
 
@@ -42,7 +42,8 @@ class TransactionTest : PureJdbiTest(resetDbBeforeEach = true) {
             tx.execute { sql("INSERT INTO test_table (test_column) VALUES ('2020-01-02')") }
             assertEquals(
                 listOf(LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 2)),
-                tx.createQuery { sql("SELECT test_column FROM test_table ORDER BY test_column") }
+                tx
+                    .createQuery { sql("SELECT test_column FROM test_table ORDER BY test_column") }
                     .toList<LocalDate>(),
             )
         }
@@ -60,7 +61,8 @@ class TransactionTest : PureJdbiTest(resetDbBeforeEach = true) {
             }
             assertEquals(
                 listOf(LocalDate.of(2020, 1, 1)),
-                tx.createQuery { sql("SELECT test_column FROM test_table ORDER BY test_column") }
+                tx
+                    .createQuery { sql("SELECT test_column FROM test_table ORDER BY test_column") }
                     .toList<LocalDate>(),
             )
         }

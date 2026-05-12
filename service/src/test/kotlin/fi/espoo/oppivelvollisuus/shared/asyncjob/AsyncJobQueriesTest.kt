@@ -7,6 +7,7 @@ package fi.espoo.oppivelvollisuus.shared.asyncjob
 import fi.espoo.oppivelvollisuus.PureJdbiTest
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
+import org.junit.jupiter.api.Test
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -15,10 +16,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
-    private data class TestJob(val data: UUID)
+    private data class TestJob(
+        val data: UUID
+    )
 
     private val jobType = AsyncJobType(TestJob::class)
 
@@ -30,15 +32,17 @@ class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 JobParams(TestJob(id), 1234, Duration.ofMinutes(42), HelsinkiDateTime.now())
             )
         }
-        val runAt = db.read {
-            it.createQuery { sql("SELECT run_at FROM async_job") }.exactlyOne<HelsinkiDateTime>()
-        }
+        val runAt =
+            db.read {
+                it.createQuery { sql("SELECT run_at FROM async_job") }.exactlyOne<HelsinkiDateTime>()
+            }
 
         val ref = db.transaction { it.claimJob(HelsinkiDateTime.now(), listOf(jobType))!! }
         assertEquals(jobType, ref.jobType)
         val (retryRunAt, retryCount) =
             db.read {
-                it.createQuery { sql("SELECT run_at, retry_count FROM async_job") }
+                it
+                    .createQuery { sql("SELECT run_at, retry_count FROM async_job") }
                     .exactlyOne<Retry>()
             }
         assertTrue(retryRunAt > runAt)
@@ -51,10 +55,12 @@ class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
             tx.completeJob(ref, HelsinkiDateTime.now())
         }
 
-        val completedAt = db.read {
-            it.createQuery { sql("SELECT completed_at FROM async_job") }
-                .exactlyOne<HelsinkiDateTime>()
-        }
+        val completedAt =
+            db.read {
+                it
+                    .createQuery { sql("SELECT completed_at FROM async_job") }
+                    .exactlyOne<HelsinkiDateTime>()
+            }
         assertTrue(completedAt > runAt)
     }
 
@@ -97,7 +103,8 @@ class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
         }
         val completedCount =
             jdbi.open().use { h ->
-                h.createQuery("SELECT count(*) FROM async_job WHERE completed_at IS NOT NULL")
+                h
+                    .createQuery("SELECT count(*) FROM async_job WHERE completed_at IS NOT NULL")
                     .mapTo(Int::class.java)
                     .one()
             }
@@ -117,26 +124,26 @@ class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                         TestJobParams(it, completed = false),
                         TestJobParams(it, completed = true),
                     )
-                }
-                .forEach { params -> tx.insertTestJob(params) }
+                }.forEach { params -> tx.insertTestJob(params) }
             tx.insertTestJob(TestJobParams(future, completed = false))
         }
 
         db.removeOldAsyncJobs(now)
 
-        val remainingJobs = db.read {
-            it.createQuery {
-                    sql(
-                        "SELECT run_at, completed_at IS NOT NULL AS completed FROM async_job ORDER BY 1,2"
-                    )
-                }
-                .toList {
-                    TestJobParams(
-                        runAt = column<HelsinkiDateTime>("run_at").toLocalDate(),
-                        completed = column("completed"),
-                    )
-                }
-        }
+        val remainingJobs =
+            db.read {
+                it
+                    .createQuery {
+                        sql(
+                            "SELECT run_at, completed_at IS NOT NULL AS completed FROM async_job ORDER BY 1,2"
+                        )
+                    }.toList {
+                        TestJobParams(
+                            runAt = column<HelsinkiDateTime>("run_at").toLocalDate(),
+                            completed = column("completed"),
+                        )
+                    }
+            }
         assertEquals(
             listOf(
                 TestJobParams(recent, completed = false),
@@ -147,10 +154,16 @@ class AsyncJobQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
         )
     }
 
-    private data class Retry(val runAt: HelsinkiDateTime, val retryCount: Long)
+    private data class Retry(
+        val runAt: HelsinkiDateTime,
+        val retryCount: Long
+    )
 }
 
-private data class TestJobParams(val runAt: LocalDate, val completed: Boolean)
+private data class TestJobParams(
+    val runAt: LocalDate,
+    val completed: Boolean
+)
 
 private fun Database.Transaction.insertTestJob(params: TestJobParams) {
     val runAt = HelsinkiDateTime.of(params.runAt, LocalTime.of(12, 0))

@@ -51,7 +51,7 @@ class HttpFilterConfig {
             order = -8
         }
 
-    class BasicMdcFilter() : HttpFilter() {
+    class BasicMdcFilter : HttpFilter() {
         override fun doFilter(
             request: HttpServletRequest,
             response: HttpServletResponse,

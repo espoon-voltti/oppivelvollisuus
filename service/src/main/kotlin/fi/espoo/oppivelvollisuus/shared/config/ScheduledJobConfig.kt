@@ -9,13 +9,13 @@ import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
 import fi.espoo.oppivelvollisuus.shared.asyncjob.JobSchedule
 import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJobRunner
 import io.opentelemetry.api.trace.Tracer
-import javax.sql.DataSource
 import org.jdbi.v3.core.Jdbi
 import org.springframework.boot.context.event.ApplicationReadyEvent
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
+import javax.sql.DataSource
 
 @Configuration
 class ScheduledJobConfig {
@@ -33,7 +33,9 @@ class ScheduledJobConfig {
     fun scheduledJobRunnerStart(runner: ScheduledJobRunner) =
         object {
             @EventListener
-            fun onApplicationReady(@Suppress("UNUSED_PARAMETER") event: ApplicationReadyEvent) {
+            fun onApplicationReady(
+                @Suppress("UNUSED_PARAMETER") event: ApplicationReadyEvent
+            ) {
                 runner.scheduler.start()
             }
         }

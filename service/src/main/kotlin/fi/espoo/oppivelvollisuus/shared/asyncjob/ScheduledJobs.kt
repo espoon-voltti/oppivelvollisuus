@@ -15,7 +15,9 @@ enum class ScheduledJob(
 )
 
 @Component
-class ScheduledJobs(env: ScheduledJobsEnv<ScheduledJob>) : JobSchedule {
+class ScheduledJobs(
+    env: ScheduledJobsEnv<ScheduledJob>
+) : JobSchedule {
     override val jobs: List<ScheduledJobDefinition> =
         env.jobs.map {
             ScheduledJobDefinition(it.key, it.value) { db, clock -> it.key.fn(this, db, clock) }

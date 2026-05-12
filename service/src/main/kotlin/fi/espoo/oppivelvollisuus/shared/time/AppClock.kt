@@ -15,7 +15,9 @@ interface AppClock {
     fun now(): HelsinkiDateTime
 }
 
-class MockAppClock(private var now: HelsinkiDateTime) : AppClock {
+class MockAppClock(
+    private var now: HelsinkiDateTime
+) : AppClock {
     constructor(
         year: Int,
         month: Int,
@@ -36,7 +38,9 @@ class MockAppClock(private var now: HelsinkiDateTime) : AppClock {
     }
 }
 
-class RealAppClock(private val clock: Clock = Clock.systemUTC()) : AppClock {
+class RealAppClock(
+    private val clock: Clock = Clock.systemUTC()
+) : AppClock {
     override fun today(): LocalDate = LocalDate.now(europeHelsinki)
 
     override fun now(): HelsinkiDateTime = HelsinkiDateTime.now(clock)

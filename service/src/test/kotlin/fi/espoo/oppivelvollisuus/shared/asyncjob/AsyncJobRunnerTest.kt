@@ -8,6 +8,11 @@ import fi.espoo.oppivelvollisuus.PureJdbiTest
 import fi.espoo.oppivelvollisuus.shared.logging.MdcKey
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.time.RealAppClock
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertThrows
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.CompletableFuture
@@ -18,15 +23,12 @@ import java.util.concurrent.atomic.AtomicReference
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.assertThrows
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AsyncJobRunnerTest : PureJdbiTest(resetDbBeforeEach = true) {
-    private data class TestJob(val data: UUID = UUID.randomUUID())
+    private data class TestJob(
+        val data: UUID = UUID.randomUUID()
+    )
 
     private class LetsRollbackException : RuntimeException()
 

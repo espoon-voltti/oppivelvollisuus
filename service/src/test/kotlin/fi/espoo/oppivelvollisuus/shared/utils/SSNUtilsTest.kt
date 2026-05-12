@@ -4,12 +4,12 @@
 
 package fi.espoo.oppivelvollisuus.shared.utils
 
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class SSNUtilsTest {
     @Test

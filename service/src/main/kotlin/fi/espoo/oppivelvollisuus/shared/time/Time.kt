@@ -14,15 +14,20 @@ import java.time.temporal.TemporalAdjusters.lastDayOfMonth
 
 fun orMax(date: LocalDate?): LocalDate = date ?: LocalDate.MAX
 
-fun maxEndDate(first: LocalDate?, second: LocalDate?): LocalDate? =
+fun maxEndDate(
+    first: LocalDate?,
+    second: LocalDate?
+): LocalDate? =
     when {
         first == null || second == null -> null
         else -> maxOf(first, second)
     }
 
 /** A closed (inclusive) date range with finite start and end */
-data class FiniteDateRange(override val start: LocalDate, override val end: LocalDate) :
-    BoundedRange<LocalDate, FiniteDateRange> {
+data class FiniteDateRange(
+    override val start: LocalDate,
+    override val end: LocalDate
+) : BoundedRange<LocalDate, FiniteDateRange> {
     init {
         require(start <= end) {
             "Attempting to initialize invalid finite date range with start: $start, end: $end"
@@ -46,17 +51,14 @@ data class FiniteDateRange(override val start: LocalDate, override val end: Loca
     /** Returns true if this date range includes the given date. */
     override fun includes(point: LocalDate) = this.start <= point && point <= this.end
 
-    override fun overlaps(other: FiniteDateRange): Boolean =
-        this.start <= other.end && other.start <= this.end
+    override fun overlaps(other: FiniteDateRange): Boolean = this.start <= other.end && other.start <= this.end
 
     /** Returns true if this date range overlaps at least partially with the given date range. */
     fun overlaps(other: DateRange) = this.asDateRange().overlaps(other)
 
-    override fun leftAdjacentTo(other: FiniteDateRange): Boolean =
-        this.end.plusDays(1) == other.start
+    override fun leftAdjacentTo(other: FiniteDateRange): Boolean = this.end.plusDays(1) == other.start
 
-    override fun rightAdjacentTo(other: FiniteDateRange): Boolean =
-        other.end.plusDays(1) == this.start
+    override fun rightAdjacentTo(other: FiniteDateRange): Boolean = other.end.plusDays(1) == this.start
 
     override fun strictlyLeftTo(other: FiniteDateRange): Boolean = this.end < other.start
 
@@ -168,22 +170,23 @@ data class FiniteDateRange(override val start: LocalDate, override val end: Loca
         }
 
     /** Returns a lazy sequence of all dates included in this date range. */
-    fun dates(): Sequence<LocalDate> =
-        generateSequence(start) { if (it < end) it.plusDays(1) else null }
+    fun dates(): Sequence<LocalDate> = generateSequence(start) { if (it < end) it.plusDays(1) else null }
 
     /** Returns the total duration of this date range counted in days. */
-    fun durationInDays(): Long =
-        ChronoUnit.DAYS.between(start, end.plusDays(1)) // adjust to exclusive range
+    fun durationInDays(): Long = ChronoUnit.DAYS.between(start, end.plusDays(1)) // adjust to exclusive range
 
     companion object {
-        fun tryCreate(start: LocalDate, end: LocalDate): FiniteDateRange? =
-            if (start <= end) FiniteDateRange(start, end) else null
+        fun tryCreate(
+            start: LocalDate,
+            end: LocalDate
+        ): FiniteDateRange? = if (start <= end) FiniteDateRange(start, end) else null
 
-        fun ofMonth(year: Int, month: Month): FiniteDateRange =
-            ofMonth(LocalDate.of(year, month, 1))
+        fun ofMonth(
+            year: Int,
+            month: Month
+        ): FiniteDateRange = ofMonth(LocalDate.of(year, month, 1))
 
-        fun ofMonth(yearMonth: YearMonth): FiniteDateRange =
-            ofMonth(LocalDate.of(yearMonth.year, yearMonth.month, 1))
+        fun ofMonth(yearMonth: YearMonth): FiniteDateRange = ofMonth(LocalDate.of(yearMonth.year, yearMonth.month, 1))
 
         fun ofMonth(date: LocalDate): FiniteDateRange {
             val from = date.with(date.withDayOfMonth(1))
@@ -200,7 +203,10 @@ data class FiniteDateRange(override val start: LocalDate, override val end: Loca
 }
 
 /** A closed (inclusive) date range with finite start and possibly infinite (= null) end */
-data class DateRange(val start: LocalDate, val end: LocalDate?) {
+data class DateRange(
+    val start: LocalDate,
+    val end: LocalDate?
+) {
     init {
         check(start <= orMax(end)) {
             "Attempting to initialize invalid date range with start: $start, end: $end"
@@ -209,18 +215,15 @@ data class DateRange(val start: LocalDate, val end: LocalDate?) {
 
     fun asFiniteDateRange(): FiniteDateRange? = end?.let { FiniteDateRange(start, it) }
 
-    fun asFiniteDateRange(defaultEnd: LocalDate): FiniteDateRange =
-        FiniteDateRange(start, end ?: defaultEnd)
+    fun asFiniteDateRange(defaultEnd: LocalDate): FiniteDateRange = FiniteDateRange(start, end ?: defaultEnd)
 
-    fun contains(other: DateRange) =
-        this.start <= other.start && orMax(other.end) <= orMax(this.end)
+    fun contains(other: DateRange) = this.start <= other.start && orMax(other.end) <= orMax(this.end)
 
     fun contains(other: FiniteDateRange) = contains(other.asDateRange())
 
     fun includes(date: LocalDate) = this.start <= date && date <= orMax(this.end)
 
-    fun overlaps(other: DateRange) =
-        this.start <= orMax(other.end) && other.start <= orMax(this.end)
+    fun overlaps(other: DateRange) = this.start <= orMax(other.end) && other.start <= orMax(this.end)
 
     fun overlaps(other: FiniteDateRange) = overlaps(other.asDateRange())
 
@@ -241,10 +244,12 @@ data class DateRange(val start: LocalDate, val end: LocalDate?) {
     }
 
     companion object {
-        fun ofMonth(year: Int, month: Month): DateRange = ofMonth(LocalDate.of(year, month, 1))
+        fun ofMonth(
+            year: Int,
+            month: Month
+        ): DateRange = ofMonth(LocalDate.of(year, month, 1))
 
-        fun ofMonth(yearMonth: YearMonth): DateRange =
-            ofMonth(LocalDate.of(yearMonth.year, yearMonth.month, 1))
+        fun ofMonth(yearMonth: YearMonth): DateRange = ofMonth(LocalDate.of(yearMonth.year, yearMonth.month, 1))
 
         fun ofMonth(date: LocalDate): DateRange {
             val from = date.with(date.withDayOfMonth(1))
@@ -254,8 +259,10 @@ data class DateRange(val start: LocalDate, val end: LocalDate?) {
     }
 }
 
-fun periodsCanMerge(first: FiniteDateRange, second: FiniteDateRange): Boolean =
-    first.overlaps(second) || first.end.plusDays(1) == second.start
+fun periodsCanMerge(
+    first: FiniteDateRange,
+    second: FiniteDateRange
+): Boolean = first.overlaps(second) || first.end.plusDays(1) == second.start
 
 fun asDistinctPeriods(
     periods: List<FiniteDateRange>,
@@ -282,10 +289,8 @@ fun asDistinctPeriods(
         .toList()
 }
 
-fun LocalDate.isWeekend() =
-    this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
+fun LocalDate.isWeekend() = this.dayOfWeek == DayOfWeek.SATURDAY || this.dayOfWeek == DayOfWeek.SUNDAY
 
 fun LocalDate.toFiniteDateRange(): FiniteDateRange = FiniteDateRange(this, this)
 
-fun LocalDate.asHelsinkiDateTimeRange(): HelsinkiDateTimeRange =
-    toFiniteDateRange().asHelsinkiDateTimeRange()
+fun LocalDate.asHelsinkiDateTimeRange(): HelsinkiDateTimeRange = toFiniteDateRange().asHelsinkiDateTimeRange()
