@@ -4,35 +4,35 @@
 
 package fi.espoo.oppivelvollisuus.config
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.zaxxer.hikari.HikariDataSource
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.KotlinPlugin
 import org.jdbi.v3.core.mapper.ColumnMappers
-import org.jdbi.v3.jackson2.Jackson2Config
-import org.jdbi.v3.jackson2.Jackson2Plugin
+import org.jdbi.v3.jackson3.Jackson3Config
+import org.jdbi.v3.jackson3.Jackson3Plugin
 import org.jdbi.v3.postgres.PostgresPlugin
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.json.JsonMapper
 
 @Configuration
 class DbConfig {
     @Bean
     fun jdbi(
         dataSource: HikariDataSource,
-        objectMapper: ObjectMapper
-    ) = configureJdbi(Jdbi.create(dataSource), objectMapper)
+        jsonMapper: JsonMapper
+    ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
 }
 
 private fun configureJdbi(
     jdbi: Jdbi,
-    objectMapper: ObjectMapper
+    jsonMapper: JsonMapper
 ): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
         .installPlugin(PostgresPlugin())
-        .installPlugin(Jackson2Plugin())
+        .installPlugin(Jackson3Plugin())
     jdbi.getConfig(ColumnMappers::class.java).coalesceNullPrimitivesToDefaults = false
-    jdbi.getConfig(Jackson2Config::class.java).mapper = objectMapper
+    jdbi.getConfig(Jackson3Config::class.java).mapper = jsonMapper
     return jdbi
 }
