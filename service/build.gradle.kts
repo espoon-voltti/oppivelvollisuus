@@ -61,8 +61,8 @@ dependencies {
     api("ch.qos.logback:logback-core:1.5.32")
 
     api("org.springframework.boot:spring-boot-starter")
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
@@ -75,19 +75,20 @@ dependencies {
     implementation("org.postgresql:postgresql:42.7.11")
     api(platform("org.jdbi:jdbi3-bom:3.53.0"))
     implementation("org.jdbi:jdbi3-core")
-    implementation("org.jdbi:jdbi3-jackson2")
+    implementation("org.jdbi:jdbi3-jackson3")
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    api(platform("com.fasterxml.jackson:jackson-bom:2.21.3"))
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+    api(platform("tools.jackson:jackson-bom:3.1.2"))
+    implementation("tools.jackson.core:jackson-core")
+    implementation("tools.jackson.core:jackson-databind")
+    implementation("tools.jackson.module:jackson-module-kotlin")
 
     implementation("com.auth0:java-jwt:4.5.2")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.32")
-    implementation("io.github.microutils:kotlin-logging-jvm:3.0.5")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.01")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))

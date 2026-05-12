@@ -8,7 +8,7 @@ import fi.espoo.oppivelvollisuus.common.AppUser
 import fi.espoo.oppivelvollisuus.common.getActiveAppUsers
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.config.audit
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
