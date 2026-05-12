@@ -61,7 +61,7 @@ VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth
 RETURNING id
 """
     ).bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
@@ -229,7 +229,7 @@ WHERE id = :id
 """
     ).bind("id", id)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }

@@ -39,7 +39,7 @@ class SystemController {
         @RequestBody adUser: AdUser
     ): AppUser =
         jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
-            logger.audit(AuthenticatedUser(it.id), "USER_LOGIN")
+            logger.audit(AuthenticatedUser.EspooUser(it.id), "USER_LOGIN")
         }
 
     @GetMapping("/users/{id}")

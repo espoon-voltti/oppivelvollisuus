@@ -10,7 +10,7 @@ import fi.espoo.oppivelvollisuus.domain.StudentInput
 import java.time.LocalDate
 import java.util.UUID
 
-val testUser = AuthenticatedUser(UUID.randomUUID())
+val testUser = AuthenticatedUser.EspooUser(UUID.randomUUID())
 val testUserName = "Teija Testaaja"
 
 val minimalStudentTestInput =
