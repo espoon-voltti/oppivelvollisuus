@@ -1,73 +1,88 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2025-2025 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 package fi.espoo.oppivelvollisuus
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJob
+import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
+import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJobs
+import fi.espoo.oppivelvollisuus.shared.config.defaultJsonMapper
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.dev.resetDatabase
+import io.opentelemetry.api.trace.Tracer
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.withHandleUnchecked
+import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.core.env.Environment
 import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    classes = [SharedIntegrationTestConfig::class],
 )
-abstract class FullApplicationTest {
-    @Autowired
-    protected lateinit var jdbi: Jdbi
+abstract class FullApplicationTest(
+    private val resetDbBeforeEach: Boolean = true,
+) {
+    @LocalServerPort protected var httpPort: Int = 0
+
+    protected val jsonMapper: ObjectMapper =
+        defaultJsonMapper().apply {
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        }
+
+    @Autowired private lateinit var jdbi: Jdbi
+
+    @Autowired protected lateinit var env: Environment
+
+    @Autowired protected lateinit var tracer: Tracer
+
+    @Autowired protected lateinit var asyncJobRunner: AsyncJobRunner<AsyncJob>
+
+    @Autowired protected lateinit var scheduledJobs: ScheduledJobs
+
+    protected lateinit var db: Database.Connection
+
+    protected fun dbInstance(): Database = Database(jdbi, tracer)
 
     @BeforeAll
     fun beforeAll() {
-        jdbi.withHandleUnchecked { tx ->
-            tx.execute(
-                """
-                CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS $$
-                DECLARE
-                  truncate_query text;
-                  sequence_query text;
-                BEGIN
-                  SELECT 'TRUNCATE TABLE ' || string_agg(quote_ident(table_name), ', ') || ' CASCADE'
-                  INTO truncate_query
-                  FROM information_schema.tables
-                  WHERE table_schema = 'public'
-                  AND table_type = 'BASE TABLE'
-                  AND table_name <> 'flyway_schema_history';
-                  
-                  IF truncate_query IS NOT NULL THEN
-                    EXECUTE truncate_query;
-                  END IF;
-                  
-                  SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
-                  INTO sequence_query
-                  FROM information_schema.sequences
-                  WHERE sequence_schema = 'public';
-                  
-                  IF sequence_query IS NOT NULL THEN
-                    EXECUTE sequence_query;
-                  END IF;
-                END $$ LANGUAGE plpgsql;
-                """.trimIndent()
-            )
+        assert(httpPort > 0)
+        db = Database(jdbi, tracer).connectWithManualLifecycle()
+        if (!resetDbBeforeEach) {
+            db.transaction { it.resetDatabase() }
         }
     }
 
     @BeforeEach
-    fun beforeEach() {
+    fun resetBeforeTest() {
+        if (resetDbBeforeEach) {
+            db.transaction { it.resetDatabase() }
+        }
         jdbi.withHandleUnchecked { tx ->
-            tx.execute("SELECT reset_database()")
             tx
                 .createUpdate(
                     """
-                INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
-                VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
-            """
+                    INSERT INTO users (id, updated, external_id, first_names, last_name, email)
+                    VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
+                    ON CONFLICT DO NOTHING
+                    """
                 ).bind("id", testUser.id)
                 .execute()
         }
+    }
+
+    @AfterAll
+    fun afterAll() {
+        db.close()
     }
 }

@@ -4,14 +4,15 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.AppUser
-import fi.espoo.oppivelvollisuus.common.getActiveAppUsers
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import fi.espoo.oppivelvollisuus.config.audit
-import mu.KotlinLogging
-import org.jdbi.v3.core.Jdbi
-import org.jdbi.v3.core.kotlin.inTransactionUnchecked
-import org.springframework.beans.factory.annotation.Autowired
+import fi.espoo.oppivelvollisuus.AppUser
+import fi.espoo.oppivelvollisuus.CaseEventId
+import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.StudentId
+import fi.espoo.oppivelvollisuus.getActiveAppUsers
+import fi.espoo.oppivelvollisuus.shared.Audit
+import fi.espoo.oppivelvollisuus.shared.AuditId
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -21,15 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.util.UUID
 
 @RestController
 class AppController {
-    @Autowired
-    lateinit var jdbi: Jdbi
-
-    private val logger = KotlinLogging.logger {}
-
     data class StudentAndCaseInput(
         val student: StudentInput,
         val studentCase: StudentCaseInput
@@ -38,55 +33,48 @@ class AppController {
     @PostMapping("/students")
     fun createStudent(
         user: AuthenticatedUser,
-        @RequestBody body: StudentAndCaseInput
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                val studentId = tx.insertStudent(data = body.student, user = user)
-                tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
-
-                studentId
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_STUDENT"
-                )
-            }
+        @RequestBody body: StudentAndCaseInput,
+        db: Database
+    ): StudentId =
+        db
+            .connect {
+                it.transaction { tx ->
+                    val studentId = tx.insertStudent(data = body.student, user = user)
+                    tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
+                    studentId
+                }
+            }.also { Audit.CREATE_STUDENT.log(targetId = AuditId(it)) }
 
     @PostMapping("/students/duplicates")
     fun getDuplicateStudents(
         user: AuthenticatedUser,
-        @RequestBody body: DuplicateStudentCheckInput
+        @RequestBody body: DuplicateStudentCheckInput,
+        db: Database
     ): List<DuplicateStudent> =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.getPossibleDuplicateStudents(body)
-            }.also {
-                logger.audit(
-                    user,
-                    "GET_DUPLICATE_STUDENTS"
-                )
-            }
+        db
+            .connect {
+                it.read { tx ->
+                    tx.getPossibleDuplicateStudents(body)
+                }
+            }.also { Audit.GET_DUPLICATE_STUDENTS.log() }
 
     @PostMapping("/students/search")
     fun getStudents(
         user: AuthenticatedUser,
-        @RequestBody body: StudentSearchParams
+        @RequestBody body: StudentSearchParams,
+        db: Database
     ): List<StudentSummary> =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.getStudentSummaries(
-                    params =
-                        body.copy(
-                            query = body.query.takeIf { !it.isNullOrBlank() }
-                        )
-                )
-            }.also {
-                logger.audit(
-                    user,
-                    "SEARCH_STUDENTS"
-                )
-            }
+        db
+            .connect {
+                it.read { tx ->
+                    tx.getStudentSummaries(
+                        params =
+                            body.copy(
+                                query = body.query.takeIf { !it.isNullOrBlank() }
+                            )
+                    )
+                }
+            }.also { Audit.SEARCH_STUDENTS.log() }
 
     data class StudentResponse(
         val student: Student,
@@ -96,209 +84,169 @@ class AppController {
     @GetMapping("/students/{id}")
     fun getStudent(
         user: AuthenticatedUser,
-        @PathVariable id: UUID
+        @PathVariable id: StudentId,
+        db: Database
     ): StudentResponse =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                val studentDetails = tx.getStudent(id = id)
-                val cases = tx.getStudentCasesByStudent(studentId = id)
-                StudentResponse(studentDetails, cases)
-            }.also {
-                logger.audit(
-                    user,
-                    "GET_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.read { tx ->
+                    val studentDetails = tx.getStudent(id = id)
+                    val cases = tx.getStudentCasesByStudent(studentId = id)
+                    StudentResponse(studentDetails, cases)
+                }
+            }.also { Audit.GET_STUDENT.log(targetId = AuditId(id)) }
 
     @PutMapping("/students/{id}")
     fun updateStudent(
         user: AuthenticatedUser,
-        @PathVariable id: UUID,
-        @RequestBody body: StudentInput
+        @PathVariable id: StudentId,
+        @RequestBody body: StudentInput,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateStudent(id = id, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudent(id = id, data = body, user = user)
+                }
+            }.also { Audit.UPDATE_STUDENT.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/students/{id}")
     fun deleteStudent(
         user: AuthenticatedUser,
-        @PathVariable id: UUID
+        @PathVariable id: StudentId,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.deleteStudent(id = id)
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_STUDENT",
-                    mapOf("studentId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteStudent(id = id)
+                }
+            }.also { Audit.DELETE_STUDENT.log(targetId = AuditId(id)) }
     }
 
     @PostMapping("/students/{studentId}/cases")
     fun createStudentCase(
         user: AuthenticatedUser,
-        @PathVariable studentId: UUID,
-        @RequestBody body: StudentCaseInput
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertStudentCase(studentId = studentId, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString())
-                )
-            }
+        @PathVariable studentId: StudentId,
+        @RequestBody body: StudentCaseInput,
+        db: Database
+    ): StudentCaseId =
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.insertStudentCase(studentId = studentId, data = body, user = user)
+                }
+            }.also { Audit.CREATE_STUDENT_CASE.log(targetId = AuditId(it), objectId = AuditId(studentId)) }
 
     @PutMapping("/students/{studentId}/cases/{id}")
     fun updateStudentCase(
         user: AuthenticatedUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID,
-        @RequestBody body: StudentCaseInput
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
+        @RequestBody body: StudentCaseInput,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
+                }
+            }.also { Audit.UPDATE_STUDENT_CASE.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @DeleteMapping("/students/{studentId}/cases/{id}")
     fun deleteStudentCase(
         user: AuthenticatedUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.deleteStudentCase(id = id, studentId = studentId)
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_STUDENT_CASE",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteStudentCase(id = id, studentId = studentId)
+                }
+            }.also { Audit.DELETE_STUDENT_CASE.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @PutMapping("/students/{studentId}/cases/{id}/status")
     fun updateStudentCaseStatus(
         user: AuthenticatedUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID,
-        @RequestBody body: CaseStatusInput
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
+        @RequestBody body: CaseStatusInput,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_STUDENT_CASE_STATUS",
-                    mapOf("studentId" to studentId.toString(), "caseId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
+                }
+            }.also { Audit.UPDATE_STUDENT_CASE_STATUS.log(targetId = AuditId(id), objectId = AuditId(studentId)) }
     }
 
     @PostMapping("/student-cases/{studentCaseId}/case-events")
     fun createCaseEvent(
         user: AuthenticatedUser,
-        @PathVariable studentCaseId: UUID,
-        @RequestBody body: CaseEventInput
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "CREATE_CASE_EVENT",
-                    mapOf("caseId" to studentCaseId.toString())
-                )
-            }
+        @PathVariable studentCaseId: StudentCaseId,
+        @RequestBody body: CaseEventInput,
+        db: Database
+    ): CaseEventId =
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
+                }
+            }.also { Audit.CREATE_CASE_EVENT.log(targetId = AuditId(it), objectId = AuditId(studentCaseId)) }
 
     @PutMapping("/case-events/{id}")
     fun updateCaseEvent(
         user: AuthenticatedUser,
-        @PathVariable id: UUID,
-        @RequestBody body: CaseEventInput
+        @PathVariable id: CaseEventId,
+        @RequestBody body: CaseEventInput,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateCaseEvent(id = id, data = body, user = user)
-            }.also {
-                logger.audit(
-                    user,
-                    "UPDATE_CASE_EVENT",
-                    mapOf("eventId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.updateCaseEvent(id = id, data = body, user = user)
+                }
+            }.also { Audit.UPDATE_CASE_EVENT.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/case-events/{id}")
     fun deleteCaseEvent(
         user: AuthenticatedUser,
-        @PathVariable id: UUID
+        @PathVariable id: CaseEventId,
+        db: Database
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.deleteCaseEvent(id = id)
-            }.also {
-                logger.audit(
-                    user,
-                    "DELETE_CASE_EVENT",
-                    mapOf("eventId" to id.toString())
-                )
-            }
+        db
+            .connect {
+                it.transaction { tx ->
+                    tx.deleteCaseEvent(id = id)
+                }
+            }.also { Audit.DELETE_CASE_EVENT.log(targetId = AuditId(id)) }
     }
 
     @GetMapping("/employees")
-    fun getEmployeeUsers(user: AuthenticatedUser): List<AppUser> =
-        jdbi.inTransactionUnchecked { it.getActiveAppUsers() }.also {
-            logger.audit(
-                user,
-                "GET_EMPLOYEES"
-            )
-        }
+    fun getEmployeeUsers(
+        user: AuthenticatedUser,
+        db: Database
+    ): List<AppUser> = db.connect { it.read { tx -> tx.getActiveAppUsers() } }.also { Audit.GET_EMPLOYEES.log() }
 
     @GetMapping("/reports/student-cases")
     fun getCasesReport(
         user: AuthenticatedUser,
         @RequestParam(required = false) start: LocalDate?,
-        @RequestParam(required = false) end: LocalDate?
+        @RequestParam(required = false) end: LocalDate?,
+        db: Database
     ): List<CaseReportRow> =
-        jdbi.inTransactionUnchecked { it.getCasesReport(CaseReportRequest(start, end)) }.also {
-            logger.audit(
-                user,
-                "GET_CASES_REPORT"
-            )
-        }
+        db.connect { it.read { tx -> tx.getCasesReport(CaseReportRequest(start, end)) } }.also { Audit.GET_CASES_REPORT.log() }
 
     @DeleteMapping("/old-students")
-    fun deleteOldStudents(user: AuthenticatedUser) =
-        jdbi.inTransactionUnchecked { it.deleteOldStudents() }.also {
-            logger.audit(
-                user,
-                "DELETE_OLD_STUDENTS"
-            )
-        }
+    fun deleteOldStudents(
+        user: AuthenticatedUser,
+        db: Database
+    ) = db.connect { it.transaction { tx -> tx.deleteOldStudents() } }.also { Audit.DELETE_OLD_STUDENTS.log() }
 }

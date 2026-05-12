@@ -4,17 +4,18 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import org.jdbi.v3.core.Handle
+import fi.espoo.oppivelvollisuus.EspooUserId
+import fi.espoo.oppivelvollisuus.StudentId
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.shared.NotFound
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.core.statement.SqlStatements
 import java.time.LocalDate
-import java.util.UUID
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.max
 
@@ -50,24 +51,25 @@ data class StudentInput(
     val partnerOrganisations: Set<PartnerOrganisation> = emptySet()
 )
 
-fun Handle.insertStudent(
+fun Database.Transaction.insertStudent(
     data: StudentInput,
     user: AuthenticatedUser
-): UUID =
-    createUpdate(
-        """
-INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations) 
+): StudentId =
+    handle
+        .createUpdate(
+            """
+INSERT INTO students (created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
 VALUES (:user, :valpasLink, :ssn, :firstName, :lastName, :language, :dateOfBirth, :phone, :email, :gender, :address, :municipalityInFinland, :guardianInfo, :supportContactsInfo, :partnerOrganisations::partner_organisation[])
 RETURNING id
 """
-    ).bindKotlin(data)
-        .bind("user", user.id)
+        ).bindKotlin(data)
+        .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
-        .mapTo<UUID>()
+        .mapTo<StudentId>()
         .one()
 
 data class StudentSummary(
-    val id: UUID,
+    val id: StudentId,
     val firstName: String,
     val lastName: String,
     val openedAt: LocalDate?,
@@ -85,7 +87,7 @@ data class CaseEventSummary(
 
 data class AssignedToSearch(
     // null = not assigned
-    val assignedTo: UUID?
+    val assignedTo: EspooUserId?
 )
 
 data class StudentSearchParams(
@@ -95,11 +97,12 @@ data class StudentSearchParams(
     val assignee: AssignedToSearch?
 )
 
-fun Handle.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
-    createQuery(
+fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
+    handle
+        .createQuery(
 """
 SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status, sc.source,
-    assignee.id AS assigned_to_id, 
+    assignee.id AS assigned_to_id,
     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
     ce.date AS event_date, ce.type AS event_type, ce.notes AS event_notes
 FROM students s
@@ -121,14 +124,14 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE (status IS NULL OR status = ANY(:statuses::case_status[]))
   AND (source IS NULL OR source = ANY(:sources::case_source[]))
 ${if (params.assignee == null) {
-            ""
-        } else if (params.assignee.assignedTo == null) {
-            "AND assignee.id IS NULL"
-        } else {
-            "AND assignee.id = :assignedTo"
-        }}
+                ""
+            } else if (params.assignee.assignedTo == null) {
+                "AND assignee.id IS NULL"
+            } else {
+                "AND assignee.id = :assignedTo"
+            }}
 ${if (params.query != null) {
-            """
+                """
     AND (EXISTS (
         SELECT 1
         FROM unnest(regexp_split_to_array(lower(s.first_name), '\s+')) AS t(name)
@@ -136,20 +139,20 @@ ${if (params.query != null) {
             OR lower(name || ' ' || s.last_name) LIKE :query || '%'
             OR lower(s.last_name || ' ' || name) LIKE :query || '%'
       ) OR
-        lower(s.last_name) LIKE :query || '%' OR 
+        lower(s.last_name) LIKE :query || '%' OR
         lower(s.first_name || ' ' || s.last_name) LIKE :query || '%' OR
         lower(s.last_name || ' ' || s.first_name) LIKE :query || '%' OR
         lower(s.ssn) LIKE :query || '%')
 """
-        } else {
-            ""
-        }}
+            } else {
+                ""
+            }}
 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
 """
-    ).bind("query", params.query?.trim()?.lowercase())
+        ).bind("query", params.query?.trim()?.lowercase())
         .bind("statuses", params.statuses.toTypedArray())
         .bind("sources", params.sources.toTypedArray())
-        .bind("assignedTo", params.assignee?.assignedTo)
+        .bind("assignedTo", params.assignee?.assignedTo?.raw)
         .mapTo<StudentSummary>()
         .list()
         .map {
@@ -170,7 +173,7 @@ ORDER BY opened_at DESC NULLS LAST, last_name, first_name
         }
 
 data class Student(
-    val id: UUID,
+    val id: StudentId,
     val valpasLink: String,
     val ssn: String,
     val firstName: String,
@@ -187,28 +190,30 @@ data class Student(
     val partnerOrganisations: Set<PartnerOrganisation> = emptySet()
 )
 
-fun Handle.getStudent(id: UUID) =
-    createQuery(
+fun Database.Read.getStudent(id: StudentId) =
+    handle
+        .createQuery(
 """
 SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
 FROM students
 WHERE id = :id
 """
-    ).bind("id", id)
+        ).bind("id", id.raw)
         .mapTo<Student>()
         .findOne()
         .getOrNull()
         ?: throw NotFound()
 
-fun Handle.updateStudent(
-    id: UUID,
+fun Database.Transaction.updateStudent(
+    id: StudentId,
     data: StudentInput,
     user: AuthenticatedUser
 ) {
-    createUpdate(
+    handle
+        .createUpdate(
 """
-UPDATE students 
-SET 
+UPDATE students
+SET
     updated = now(),
     updated_by = :user,
     valpas_link = :valpasLink,
@@ -221,15 +226,15 @@ SET
     email = :email,
     gender = :gender,
     address = :address,
-    municipality_in_finland = :municipalityInFinland, 
+    municipality_in_finland = :municipalityInFinland,
     guardian_info = :guardianInfo,
     support_contacts_info = :supportContactsInfo,
     partner_organisations = :partnerOrganisations::partner_organisation[]
 WHERE id = :id
 """
-    ).bind("id", id)
+        ).bind("id", id.raw)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
@@ -242,7 +247,7 @@ data class DuplicateStudentCheckInput(
 )
 
 data class DuplicateStudent(
-    val id: UUID,
+    val id: StudentId,
     val name: String,
     val dateOfBirth: LocalDate,
     val matchingSsn: Boolean,
@@ -250,7 +255,7 @@ data class DuplicateStudent(
     val matchingName: Boolean
 )
 
-fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List<DuplicateStudent> {
+fun Database.Read.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List<DuplicateStudent> {
     val ssnPredicate =
         "(lower(ssn) = lower(:ssn))"
             .takeIf { input.ssn.isNotBlank() }
@@ -261,17 +266,18 @@ fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List
 
     val namePredicate =
         """(
-        lower(first_name) = lower(:firstName) AND 
-        lower(last_name) = lower(:lastName) AND 
+        lower(first_name) = lower(:firstName) AND
+        lower(last_name) = lower(:lastName) AND
         (ssn = '' OR :ssn = '')
     )""".takeIf {
             input.firstName.isNotBlank() && input.lastName.isNotBlank()
         }
 
-    return createQuery(
-        """
+    return handle
+        .createQuery(
+            """
         WITH match_data AS (
-            SELECT 
+            SELECT
                 id,
                 last_name || ' ' || first_name AS name,
                 date_of_birth,
@@ -283,32 +289,34 @@ fun Handle.getPossibleDuplicateStudents(input: DuplicateStudentCheckInput): List
         SELECT * FROM match_data
         WHERE matching_ssn OR matching_valpas_link OR matching_name
     """
-    ).configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
+        ).configure(SqlStatements::class.java) { it.setUnusedBindingAllowed(true) }
         .bindKotlin(input)
         .mapTo<DuplicateStudent>()
         .list()
 }
 
-fun Handle.deleteStudent(id: UUID) {
-    createUpdate("DELETE FROM students WHERE id = :id")
-        .bind("id", id)
+fun Database.Transaction.deleteStudent(id: StudentId) {
+    handle
+        .createUpdate("DELETE FROM students WHERE id = :id")
+        .bind("id", id.raw)
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
 
-fun Handle.deleteOldStudents() {
-    createUpdate(
-        """
+fun Database.Transaction.deleteOldStudents() {
+    handle
+        .createUpdate(
+            """
         WITH students_to_delete AS (
             SELECT id
             FROM students
             WHERE date_of_birth < :threshold
-            FOR UPDATE SKIP LOCKED 
+            FOR UPDATE SKIP LOCKED
         ), cases_to_delete AS (
             SELECT sc.id
             FROM student_cases sc
             JOIN students_to_delete s ON s.id = sc.student_id
-            FOR UPDATE SKIP LOCKED 
+            FOR UPDATE SKIP LOCKED
         ), deleted_events AS (
             DELETE FROM case_events
             WHERE student_case_id IN (SELECT id FROM cases_to_delete)
@@ -319,6 +327,6 @@ fun Handle.deleteOldStudents() {
         DELETE FROM students
         WHERE id IN (SELECT id FROM students_to_delete)
     """
-    ).bind("threshold", LocalDate.now().minusYears(21))
+        ).bind("threshold", LocalDate.now().minusYears(21))
         .execute()
 }

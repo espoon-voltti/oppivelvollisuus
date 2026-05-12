@@ -4,18 +4,19 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.BadRequest
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
+import fi.espoo.oppivelvollisuus.EspooUserId
+import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.StudentId
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.NotFound
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
 import java.time.LocalDate
-import java.util.UUID
 
 enum class CaseStatus {
     TODO,
@@ -96,7 +97,7 @@ enum class NotInSchoolReason {
 
 data class StudentCaseInput(
     val openedAt: LocalDate,
-    val assignedTo: UUID?,
+    val assignedTo: EspooUserId?,
     val source: CaseSource,
     val sourceValpas: ValpasNotifier?,
     val sourceOther: OtherNotifier?,
@@ -115,22 +116,31 @@ data class StudentCaseInput(
     }
 }
 
-fun Handle.insertStudentCase(
-    studentId: UUID,
+fun Database.Transaction.insertStudentCase(
+    studentId: StudentId,
     data: StudentCaseInput,
     user: AuthenticatedUser
-): UUID =
-    createUpdate(
-        """
-                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
+): StudentCaseId =
+    handle
+        .createUpdate(
+            """
+                INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason)
                 VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
-    ).bind("studentId", studentId)
-        .bindKotlin(data)
-        .bind("user", user.id)
+        ).bind("studentId", studentId.raw)
+        .bind("openedAt", data.openedAt)
+        .bind("assignedTo", data.assignedTo?.raw)
+        .bind("source", data.source)
+        .bind("sourceValpas", data.sourceValpas)
+        .bind("sourceOther", data.sourceOther)
+        .bind("sourceContact", data.sourceContact)
+        .bind("schoolBackground", data.schoolBackground.toTypedArray())
+        .bind("caseBackgroundReasons", data.caseBackgroundReasons.toTypedArray())
+        .bind("notInSchoolReason", data.notInSchoolReason)
+        .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
-        .mapTo<UUID>()
+        .mapTo<StudentCaseId>()
         .one()
 
 enum class CaseFinishedReason {
@@ -186,8 +196,8 @@ data class FinishedInfo(
 }
 
 data class StudentCase(
-    val id: UUID,
-    val studentId: UUID,
+    val id: StudentCaseId,
+    val studentId: StudentId,
     val openedAt: LocalDate,
     @param:Nested("assignedTo") val assignedTo: UserBasics?,
     val status: CaseStatus,
@@ -214,8 +224,9 @@ data class StudentCase(
     }
 }
 
-fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> =
-    createQuery(
+fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCase> =
+    handle
+        .createQuery(
 """
 SELECT
     sc.id, sc.student_id, sc.opened_at,
@@ -259,20 +270,21 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
 ORDER BY opened_at DESC, sc.created DESC;
 """
-    ).bind("studentId", studentId)
+        ).bind("studentId", studentId.raw)
         .mapTo<StudentCase>()
         .list()
 
-fun Handle.updateStudentCase(
-    id: UUID,
-    studentId: UUID,
+fun Database.Transaction.updateStudentCase(
+    id: StudentCaseId,
+    studentId: StudentId,
     data: StudentCaseInput,
     user: AuthenticatedUser
 ) {
-    createUpdate(
+    handle
+        .createUpdate(
 """
 UPDATE student_cases
-SET 
+SET
     updated = now(),
     updated_by = :user,
     opened_at = :openedAt,
@@ -282,14 +294,22 @@ SET
     source_other = :sourceOther,
     source_contact = :sourceContact,
     school_background = :schoolBackground::school_background[],
-    case_background_reasons = :caseBackgroundReasons::case_background_reason[], 
+    case_background_reasons = :caseBackgroundReasons::case_background_reason[],
     not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id)
-        .bind("studentId", studentId)
-        .bindKotlin(data)
-        .bind("user", user.id)
+        ).bind("id", id.raw)
+        .bind("studentId", studentId.raw)
+        .bind("openedAt", data.openedAt)
+        .bind("assignedTo", data.assignedTo?.raw)
+        .bind("source", data.source)
+        .bind("sourceValpas", data.sourceValpas)
+        .bind("sourceOther", data.sourceOther)
+        .bind("sourceContact", data.sourceContact)
+        .bind("schoolBackground", data.schoolBackground.toTypedArray())
+        .bind("caseBackgroundReasons", data.caseBackgroundReasons.toTypedArray())
+        .bind("notInSchoolReason", data.notInSchoolReason)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
@@ -305,16 +325,17 @@ data class CaseStatusInput(
     }
 }
 
-fun Handle.updateStudentCaseStatus(
-    id: UUID,
-    studentId: UUID,
+fun Database.Transaction.updateStudentCaseStatus(
+    id: StudentCaseId,
+    studentId: StudentId,
     data: CaseStatusInput,
     user: AuthenticatedUser
 ) {
-    createUpdate(
-        """
+    handle
+        .createUpdate(
+            """
         UPDATE student_cases
-        SET 
+        SET
             updated = now(),
             updated_by = :user,
             status = :status,
@@ -324,25 +345,26 @@ fun Handle.updateStudentCaseStatus(
             other_reason = :otherReason
         WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id)
-        .bind("studentId", studentId)
+        ).bind("id", id.raw)
+        .bind("studentId", studentId.raw)
         .bind("status", data.status)
         .bind("finishedReason", data.finishedInfo?.reason)
         .bind("startedAtSchool", data.finishedInfo?.startedAtSchool)
         .bind("followUpMeasures", data.finishedInfo?.followUpMeasures?.toTypedArray())
         .bind("otherReason", data.finishedInfo?.otherReason)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
 
-fun Handle.deleteStudentCase(
-    id: UUID,
-    studentId: UUID
+fun Database.Transaction.deleteStudentCase(
+    id: StudentCaseId,
+    studentId: StudentId
 ) {
-    createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
-        .bind("id", id)
-        .bind("studentId", studentId)
+    handle
+        .createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
+        .bind("id", id.raw)
+        .bind("studentId", studentId.raw)
         .execute()
         .also { if (it != 1) throw NotFound() }
 }

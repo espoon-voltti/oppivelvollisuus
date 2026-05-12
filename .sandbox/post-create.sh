@@ -23,3 +23,8 @@ cat > ~/.claude/settings.json <<'SETTINGS'
   }
 }
 SETTINGS
+
+# System dependencies for running e2e tests
+sudo apt-get update
+sudo apt-get install -y xvfb
+(cd service && ./gradlew --no-daemon e2eTestDeps)
