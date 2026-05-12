@@ -18,7 +18,7 @@ fun KLogger.audit(
 ) {
     val data =
         mapOf<String, Any?>(
-            "userId" to user.id,
+            "userId" to user.rawId(),
             "meta" to meta
         )
     atWarn(AUDIT_MARKER) {

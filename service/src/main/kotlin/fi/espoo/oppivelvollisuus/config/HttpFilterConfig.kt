@@ -21,7 +21,7 @@ class HttpFilterConfig {
 
     @Bean
     fun jwtToAuthenticatedUser() =
-        FilterRegistrationBean(JwtToAuthenticatedUser()).apply {
+        FilterRegistrationBean(RequestToAuthenticatedUser()).apply {
             setName("jwtToAuthenticatedUser")
             urlPatterns = listOf("/*")
             order = -9
