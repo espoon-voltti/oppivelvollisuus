@@ -4,12 +4,12 @@
 
 package fi.espoo.oppivelvollisuus.config
 
-import mu.KLogger
+import io.github.oshai.kotlinlogging.KLogger
+import io.github.oshai.kotlinlogging.KMarkerFactory
+import io.github.oshai.kotlinlogging.Marker
 import net.logstash.logback.argument.StructuredArguments
-import org.slf4j.Marker
-import org.slf4j.MarkerFactory
 
-val AUDIT_MARKER: Marker = MarkerFactory.getMarker("AUDIT_EVENT")
+val AUDIT_MARKER: Marker = KMarkerFactory.getMarker("AUDIT_EVENT")
 
 fun KLogger.audit(
     user: AuthenticatedUser,
@@ -18,8 +18,11 @@ fun KLogger.audit(
 ) {
     val data =
         mapOf<String, Any?>(
-            "userId" to user.id,
+            "userId" to user.rawId(),
             "meta" to meta
         )
-    warn(AUDIT_MARKER, eventCode, StructuredArguments.entries(data))
+    atWarn(AUDIT_MARKER) {
+        message = eventCode
+        arguments = arrayOf(StructuredArguments.entries(data))
+    }
 }

@@ -4,39 +4,32 @@
 
 package fi.espoo.oppivelvollisuus.config
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinFeature
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import tools.jackson.databind.DeserializationFeature
+import tools.jackson.databind.MapperFeature
+import tools.jackson.databind.cfg.DateTimeFeature
+import tools.jackson.databind.cfg.EnumFeature
+import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.KotlinModule
 
-fun defaultJsonMapper(): ObjectMapper =
-    ObjectMapper().apply {
-        registerModules(
-            KotlinModule
-                .Builder()
-                .enable(KotlinFeature.SingletonSupport)
-                .build(),
-            JavaTimeModule(),
-            // Note: Jdk8Module and ParameterNamesModule are no longer needed
-        )
-        // We never want to serialize timestamps as numbers but use ISO formats instead
-        disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-    }
+fun defaultJsonMapperBuilder(): JsonMapper.Builder =
+    JsonMapper
+        .builder()
+        .addModules(KotlinModule.Builder().build())
+        // We never want to serialize timestamps as numbers but use ISO formats instead.
+        .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)
+
+fun defaultJsonMapper(): JsonMapper = defaultJsonMapperBuilder().build()
 
 @Configuration
 class JacksonConfig {
-    // This replaces default ObjectMapper provided by Spring Boot autoconfiguration
+    // This replaces default JsonMapper provided by Spring Boot autoconfiguration
     @Bean
-    @Suppress("DEPRECATION") // disable() methods work fine, just deprecated in favor of builder
-    fun objectMapper(): ObjectMapper =
-        defaultJsonMapper().apply {
-            disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-            enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
-        }
+    fun jsonMapper(): JsonMapper =
+        defaultJsonMapperBuilder()
+            .disable(MapperFeature.DEFAULT_VIEW_INCLUSION)
+            .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .enable(EnumFeature.READ_UNKNOWN_ENUM_VALUES_USING_DEFAULT_VALUE)
+            .build()
 }

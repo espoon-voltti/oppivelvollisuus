@@ -10,7 +10,7 @@ import fi.espoo.oppivelvollisuus.common.getAppUser
 import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.config.audit
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
@@ -39,7 +39,7 @@ class SystemController {
         @RequestBody adUser: AdUser
     ): AppUser =
         jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
-            logger.audit(AuthenticatedUser(it.id), "USER_LOGIN")
+            logger.audit(AuthenticatedUser.EspooUser(it.id), "USER_LOGIN")
         }
 
     @GetMapping("/users/{id}")

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -7,49 +7,33 @@ package fi.espoo.oppivelvollisuus.config
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.auth0.jwt.interfaces.JWTVerifier
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpFilter
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
-import java.util.UUID
-
-data class AuthenticatedUser(
-    val id: UUID
-) {
-    fun isSystemUser() = id == UUID.fromString("00000000-0000-0000-0000-000000000000")
-}
-
-class JwtToAuthenticatedUser : HttpFilter() {
-    override fun doFilter(
-        request: HttpServletRequest,
-        response: HttpServletResponse,
-        chain: FilterChain
-    ) {
-        val user =
-            request.getDecodedJwt()?.subject?.let { subject ->
-                AuthenticatedUser(id = UUID.fromString(subject))
-            }
-        if (user != null) {
-            request.setAttribute(ATTR_USER, user)
-        }
-        chain.doFilter(request, response)
-    }
-}
+import tools.jackson.module.kotlin.jsonMapper
+import tools.jackson.module.kotlin.readValue
 
 class HttpAccessControl : HttpFilter() {
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         if (request.requiresAuthentication()) {
             val authenticatedUser = request.getAuthenticatedUser()
             if (authenticatedUser == null) {
-                return response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "fi.espoo.oppivelvollisuus.common.Unauthorized")
+                return response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "fi.espoo.oppivelvollisuus.common.Unauthorized",
+                )
             }
             if (!request.isAuthorized(authenticatedUser)) {
-                return response.sendError(HttpServletResponse.SC_FORBIDDEN, "fi.espoo.oppivelvollisuus.common.Forbidden")
+                return response.sendError(
+                    HttpServletResponse.SC_FORBIDDEN,
+                    "fi.espoo.oppivelvollisuus.common.Forbidden",
+                )
             }
         }
 
@@ -64,8 +48,8 @@ class HttpAccessControl : HttpFilter() {
 
     private fun HttpServletRequest.isAuthorized(user: AuthenticatedUser): Boolean =
         when {
-            requestURI.startsWith("/system/") -> user.isSystemUser()
-            else -> !user.isSystemUser()
+            requestURI.startsWith("/system/") -> user is AuthenticatedUser.SystemInternalUser
+            else -> user is AuthenticatedUser.EspooUser
         }
 }
 
@@ -77,7 +61,7 @@ class JwtTokenDecoder(
     override fun doFilter(
         request: HttpServletRequest,
         response: HttpServletResponse,
-        chain: FilterChain
+        chain: FilterChain,
     ) {
         try {
             request
@@ -91,9 +75,12 @@ class JwtTokenDecoder(
     }
 }
 
+private const val ATTR_USER = "oppivelvollisuus.user"
+
 fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? = getAttribute(ATTR_USER) as AuthenticatedUser?
 
-private const val ATTR_USER = "oppivelvollisuus.user"
+fun HttpServletRequest.setAuthenticatedUser(user: AuthenticatedUser) = setAttribute(ATTR_USER, user)
+
 private const val ATTR_JWT = "oppivelvollisuus.jwt"
 
 private fun HttpServletRequest.getDecodedJwt(): DecodedJWT? = getAttribute(ATTR_JWT) as DecodedJWT?
@@ -101,3 +88,23 @@ private fun HttpServletRequest.getDecodedJwt(): DecodedJWT? = getAttribute(ATTR_
 private fun HttpServletRequest.setDecodedJwt(jwt: DecodedJWT) = setAttribute(ATTR_JWT, jwt)
 
 private fun HttpServletRequest.getBearerToken(): String? = getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")
+
+class RequestToAuthenticatedUser : HttpFilter() {
+    override fun doFilter(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        chain: FilterChain,
+    ) {
+        val decodedJwt = request.getDecodedJwt()
+        if (decodedJwt != null) {
+            // JWT is valid => the request came from apigw
+            val user =
+                request.getHeader("X-User")?.let { jsonMapper().readValue<AuthenticatedUser>(it) }
+            if (user != null) {
+                request.setAuthenticatedUser(user)
+                // TODO: tag the request with MDC user keys and an OpenTelemetry span attribute for the authenticated user, as the other Voltti projects do, once that infrastructure exists in this service
+            }
+        }
+        chain.doFilter(request, response)
+    }
+}

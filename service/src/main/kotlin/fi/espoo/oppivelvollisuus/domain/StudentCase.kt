@@ -128,7 +128,7 @@ fun Handle.insertStudentCase(
             """
     ).bind("studentId", studentId)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
         .mapTo<UUID>()
         .one()
@@ -289,7 +289,7 @@ WHERE id = :id AND student_id = :studentId
     ).bind("id", id)
         .bind("studentId", studentId)
         .bindKotlin(data)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
@@ -331,7 +331,7 @@ fun Handle.updateStudentCaseStatus(
         .bind("startedAtSchool", data.finishedInfo?.startedAtSchool)
         .bind("followUpMeasures", data.finishedInfo?.followUpMeasures?.toTypedArray())
         .bind("otherReason", data.finishedInfo?.otherReason)
-        .bind("user", user.id)
+        .bind("user", user.rawId())
         .execute()
         .also { if (it != 1) throw NotFound() }
 }
