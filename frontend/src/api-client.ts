@@ -5,9 +5,9 @@
 import axios, { AxiosError } from 'axios'
 
 export const apiClient = axios.create({
-  baseURL: '/api',
-  xsrfCookieName: 'oppivelvollisuus.xsrf'
+  baseURL: '/api'
 })
+apiClient.defaults.headers.common['x-oppivelvollisuus-csrf'] = '1'
 
 apiClient.interceptors.response.use(
   (res) => res,

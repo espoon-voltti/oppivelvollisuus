@@ -27,6 +27,7 @@ services:
     environment:
       NODE_ENV: local
       HTTP_PORT: 3000
+      BASE_URL: http://frontend
       SERVICE_URL: http://service-e2e-tests:8080
       JWT_KID: "oppivelvollisuus-api-gateway"
       JWT_PRIVATE_KEY: "config/test-cert/jwt_private_key.pem"

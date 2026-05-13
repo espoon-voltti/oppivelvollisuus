@@ -1,44 +1,30 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2025-2025 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-import sourceMapSupport from 'source-map-support'
+import './tracer.ts'
+
+import * as redis from '@redis/client'
 import express from 'express'
 import helmet from 'helmet'
-import { configFromEnv, httpPort } from './config.js'
-import { fallbackErrorHandler } from './middleware/errors.js'
-import { createRouter } from './router.js'
-import { logError, loggingMiddleware } from './logging/index.js'
-import { createClient } from 'redis'
-import passport from 'passport'
-import { trustReverseProxy } from './utils/express.js'
 
-sourceMapSupport.install()
+import { apiRouter } from './app.ts'
+import { configFromEnv, httpPort, toRedisClientOpts } from './shared/config.ts'
+import { logError, loggingMiddleware, logInfo } from './shared/logging.ts'
+import { fallbackErrorHandler } from './shared/middleware/error-handler.ts'
+import tracing from './shared/middleware/tracing.ts'
+import { assertRedisConnection } from './shared/redis-client.ts'
+import { trustReverseProxy } from './shared/reverse-proxy.ts'
+
 const config = configFromEnv()
 
-const socketOptions = config.redis.disableSecurity
-  ? {
-      host: config.redis.host!,
-      port: config.redis.port!
-    }
-  : {
-      host: config.redis.host!,
-      port: config.redis.port!,
-      tls: true as const,
-      servername: config.redis.tlsServerName!
-    }
-
-const redisClient = createClient({
-  socket: socketOptions,
-  ...(config.redis.disableSecurity ? {} : { password: config.redis.password })
-})
-
-export type VekkuliRedisClient = typeof redisClient
-
+const redisClient = redis.createClient(toRedisClientOpts(config))
 redisClient.on('error', (err) =>
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   logError('Redis error', undefined, undefined, err)
 )
 redisClient.connect().catch((err) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   logError('Unable to connect to redis', undefined, undefined, err)
 })
 // Don't prevent the app from exiting if a redis connection is alive.
@@ -55,12 +41,7 @@ app.use(
   })
 )
 app.get('/health', (_, res) => {
-  if (!redisClient.isReady) {
-    throw new Error('not connected to redis')
-  }
-
-  redisClient
-    .ping()
+  assertRedisConnection(redisClient)
     .then(() => {
       res.status(200).json({ status: 'UP' })
     })
@@ -68,17 +49,13 @@ app.get('/health', (_, res) => {
       res.status(503).json({ status: 'DOWN' })
     })
 })
+app.use(tracing)
 app.use(loggingMiddleware)
-
-passport.serializeUser<Express.User>((user, done) => done(null, user))
-passport.deserializeUser<Express.User>((user, done) => done(null, user))
-
-app.use('/api', createRouter(config, redisClient))
+app.use('/api/', apiRouter(config, redisClient))
 app.use(fallbackErrorHandler)
 
-const server = app.listen(httpPort, () => {
-  console.log(`Oppivelvollisuus API Gateway listening on port ${httpPort}`)
-})
-
+const server = app.listen(httpPort, () =>
+  logInfo(`Vakaseteli API Gateway listening on port ${httpPort}`)
+)
 server.keepAliveTimeout = 70 * 1000
 server.headersTimeout = 75 * 1000
