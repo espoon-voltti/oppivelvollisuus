@@ -49,11 +49,11 @@ services:
     environment:
       NODE_ENV: local
       HTTP_PORT: 8888
+      BASE_URL: http://localhost:8765
       SERVICE_URL: http://service:9000
       JWT_KID: "oppivelvollisuus-api-gateway"
       JWT_PRIVATE_KEY: "config/test-cert/jwt_private_key.pem"
       AD_MOCK: "false"
-      DEV_LOGIN: "false"
       AD_SAML_CALLBACK_URL: http://localhost:8765/api/auth/saml/login/callback
       AD_SAML_ENTRYPOINT_URL: https://voltti-idp-azuread.staging.espoon-voltti.fi/idp/profile/SAML2/Redirect/SSO
       AD_SAML_LOGOUT_URL: https://voltti-idp-azuread.staging.espoon-voltti.fi/idp/profile/SAML2/Redirect/SLO
