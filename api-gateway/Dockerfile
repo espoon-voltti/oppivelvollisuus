@@ -17,12 +17,11 @@ RUN yarn install --immutable
 
 COPY . .
 
-RUN yarn build
-
 FROM builder AS test
 
 RUN yarn lint
-#RUN yarn test
+RUN yarn type-check
+RUN yarn test-ci
 
 FROM builder
 
@@ -59,4 +58,4 @@ LABEL fi.espoo.build="$build" \
 USER oppivelvollisuus
 
 ENTRYPOINT ["/app/entrypoint.sh"]
-CMD ["node", "dist/index.js"]
+CMD ["node", "--loader", "dd-trace/loader-hook.mjs", "src/index.ts"]
