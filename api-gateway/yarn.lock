@@ -491,12 +491,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:25.7.0":
+"@types/node@npm:*":
   version: 25.7.0
   resolution: "@types/node@npm:25.7.0"
   dependencies:
     undici-types: "npm:~7.21.0"
   checksum: 10/1b11c865ea517ab90af870c2f58c100804e3dd8dc25a62b5e5af3aea12ad015f9faf513664babc7e0c755bb1c0744649b2ff19b7b434c1648ad8057f2dc6c71a
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:25.8.0":
+  version: 25.8.0
+  resolution: "@types/node@npm:25.8.0"
+  dependencies:
+    undici-types: "npm:>=7.24.0 <7.24.7"
+  checksum: 10/1b1eb14c4f5294ff12de0c668c0ed786b377e2e878fe4c9f84e5219d06d0e2fbf9ea7d7a95077360d2ed1329f56e7a94afc65768fe9f3afdb6c95977f89eb2e2
   languageName: node
   linkType: hard
 
@@ -2832,7 +2841,7 @@ __metadata:
     "@types/express-session": "npm:1.19.0"
     "@types/jsonwebtoken": "npm:9.0.7"
     "@types/lodash": "npm:4.17.24"
-    "@types/node": "npm:25.7.0"
+    "@types/node": "npm:25.8.0"
     "@types/passport": "npm:1.0.17"
     "@types/passport-strategy": "npm:0.2.38"
     "@types/redis": "npm:4.0.11"
@@ -3874,6 +3883,13 @@ __metadata:
   version: 2.0.5
   resolution: "undefsafe@npm:2.0.5"
   checksum: 10/f42ab3b5770fedd4ada175fc1b2eb775b78f609156f7c389106aafd231bfc210813ee49f54483d7191d7b76e483bc7f537b5d92d19ded27156baf57592eb02cc
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:>=7.24.0 <7.24.7":
+  version: 7.24.6
+  resolution: "undici-types@npm:7.24.6"
+  checksum: 10/defc9538b952e3c15b8526596c591f7c1f0c7605ad27a2b7feddbea7ef2e3003f3eda2cdb051a3cb1a2185e3893100fd9cb925c799db99d48131ea63b5233d10
   languageName: node
   linkType: hard
 
