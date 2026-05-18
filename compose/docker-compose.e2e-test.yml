@@ -15,6 +15,7 @@ services:
       RESOLVER: "127.0.0.11 ipv6=off"
       API_GATEWAY_URL: http://api-gateway:3000
       HTTP_SCHEME: http
+      RATE_LIMIT_CIDR_WHITELIST: "0.0.0.0/0"
     depends_on:
       - api-gateway
 
