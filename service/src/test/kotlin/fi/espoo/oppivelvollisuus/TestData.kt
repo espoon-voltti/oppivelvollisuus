@@ -28,7 +28,7 @@ val minimalStudentTestInput =
         municipalityInFinland = true,
         guardianInfo = "",
         supportContactsInfo = "",
-        partnerOrganisations = emptySet()
+        partnerOrganisations = emptySet(),
     )
 val minimalStudentCaseTestInput =
     StudentCaseInput(
@@ -40,10 +40,10 @@ val minimalStudentCaseTestInput =
         sourceContact = "",
         schoolBackground = emptySet(),
         caseBackgroundReasons = emptySet(),
-        notInSchoolReason = null
+        notInSchoolReason = null,
     )
 val minimalStudentAndCaseTestInput =
     AppController.StudentAndCaseInput(
         student = minimalStudentTestInput,
-        studentCase = minimalStudentCaseTestInput
+        studentCase = minimalStudentCaseTestInput,
     )

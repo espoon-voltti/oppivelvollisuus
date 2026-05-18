@@ -26,6 +26,10 @@ import fi.espoo.oppivelvollisuus.domain.StudentInput
 import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
 import fi.espoo.oppivelvollisuus.domain.StudentSummary
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
+import java.time.LocalDate
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import minimalStudentAndCaseTestInput
 import minimalStudentCaseTestInput
 import minimalStudentTestInput
@@ -35,21 +39,16 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import testUser
 import testUserName
-import java.time.LocalDate
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class StudentTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+    @Autowired lateinit var controller: AppController
 
     val emptySearch =
         StudentSearchParams(
             query = "",
             statuses = CaseStatus.entries,
             sources = CaseSource.entries,
-            assignee = null
+            assignee = null,
         )
 
     @Test
@@ -79,7 +78,11 @@ class StudentTests : FullApplicationTest() {
                                 municipalityInFinland = false,
                                 guardianInfo = "Huoltaja",
                                 supportContactsInfo = "Joku muu",
-                                partnerOrganisations = setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO)
+                                partnerOrganisations =
+                                    setOf(
+                                        PartnerOrganisation.LASTENSUOJELU,
+                                        PartnerOrganisation.TERVEYDENHUOLTO,
+                                    ),
                             ),
                         studentCase =
                             StudentCaseInput(
@@ -91,16 +94,12 @@ class StudentTests : FullApplicationTest() {
                                 sourceContact = "Espoon ala-aste",
                                 schoolBackground = SchoolBackground.entries.toSet(),
                                 caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
-                                notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA
-                            )
-                    )
+                                notInSchoolReason =
+                                    NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                            ),
+                    ),
             )
-        val caseId =
-            controller
-                .getStudent(testUser, studentId)
-                .cases
-                .first()
-                .id
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
         controller.createCaseEvent(
             testUser,
             caseId,
@@ -120,8 +119,9 @@ class StudentTests : FullApplicationTest() {
                     ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros. 
                     Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id 
                     semper. Interdum et malesuada fames ac ante ipsum primis in faucibus.
-                    """.trimIndent()
-            )
+                    """
+                        .trimIndent(),
+            ),
         )
 
         assertEquals(
@@ -143,11 +143,12 @@ class StudentTests : FullApplicationTest() {
                                     """
                                     Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
                                     sem, mattis et...
-                                    """.trimIndent()
-                            )
+                                    """
+                                        .trimIndent(),
+                            ),
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch)
+            actual = controller.getStudents(testUser, emptySearch),
         )
 
         val studentResponse = controller.getStudent(testUser, studentId)
@@ -167,9 +168,10 @@ class StudentTests : FullApplicationTest() {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Joku muu",
-                partnerOrganisations = setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO)
+                partnerOrganisations =
+                    setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO),
             ),
-            studentResponse.student
+            studentResponse.student,
         )
         assertEquals(1, studentResponse.cases.size)
         studentResponse.cases.first().let { studentCase ->
@@ -189,9 +191,9 @@ class StudentTests : FullApplicationTest() {
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
                     // skip assertion of events
-                    events = studentCase.events
+                    events = studentCase.events,
                 ),
-                studentCase
+                studentCase,
             )
         }
     }
@@ -217,7 +219,7 @@ class StudentTests : FullApplicationTest() {
                                 address = "",
                                 municipalityInFinland = true,
                                 guardianInfo = "",
-                                supportContactsInfo = ""
+                                supportContactsInfo = "",
                             ),
                         studentCase =
                             StudentCaseInput(
@@ -229,9 +231,9 @@ class StudentTests : FullApplicationTest() {
                                 sourceContact = "",
                                 schoolBackground = emptySet(),
                                 caseBackgroundReasons = emptySet(),
-                                notInSchoolReason = null
-                            )
-                    )
+                                notInSchoolReason = null,
+                            ),
+                    ),
             )
         assertEquals(
             expected =
@@ -244,10 +246,10 @@ class StudentTests : FullApplicationTest() {
                         assignedTo = null,
                         status = CaseStatus.TODO,
                         source = CaseSource.VALPAS_AUTOMATIC_CHECK,
-                        lastEvent = null
+                        lastEvent = null,
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch)
+            actual = controller.getStudents(testUser, emptySearch),
         )
 
         val studentResponse = controller.getStudent(testUser, studentId)
@@ -266,9 +268,9 @@ class StudentTests : FullApplicationTest() {
                 address = "",
                 municipalityInFinland = true,
                 guardianInfo = "",
-                supportContactsInfo = ""
+                supportContactsInfo = "",
             ),
-            studentResponse.student
+            studentResponse.student,
         )
         assertEquals(1, studentResponse.cases.size)
         studentResponse.cases.first().let { studentCase ->
@@ -287,9 +289,9 @@ class StudentTests : FullApplicationTest() {
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
                     notInSchoolReason = null,
-                    events = emptyList()
+                    events = emptyList(),
                 ),
-                studentCase
+                studentCase,
             )
         }
     }
@@ -315,8 +317,12 @@ class StudentTests : FullApplicationTest() {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo",
-                partnerOrganisations = setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
-            )
+                partnerOrganisations =
+                    setOf(
+                        PartnerOrganisation.TUKIHENKILO,
+                        PartnerOrganisation.MIELENTERVEYSPALVELUT,
+                    ),
+            ),
         )
 
         val studentResponse = controller.getStudent(testUser, studentId)
@@ -336,9 +342,9 @@ class StudentTests : FullApplicationTest() {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo",
-                setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT)
+                setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT),
             ),
-            studentResponse.student
+            studentResponse.student,
         )
     }
 
@@ -349,16 +355,16 @@ class StudentTests : FullApplicationTest() {
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         controller.createStudent(
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
 
         assertEquals(2, controller.getStudents(testUser, emptySearch).size)
@@ -370,12 +376,9 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
-                    student =
-                        minimalStudentTestInput.copy(
-                            ssn = "170108A927R"
-                        ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    student = minimalStudentTestInput.copy(ssn = "170108A927R"),
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val e =
             assertThrows<UnableToExecuteStatementException> {
@@ -383,12 +386,9 @@ class StudentTests : FullApplicationTest() {
                     user = testUser,
                     body =
                         AppController.StudentAndCaseInput(
-                            student =
-                                minimalStudentTestInput.copy(
-                                    ssn = "170108A927R"
-                                ),
-                            studentCase = minimalStudentCaseTestInput
-                        )
+                            student = minimalStudentTestInput.copy(ssn = "170108A927R"),
+                            studentCase = minimalStudentCaseTestInput,
+                        ),
                 )
             }
         assertTrue(e.isUniqueConstraintViolation())
@@ -402,12 +402,9 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
-                    student =
-                        minimalStudentTestInput.copy(
-                            valpasLink = "http://valpas.fi/123"
-                        ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    student = minimalStudentTestInput.copy(valpasLink = "http://valpas.fi/123"),
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val e =
             assertThrows<UnableToExecuteStatementException> {
@@ -416,11 +413,9 @@ class StudentTests : FullApplicationTest() {
                     body =
                         AppController.StudentAndCaseInput(
                             student =
-                                minimalStudentTestInput.copy(
-                                    valpasLink = "http://valpas.fi/123"
-                                ),
-                            studentCase = minimalStudentCaseTestInput
-                        )
+                                minimalStudentTestInput.copy(valpasLink = "http://valpas.fi/123"),
+                            studentCase = minimalStudentCaseTestInput,
+                        ),
                 )
             }
         assertTrue(e.isUniqueConstraintViolation())
@@ -434,12 +429,9 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
-                    student =
-                        minimalStudentTestInput.copy(
-                            ssn = "170108A927R"
-                        ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    student = minimalStudentTestInput.copy(ssn = "170108A927R"),
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -448,8 +440,8 @@ class StudentTests : FullApplicationTest() {
                     ssn = "170108A927R",
                     valpasLink = "",
                     firstName = "",
-                    lastName = ""
-                )
+                    lastName = "",
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -465,12 +457,9 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
-                    student =
-                        minimalStudentTestInput.copy(
-                            valpasLink = "https://valpas.fi/123"
-                        ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    student = minimalStudentTestInput.copy(valpasLink = "https://valpas.fi/123"),
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -479,8 +468,8 @@ class StudentTests : FullApplicationTest() {
                     ssn = "",
                     valpasLink = "https://valpas.fi/123",
                     firstName = "",
-                    lastName = ""
-                )
+                    lastName = "",
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -496,13 +485,9 @@ class StudentTests : FullApplicationTest() {
             user = testUser,
             body =
                 AppController.StudentAndCaseInput(
-                    student =
-                        minimalStudentTestInput.copy(
-                            firstName = "Tupu",
-                            lastName = "Ankka"
-                        ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    student = minimalStudentTestInput.copy(firstName = "Tupu", lastName = "Ankka"),
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -511,8 +496,8 @@ class StudentTests : FullApplicationTest() {
                     ssn = "",
                     valpasLink = "",
                     firstName = "Tupu",
-                    lastName = "Ankka"
-                )
+                    lastName = "Ankka",
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -532,10 +517,10 @@ class StudentTests : FullApplicationTest() {
                         minimalStudentTestInput.copy(
                             ssn = "170108A927R",
                             firstName = "Tupu",
-                            lastName = "Ankka"
+                            lastName = "Ankka",
                         ),
-                    studentCase = minimalStudentCaseTestInput
-                )
+                    studentCase = minimalStudentCaseTestInput,
+                ),
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
@@ -544,8 +529,8 @@ class StudentTests : FullApplicationTest() {
                     ssn = "100507A967F",
                     valpasLink = "",
                     firstName = "Tupu",
-                    lastName = "Ankka"
-                )
+                    lastName = "Ankka",
+                ),
             )
         assertEquals(0, duplicateStudents.size)
     }
@@ -553,10 +538,7 @@ class StudentTests : FullApplicationTest() {
     @Test
     fun `deleting student fails when it has cases`() {
         val studentId =
-            controller.createStudent(
-                user = testUser,
-                body = minimalStudentAndCaseTestInput
-            )
+            controller.createStudent(user = testUser, body = minimalStudentAndCaseTestInput)
         assertThrows<UnableToExecuteStatementException> {
             controller.deleteStudent(testUser, studentId)
         }
@@ -565,16 +547,8 @@ class StudentTests : FullApplicationTest() {
     @Test
     fun `deleting student after deleting its cases`() {
         val studentId =
-            controller.createStudent(
-                user = testUser,
-                body = minimalStudentAndCaseTestInput
-            )
-        val caseId =
-            controller
-                .getStudent(testUser, studentId)
-                .cases
-                .first()
-                .id
+            controller.createStudent(user = testUser, body = minimalStudentAndCaseTestInput)
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
         controller.deleteStudentCase(testUser, studentId, caseId)
 
         controller.deleteStudent(testUser, studentId)
@@ -594,8 +568,8 @@ class StudentTests : FullApplicationTest() {
                             minimalStudentTestInput.copy(
                                 dateOfBirth = LocalDate.now().minusYears(21).minusDays(1)
                             ),
-                        studentCase = minimalStudentCaseTestInput
-                    )
+                        studentCase = minimalStudentCaseTestInput,
+                    ),
             )
         val studentId2 =
             controller.createStudent(
@@ -606,16 +580,15 @@ class StudentTests : FullApplicationTest() {
                             minimalStudentTestInput.copy(
                                 dateOfBirth = LocalDate.now().minusYears(21).plusDays(1)
                             ),
-                        studentCase = minimalStudentCaseTestInput
-                    )
+                        studentCase = minimalStudentCaseTestInput,
+                    ),
             )
-        val caseId =
-            controller
-                .getStudent(testUser, studentId1)
-                .cases
-                .first()
-                .id
-        controller.createCaseEvent(testUser, caseId, CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"))
+        val caseId = controller.getStudent(testUser, studentId1).cases.first().id
+        controller.createCaseEvent(
+            testUser,
+            caseId,
+            CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"),
+        )
 
         controller.deleteOldStudents(testUser)
 

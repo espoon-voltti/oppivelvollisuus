@@ -6,12 +6,12 @@ package fi.espoo.oppivelvollisuus.domain
 
 import fi.espoo.oppivelvollisuus.common.NotFound
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
-import org.jdbi.v3.core.kotlin.mapTo
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.UUID
+import org.jdbi.v3.core.Handle
+import org.jdbi.v3.core.kotlin.bindKotlin
+import org.jdbi.v3.core.kotlin.mapTo
 
 enum class CaseEventType {
     NOTE,
@@ -30,27 +30,24 @@ enum class CaseEventType {
     HEARING,
     DIRECTED_TO_YLEISOPPILAITOKSEN_TUVA,
     DIRECTED_TO_ERITYISOPPILAITOKSEN_TUVA,
-    DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA
+    DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA,
 }
 
-data class CaseEventInput(
-    val date: LocalDate,
-    val type: CaseEventType,
-    val notes: String
-)
+data class CaseEventInput(val date: LocalDate, val type: CaseEventType, val notes: String)
 
 fun Handle.insertCaseEvent(
     studentCaseId: UUID,
     data: CaseEventInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
 ): UUID =
     createUpdate(
-        """
+            """
                 INSERT INTO case_events (created_by, student_case_id, date, type, notes) 
                 VALUES (:user, :studentCaseId, :date, :type, :notes)
                 RETURNING id
             """
-    ).bind("studentCaseId", studentCaseId)
+        )
+        .bind("studentCaseId", studentCaseId)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
@@ -64,21 +61,14 @@ data class CaseEvent(
     val type: CaseEventType,
     val notes: String,
     val created: ModifyInfo,
-    val updated: ModifyInfo?
+    val updated: ModifyInfo?,
 )
 
-data class ModifyInfo(
-    val name: String,
-    val time: ZonedDateTime
-)
+data class ModifyInfo(val name: String, val time: ZonedDateTime)
 
-fun Handle.updateCaseEvent(
-    id: UUID,
-    data: CaseEventInput,
-    user: AuthenticatedUser
-) {
+fun Handle.updateCaseEvent(id: UUID, data: CaseEventInput, user: AuthenticatedUser) {
     createUpdate(
-        """
+            """
 UPDATE case_events
 SET 
     updated = now(),
@@ -88,7 +78,8 @@ SET
     notes = :notes
 WHERE id = :id
 """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .execute()
@@ -97,10 +88,11 @@ WHERE id = :id
 
 fun Handle.deleteCaseEvent(id: UUID) {
     createUpdate(
-        """
+            """
 DELETE FROM case_events
 WHERE id = :id
 """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .execute()
 }

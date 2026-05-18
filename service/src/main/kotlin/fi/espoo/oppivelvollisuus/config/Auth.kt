@@ -53,9 +53,7 @@ class HttpAccessControl : HttpFilter() {
         }
 }
 
-class JwtTokenDecoder(
-    private val jwtVerifier: JWTVerifier
-) : HttpFilter() {
+class JwtTokenDecoder(private val jwtVerifier: JWTVerifier) : HttpFilter() {
     private val logger = KotlinLogging.logger {}
 
     override fun doFilter(
@@ -77,7 +75,8 @@ class JwtTokenDecoder(
 
 private const val ATTR_USER = "oppivelvollisuus.user"
 
-fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? = getAttribute(ATTR_USER) as AuthenticatedUser?
+fun HttpServletRequest.getAuthenticatedUser(): AuthenticatedUser? =
+    getAttribute(ATTR_USER) as AuthenticatedUser?
 
 fun HttpServletRequest.setAuthenticatedUser(user: AuthenticatedUser) = setAttribute(ATTR_USER, user)
 
@@ -87,7 +86,8 @@ private fun HttpServletRequest.getDecodedJwt(): DecodedJWT? = getAttribute(ATTR_
 
 private fun HttpServletRequest.setDecodedJwt(jwt: DecodedJWT) = setAttribute(ATTR_JWT, jwt)
 
-private fun HttpServletRequest.getBearerToken(): String? = getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")
+private fun HttpServletRequest.getBearerToken(): String? =
+    getHeader("Authorization")?.substringAfter("Bearer ", missingDelimiterValue = "")
 
 class RequestToAuthenticatedUser : HttpFilter() {
     override fun doFilter(
@@ -102,7 +102,9 @@ class RequestToAuthenticatedUser : HttpFilter() {
                 request.getHeader("X-User")?.let { jsonMapper().readValue<AuthenticatedUser>(it) }
             if (user != null) {
                 request.setAuthenticatedUser(user)
-                // TODO: tag the request with MDC user keys and an OpenTelemetry span attribute for the authenticated user, as the other Voltti projects do, once that infrastructure exists in this service
+                // TODO: tag the request with MDC user keys and an OpenTelemetry span attribute for
+                // the authenticated user, as the other Voltti projects do, once that infrastructure
+                // exists in this service
             }
         }
         chain.doFilter(request, response)

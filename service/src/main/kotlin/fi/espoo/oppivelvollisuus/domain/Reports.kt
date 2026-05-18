@@ -4,14 +4,11 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
+import java.time.LocalDate
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.mapTo
-import java.time.LocalDate
 
-data class CaseReportRequest(
-    val start: LocalDate?,
-    val end: LocalDate?
-)
+data class CaseReportRequest(val start: LocalDate?, val end: LocalDate?)
 
 data class CaseReportRow(
     val openedAt: LocalDate,
@@ -31,12 +28,12 @@ data class CaseReportRow(
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
     val followUpMeasures: Set<FollowUpMeasure>?,
-    val eventTypes: Set<CaseEventType>
+    val eventTypes: Set<CaseEventType>,
 )
 
 fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
     createQuery(
-        """
+            """
     SELECT 
         sc.opened_at,
         extract('year' FROM s.date_of_birth) AS birth_year,
@@ -70,7 +67,8 @@ fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
     ${request.start?.let { "AND sc.opened_at >= :start" } ?: ""}
     ${request.end?.let { "AND sc.opened_at <= :end" } ?: ""}
 """
-    ).also { if (request.start != null) it.bind("start", request.start) }
+        )
+        .also { if (request.start != null) it.bind("start", request.start) }
         .also { if (request.end != null) it.bind("end", request.end) }
         .mapTo<CaseReportRow>()
         .list()

@@ -10,9 +10,7 @@ import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
 import java.util.regex.Pattern
 
-class StudentPage(
-    private val page: Page
-) {
+class StudentPage(private val page: Page) {
     val studentName = page.locator(dataQa("student-name"))
 
     fun assertUrl() {

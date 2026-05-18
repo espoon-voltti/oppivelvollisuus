@@ -4,21 +4,15 @@
 
 package fi.espoo.oppivelvollisuus.config
 
+import java.util.UUID
 import tools.jackson.core.JsonParser
 import tools.jackson.databind.DeserializationContext
 import tools.jackson.databind.ValueDeserializer
-import java.util.UUID
 
 class AuthenticatedUserJsonDeserializer : ValueDeserializer<AuthenticatedUser>() {
-    private data class AllFields(
-        val type: AuthenticatedUserType? = null,
-        val id: UUID? = null
-    )
+    private data class AllFields(val type: AuthenticatedUserType? = null, val id: UUID? = null)
 
-    override fun deserialize(
-        p: JsonParser,
-        ctx: DeserializationContext
-    ): AuthenticatedUser {
+    override fun deserialize(p: JsonParser, ctx: DeserializationContext): AuthenticatedUser {
         val user = p.readValueAs(AllFields::class.java)
         return when (user.type!!) {
             AuthenticatedUserType.espooUser -> {

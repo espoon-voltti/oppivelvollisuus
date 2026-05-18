@@ -14,8 +14,7 @@ import tools.jackson.databind.json.JsonMapper
 import tools.jackson.module.kotlin.KotlinModule
 
 fun defaultJsonMapperBuilder(): JsonMapper.Builder =
-    JsonMapper
-        .builder()
+    JsonMapper.builder()
         .addModules(KotlinModule.Builder().build())
         // We never want to serialize timestamps as numbers but use ISO formats instead.
         .disable(DateTimeFeature.WRITE_DATES_AS_TIMESTAMPS)

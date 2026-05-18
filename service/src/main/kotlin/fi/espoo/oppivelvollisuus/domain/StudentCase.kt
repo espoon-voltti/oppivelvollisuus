@@ -8,25 +8,25 @@ import fi.espoo.oppivelvollisuus.common.BadRequest
 import fi.espoo.oppivelvollisuus.common.NotFound
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import java.time.LocalDate
+import java.util.UUID
 import org.jdbi.v3.core.Handle
 import org.jdbi.v3.core.kotlin.bindKotlin
 import org.jdbi.v3.core.kotlin.mapTo
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
-import java.time.LocalDate
-import java.util.UUID
 
 enum class CaseStatus {
     TODO,
     ON_HOLD,
-    FINISHED
+    FINISHED,
 }
 
 enum class CaseSource {
     VALPAS_NOTICE,
     VALPAS_AUTOMATIC_CHECK,
-    OTHER
+    OTHER,
 }
 
 enum class ValpasNotifier {
@@ -40,7 +40,7 @@ enum class ValpasNotifier {
     AMMATILLISEN_ERITYISOPPILAITOKSEN_TUVA,
     TELMA,
     TOINEN_ASUINKUNTA,
-    OPISTO
+    OPISTO,
 }
 
 enum class OtherNotifier {
@@ -50,7 +50,7 @@ enum class OtherNotifier {
     OHJAAMOTALO,
     OPPILAITOS,
     LASTENSUOJELU,
-    OTHER
+    OTHER,
 }
 
 enum class SchoolBackground {
@@ -65,7 +65,7 @@ enum class SchoolBackground {
     ERITYISEN_TUEN_PAATOS_PERUSKOULUSSA,
     YKSILOLLISTETTY_OPPIMAARA_AIDINKIELESSA_JA_MATEMATIIKASSA,
     PERUSOPETUKSEEN_VALMISTAVA_OPISKELU_SUOMESSA,
-    ULKOMAILLA_SUORITETUT_PERUSOPETUSTA_VASTAAVAT_OPINNOT
+    ULKOMAILLA_SUORITETUT_PERUSOPETUSTA_VASTAAVAT_OPINNOT,
 }
 
 enum class CaseBackgroundReason {
@@ -79,7 +79,7 @@ enum class CaseBackgroundReason {
     MUUTTO_ULKOMAILLE,
     MAAHAN_MUUTTANUT_NUORI_ILMAN_OPISKELUPAIKKAA,
     JAANYT_ILMAN_OPISKELUPAIKKAA,
-    MUU_SYY
+    MUU_SYY,
 }
 
 enum class NotInSchoolReason {
@@ -91,7 +91,7 @@ enum class NotInSchoolReason {
     EI_OPISKELUPAIKKAA_AMMATILLISESSA_ERITYISOPPILAITOKSESSA,
     EI_OLE_SAANUT_OPISKELUPAIKKAA_KIELITAIDON_VUOKSI,
     OPINNOT_ULKOMAILLA,
-    MUU_SYY
+    MUU_SYY,
 }
 
 data class StudentCaseInput(
@@ -103,7 +103,7 @@ data class StudentCaseInput(
     val sourceContact: String,
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
-    val notInSchoolReason: NotInSchoolReason?
+    val notInSchoolReason: NotInSchoolReason?,
 ) {
     init {
         if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
@@ -118,15 +118,16 @@ data class StudentCaseInput(
 fun Handle.insertStudentCase(
     studentId: UUID,
     data: StudentCaseInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
 ): UUID =
     createUpdate(
-        """
+            """
                 INSERT INTO student_cases (created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason) 
                 VALUES (:user, :studentId, :openedAt, :assignedTo, 'TODO', :source, :sourceValpas, :sourceOther, :sourceContact, :schoolBackground::school_background[], :caseBackgroundReasons::case_background_reason[], :notInSchoolReason)
                 RETURNING id
             """
-    ).bind("studentId", studentId)
+        )
+        .bind("studentId", studentId)
         .bindKotlin(data)
         .bind("user", user.rawId())
         .executeAndReturnGeneratedKeys()
@@ -141,7 +142,7 @@ enum class CaseFinishedReason {
     MOVED_TO_ANOTHER_MUNICIPALITY,
     MOVED_ABROAD,
     ERRONEOUS_NOTICE,
-    OTHER
+    OTHER,
 }
 
 enum class SchoolType {
@@ -156,7 +157,7 @@ enum class SchoolType {
     AMMATILLISEN_ERITYISOPPILAITOKSEN_PERUSTUTKINTO,
     TELMA,
     KANSANOPISTO,
-    OTHER
+    OTHER,
 }
 
 enum class FollowUpMeasure {
@@ -166,21 +167,27 @@ enum class FollowUpMeasure {
     JOB_SEARCH_SUPPORT,
     LANGUAGE_COURSE,
     MISSING,
-    MOVE_ABROAD
+    MOVE_ABROAD,
 }
 
 data class FinishedInfo(
     @param:PropagateNull val reason: CaseFinishedReason,
     val startedAtSchool: SchoolType?,
     val followUpMeasures: Set<FollowUpMeasure>?,
-    val otherReason: String?
+    val otherReason: String?,
 ) {
     init {
         if ((reason == CaseFinishedReason.BEGAN_STUDIES) != (startedAtSchool != null)) {
-            throw BadRequest("startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES")
+            throw BadRequest(
+                "startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES"
+            )
         }
-        if ((reason == CaseFinishedReason.COMPULSORY_EDUCATION_ENDED) != (followUpMeasures != null)) {
-            throw BadRequest("followUpMeasure must be present if and only if finished reason is COMPULSORY_EDUCATION_ENDED")
+        if (
+            (reason == CaseFinishedReason.COMPULSORY_EDUCATION_ENDED) != (followUpMeasures != null)
+        ) {
+            throw BadRequest(
+                "followUpMeasure must be present if and only if finished reason is COMPULSORY_EDUCATION_ENDED"
+            )
         }
     }
 }
@@ -199,7 +206,7 @@ data class StudentCase(
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
-    @param:Json val events: List<CaseEvent>
+    @param:Json val events: List<CaseEvent>,
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
@@ -216,7 +223,7 @@ data class StudentCase(
 
 fun Handle.getStudentCasesByStudent(studentId: UUID): List<StudentCase> =
     createQuery(
-"""
+            """
 SELECT
     sc.id, sc.student_id, sc.opened_at,
     assignee.id AS assigned_to_id,
@@ -259,7 +266,8 @@ LEFT JOIN users assignee ON sc.assigned_to = assignee.id
 WHERE student_id = :studentId
 ORDER BY opened_at DESC, sc.created DESC;
 """
-    ).bind("studentId", studentId)
+        )
+        .bind("studentId", studentId)
         .mapTo<StudentCase>()
         .list()
 
@@ -267,10 +275,10 @@ fun Handle.updateStudentCase(
     id: UUID,
     studentId: UUID,
     data: StudentCaseInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
 ) {
     createUpdate(
-"""
+            """
 UPDATE student_cases
 SET 
     updated = now(),
@@ -286,7 +294,8 @@ SET
     not_in_school_reason = :notInSchoolReason
 WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .bind("studentId", studentId)
         .bindKotlin(data)
         .bind("user", user.rawId())
@@ -294,10 +303,7 @@ WHERE id = :id AND student_id = :studentId
         .also { if (it != 1) throw NotFound() }
 }
 
-data class CaseStatusInput(
-    val status: CaseStatus,
-    val finishedInfo: FinishedInfo?
-) {
+data class CaseStatusInput(val status: CaseStatus, val finishedInfo: FinishedInfo?) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
             throw BadRequest("finishedInfo must be present if and only if status is FINISHED")
@@ -309,10 +315,10 @@ fun Handle.updateStudentCaseStatus(
     id: UUID,
     studentId: UUID,
     data: CaseStatusInput,
-    user: AuthenticatedUser
+    user: AuthenticatedUser,
 ) {
     createUpdate(
-        """
+            """
         UPDATE student_cases
         SET 
             updated = now(),
@@ -324,7 +330,8 @@ fun Handle.updateStudentCaseStatus(
             other_reason = :otherReason
         WHERE id = :id AND student_id = :studentId
 """
-    ).bind("id", id)
+        )
+        .bind("id", id)
         .bind("studentId", studentId)
         .bind("status", data.status)
         .bind("finishedReason", data.finishedInfo?.reason)
@@ -336,10 +343,7 @@ fun Handle.updateStudentCaseStatus(
         .also { if (it != 1) throw NotFound() }
 }
 
-fun Handle.deleteStudentCase(
-    id: UUID,
-    studentId: UUID
-) {
+fun Handle.deleteStudentCase(id: UUID, studentId: UUID) {
     createUpdate("DELETE FROM student_cases WHERE id = :id AND student_id = :studentId")
         .bind("id", id)
         .bind("studentId", studentId)

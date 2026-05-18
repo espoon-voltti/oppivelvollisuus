@@ -14,12 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest
 import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SpringBootTest(
-    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
-)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class FullApplicationTest {
-    @Autowired
-    protected lateinit var jdbi: Jdbi
+    @Autowired protected lateinit var jdbi: Jdbi
 
     @BeforeAll
     fun beforeAll() {
@@ -51,7 +48,8 @@ abstract class FullApplicationTest {
                     EXECUTE sequence_query;
                   END IF;
                 END $$ LANGUAGE plpgsql;
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
     }
@@ -60,13 +58,13 @@ abstract class FullApplicationTest {
     fun beforeEach() {
         jdbi.withHandleUnchecked { tx ->
             tx.execute("SELECT reset_database()")
-            tx
-                .createUpdate(
+            tx.createUpdate(
                     """
                 INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
                 VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
             """
-                ).bind("id", testUser.id)
+                )
+                .bind("id", testUser.id)
                 .execute()
         }
     }

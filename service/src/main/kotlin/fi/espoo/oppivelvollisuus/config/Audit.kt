@@ -14,13 +14,9 @@ val AUDIT_MARKER: Marker = KMarkerFactory.getMarker("AUDIT_EVENT")
 fun KLogger.audit(
     user: AuthenticatedUser,
     eventCode: String,
-    meta: Map<String, String> = emptyMap()
+    meta: Map<String, String> = emptyMap(),
 ) {
-    val data =
-        mapOf<String, Any?>(
-            "userId" to user.rawId(),
-            "meta" to meta
-        )
+    val data = mapOf<String, Any?>("userId" to user.rawId(), "meta" to meta)
     atWarn(AUDIT_MARKER) {
         message = eventCode
         arguments = arrayOf(StructuredArguments.entries(data))

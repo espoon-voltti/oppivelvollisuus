@@ -22,15 +22,14 @@ import fi.espoo.oppivelvollisuus.domain.SchoolType
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.StudentInput
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
+import java.time.LocalDate
+import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import testUser
-import java.time.LocalDate
-import kotlin.test.assertEquals
 
 class CasesReportTests : FullApplicationTest() {
-    @Autowired
-    lateinit var controller: AppController
+    @Autowired lateinit var controller: AppController
 
     @Test
     fun `create new case event, then update it and finally delete it`() {
@@ -53,7 +52,7 @@ class CasesReportTests : FullApplicationTest() {
                                 address = "",
                                 municipalityInFinland = false,
                                 guardianInfo = "",
-                                supportContactsInfo = ""
+                                supportContactsInfo = "",
                             ),
                         studentCase =
                             StudentCaseInput(
@@ -63,18 +62,15 @@ class CasesReportTests : FullApplicationTest() {
                                 sourceValpas = ValpasNotifier.PERUSOPETUS,
                                 sourceOther = null,
                                 sourceContact = "",
-                                schoolBackground = setOf(SchoolBackground.PERUSKOULUN_PAATTOTODISTUS),
+                                schoolBackground =
+                                    setOf(SchoolBackground.PERUSKOULUN_PAATTOTODISTUS),
                                 caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
-                                notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN
-                            )
-                    )
+                                notInSchoolReason =
+                                    NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
+                            ),
+                    ),
             )
-        val caseId =
-            controller
-                .getStudent(testUser, studentId)
-                .cases
-                .first()
-                .id
+        val caseId = controller.getStudent(testUser, studentId).cases.first().id
 
         assertEquals(
             listOf(
@@ -96,14 +92,14 @@ class CasesReportTests : FullApplicationTest() {
                     notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
                     eventTypes = emptySet(),
                     followUpMeasures = null,
-                    partnerOrganisations = emptySet()
+                    partnerOrganisations = emptySet(),
                 )
             ),
             controller.getCasesReport(
                 user = testUser,
                 start = LocalDate.of(2022, 1, 1),
-                end = LocalDate.of(2022, 12, 31)
-            )
+                end = LocalDate.of(2022, 12, 31),
+            ),
         )
 
         controller.createCaseEvent(
@@ -112,8 +108,8 @@ class CasesReportTests : FullApplicationTest() {
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 15),
                 type = CaseEventType.HEARING_LETTER,
-                notes = ""
-            )
+                notes = "",
+            ),
         )
         controller.createCaseEvent(
             testUser,
@@ -121,8 +117,8 @@ class CasesReportTests : FullApplicationTest() {
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 22),
                 type = CaseEventType.HEARING,
-                notes = ""
-            )
+                notes = "",
+            ),
         )
         controller.createCaseEvent(
             testUser,
@@ -130,8 +126,8 @@ class CasesReportTests : FullApplicationTest() {
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 25),
                 type = CaseEventType.HEARING,
-                notes = ""
-            )
+                notes = "",
+            ),
         )
         controller.updateStudentCaseStatus(
             testUser,
@@ -144,9 +140,9 @@ class CasesReportTests : FullApplicationTest() {
                         reason = CaseFinishedReason.BEGAN_STUDIES,
                         startedAtSchool = SchoolType.LUKIO,
                         followUpMeasures = null,
-                        otherReason = null
-                    )
-            )
+                        otherReason = null,
+                    ),
+            ),
         )
         controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
@@ -165,16 +161,20 @@ class CasesReportTests : FullApplicationTest() {
                     FinishedInfo(
                         reason = CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
                         startedAtSchool = null,
-                        followUpMeasures = setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
-                        otherReason = null
-                    )
-            )
+                        followUpMeasures =
+                            setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
+                        otherReason = null,
+                    ),
+            ),
         )
 
         controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
-            assertEquals(setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE), row.followUpMeasures)
+            assertEquals(
+                setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
+                row.followUpMeasures,
+            )
             assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
         }
     }

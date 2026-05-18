@@ -20,13 +20,9 @@ plugins {
     idea
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_25
-}
+java { sourceCompatibility = JavaVersion.VERSION_25 }
 
-repositories {
-    mavenCentral()
-}
+repositories { mavenCentral() }
 
 sourceSets {
     register("e2eTest") {
@@ -41,17 +37,11 @@ val e2eTestImplementation: Configuration by configurations.getting {
 
 configurations["e2eTestRuntimeOnly"].extendsFrom(configurations.testRuntimeOnly.get())
 
-idea {
-    module {
-        testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories
-    }
-}
+idea { module { testSources = testSources + sourceSets["e2eTest"].kotlin.sourceDirectories } }
 
 ktfmt { kotlinLangStyle() }
 
-ktlint {
-    version.set("1.8.0")
-}
+ktlint { version.set("1.8.0") }
 
 dependencies {
     api(kotlin("stdlib"))
@@ -70,9 +60,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    implementation("org.springframework.ws:spring-ws-security") {
-        exclude("org.opensaml")
-    }
+    implementation("org.springframework.ws:spring-ws-security") { exclude("org.opensaml") }
 
     implementation("com.zaxxer:HikariCP:7.0.2")
     implementation("org.flywaydb:flyway-database-postgresql")
@@ -116,13 +104,9 @@ tasks.withType<Test> {
     outputs.upToDateWhen { false }
 }
 
-tasks.getByName<Jar>("jar") {
-    archiveClassifier.set("")
-}
+tasks.getByName<Jar>("jar") { archiveClassifier.set("") }
 
-tasks.getByName<BootJar>("bootJar") {
-    archiveClassifier.set("boot")
-}
+tasks.getByName<BootJar>("bootJar") { archiveClassifier.set("boot") }
 
 tasks.register("resolveDependencies") {
     description = "Resolves all dependencies"
@@ -132,10 +116,12 @@ tasks.register("resolveDependencies") {
                 it.isCanBeResolved &&
                     // ignore configurations that fetch sources (e.g. Java source code)
                     !it.name.endsWith("dependencySources", ignoreCase = true)
-            }.map {
+            }
+            .map {
                 val files = it.resolve()
                 it.name to files.size
-            }.groupBy({ (_, count) -> count }) { (name, _) -> name }
+            }
+            .groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
                     "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
@@ -145,9 +131,7 @@ tasks.register("resolveDependencies") {
 }
 
 tasks {
-    bootRun {
-        systemProperty("spring.profiles.active", "local")
-    }
+    bootRun { systemProperty("spring.profiles.active", "local") }
 
     register<KtfmtFormatTask>("ktfmtPrecommit") {
         source = project.fileTree(rootDir)

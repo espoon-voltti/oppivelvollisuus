@@ -10,9 +10,7 @@ import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
 import kotlin.test.assertEquals
 
-class CreateStudentPage(
-    private val page: Page
-) {
+class CreateStudentPage(private val page: Page) {
     val saveButton = page.locator(dataQa("save-button"))
     val dateOfBirthInput = page.locator(dataQa("date-of-birth-input"))
     val lastNameInput = page.locator(dataQa("last-name-input"))

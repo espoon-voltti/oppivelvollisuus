@@ -46,13 +46,16 @@ class E2ETests : PlaywrightTest() {
 
         val studentsSearchPage = StudentsSearchPage(page)
         studentsSearchPage.assertUrl()
-        studentsSearchPage.assertEmployeeSelectOptions(listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija"))
+        studentsSearchPage.assertEmployeeSelectOptions(
+            listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija")
+        )
 
         jdbi.withHandleUnchecked { tx ->
             tx.execute(
                 """
                 UPDATE users SET is_active = false WHERE last_name = 'Suunnittelija'
-                """.trimIndent()
+                """
+                    .trimIndent()
             )
         }
 

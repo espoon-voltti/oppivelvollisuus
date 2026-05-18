@@ -10,9 +10,7 @@ import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
 import kotlin.test.assertEquals
 
-class StudentsSearchPage(
-    private val page: Page
-) {
+class StudentsSearchPage(private val page: Page) {
     val createStudentButton = page.locator(dataQa("create-student-button"))
     val employeeSelect = page.locator(dataQa("employee-select"))
 

@@ -18,16 +18,11 @@ import tools.jackson.databind.json.JsonMapper
 @Configuration
 class DbConfig {
     @Bean
-    fun jdbi(
-        dataSource: HikariDataSource,
-        jsonMapper: JsonMapper
-    ) = configureJdbi(Jdbi.create(dataSource), jsonMapper)
+    fun jdbi(dataSource: HikariDataSource, jsonMapper: JsonMapper) =
+        configureJdbi(Jdbi.create(dataSource), jsonMapper)
 }
 
-private fun configureJdbi(
-    jdbi: Jdbi,
-    jsonMapper: JsonMapper
-): Jdbi {
+private fun configureJdbi(jdbi: Jdbi, jsonMapper: JsonMapper): Jdbi {
     jdbi
         .installPlugin(KotlinPlugin())
         .installPlugin(PostgresPlugin())

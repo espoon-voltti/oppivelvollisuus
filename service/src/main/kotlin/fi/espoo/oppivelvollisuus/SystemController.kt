@@ -11,6 +11,7 @@ import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
 import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.config.audit
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.util.UUID
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,30 +21,26 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 /**
- * Controller for "system" endpoints intended to be only called from api-gateway
- * as the system internal user
+ * Controller for "system" endpoints intended to be only called from api-gateway as the system
+ * internal user
  */
 @RestController
 @RequestMapping("/system")
 class SystemController {
-    @Autowired
-    lateinit var jdbi: Jdbi
+    @Autowired lateinit var jdbi: Jdbi
 
     private val logger = KotlinLogging.logger {}
 
     @PostMapping("/user-login")
-    fun userLogin(
-        @RequestBody adUser: AdUser
-    ): AppUser =
-        jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
-            logger.audit(AuthenticatedUser.EspooUser(it.id), "USER_LOGIN")
-        }
+    fun userLogin(@RequestBody adUser: AdUser): AppUser =
+        jdbi
+            .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
+            .also { logger.audit(AuthenticatedUser.EspooUser(it.id), "USER_LOGIN") }
 
     @GetMapping("/users/{id}")
-    fun getUser(
-        @PathVariable id: UUID
-    ): AppUser? = jdbi.inTransactionUnchecked { it.getAppUser(id) }
+    fun getUser(@PathVariable id: UUID): AppUser? = jdbi.inTransactionUnchecked {
+        it.getAppUser(id)
+    }
 }
