@@ -24,7 +24,7 @@ class EnvConfig {
     @Bean fun jwtEnv(env: Environment): JwtEnv = JwtEnv.fromEnvironment(env)
 
     @Bean
-    fun scheduledJobsEnvEnv(env: Environment): ScheduledJobsEnv<ScheduledJob> =
+    fun scheduledJobsEnv(env: Environment): ScheduledJobsEnv<ScheduledJob> =
         ScheduledJobsEnv.fromEnvironment(
             ScheduledJob.entries.associateWith { it.defaultSettings },
             "app.job",

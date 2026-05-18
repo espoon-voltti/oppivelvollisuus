@@ -45,21 +45,21 @@ class ExceptionHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(value = [Conflict::class])
     fun conflict(req: HttpServletRequest, ex: Conflict): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Conflict (${ex.message})", ex)
+        logger.warn("fi.espoo.oppivelvollisuus.shared.Conflict (${ex.message})", ex)
         return ResponseEntity.status(HttpStatus.CONFLICT)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [Unauthorized::class])
     fun unauthorized(req: HttpServletRequest, ex: Unauthorized): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Unauthorized (${ex.message})", ex)
+        logger.warn("fi.espoo.oppivelvollisuus.shared.Unauthorized (${ex.message})", ex)
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
 
     @ExceptionHandler(value = [Forbidden::class])
     fun forbidden(req: HttpServletRequest, ex: Forbidden): ResponseEntity<ErrorResponse> {
-        logger.warn("fi.espoo.oppivelvollisuus.common.Forbidden (${ex.message})", ex)
+        logger.warn("fi.espoo.oppivelvollisuus.shared.Forbidden (${ex.message})", ex)
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
             .body(ErrorResponse(errorCode = ex.errorCode))
     }
