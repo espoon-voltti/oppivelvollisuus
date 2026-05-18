@@ -1,0 +1,109 @@
+// SPDX-FileCopyrightText: 2025-2025 City of Espoo
+//
+// SPDX-License-Identifier: LGPL-2.1-or-later
+
+package fi.espoo.oppivelvollisuus.shared.asyncjob
+
+import com.github.kagkarlsson.scheduler.ScheduledExecution
+import com.github.kagkarlsson.scheduler.Scheduler
+import com.github.kagkarlsson.scheduler.task.helper.Tasks
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.logging.info
+import fi.espoo.oppivelvollisuus.shared.time.AppClock
+import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
+import fi.espoo.oppivelvollisuus.shared.withDetachedSpan
+import io.github.oshai.kotlinlogging.KotlinLogging
+import io.opentelemetry.api.trace.Tracer
+import java.time.Duration
+import javax.sql.DataSource
+import org.jdbi.v3.core.Jdbi
+
+private const val SCHEDULER_THREADS = 1
+private const val ASYNC_JOB_RETRY_COUNT = 12
+private val POLLING_INTERVAL = Duration.ofMinutes(1)
+
+class ScheduledJobRunner(
+    private val jdbi: Jdbi,
+    private val tracer: Tracer,
+    private val asyncJobRunner: AsyncJobRunner<AsyncJob>,
+    private val schedules: List<JobSchedule>,
+    dataSource: DataSource,
+) : AutoCloseable {
+    private val logger = KotlinLogging.logger {}
+
+    init {
+        val jobsByName =
+            schedules.asSequence().flatMap { it.jobs }.map { it.job }.groupBy { it.name }.values
+        val notUnique = jobsByName.filterNot { it.count() == 1 }
+        require(notUnique.isEmpty()) {
+            val jobNames = notUnique.joinToString { jobs ->
+                jobs.joinToString(prefix = "[", postfix = "]") { "${it.javaClass.name}.${it.name}" }
+            }
+            "Scheduled job name conflict: $jobNames"
+        }
+        asyncJobRunner.registerHandler(::runJob)
+    }
+
+    val scheduler: Scheduler =
+        Scheduler.create(dataSource)
+            .startTasks(
+                schedules
+                    .asSequence()
+                    .flatMap { it.jobs }
+                    .partition { it.settings.enabled }
+                    .let { (enabled, disabled) ->
+                        logger.info {
+                            "Ignoring disabled jobs: ${disabled.joinToString { it.job.name }}"
+                        }
+                        enabled.map { definition ->
+                            val logMeta = mapOf("jobName" to definition.job.name)
+                            logger.info(logMeta) {
+                                "Scheduling job ${definition.job.name}: ${definition.settings.schedule}"
+                            }
+                            Tasks.recurring(definition.job.name, definition.settings.schedule)
+                                .execute { _, _ ->
+                                    Database(jdbi, tracer).connect {
+                                        this.planAsyncJob(it, definition)
+                                    }
+                                }
+                        }
+                    }
+            )
+            .threads(SCHEDULER_THREADS)
+            .pollingInterval(POLLING_INTERVAL)
+            .pollUsingLockAndFetch(0.5, 1.0)
+            .deleteUnresolvedAfter(Duration.ofHours(1))
+            .build()
+
+    private fun planAsyncJob(db: Database.Connection, definition: ScheduledJobDefinition) {
+        val (job, settings, _) = definition
+        val logMeta = mapOf("jobName" to job.name)
+        logger.info(logMeta) { "Planning scheduled job ${job.name}" }
+        val payload = AsyncJob.RunScheduledJob(job.name)
+        db.transaction { tx ->
+            asyncJobRunner.plan(
+                tx,
+                listOf(payload),
+                retryCount = settings.retryCount ?: ASYNC_JOB_RETRY_COUNT,
+                runAt = HelsinkiDateTime.now(),
+            )
+        }
+    }
+
+    private fun runJob(db: Database.Connection, clock: AppClock, msg: AsyncJob.RunScheduledJob) {
+        val jobName = msg.job
+        val spanNamePrefix = "scheduledjob"
+        val definition =
+            schedules.firstNotNullOfOrNull { schedule ->
+                schedule.jobs.find { it.job.name == jobName }
+            } ?: error("Can't run unknown job $jobName")
+        val logMeta = mapOf("jobName" to jobName)
+        logger.info(logMeta) { "Running $spanNamePrefix job $jobName" }
+        tracer.withDetachedSpan("$spanNamePrefix $jobName") { definition.jobFn(db, clock) }
+    }
+
+    fun getScheduledExecutionsForTask(job: Enum<*>): List<ScheduledExecution<Unit>> =
+        scheduler.getScheduledExecutionsForTask(job.name, Unit::class.java)
+
+    override fun close() = scheduler.stop()
+}

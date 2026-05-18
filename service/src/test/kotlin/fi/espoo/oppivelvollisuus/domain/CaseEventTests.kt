@@ -2,11 +2,9 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.domain.AppController
-import fi.espoo.oppivelvollisuus.domain.CaseEventInput
-import fi.espoo.oppivelvollisuus.domain.CaseEventType
+import fi.espoo.oppivelvollisuus.FullApplicationTestOld
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -16,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import testUser
 import testUserName
 
-class CaseEvenTests : FullApplicationTest() {
+class CaseEventTests : FullApplicationTestOld() {
     @Autowired lateinit var controller: AppController
 
     @Test

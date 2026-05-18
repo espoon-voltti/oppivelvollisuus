@@ -2,30 +2,12 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-package fi.espoo.oppivelvollisuus
+package fi.espoo.oppivelvollisuus.domain
 
+import fi.espoo.oppivelvollisuus.FullApplicationTestOld
 import fi.espoo.oppivelvollisuus.common.BadRequest
 import fi.espoo.oppivelvollisuus.common.UserBasics
 import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
-import fi.espoo.oppivelvollisuus.domain.AppController
-import fi.espoo.oppivelvollisuus.domain.CaseBackgroundReason
-import fi.espoo.oppivelvollisuus.domain.CaseEventInput
-import fi.espoo.oppivelvollisuus.domain.CaseEventType
-import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
-import fi.espoo.oppivelvollisuus.domain.CaseSource
-import fi.espoo.oppivelvollisuus.domain.CaseStatus
-import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
-import fi.espoo.oppivelvollisuus.domain.FinishedInfo
-import fi.espoo.oppivelvollisuus.domain.FollowUpMeasure
-import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
-import fi.espoo.oppivelvollisuus.domain.OtherNotifier
-import fi.espoo.oppivelvollisuus.domain.SchoolBackground
-import fi.espoo.oppivelvollisuus.domain.SchoolType
-import fi.espoo.oppivelvollisuus.domain.StudentCase
-import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
-import fi.espoo.oppivelvollisuus.domain.StudentSearchParams
-import fi.espoo.oppivelvollisuus.domain.StudentSummary
-import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -39,7 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import testUser
 import testUserName
 
-class StudentCaseTests : FullApplicationTest() {
+class StudentCaseTests : FullApplicationTestOld() {
     @Autowired lateinit var controller: AppController
 
     @Test
