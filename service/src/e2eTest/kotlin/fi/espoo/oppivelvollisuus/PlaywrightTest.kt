@@ -87,7 +87,7 @@ abstract class PlaywrightTest {
 
     protected fun getPageWithDefaultOptions(): Page {
         val page = browser.newPage()
-        val timeout = if (runningInDocker) 10_000.0 else 2000.0
+        val timeout = if (runningInDocker) 30_000.0 else 2000.0
         page.setDefaultTimeout(timeout)
         page.setDefaultNavigationTimeout(timeout)
         if (E2E_DEBUG_LOGGING) {

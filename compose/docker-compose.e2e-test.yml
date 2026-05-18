@@ -53,5 +53,7 @@ services:
       APP_DATABASE_PASSWORD: postgres
       E2E_ENV: docker
     entrypoint: ./e2e-test-entrypoint.sh
+    volumes:
+      - ./screenshots:/app/screenshots
     depends_on:
       - oppivelvollisuus-db
