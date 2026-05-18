@@ -4,16 +4,16 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.shared.NotFound
-import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.CaseEventId
+import fi.espoo.oppivelvollisuus.EspooUserId
+import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.db.DatabaseEnum
+import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import java.time.LocalDate
 import java.time.ZonedDateTime
-import java.util.UUID
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
-import org.jdbi.v3.core.kotlin.mapTo
 
-enum class CaseEventType {
+enum class CaseEventType : DatabaseEnum {
     NOTE,
     TEXT_MESSAGE,
     EMAIL,
@@ -30,33 +30,34 @@ enum class CaseEventType {
     HEARING,
     DIRECTED_TO_YLEISOPPILAITOKSEN_TUVA,
     DIRECTED_TO_ERITYISOPPILAITOKSEN_TUVA,
-    DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA,
+    DIRECTED_TO_ERITYISOPPILAITOKSEN_TELMA;
+
+    override val sqlType: String = "case_event_type"
 }
 
 data class CaseEventInput(val date: LocalDate, val type: CaseEventType, val notes: String)
 
-fun Handle.insertCaseEvent(
-    studentCaseId: UUID,
+fun Database.Transaction.insertCaseEvent(
+    studentCaseId: StudentCaseId,
     data: CaseEventInput,
-    user: AuthenticatedUser,
-): UUID =
-    createUpdate(
-            """
-                INSERT INTO case_events (created_by, student_case_id, date, type, notes) 
-                VALUES (:user, :studentCaseId, :date, :type, :notes)
+    createdBy: EspooUserId,
+    now: HelsinkiDateTime,
+): CaseEventId =
+    createUpdate {
+            sql(
+                """
+                INSERT INTO case_events (created, created_by, student_case_id, date, type, notes)
+                VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(studentCaseId)}, ${bind(data.date)}, ${bind(data.type)}, ${bind(data.notes)})
                 RETURNING id
-            """
-        )
-        .bind("studentCaseId", studentCaseId)
-        .bindKotlin(data)
-        .bind("user", user.rawId())
+                """
+            )
+        }
         .executeAndReturnGeneratedKeys()
-        .mapTo<UUID>()
-        .one()
+        .exactlyOne<CaseEventId>()
 
 data class CaseEvent(
-    val id: UUID,
-    val studentCaseId: UUID,
+    val id: CaseEventId,
+    val studentCaseId: StudentCaseId,
     val date: LocalDate,
     val type: CaseEventType,
     val notes: String,
@@ -66,33 +67,29 @@ data class CaseEvent(
 
 data class ModifyInfo(val name: String, val time: ZonedDateTime)
 
-fun Handle.updateCaseEvent(id: UUID, data: CaseEventInput, user: AuthenticatedUser) {
-    createUpdate(
-            """
-UPDATE case_events
-SET 
-    updated = now(),
-    updated_by = :user,
-    date = :date,
-    type = :type,
-    notes = :notes
-WHERE id = :id
-"""
-        )
-        .bind("id", id)
-        .bindKotlin(data)
-        .bind("user", user.rawId())
-        .execute()
-        .also { if (it != 1) throw NotFound() }
+fun Database.Transaction.updateCaseEvent(
+    id: CaseEventId,
+    data: CaseEventInput,
+    updatedBy: EspooUserId,
+    now: HelsinkiDateTime,
+) {
+    createUpdate {
+            sql(
+                """
+                UPDATE case_events
+                SET
+                    updated = ${bind(now)},
+                    updated_by = ${bind(updatedBy)},
+                    date = ${bind(data.date)},
+                    type = ${bind(data.type)},
+                    notes = ${bind(data.notes)}
+                WHERE id = ${bind(id)}
+                """
+            )
+        }
+        .updateExactlyOne()
 }
 
-fun Handle.deleteCaseEvent(id: UUID) {
-    createUpdate(
-            """
-DELETE FROM case_events
-WHERE id = :id
-"""
-        )
-        .bind("id", id)
-        .execute()
+fun Database.Transaction.deleteCaseEvent(id: CaseEventId) {
+    createUpdate { sql("DELETE FROM case_events WHERE id = ${bind(id)}") }.execute()
 }

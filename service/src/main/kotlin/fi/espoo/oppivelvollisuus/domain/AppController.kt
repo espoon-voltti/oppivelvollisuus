@@ -5,15 +5,16 @@
 package fi.espoo.oppivelvollisuus.domain
 
 import fi.espoo.oppivelvollisuus.AppUser
+import fi.espoo.oppivelvollisuus.CaseEventId
+import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.getActiveAppUsers
 import fi.espoo.oppivelvollisuus.shared.Audit
 import fi.espoo.oppivelvollisuus.shared.AuditId
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.time.AppClock
 import java.time.LocalDate
-import java.util.UUID
-import org.jdbi.v3.core.Jdbi
-import org.jdbi.v3.core.kotlin.inTransactionUnchecked
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -27,85 +28,115 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/espoo-user")
 class AppController {
-    @Autowired lateinit var jdbi: Jdbi
-
     data class StudentAndCaseInput(val student: StudentInput, val studentCase: StudentCaseInput)
 
     @PostMapping("/students")
     fun createStudent(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
+        clock: AppClock,
         @RequestBody body: StudentAndCaseInput,
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                val studentId = tx.insertStudent(data = body.student, user = user)
-                tx.insertStudentCase(studentId = studentId, data = body.studentCase, user = user)
-
-                studentId
+    ): StudentId =
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    val now = clock.now()
+                    val studentId =
+                        tx.insertStudent(data = body.student, createdBy = user.id, now = now)
+                    tx.insertStudentCase(
+                        studentId = studentId,
+                        data = body.studentCase,
+                        createdBy = user.id,
+                        now = now,
+                    )
+                    studentId
+                }
             }
             .also { Audit.CreateStudent.log(targetId = AuditId(it)) }
 
     @PostMapping("/students/duplicates")
     fun getDuplicateStudents(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
         @RequestBody body: DuplicateStudentCheckInput,
     ): List<DuplicateStudent> =
-        jdbi
-            .inTransactionUnchecked { tx -> tx.getPossibleDuplicateStudents(body) }
+        db.connect { dbc -> dbc.read { tx -> tx.getPossibleDuplicateStudents(body) } }
             .also { Audit.GetDuplicateStudents.log() }
 
     @PostMapping("/students/search")
     fun getStudents(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
         @RequestBody body: StudentSearchParams,
     ): List<StudentSummary> =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.getStudentSummaries(
-                    params = body.copy(query = body.query.takeIf { !it.isNullOrBlank() })
-                )
+        db.connect { dbc ->
+                dbc.read { tx ->
+                    tx.getStudentSummaries(
+                        params = body.copy(query = body.query.takeIf { !it.isNullOrBlank() })
+                    )
+                }
             }
             .also { Audit.SearchStudents.log() }
 
     data class StudentResponse(val student: Student, val cases: List<StudentCase>)
 
     @GetMapping("/students/{id}")
-    fun getStudent(user: AuthenticatedUser.EspooUser, @PathVariable id: UUID): StudentResponse =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                val studentDetails = tx.getStudent(id = id)
-                val cases = tx.getStudentCasesByStudent(studentId = id)
-                StudentResponse(studentDetails, cases)
+    fun getStudent(
+        db: Database,
+        user: AuthenticatedUser.EspooUser,
+        @PathVariable id: StudentId,
+    ): StudentResponse =
+        db.connect { dbc ->
+                dbc.read { tx ->
+                    val studentDetails = tx.getStudent(id = id)
+                    val cases = tx.getStudentCasesByStudent(studentId = id)
+                    StudentResponse(studentDetails, cases)
+                }
             }
             .also { Audit.GetStudent.log(targetId = AuditId(id)) }
 
     @PutMapping("/students/{id}")
     fun updateStudent(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable id: UUID,
+        clock: AppClock,
+        @PathVariable id: StudentId,
         @RequestBody body: StudentInput,
     ) {
-        jdbi
-            .inTransactionUnchecked { tx -> tx.updateStudent(id = id, data = body, user = user) }
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.updateStudent(id = id, data = body, updatedBy = user.id, now = clock.now())
+                }
+            }
             .also { Audit.UpdateStudent.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/students/{id}")
-    fun deleteStudent(user: AuthenticatedUser.EspooUser, @PathVariable id: UUID) {
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteStudent(id = id) }
+    fun deleteStudent(
+        db: Database,
+        user: AuthenticatedUser.EspooUser,
+        @PathVariable id: StudentId,
+    ) {
+        db.connect { dbc -> dbc.transaction { tx -> tx.deleteStudent(id = id) } }
             .also { Audit.DeleteStudent.log(targetId = AuditId(id)) }
     }
 
     @PostMapping("/students/{studentId}/cases")
     fun createStudentCase(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable studentId: UUID,
+        clock: AppClock,
+        @PathVariable studentId: StudentId,
         @RequestBody body: StudentCaseInput,
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertStudentCase(studentId = studentId, data = body, user = user)
+    ): StudentCaseId =
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.insertStudentCase(
+                        studentId = studentId,
+                        data = body,
+                        createdBy = user.id,
+                        now = clock.now(),
+                    )
+                }
             }
             .also {
                 Audit.CreateStudentCase.log(targetId = AuditId(studentId), objectId = AuditId(it))
@@ -113,14 +144,23 @@ class AppController {
 
     @PutMapping("/students/{studentId}/cases/{id}")
     fun updateStudentCase(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID,
+        clock: AppClock,
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
         @RequestBody body: StudentCaseInput,
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateStudentCase(id = id, studentId = studentId, data = body, user = user)
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.updateStudentCase(
+                        id = id,
+                        studentId = studentId,
+                        data = body,
+                        updatedBy = user.id,
+                        now = clock.now(),
+                    )
+                }
             }
             .also {
                 Audit.UpdateStudentCase.log(targetId = AuditId(studentId), objectId = AuditId(id))
@@ -129,12 +169,14 @@ class AppController {
 
     @DeleteMapping("/students/{studentId}/cases/{id}")
     fun deleteStudentCase(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID,
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
     ) {
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteStudentCase(id = id, studentId = studentId) }
+        db.connect { dbc ->
+                dbc.transaction { tx -> tx.deleteStudentCase(id = id, studentId = studentId) }
+            }
             .also {
                 Audit.DeleteStudentCase.log(targetId = AuditId(studentId), objectId = AuditId(id))
             }
@@ -142,14 +184,23 @@ class AppController {
 
     @PutMapping("/students/{studentId}/cases/{id}/status")
     fun updateStudentCaseStatus(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable studentId: UUID,
-        @PathVariable id: UUID,
+        clock: AppClock,
+        @PathVariable studentId: StudentId,
+        @PathVariable id: StudentCaseId,
         @RequestBody body: CaseStatusInput,
     ) {
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.updateStudentCaseStatus(id = id, studentId = studentId, data = body, user = user)
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.updateStudentCaseStatus(
+                        id = id,
+                        studentId = studentId,
+                        data = body,
+                        updatedBy = user.id,
+                        now = clock.now(),
+                    )
+                }
             }
             .also {
                 Audit.UpdateStudentCaseStatus.log(
@@ -161,13 +212,21 @@ class AppController {
 
     @PostMapping("/student-cases/{studentCaseId}/case-events")
     fun createCaseEvent(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable studentCaseId: UUID,
+        clock: AppClock,
+        @PathVariable studentCaseId: StudentCaseId,
         @RequestBody body: CaseEventInput,
-    ): UUID =
-        jdbi
-            .inTransactionUnchecked { tx ->
-                tx.insertCaseEvent(studentCaseId = studentCaseId, data = body, user = user)
+    ): CaseEventId =
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.insertCaseEvent(
+                        studentCaseId = studentCaseId,
+                        data = body,
+                        createdBy = user.id,
+                        now = clock.now(),
+                    )
+                }
             }
             .also {
                 Audit.CreateCaseEvent.log(targetId = AuditId(studentCaseId), objectId = AuditId(it))
@@ -175,39 +234,51 @@ class AppController {
 
     @PutMapping("/case-events/{id}")
     fun updateCaseEvent(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
-        @PathVariable id: UUID,
+        clock: AppClock,
+        @PathVariable id: CaseEventId,
         @RequestBody body: CaseEventInput,
     ) {
-        jdbi
-            .inTransactionUnchecked { tx -> tx.updateCaseEvent(id = id, data = body, user = user) }
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.updateCaseEvent(id = id, data = body, updatedBy = user.id, now = clock.now())
+                }
+            }
             .also { Audit.UpdateCaseEvent.log(targetId = AuditId(id)) }
     }
 
     @DeleteMapping("/case-events/{id}")
-    fun deleteCaseEvent(user: AuthenticatedUser.EspooUser, @PathVariable id: UUID) {
-        jdbi
-            .inTransactionUnchecked { tx -> tx.deleteCaseEvent(id = id) }
+    fun deleteCaseEvent(
+        db: Database,
+        user: AuthenticatedUser.EspooUser,
+        @PathVariable id: CaseEventId,
+    ) {
+        db.connect { dbc -> dbc.transaction { tx -> tx.deleteCaseEvent(id = id) } }
             .also { Audit.DeleteCaseEvent.log(targetId = AuditId(id)) }
     }
 
     @GetMapping("/employees")
-    fun getEmployeeUsers(user: AuthenticatedUser.EspooUser): List<AppUser> =
-        jdbi.inTransactionUnchecked { it.getActiveAppUsers() }.also { Audit.GetEmployees.log() }
+    fun getEmployeeUsers(db: Database, user: AuthenticatedUser.EspooUser): List<AppUser> =
+        db.connect { dbc -> dbc.read { it.getActiveAppUsers() } }.also { Audit.GetEmployees.log() }
 
     @GetMapping("/reports/student-cases")
     fun getCasesReport(
+        db: Database,
         user: AuthenticatedUser.EspooUser,
         @RequestParam(required = false) start: LocalDate?,
         @RequestParam(required = false) end: LocalDate?,
     ): List<CaseReportRow> =
-        jdbi
-            .inTransactionUnchecked { it.getCasesReport(CaseReportRequest(start, end)) }
+        db.connect { dbc -> dbc.read { it.getCasesReport(CaseReportRequest(start, end)) } }
             .also { Audit.GetCasesReport.log() }
 
     @DeleteMapping("/old-students")
-    fun deleteOldStudents(user: AuthenticatedUser.EspooUser) =
-        jdbi
-            .inTransactionUnchecked { it.deleteOldStudents() }
+    fun deleteOldStudents(db: Database, user: AuthenticatedUser.EspooUser, clock: AppClock) {
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    tx.deleteOldStudents(thresholdDate = clock.today().minusYears(21))
+                }
+            }
             .also { Audit.DeleteOldStudents.log() }
+    }
 }

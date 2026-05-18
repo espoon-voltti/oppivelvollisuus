@@ -35,14 +35,16 @@ class StudentTests : FullApplicationTestOld() {
 
     @Test
     fun `get empty list of students`() {
-        assertEquals(emptyList(), controller.getStudents(testUser, emptySearch))
+        assertEquals(emptyList(), controller.getStudents(dbInstance(), testUser, emptySearch))
     }
 
     @Test
     fun `create student with all data and fetch`() {
         val studentId =
             controller.createStudent(
+                db = dbInstance(),
                 user = testUser,
+                clock = mockClock,
                 body =
                     AppController.StudentAndCaseInput(
                         student =
@@ -69,7 +71,7 @@ class StudentTests : FullApplicationTestOld() {
                         studentCase =
                             StudentCaseInput(
                                 openedAt = LocalDate.of(2023, 12, 7),
-                                assignedTo = testUser.id.raw,
+                                assignedTo = testUser.id,
                                 source = CaseSource.VALPAS_NOTICE,
                                 sourceValpas = ValpasNotifier.PERUSOPETUS,
                                 sourceOther = null,
@@ -81,25 +83,27 @@ class StudentTests : FullApplicationTestOld() {
                             ),
                     ),
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
         controller.createCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             caseId,
             CaseEventInput(
                 date = LocalDate.of(2023, 12, 7),
                 type = CaseEventType.HEARING_LETTER,
                 notes =
                     """
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
-                    sem, mattis et scelerisque quis, convallis vulputate dui. Ut eget arcu nec 
-                    mi maximus porta. Donec id ex eget urna cursus vehicula congue id quam. 
-                    Etiam id diam velit. Morbi pellentesque, tortor nec fermentum hendrerit, 
-                    neque purus imperdiet tortor, sed dapibus nibh tellus sit amet tortor. 
-                    Integer at faucibus neque. Donec pellentesque, turpis vitae commodo tempor, 
-                    est ipsum elementum nunc, in pretium augue turpis non nulla. Sed pulvinar 
-                    mollis scelerisque. Aenean tincidunt metus ut velit facilisis, in consequat 
-                    ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros. 
-                    Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id 
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis
+                    sem, mattis et scelerisque quis, convallis vulputate dui. Ut eget arcu nec
+                    mi maximus porta. Donec id ex eget urna cursus vehicula congue id quam.
+                    Etiam id diam velit. Morbi pellentesque, tortor nec fermentum hendrerit,
+                    neque purus imperdiet tortor, sed dapibus nibh tellus sit amet tortor.
+                    Integer at faucibus neque. Donec pellentesque, turpis vitae commodo tempor,
+                    est ipsum elementum nunc, in pretium augue turpis non nulla. Sed pulvinar
+                    mollis scelerisque. Aenean tincidunt metus ut velit facilisis, in consequat
+                    ex laoreet. In magna tellus, accumsan at nisl id, fermentum vehicula eros.
+                    Aliquam at gravida felis, in auctor risus. Ut porttitor dignissim arcu id
                     semper. Interdum et malesuada fames ac ante ipsum primis in faucibus.
                     """
                         .trimIndent(),
@@ -114,7 +118,7 @@ class StudentTests : FullApplicationTestOld() {
                         firstName = "Testi",
                         lastName = "Testilä",
                         openedAt = LocalDate.of(2023, 12, 7),
-                        assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
+                        assignedTo = UserBasics(id = testUser.id, name = testUserName),
                         status = CaseStatus.TODO,
                         source = CaseSource.VALPAS_NOTICE,
                         lastEvent =
@@ -123,17 +127,17 @@ class StudentTests : FullApplicationTestOld() {
                                 type = CaseEventType.HEARING_LETTER,
                                 notes =
                                     """
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis 
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus turpis
                                     sem, mattis et...
                                     """
                                         .trimIndent(),
                             ),
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch),
+            actual = controller.getStudents(dbInstance(), testUser, emptySearch),
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -162,7 +166,7 @@ class StudentTests : FullApplicationTestOld() {
                     id = studentCase.id,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.VALPAS_NOTICE,
@@ -184,7 +188,9 @@ class StudentTests : FullApplicationTestOld() {
     fun `create student with minimal data and fetch`() {
         val studentId =
             controller.createStudent(
+                db = dbInstance(),
                 user = testUser,
+                clock = mockClock,
                 body =
                     AppController.StudentAndCaseInput(
                         student =
@@ -231,10 +237,10 @@ class StudentTests : FullApplicationTestOld() {
                         lastEvent = null,
                     )
                 ),
-            actual = controller.getStudents(testUser, emptySearch),
+            actual = controller.getStudents(dbInstance(), testUser, emptySearch),
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -280,34 +286,43 @@ class StudentTests : FullApplicationTestOld() {
 
     @Test
     fun `update student data`() {
-        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
+        val studentId =
+            controller.createStudent(
+                dbInstance(),
+                testUser,
+                mockClock,
+                minimalStudentAndCaseTestInput,
+            )
 
         controller.updateStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             id = studentId,
-            StudentInput(
-                valpasLink = "valpas",
-                ssn = "170108A927R",
-                firstName = "Teppo",
-                lastName = "Testaajainen",
-                language = "ruotsi",
-                dateOfBirth = LocalDate.of(2008, 1, 17),
-                phone = "1234567",
-                email = "a@a.com",
-                gender = Gender.MALE,
-                address = "Katu 1",
-                municipalityInFinland = false,
-                guardianInfo = "Huoltaja",
-                supportContactsInfo = "Opo",
-                partnerOrganisations =
-                    setOf(
-                        PartnerOrganisation.TUKIHENKILO,
-                        PartnerOrganisation.MIELENTERVEYSPALVELUT,
-                    ),
-            ),
+            body =
+                StudentInput(
+                    valpasLink = "valpas",
+                    ssn = "170108A927R",
+                    firstName = "Teppo",
+                    lastName = "Testaajainen",
+                    language = "ruotsi",
+                    dateOfBirth = LocalDate.of(2008, 1, 17),
+                    phone = "1234567",
+                    email = "a@a.com",
+                    gender = Gender.MALE,
+                    address = "Katu 1",
+                    municipalityInFinland = false,
+                    guardianInfo = "Huoltaja",
+                    supportContactsInfo = "Opo",
+                    partnerOrganisations =
+                        setOf(
+                            PartnerOrganisation.TUKIHENKILO,
+                            PartnerOrganisation.MIELENTERVEYSPALVELUT,
+                        ),
+                ),
         )
 
-        val studentResponse = controller.getStudent(testUser, studentId)
+        val studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
         assertEquals(
             Student(
                 id = studentId,
@@ -333,7 +348,9 @@ class StudentTests : FullApplicationTestOld() {
     @Test
     fun `creating two people with same is ok`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
@@ -341,7 +358,9 @@ class StudentTests : FullApplicationTestOld() {
                 ),
         )
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput,
@@ -349,13 +368,15 @@ class StudentTests : FullApplicationTestOld() {
                 ),
         )
 
-        assertEquals(2, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(2, controller.getStudents(dbInstance(), testUser, emptySearch).size)
     }
 
     @Test
     fun `creating two people with same ssn fails`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput.copy(ssn = "170108A927R"),
@@ -365,7 +386,9 @@ class StudentTests : FullApplicationTestOld() {
         val e =
             assertThrows<UnableToExecuteStatementException> {
                 controller.createStudent(
+                    db = dbInstance(),
                     user = testUser,
+                    clock = mockClock,
                     body =
                         AppController.StudentAndCaseInput(
                             student = minimalStudentTestInput.copy(ssn = "170108A927R"),
@@ -375,13 +398,15 @@ class StudentTests : FullApplicationTestOld() {
             }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(1, controller.getStudents(dbInstance(), testUser, emptySearch).size)
     }
 
     @Test
     fun `creating two people with same valpas link fails`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput.copy(valpasLink = "http://valpas.fi/123"),
@@ -391,7 +416,9 @@ class StudentTests : FullApplicationTestOld() {
         val e =
             assertThrows<UnableToExecuteStatementException> {
                 controller.createStudent(
+                    db = dbInstance(),
                     user = testUser,
+                    clock = mockClock,
                     body =
                         AppController.StudentAndCaseInput(
                             student =
@@ -402,13 +429,15 @@ class StudentTests : FullApplicationTestOld() {
             }
         assertTrue(e.isUniqueConstraintViolation())
 
-        assertEquals(1, controller.getStudents(testUser, emptySearch).size)
+        assertEquals(1, controller.getStudents(dbInstance(), testUser, emptySearch).size)
     }
 
     @Test
     fun `duplicate ssn is detected`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput.copy(ssn = "170108A927R"),
@@ -417,6 +446,7 @@ class StudentTests : FullApplicationTestOld() {
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
+                dbInstance(),
                 testUser,
                 DuplicateStudentCheckInput(
                     ssn = "170108A927R",
@@ -436,7 +466,9 @@ class StudentTests : FullApplicationTestOld() {
     @Test
     fun `duplicate valpasLink is detected`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput.copy(valpasLink = "https://valpas.fi/123"),
@@ -445,6 +477,7 @@ class StudentTests : FullApplicationTestOld() {
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
+                dbInstance(),
                 testUser,
                 DuplicateStudentCheckInput(
                     ssn = "",
@@ -464,7 +497,9 @@ class StudentTests : FullApplicationTestOld() {
     @Test
     fun `duplicate name is detected`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student = minimalStudentTestInput.copy(firstName = "Tupu", lastName = "Ankka"),
@@ -473,6 +508,7 @@ class StudentTests : FullApplicationTestOld() {
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
+                dbInstance(),
                 testUser,
                 DuplicateStudentCheckInput(
                     ssn = "",
@@ -492,7 +528,9 @@ class StudentTests : FullApplicationTestOld() {
     @Test
     fun `duplicate name is ignored if both students have ssn`() {
         controller.createStudent(
+            db = dbInstance(),
             user = testUser,
+            clock = mockClock,
             body =
                 AppController.StudentAndCaseInput(
                     student =
@@ -506,6 +544,7 @@ class StudentTests : FullApplicationTestOld() {
         )
         val duplicateStudents =
             controller.getDuplicateStudents(
+                dbInstance(),
                 testUser,
                 DuplicateStudentCheckInput(
                     ssn = "100507A967F",
@@ -520,63 +559,79 @@ class StudentTests : FullApplicationTestOld() {
     @Test
     fun `deleting student fails when it has cases`() {
         val studentId =
-            controller.createStudent(user = testUser, body = minimalStudentAndCaseTestInput)
+            controller.createStudent(
+                db = dbInstance(),
+                user = testUser,
+                clock = mockClock,
+                body = minimalStudentAndCaseTestInput,
+            )
         assertThrows<UnableToExecuteStatementException> {
-            controller.deleteStudent(testUser, studentId)
+            controller.deleteStudent(dbInstance(), testUser, studentId)
         }
     }
 
     @Test
     fun `deleting student after deleting its cases`() {
         val studentId =
-            controller.createStudent(user = testUser, body = minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
-        controller.deleteStudentCase(testUser, studentId, caseId)
+            controller.createStudent(
+                db = dbInstance(),
+                user = testUser,
+                clock = mockClock,
+                body = minimalStudentAndCaseTestInput,
+            )
+        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        controller.deleteStudentCase(dbInstance(), testUser, studentId, caseId)
 
-        controller.deleteStudent(testUser, studentId)
+        controller.deleteStudent(dbInstance(), testUser, studentId)
 
-        assertEquals(0, controller.getStudents(testUser, emptySearch).size)
-        assertThrows<NotFound> { controller.getStudent(testUser, studentId) }
+        assertEquals(0, controller.getStudents(dbInstance(), testUser, emptySearch).size)
+        assertThrows<NotFound> { controller.getStudent(dbInstance(), testUser, studentId) }
     }
 
     @Test
     fun `deleting old students`() {
         val studentId1 =
             controller.createStudent(
+                db = dbInstance(),
                 user = testUser,
+                clock = mockClock,
                 body =
                     AppController.StudentAndCaseInput(
                         student =
                             minimalStudentTestInput.copy(
-                                dateOfBirth = LocalDate.now().minusYears(21).minusDays(1)
+                                dateOfBirth = mockClock.today().minusYears(21).minusDays(1)
                             ),
                         studentCase = minimalStudentCaseTestInput,
                     ),
             )
         val studentId2 =
             controller.createStudent(
+                db = dbInstance(),
                 user = testUser,
+                clock = mockClock,
                 body =
                     AppController.StudentAndCaseInput(
                         student =
                             minimalStudentTestInput.copy(
-                                dateOfBirth = LocalDate.now().minusYears(21).plusDays(1)
+                                dateOfBirth = mockClock.today().minusYears(21).plusDays(1)
                             ),
                         studentCase = minimalStudentCaseTestInput,
                     ),
             )
-        val caseId = controller.getStudent(testUser, studentId1).cases.first().id
+        val caseId = controller.getStudent(dbInstance(), testUser, studentId1).cases.first().id
         controller.createCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             caseId,
-            CaseEventInput(LocalDate.now(), CaseEventType.NOTE, "foo"),
+            CaseEventInput(mockClock.today(), CaseEventType.NOTE, "foo"),
         )
 
-        controller.deleteOldStudents(testUser)
+        controller.deleteOldStudents(dbInstance(), testUser, mockClock)
 
-        val students = controller.getStudents(testUser, emptySearch)
+        val students = controller.getStudents(dbInstance(), testUser, emptySearch)
         assertEquals(1, students.size)
         assertEquals(studentId2, students.first().id)
-        assertThrows<NotFound> { controller.getStudent(testUser, studentId1) }
+        assertThrows<NotFound> { controller.getStudent(dbInstance(), testUser, studentId1) }
     }
 }

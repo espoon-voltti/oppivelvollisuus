@@ -5,11 +5,8 @@
 package fi.espoo.oppivelvollisuus
 
 import fi.espoo.oppivelvollisuus.shared.auth.AdUser
-import java.util.UUID
-import kotlin.jvm.optionals.getOrNull
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.bindKotlin
-import org.jdbi.v3.core.kotlin.mapTo
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import org.jdbi.v3.core.mapper.PropagateNull
 
 data class AppUser(
@@ -21,46 +18,42 @@ data class AppUser(
     val isActive: Boolean,
 )
 
-data class UserBasics(@param:PropagateNull val id: UUID, val name: String)
+data class UserBasics(@param:PropagateNull val id: EspooUserId, val name: String)
 
-fun Handle.upsertAppUserFromAd(adUser: AdUser): AppUser =
-    createQuery(
-            // language=SQL
-            """
-            INSERT INTO users (external_id, first_names, last_name, email, is_active)
-            VALUES (:externalId, :firstName, :lastName, :email, true)
-            ON CONFLICT (external_id) DO UPDATE
-            SET updated = now(), first_names = :firstName, last_name = :lastName, email = :email
-            RETURNING id, external_id, first_name, last_name, email, is_active
-            """
-                .trimIndent()
-        )
-        .bindKotlin(adUser)
-        .mapTo<AppUser>()
-        .one()
+fun Database.Transaction.upsertAppUserFromAd(adUser: AdUser, now: HelsinkiDateTime): AppUser =
+    createQuery {
+            sql(
+                """
+                INSERT INTO users (external_id, first_names, last_name, email, is_active, created)
+                VALUES (${bind(adUser.externalId)}, ${bind(adUser.firstName)}, ${bind(adUser.lastName)}, ${bind(adUser.email)}, true, ${bind(now)})
+                ON CONFLICT (external_id) DO UPDATE
+                SET updated = ${bind(now)}, first_names = ${bind(adUser.firstName)}, last_name = ${bind(adUser.lastName)}, email = ${bind(adUser.email)}
+                RETURNING id, external_id, first_name, last_name, email, is_active
+                """
+            )
+        }
+        .exactlyOne<AppUser>()
 
-fun Handle.getActiveAppUsers(): List<AppUser> =
-    createQuery(
-            """
-    SELECT id, external_id, first_name, last_name, email, is_active
-    FROM users
-    WHERE NOT is_system_user AND is_active
-"""
-        )
-        .mapTo<AppUser>()
-        .list()
+fun Database.Read.getActiveAppUsers(): List<AppUser> =
+    createQuery {
+            sql(
+                """
+                SELECT id, external_id, first_name, last_name, email, is_active
+                FROM users
+                WHERE NOT is_system_user AND is_active
+                """
+            )
+        }
+        .toList<AppUser>()
 
-fun Handle.getAppUser(id: UUID) =
-    createQuery(
-            // language=SQL
-            """
-            SELECT id, external_id, first_name, last_name, email, is_active
-            FROM users
-            WHERE id = :id AND NOT is_system_user
-            """
-                .trimIndent()
-        )
-        .bind("id", id)
-        .mapTo<AppUser>()
-        .findOne()
-        .getOrNull()
+fun Database.Read.getAppUser(id: EspooUserId): AppUser? =
+    createQuery {
+            sql(
+                """
+                SELECT id, external_id, first_name, last_name, email, is_active
+                FROM users
+                WHERE id = ${bind(id)} AND NOT is_system_user
+                """
+            )
+        }
+        .exactlyOneOrNull<AppUser>()

@@ -4,6 +4,9 @@
 
 package fi.espoo.oppivelvollisuus
 
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.noopTracer
+import fi.espoo.oppivelvollisuus.shared.time.MockAppClock
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.withHandleUnchecked
 import org.junit.jupiter.api.BeforeAll
@@ -19,6 +22,10 @@ import testUser
 @Import(SharedIntegrationTestConfig::class)
 abstract class FullApplicationTestOld {
     @Autowired protected lateinit var jdbi: Jdbi
+
+    protected val mockClock = MockAppClock(2026, 1, 1, 12, 0, 0)
+
+    protected fun dbInstance(): Database = Database(jdbi, noopTracer())
 
     @BeforeAll
     fun beforeAll() {
@@ -36,16 +43,16 @@ abstract class FullApplicationTestOld {
                   WHERE table_schema = 'public'
                   AND table_type = 'BASE TABLE'
                   AND table_name <> 'flyway_schema_history';
-                  
+
                   IF truncate_query IS NOT NULL THEN
                     EXECUTE truncate_query;
                   END IF;
-                  
+
                   SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
                   INTO sequence_query
                   FROM information_schema.sequences
                   WHERE sequence_schema = 'public';
-                  
+
                   IF sequence_query IS NOT NULL THEN
                     EXECUTE sequence_query;
                   END IF;
@@ -62,11 +69,12 @@ abstract class FullApplicationTestOld {
             tx.execute("SELECT reset_database()")
             tx.createUpdate(
                     """
-                INSERT INTO users (id, updated, external_id, first_names, last_name, email) 
-                VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
+                INSERT INTO users (id, created, updated, external_id, first_names, last_name, email)
+                VALUES (:id, :now, :now, 'test', 'Teija', 'Testaaja', NULL)
             """
                 )
                 .bind("id", testUser.id.raw)
+                .bind("now", mockClock.now().toZonedDateTime().toOffsetDateTime())
                 .execute()
         }
     }

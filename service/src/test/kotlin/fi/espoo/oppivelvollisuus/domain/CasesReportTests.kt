@@ -18,7 +18,9 @@ class CasesReportTests : FullApplicationTestOld() {
     fun `create new case event, then update it and finally delete it`() {
         val studentId =
             controller.createStudent(
+                db = dbInstance(),
                 user = testUser,
+                clock = mockClock,
                 body =
                     AppController.StudentAndCaseInput(
                         student =
@@ -53,7 +55,7 @@ class CasesReportTests : FullApplicationTestOld() {
                             ),
                     ),
             )
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
 
         assertEquals(
             listOf(
@@ -79,6 +81,7 @@ class CasesReportTests : FullApplicationTestOld() {
                 )
             ),
             controller.getCasesReport(
+                db = dbInstance(),
                 user = testUser,
                 start = LocalDate.of(2022, 1, 1),
                 end = LocalDate.of(2022, 12, 31),
@@ -86,7 +89,9 @@ class CasesReportTests : FullApplicationTestOld() {
         )
 
         controller.createCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             caseId,
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 15),
@@ -95,7 +100,9 @@ class CasesReportTests : FullApplicationTestOld() {
             ),
         )
         controller.createCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             caseId,
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 22),
@@ -104,7 +111,9 @@ class CasesReportTests : FullApplicationTestOld() {
             ),
         )
         controller.createCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             caseId,
             CaseEventInput(
                 date = LocalDate.of(2022, 5, 25),
@@ -113,7 +122,9 @@ class CasesReportTests : FullApplicationTestOld() {
             ),
         )
         controller.updateStudentCaseStatus(
+            dbInstance(),
             testUser,
+            mockClock,
             studentId,
             caseId,
             CaseStatusInput(
@@ -127,15 +138,23 @@ class CasesReportTests : FullApplicationTestOld() {
                     ),
             ),
         )
-        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
-            assertEquals(CaseStatus.FINISHED, row.status)
-            assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
-            assertEquals(SchoolType.LUKIO, row.startedAtSchool)
-            assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
-        }
+        controller
+            .getCasesReport(db = dbInstance(), user = testUser, start = null, end = null)
+            .first()
+            .also { row ->
+                assertEquals(CaseStatus.FINISHED, row.status)
+                assertEquals(CaseFinishedReason.BEGAN_STUDIES, row.finishedReason)
+                assertEquals(SchoolType.LUKIO, row.startedAtSchool)
+                assertEquals(
+                    setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING),
+                    row.eventTypes,
+                )
+            }
 
         controller.updateStudentCaseStatus(
+            dbInstance(),
             testUser,
+            mockClock,
             studentId,
             caseId,
             CaseStatusInput(
@@ -151,14 +170,20 @@ class CasesReportTests : FullApplicationTestOld() {
             ),
         )
 
-        controller.getCasesReport(user = testUser, start = null, end = null).first().also { row ->
-            assertEquals(CaseStatus.FINISHED, row.status)
-            assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
-            assertEquals(
-                setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
-                row.followUpMeasures,
-            )
-            assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
-        }
+        controller
+            .getCasesReport(db = dbInstance(), user = testUser, start = null, end = null)
+            .first()
+            .also { row ->
+                assertEquals(CaseStatus.FINISHED, row.status)
+                assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
+                assertEquals(
+                    setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
+                    row.followUpMeasures,
+                )
+                assertEquals(
+                    setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING),
+                    row.eventTypes,
+                )
+            }
     }
 }

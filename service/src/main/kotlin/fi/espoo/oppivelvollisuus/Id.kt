@@ -14,12 +14,20 @@ import tools.jackson.databind.annotation.JsonDeserialize
 sealed interface DatabaseTable {
     sealed class User : DatabaseTable
 
-    // TODO: Add others
+    sealed class Student : DatabaseTable
+
+    sealed class StudentCase : DatabaseTable
+
+    sealed class CaseEvent : DatabaseTable
 }
 
 typealias EspooUserId = Id<DatabaseTable.User>
 
-// TODO: Add others
+typealias StudentId = Id<DatabaseTable.Student>
+
+typealias StudentCaseId = Id<DatabaseTable.StudentCase>
+
+typealias CaseEventId = Id<DatabaseTable.CaseEvent>
 
 @JsonDeserialize(keyUsing = Id.KeyFromJson::class)
 data class Id<out T : DatabaseTable>(val raw: UUID) : Comparable<Id<*>> {

@@ -19,15 +19,23 @@ class CaseEventTests : FullApplicationTestOld() {
 
     @Test
     fun `create new case event, then update it and finally delete it`() {
-        val studentId = controller.createStudent(testUser, minimalStudentAndCaseTestInput)
-        val caseId = controller.getStudent(testUser, studentId).cases.first().id
+        val studentId =
+            controller.createStudent(
+                dbInstance(),
+                testUser,
+                mockClock,
+                minimalStudentAndCaseTestInput,
+            )
+        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
 
-        var events = controller.getStudent(testUser, studentId).cases.first().events
+        var events = controller.getStudent(dbInstance(), testUser, studentId).cases.first().events
         assertEquals(emptyList(), events)
 
         val eventId =
             controller.createCaseEvent(
+                dbInstance(),
                 testUser,
+                mockClock,
                 caseId,
                 CaseEventInput(
                     date = LocalDate.of(2023, 12, 8),
@@ -36,7 +44,7 @@ class CaseEventTests : FullApplicationTestOld() {
                 ),
             )
 
-        events = controller.getStudent(testUser, studentId).cases.first().events
+        events = controller.getStudent(dbInstance(), testUser, studentId).cases.first().events
         assertEquals(1, events.size)
         events.first().let { event ->
             assertEquals(eventId, event.id)
@@ -48,7 +56,9 @@ class CaseEventTests : FullApplicationTestOld() {
         }
 
         controller.updateCaseEvent(
+            dbInstance(),
             testUser,
+            mockClock,
             eventId,
             CaseEventInput(
                 date = LocalDate.of(2023, 12, 7),
@@ -57,7 +67,7 @@ class CaseEventTests : FullApplicationTestOld() {
             ),
         )
 
-        events = controller.getStudent(testUser, studentId).cases.first().events
+        events = controller.getStudent(dbInstance(), testUser, studentId).cases.first().events
         assertEquals(1, events.size)
         events.first().let { event ->
             assertEquals(eventId, event.id)
@@ -68,9 +78,9 @@ class CaseEventTests : FullApplicationTestOld() {
             assertEquals(testUserName, event.updated?.name)
         }
 
-        controller.deleteCaseEvent(testUser, eventId)
+        controller.deleteCaseEvent(dbInstance(), testUser, eventId)
 
-        events = controller.getStudent(testUser, studentId).cases.first().events
+        events = controller.getStudent(dbInstance(), testUser, studentId).cases.first().events
         assertEquals(0, events.size)
     }
 }
