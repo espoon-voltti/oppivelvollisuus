@@ -4,13 +4,9 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.common.AdUser
-import fi.espoo.oppivelvollisuus.common.AppUser
-import fi.espoo.oppivelvollisuus.common.getAppUser
-import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import fi.espoo.oppivelvollisuus.config.audit
-import io.github.oshai.kotlinlogging.KotlinLogging
+import fi.espoo.oppivelvollisuus.shared.Audit
+import fi.espoo.oppivelvollisuus.shared.AuditId
+import fi.espoo.oppivelvollisuus.shared.auth.AdUser
 import java.util.UUID
 import org.jdbi.v3.core.Jdbi
 import org.jdbi.v3.core.kotlin.inTransactionUnchecked
@@ -31,13 +27,11 @@ import org.springframework.web.bind.annotation.RestController
 class SystemController {
     @Autowired lateinit var jdbi: Jdbi
 
-    private val logger = KotlinLogging.logger {}
-
     @PostMapping("/user-login")
     fun userLogin(@RequestBody adUser: AdUser): AppUser =
         jdbi
             .inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }
-            .also { logger.audit(AuthenticatedUser.EspooUser(it.id), "USER_LOGIN") }
+            .also { Audit.EspooUserLogin.log(targetId = AuditId(it.id)) }
 
     @GetMapping("/users/{id}")
     fun getUser(@PathVariable id: UUID): AppUser? = jdbi.inTransactionUnchecked {

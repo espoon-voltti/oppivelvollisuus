@@ -11,10 +11,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import testUser
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(SharedIntegrationTestConfig::class)
 abstract class FullApplicationTestOld {
     @Autowired protected lateinit var jdbi: Jdbi
 
@@ -64,7 +66,7 @@ abstract class FullApplicationTestOld {
                 VALUES (:id, now(), 'test', 'Teija', 'Testaaja', NULL)
             """
                 )
-                .bind("id", testUser.id)
+                .bind("id", testUser.id.raw)
                 .execute()
         }
     }

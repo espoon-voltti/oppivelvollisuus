@@ -4,10 +4,10 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.BadRequest
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.NotFound
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import java.time.LocalDate
 import java.util.UUID
 import org.jdbi.v3.core.Handle

@@ -49,9 +49,23 @@ enum class Audit(
     private val securityLevel: String = "low",
 ) {
     EspooUserLogin(securityEvent = true, securityLevel = "medium"),
-    EspooUserLoginAttempt(securityEvent = true, securityLevel = "low");
-
-    // TODO: Add others
+    EspooUserLoginAttempt(securityEvent = true, securityLevel = "low"),
+    CreateStudent,
+    GetDuplicateStudents,
+    SearchStudents,
+    GetStudent,
+    UpdateStudent,
+    DeleteStudent,
+    CreateStudentCase,
+    UpdateStudentCase,
+    DeleteStudentCase,
+    UpdateStudentCaseStatus,
+    CreateCaseEvent,
+    UpdateCaseEvent,
+    DeleteCaseEvent,
+    GetEmployees,
+    GetCasesReport,
+    DeleteOldStudents;
 
     private val eventCode = name
 

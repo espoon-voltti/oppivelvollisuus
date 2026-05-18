@@ -7,15 +7,9 @@ spring:
     banner-mode: "off"
   application:
     name: "oppivelvollisuus-service"
-  datasource:
-    driver-class-name: "org.postgresql.Driver"
-    type: "com.zaxxer.hikari.HikariDataSource"
-    hikari:
-      data-source-properties:
-        socketTimeout: 30000
   flyway:
-    enabled: true
-    baseline-on-migrate: true
+    # Flyway is run manually by shared/config/DatabaseConfig
+    enabled: false
   sql:
     init:
       continue-on-error: false

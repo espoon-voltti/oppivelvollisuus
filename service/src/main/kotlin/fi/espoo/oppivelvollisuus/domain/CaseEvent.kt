@@ -4,8 +4,8 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
+import fi.espoo.oppivelvollisuus.shared.NotFound
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import java.time.LocalDate
 import java.time.ZonedDateTime
 import java.util.UUID

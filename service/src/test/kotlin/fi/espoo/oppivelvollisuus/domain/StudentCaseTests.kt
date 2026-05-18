@@ -5,9 +5,9 @@
 package fi.espoo.oppivelvollisuus.domain
 
 import fi.espoo.oppivelvollisuus.FullApplicationTestOld
-import fi.espoo.oppivelvollisuus.common.BadRequest
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -45,7 +45,7 @@ class StudentCaseTests : FullApplicationTestOld() {
                 studentId,
                 StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = testUser.id,
+                    assignedTo = testUser.id.raw,
                     source = CaseSource.OTHER,
                     sourceValpas = null,
                     sourceOther = OtherNotifier.LASTENSUOJELU,
@@ -64,7 +64,7 @@ class StudentCaseTests : FullApplicationTestOld() {
                     id = caseId,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.OTHER,
@@ -143,7 +143,7 @@ class StudentCaseTests : FullApplicationTestOld() {
             caseId,
             StudentCaseInput(
                 openedAt = LocalDate.of(2023, 12, 9),
-                assignedTo = testUser.id,
+                assignedTo = testUser.id.raw,
                 source = CaseSource.VALPAS_NOTICE,
                 sourceValpas = ValpasNotifier.LUKIO,
                 sourceOther = null,
@@ -164,7 +164,7 @@ class StudentCaseTests : FullApplicationTestOld() {
                     id = caseId,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 9),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.VALPAS_NOTICE,

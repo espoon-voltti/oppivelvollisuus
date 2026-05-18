@@ -5,9 +5,9 @@
 package fi.espoo.oppivelvollisuus.domain
 
 import fi.espoo.oppivelvollisuus.FullApplicationTestOld
-import fi.espoo.oppivelvollisuus.common.NotFound
-import fi.espoo.oppivelvollisuus.common.UserBasics
-import fi.espoo.oppivelvollisuus.common.isUniqueConstraintViolation
+import fi.espoo.oppivelvollisuus.UserBasics
+import fi.espoo.oppivelvollisuus.shared.NotFound
+import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
 import java.time.LocalDate
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -69,7 +69,7 @@ class StudentTests : FullApplicationTestOld() {
                         studentCase =
                             StudentCaseInput(
                                 openedAt = LocalDate.of(2023, 12, 7),
-                                assignedTo = testUser.id,
+                                assignedTo = testUser.id.raw,
                                 source = CaseSource.VALPAS_NOTICE,
                                 sourceValpas = ValpasNotifier.PERUSOPETUS,
                                 sourceOther = null,
@@ -114,7 +114,7 @@ class StudentTests : FullApplicationTestOld() {
                         firstName = "Testi",
                         lastName = "Testilä",
                         openedAt = LocalDate.of(2023, 12, 7),
-                        assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                        assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
                         status = CaseStatus.TODO,
                         source = CaseSource.VALPAS_NOTICE,
                         lastEvent =
@@ -162,7 +162,7 @@ class StudentTests : FullApplicationTestOld() {
                     id = studentCase.id,
                     studentId = studentId,
                     openedAt = LocalDate.of(2023, 12, 7),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id.raw, name = testUserName),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.VALPAS_NOTICE,

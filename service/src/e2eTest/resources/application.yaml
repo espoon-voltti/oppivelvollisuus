@@ -3,11 +3,21 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 app:
+  database:
+    url: jdbc:postgresql://localhost:5432/oppivelvollisuus_it
+    username: oppivelvollisuus
+    password: postgres
+    flyway:
+      username: oppivelvollisuus
+      password: postgres
   jwt:
-    public_keys_url: classpath:local-development/jwks.json
+    public_keys_url: classpath:jwks.json
+  async_job_runner:
+    disable_runner: true
 
 spring:
-  datasource:
-    url: "jdbc:postgresql://localhost:5432/oppivelvollisuus_it"
-    username: "oppivelvollisuus"
-    password: "postgres"
+  flyway:
+    # In integration tests, Flyway is run manually and not via Spring Boot
+    enabled: false
+  main:
+    allow-bean-definition-overriding: true

@@ -48,7 +48,6 @@ class HttpAccessControl : HttpFilter() {
     private fun HttpServletRequest.requiresAuthentication(): Boolean =
         when {
             requestURI == "/health" || requestURI == "/actuator/health" -> false
-            requestURI.startsWith("/citizen-employee/") -> false
             else -> true
         }
 
@@ -56,7 +55,7 @@ class HttpAccessControl : HttpFilter() {
         when {
             requestURI.startsWith("/system/") -> user is AuthenticatedUser.SystemInternalUser
             requestURI.startsWith("/espoo-user/") -> user is AuthenticatedUser.EspooUser
-            else -> true
+            else -> false
         }
 }
 
