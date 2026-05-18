@@ -8,6 +8,19 @@ ARG CACHE_BUST=2025-W07
 
 WORKDIR /app
 
+ARG S3_DOWNLOADER_VERSION=v1.5.1
+ARG S3_DOWNLOADER_SHA256="cb751589ca60749c42b65009671d6076435e7454b8980ee98884e296a1ec6cb8"
+
+RUN apt-get update \
+ && apt-get -y dist-upgrade \
+ && apt-get -y install --no-install-recommends curl ca-certificates \
+ && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/${S3_DOWNLOADER_VERSION}/s3downloader-linux-amd64 \
+       -o /bin/s3download \
+ && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
+ && chmod +x /bin/s3download \
+ && apt-get remove --auto-remove -y curl \
+ && rm -rf /var/lib/apt/lists/*
+
 FROM base AS builder
 
 COPY ./.yarn ./.yarn
@@ -23,20 +36,9 @@ RUN yarn lint
 RUN yarn type-check
 RUN yarn test-ci
 
-FROM builder
+FROM base
 
 ENV NODE_ENV="production"
-
-ARG S3_DOWNLOADER_VERSION=v1.5.1
-ARG S3_DOWNLOADER_SHA256="cb751589ca60749c42b65009671d6076435e7454b8980ee98884e296a1ec6cb8"
-
-RUN apt-get update \
- && apt-get -y dist-upgrade \
- && apt-get -y install curl \
- && curl -sSfL https://github.com/espoon-voltti/s3-downloader/releases/download/${S3_DOWNLOADER_VERSION}/s3downloader-linux-amd64 \
-       -o /bin/s3download \
- && echo "${S3_DOWNLOADER_SHA256}  /bin/s3download" | sha256sum -c - \
- && chmod +x /bin/s3download
 
 RUN userdel -r node \
  && addgroup --gid 1000 oppivelvollisuus \
@@ -45,6 +47,11 @@ RUN userdel -r node \
  && chown oppivelvollisuus:oppivelvollisuus /config
 
 VOLUME /config
+
+COPY --from=builder /app .
+
+RUN yarn workspaces focus --production \
+ && yarn cache clean --all
 
 ARG build=none
 ARG commit=none
