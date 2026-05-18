@@ -40,14 +40,14 @@ describe('CSRF middleware and cookie handling in oppivelvollisuus-gateway', () =
     expect(res.status).toBe(403)
   })
   it('should pass GET to a proxied API when there is no CSRF token', async () => {
-    tester.nockScope.get('/some-proxied-api').reply(200)
+    tester.nockScope.get('/espoo-user/some-proxied-api').reply(200)
     const res = await tester.client.get('/api/some-proxied-api')
     tester.nockScope.done()
     expect(res.status).toBe(200)
   })
   it('should pass POST to a proxied API when CSRF header is present', async () => {
     tester.setCsrfHeader = true
-    tester.nockScope.post('/some-proxied-api').reply(200)
+    tester.nockScope.post('/espoo-user/some-proxied-api').reply(200)
     const res = await tester.client.post('/api/some-proxied-api')
     tester.nockScope.done()
     expect(res.status).toBe(200)

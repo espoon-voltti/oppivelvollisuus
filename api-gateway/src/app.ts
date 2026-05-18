@@ -36,6 +36,7 @@ export function apiRouter(config: Config, redisClient: RedisClient) {
 
   const sessions = sessionSupport('espoo-user', redisClient, config.espooUser)
   const proxy = createProxy({
+    path: (req) => `/espoo-user${req.url}`,
     getUserHeader: (req) => sessions.getUserHeader(req)
   })
 

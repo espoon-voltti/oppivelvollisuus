@@ -171,6 +171,7 @@ tasks {
         classpath = sourceSets["e2eTest"].runtimeClasspath
         shouldRunAfter("test")
         outputs.upToDateWhen { false }
+        systemProperty("spring.profiles.active", "e2e")
     }
 
     dependencyCheck {
