@@ -67,5 +67,5 @@ yarn lint --fix
 
 **service**:
 ```
-./gradlew ktlintFormat compileKotlin compileTestKotlin compileE2eTestKotlin
+./gradlew ktfmtFormat ktlintFormat compileKotlin compileTestKotlin compileE2eTestKotlin
 ```

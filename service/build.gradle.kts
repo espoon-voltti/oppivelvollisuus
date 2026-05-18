@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import com.ncorti.ktfmt.gradle.tasks.KtfmtFormatTask
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
@@ -12,6 +13,7 @@ plugins {
     kotlin("jvm") version "2.3.21"
     kotlin("plugin.spring") version "2.3.21"
     id("org.flywaydb.flyway") version "12.6.1"
+    id("com.ncorti.ktfmt.gradle") version "0.26.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.owasp.dependencycheck") version "12.2.2"
 
@@ -45,8 +47,10 @@ idea {
     }
 }
 
+ktfmt { kotlinLangStyle() }
+
 ktlint {
-    version.set("1.4.1")
+    version.set("1.8.0")
 }
 
 dependencies {
@@ -143,6 +147,11 @@ tasks.register("resolveDependencies") {
 tasks {
     bootRun {
         systemProperty("spring.profiles.active", "local")
+    }
+
+    register<KtfmtFormatTask>("ktfmtPrecommit") {
+        source = project.fileTree(rootDir)
+        include("**/*.kt")
     }
 
     register("e2eTestDeps", JavaExec::class) {
