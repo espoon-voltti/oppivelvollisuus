@@ -11,8 +11,8 @@ import fi.espoo.oppivelvollisuus.dataQa
 import kotlin.test.assertEquals
 
 class StudentsSearchPage(private val page: Page) {
-    val createStudentButton = page.locator(dataQa("create-student-button"))
-    val employeeSelect = page.locator(dataQa("employee-select"))
+    val createStudentButton = page.dataQa("create-student-button")
+    val employeeSelect = page.dataQa("employee-select")
 
     fun assertUrl() {
         assertThat(page).hasURL("$baseUrl/oppivelvolliset")

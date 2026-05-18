@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -8,28 +8,38 @@ import com.microsoft.playwright.Browser
 import com.microsoft.playwright.BrowserType
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.Playwright
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import io.opentelemetry.api.trace.Tracer
 import org.jdbi.v3.core.Jdbi
-import org.jdbi.v3.core.kotlin.withHandleUnchecked
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ExtendWith(PlaywrightTestWatcher::class)
 abstract class PlaywrightTest {
     @Autowired protected lateinit var jdbi: Jdbi
+    @Autowired protected lateinit var tracer: Tracer
 
-    protected lateinit var playwright: Playwright
-    protected lateinit var browser: Browser
+    protected lateinit var db: Database.Connection
+
+    protected fun dbInstance(): Database = Database(jdbi, tracer)
+
+    lateinit var playwright: Playwright
+    lateinit var browser: Browser
 
     @BeforeAll
     fun beforeAllSuper() {
-        jdbi.withHandleUnchecked { tx ->
-            tx.execute(
-                """
+        db = Database(jdbi, tracer).connectWithManualLifecycle()
+        db.transaction { tx ->
+            tx.execute {
+                sql(
+                    """
                 CREATE OR REPLACE FUNCTION reset_database() RETURNS void AS $$
                 BEGIN
                   EXECUTE (
@@ -39,7 +49,7 @@ abstract class PlaywrightTest {
                     AND table_type = 'BASE TABLE'
                     AND table_name <> 'flyway_schema_history'
                   );
-                  
+
                   IF (SELECT count(*) FROM information_schema.sequences) > 0 THEN
                     EXECUTE (
                       SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')
@@ -49,8 +59,9 @@ abstract class PlaywrightTest {
                   END IF;
                 END $$ LANGUAGE plpgsql;
                 """
-                    .trimIndent()
-            )
+                        .trimIndent()
+                )
+            }
         }
 
         playwright = Playwright.create()
@@ -64,13 +75,14 @@ abstract class PlaywrightTest {
 
     @BeforeEach
     fun beforeEachSuper() {
-        jdbi.withHandleUnchecked { tx -> tx.execute("SELECT reset_database()") }
+        db.transaction { tx -> tx.execute { sql("SELECT reset_database()") } }
     }
 
     @AfterAll
     fun afterAllSuper() {
         browser.close()
         playwright.close()
+        db.close()
     }
 
     protected fun getPageWithDefaultOptions(): Page {

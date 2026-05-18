@@ -11,12 +11,12 @@ import fi.espoo.oppivelvollisuus.dataQa
 import kotlin.test.assertEquals
 
 class CreateStudentPage(private val page: Page) {
-    val saveButton = page.locator(dataQa("save-button"))
-    val dateOfBirthInput = page.locator(dataQa("date-of-birth-input"))
-    val lastNameInput = page.locator(dataQa("last-name-input"))
-    val firstNameInput = page.locator(dataQa("first-name-input"))
-    val sourceSelect = page.locator(dataQa("source-select"))
-    val employeeSelect = page.locator(dataQa("employee-select"))
+    val saveButton = page.dataQa("save-button")
+    val dateOfBirthInput = page.dataQa("date-of-birth-input")
+    val lastNameInput = page.dataQa("last-name-input")
+    val firstNameInput = page.dataQa("first-name-input")
+    val sourceSelect = page.dataQa("source-select")
+    val employeeSelect = page.dataQa("employee-select")
 
     fun assertUrl() {
         assertThat(page).hasURL("$baseUrl/oppivelvolliset/uusi")

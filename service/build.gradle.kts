@@ -172,6 +172,10 @@ tasks {
         shouldRunAfter("test")
         outputs.upToDateWhen { false }
         systemProperty("spring.profiles.active", "e2e")
+        testLogging {
+            showStandardStreams = true
+            events("passed", "skipped", "failed")
+        }
     }
 
     dependencyCheck {

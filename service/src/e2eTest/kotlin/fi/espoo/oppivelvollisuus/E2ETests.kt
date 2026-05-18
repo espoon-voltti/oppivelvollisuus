@@ -11,7 +11,6 @@ import fi.espoo.oppivelvollisuus.pages.CreateStudentPage
 import fi.espoo.oppivelvollisuus.pages.LoginPage
 import fi.espoo.oppivelvollisuus.pages.StudentPage
 import fi.espoo.oppivelvollisuus.pages.StudentsSearchPage
-import org.jdbi.v3.core.kotlin.withHandleUnchecked
 import org.junit.jupiter.api.Test
 
 class E2ETests : PlaywrightTest() {
@@ -50,13 +49,10 @@ class E2ETests : PlaywrightTest() {
             listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija")
         )
 
-        jdbi.withHandleUnchecked { tx ->
-            tx.execute(
-                """
-                UPDATE users SET is_active = false WHERE last_name = 'Suunnittelija'
-                """
-                    .trimIndent()
-            )
+        db.transaction { tx ->
+            tx.execute {
+                sql("UPDATE users SET is_active = false WHERE last_name = 'Suunnittelija'")
+            }
         }
 
         page.reload()
