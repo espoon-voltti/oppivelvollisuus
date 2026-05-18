@@ -1,59 +1,122 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 package fi.espoo.oppivelvollisuus.domain
 
-import fi.espoo.oppivelvollisuus.FullApplicationTestOld
+import fi.espoo.oppivelvollisuus.FullApplicationTest
+import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.dev.DevStudent
+import fi.espoo.oppivelvollisuus.shared.dev.DevStudentCase
+import fi.espoo.oppivelvollisuus.shared.dev.DevUser
+import fi.espoo.oppivelvollisuus.shared.dev.insert
 import fi.espoo.oppivelvollisuus.shared.isUniqueConstraintViolation
+import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
+import fi.espoo.oppivelvollisuus.shared.time.MockAppClock
 import java.time.LocalDate
+import java.time.LocalTime
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import minimalStudentAndCaseTestInput
-import minimalStudentCaseTestInput
 import org.jdbi.v3.core.statement.UnableToExecuteStatementException
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import testUser
-import testUserName
 
-class StudentCaseTests : FullApplicationTestOld() {
-    @Autowired lateinit var controller: AppController
+class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
+    @Autowired private lateinit var controller: AppController
+
+    private val now = HelsinkiDateTime.of(LocalDate.of(2026, 1, 1), LocalTime.of(12, 0))
+    private val clock = MockAppClock(now)
+
+    private val testUser = DevUser()
+    private val testStudent = DevStudent(createdBy = testUser.id, created = now)
+
+    @BeforeEach
+    fun setup() {
+        db.transaction { tx ->
+            tx.insert(testUser)
+            tx.insert(testStudent)
+        }
+    }
+
+    private fun seedCase(
+        openedAt: LocalDate = LocalDate.of(2023, 12, 7),
+        status: CaseStatus = CaseStatus.TODO,
+    ): StudentCaseId {
+        val case =
+            DevStudentCase(
+                studentId = testStudent.id,
+                createdBy = testUser.id,
+                created = now,
+                openedAt = openedAt,
+                status = status,
+            )
+        db.transaction { tx -> tx.insert(case) }
+        return case.id
+    }
+
+    private fun createStudentCase(body: StudentCaseInput): StudentCaseId =
+        controller.createStudentCase(dbInstance(), testUser.user, clock, testStudent.id, body)
+
+    private fun updateStudentCase(caseId: StudentCaseId, body: StudentCaseInput) =
+        controller.updateStudentCase(
+            dbInstance(),
+            testUser.user,
+            clock,
+            testStudent.id,
+            caseId,
+            body,
+        )
+
+    private fun updateStudentCaseStatus(caseId: StudentCaseId, body: CaseStatusInput) =
+        controller.updateStudentCaseStatus(
+            dbInstance(),
+            testUser.user,
+            clock,
+            testStudent.id,
+            caseId,
+            body,
+        )
+
+    private fun deleteStudentCase(caseId: StudentCaseId) =
+        controller.deleteStudentCase(dbInstance(), testUser.user, testStudent.id, caseId)
+
+    private fun createCaseEvent(caseId: StudentCaseId, body: CaseEventInput) =
+        controller.createCaseEvent(dbInstance(), testUser.user, clock, caseId, body)
+
+    private fun getStudent(studentId: StudentId = testStudent.id) =
+        controller.getStudent(dbInstance(), testUser.user, studentId)
+
+    private fun getStudents() =
+        controller.getStudents(
+            dbInstance(),
+            testUser.user,
+            StudentSearchParams(
+                query = "",
+                statuses = CaseStatus.entries,
+                sources = CaseSource.entries,
+                assignee = null,
+            ),
+        )
 
     @Test
     fun `create another student case with all data`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        controller.getStudent(dbInstance(), testUser, studentId).cases.first().id.also { firstCaseId
-            ->
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
-                firstCaseId,
-                CaseStatusInput(
-                    CaseStatus.FINISHED,
-                    FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"),
-                ),
-            )
-        }
+        val firstCaseId = seedCase()
+        updateStudentCaseStatus(
+            firstCaseId,
+            CaseStatusInput(
+                CaseStatus.FINISHED,
+                FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"),
+            ),
+        )
 
         val caseId =
-            controller.createStudentCase(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
+            createStudentCase(
                 StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 8),
                     assignedTo = testUser.id,
@@ -64,18 +127,18 @@ class StudentCaseTests : FullApplicationTestOld() {
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
-                ),
+                )
             )
 
-        val studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
+        val studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
         studentResponse.cases.first().let { studentCase ->
             assertEquals(
                 StudentCase(
                     id = caseId,
-                    studentId = studentId,
+                    studentId = testStudent.id,
                     openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id, name = testUser.name),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.OTHER,
@@ -94,34 +157,17 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `create another student case with minimal data and update it`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        controller.getStudent(dbInstance(), testUser, studentId).cases.first().id.also { firstCaseId
-            ->
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
-                firstCaseId,
-                CaseStatusInput(
-                    CaseStatus.FINISHED,
-                    FinishedInfo(CaseFinishedReason.OTHER, null, null, ""),
-                ),
-            )
-        }
+        val firstCaseId = seedCase()
+        updateStudentCaseStatus(
+            firstCaseId,
+            CaseStatusInput(
+                CaseStatus.FINISHED,
+                FinishedInfo(CaseFinishedReason.OTHER, null, null, ""),
+            ),
+        )
 
         val caseId =
-            controller.createStudentCase(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
+            createStudentCase(
                 StudentCaseInput(
                     openedAt = LocalDate.of(2023, 12, 8),
                     assignedTo = null,
@@ -132,16 +178,16 @@ class StudentCaseTests : FullApplicationTestOld() {
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
                     notInSchoolReason = null,
-                ),
+                )
             )
 
-        var studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
+        var studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
         studentResponse.cases.first().let { studentCase ->
             assertEquals(
                 StudentCase(
                     id = caseId,
-                    studentId = studentId,
+                    studentId = testStudent.id,
                     openedAt = LocalDate.of(2023, 12, 8),
                     assignedTo = null,
                     status = CaseStatus.TODO,
@@ -159,11 +205,7 @@ class StudentCaseTests : FullApplicationTestOld() {
             )
         }
 
-        controller.updateStudentCase(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        updateStudentCase(
             caseId,
             StudentCaseInput(
                 openedAt = LocalDate.of(2023, 12, 9),
@@ -180,15 +222,15 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        studentResponse = controller.getStudent(dbInstance(), testUser, studentId)
+        studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
         studentResponse.cases.first().let { studentCase ->
             assertEquals(
                 StudentCase(
                     id = caseId,
-                    studentId = studentId,
+                    studentId = testStudent.id,
                     openedAt = LocalDate.of(2023, 12, 9),
-                    assignedTo = UserBasics(id = testUser.id, name = testUserName),
+                    assignedTo = UserBasics(id = testUser.id, name = testUser.name),
                     status = CaseStatus.TODO,
                     finishedInfo = null,
                     source = CaseSource.VALPAS_NOTICE,
@@ -209,67 +251,28 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `cannot create another student case if all others are not finished`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
+        seedCase()
 
-        assertThrows<UnableToExecuteStatementException> {
-                controller.createStudentCase(
-                    dbInstance(),
-                    testUser,
-                    mockClock,
-                    studentId,
-                    minimalStudentCaseTestInput,
-                )
-            }
+        assertThrows<UnableToExecuteStatementException> { createStudentCase(minimalCaseInput()) }
             .also { assertTrue { it.isUniqueConstraintViolation() } }
     }
 
     @Test
     fun `change status to ON_HOLD`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
-            caseId,
-            CaseStatusInput(CaseStatus.ON_HOLD, null),
-        )
+        updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.ON_HOLD, null))
 
-        val updatedCase = controller.getStudent(dbInstance(), testUser, studentId).cases.first()
+        val updatedCase = getStudent().cases.first()
         assertEquals(CaseStatus.ON_HOLD, updatedCase.status)
         assertNull(updatedCase.finishedInfo)
     }
 
     @Test
     fun `change status to FINISHED`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
@@ -277,7 +280,7 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        val updatedCase = controller.getStudent(dbInstance(), testUser, studentId).cases.first()
+        val updatedCase = getStudent().cases.first()
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(CaseFinishedReason.OTHER, updatedCase.finishedInfo?.reason)
         assertEquals("other reason", updatedCase.finishedInfo?.otherReason)
@@ -286,20 +289,9 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `change status to FINISHED with BEGAN_STUDIES`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
@@ -307,7 +299,7 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        val updatedCase = controller.getStudent(dbInstance(), testUser, studentId).cases.first()
+        val updatedCase = getStudent().cases.first()
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(CaseFinishedReason.BEGAN_STUDIES, updatedCase.finishedInfo?.reason)
         assertEquals(SchoolType.LUKIO, updatedCase.finishedInfo?.startedAtSchool)
@@ -315,22 +307,11 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `change status to FINISHED with COMPULSORY_EDUCATION_ENDED`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
         val givenFollowUpMeasures =
             setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE)
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
@@ -343,7 +324,7 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        val updatedCase = controller.getStudent(dbInstance(), testUser, studentId).cases.first()
+        val updatedCase = getStudent().cases.first()
         assertEquals(CaseStatus.FINISHED, updatedCase.status)
         assertEquals(
             CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
@@ -354,21 +335,10 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `cannot change status to COMPULSORY_EDUCATION_ENDED without follow up measure`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
         assertThrows<BadRequest> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
+            updateStudentCaseStatus(
                 caseId,
                 CaseStatusInput(
                     CaseStatus.FINISHED,
@@ -380,44 +350,19 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `cannot change status to FINISHED without reason`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
         assertThrows<BadRequest> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
-                caseId,
-                CaseStatusInput(CaseStatus.FINISHED, null),
-            )
+            updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.FINISHED, null))
         }
     }
 
     @Test
     fun `cannot change status to FINISHED with BEGAN_STUDIES without school type`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
         assertThrows<BadRequest> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
+            updateStudentCaseStatus(
                 caseId,
                 CaseStatusInput(
                     CaseStatus.FINISHED,
@@ -429,21 +374,10 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `cannot provide startedAtSchool when reason is not BEGAN_STUDIES`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
         assertThrows<BadRequest> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser,
-                mockClock,
-                studentId,
+            updateStudentCaseStatus(
                 caseId,
                 CaseStatusInput(
                     CaseStatus.FINISHED,
@@ -460,19 +394,8 @@ class StudentCaseTests : FullApplicationTestOld() {
 
     @Test
     fun `reset status after finishing`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        val caseId = seedCase()
+        updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
@@ -480,82 +403,44 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
-            caseId,
-            CaseStatusInput(CaseStatus.TODO, null),
-        )
+        updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.TODO, null))
 
-        val updatedCase = controller.getStudent(dbInstance(), testUser, studentId).cases.first()
+        val updatedCase = getStudent().cases.first()
         assertEquals(CaseStatus.TODO, updatedCase.status)
         assertNull(updatedCase.finishedInfo)
     }
 
     @Test
     fun `cannot reset status after finishing if there already is another unfinished case`() {
-        val studentId =
-            controller.createStudent(
-                dbInstance(),
-                testUser,
-                mockClock,
-                minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
+        val caseId = seedCase()
+        updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
                 FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
             ),
         )
-        controller.createStudentCase(
-            dbInstance(),
-            testUser,
-            mockClock,
-            studentId,
-            minimalStudentCaseTestInput,
-        )
+        createStudentCase(minimalCaseInput())
 
         assertThrows<UnableToExecuteStatementException> {
-                controller.updateStudentCaseStatus(
-                    dbInstance(),
-                    testUser,
-                    mockClock,
-                    studentId,
-                    caseId,
-                    CaseStatusInput(CaseStatus.TODO, null),
-                )
+                updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.TODO, null))
             }
             .also { assertTrue { it.isUniqueConstraintViolation() } }
     }
 
     @Test
     fun `deleting student case without events`() {
-        val studentId =
-            controller.createStudent(
-                db = dbInstance(),
-                user = testUser,
-                clock = mockClock,
-                body = minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
+        val caseId = seedCase()
 
-        controller.deleteStudentCase(dbInstance(), testUser, studentId, caseId)
+        deleteStudentCase(caseId)
 
-        assertEquals(0, controller.getStudent(dbInstance(), testUser, studentId).cases.size)
+        assertEquals(0, getStudent().cases.size)
         assertEquals(
             listOf(
                 StudentSummary(
-                    id = studentId,
-                    firstName = minimalStudentAndCaseTestInput.student.firstName,
-                    lastName = minimalStudentAndCaseTestInput.student.lastName,
+                    id = testStudent.id,
+                    firstName = testStudent.firstName,
+                    lastName = testStudent.lastName,
                     openedAt = null,
                     status = null,
                     source = null,
@@ -563,33 +448,14 @@ class StudentCaseTests : FullApplicationTestOld() {
                     lastEvent = null,
                 )
             ),
-            controller.getStudents(
-                dbInstance(),
-                testUser,
-                StudentSearchParams(
-                    query = "",
-                    statuses = CaseStatus.entries,
-                    sources = CaseSource.entries,
-                    assignee = null,
-                ),
-            ),
+            getStudents(),
         )
     }
 
     @Test
     fun `deleting student case with events fails`() {
-        val studentId =
-            controller.createStudent(
-                db = dbInstance(),
-                user = testUser,
-                clock = mockClock,
-                body = minimalStudentAndCaseTestInput,
-            )
-        val caseId = controller.getStudent(dbInstance(), testUser, studentId).cases.first().id
-        controller.createCaseEvent(
-            dbInstance(),
-            testUser,
-            mockClock,
+        val caseId = seedCase()
+        createCaseEvent(
             caseId,
             CaseEventInput(
                 date = LocalDate.of(2023, 12, 8),
@@ -598,8 +464,19 @@ class StudentCaseTests : FullApplicationTestOld() {
             ),
         )
 
-        assertThrows<UnableToExecuteStatementException> {
-            controller.deleteStudentCase(dbInstance(), testUser, studentId, caseId)
-        }
+        assertThrows<UnableToExecuteStatementException> { deleteStudentCase(caseId) }
     }
+
+    private fun minimalCaseInput(): StudentCaseInput =
+        StudentCaseInput(
+            openedAt = LocalDate.of(2023, 12, 7),
+            assignedTo = null,
+            source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+            sourceValpas = null,
+            sourceOther = null,
+            sourceContact = "",
+            schoolBackground = emptySet(),
+            caseBackgroundReasons = emptySet(),
+            notInSchoolReason = null,
+        )
 }
