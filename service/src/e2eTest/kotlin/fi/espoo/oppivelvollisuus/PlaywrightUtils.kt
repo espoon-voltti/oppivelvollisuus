@@ -4,12 +4,26 @@
 
 package fi.espoo.oppivelvollisuus
 
+import com.microsoft.playwright.Dialog
 import com.microsoft.playwright.Locator
 import com.microsoft.playwright.Page
+import java.util.function.Consumer
 
 fun Page.dataQa(value: String): Locator = this.locator("[data-qa='$value']")
 
 fun Locator.dataQa(dataQa: String): Locator = this.locator("[data-qa='$dataQa']")
+
+fun Page.acceptNextDialog() {
+    val page = this
+    val handler =
+        object : Consumer<Dialog> {
+            override fun accept(dialog: Dialog) {
+                dialog.accept()
+                page.offDialog(this)
+            }
+        }
+    page.onDialog(handler)
+}
 
 class Checkbox(locator: Locator) {
     private val input: Locator = locator.locator("input[type='checkbox']")
