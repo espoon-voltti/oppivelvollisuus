@@ -150,6 +150,8 @@ tasks.register("resolveDependencies") {
 }
 
 tasks {
+    test { systemProperty("spring.profiles.active", "test") }
+
     bootRun { systemProperty("spring.profiles.active", "local") }
 
     register<KtfmtFormatTask>("ktfmtPrecommit") {
