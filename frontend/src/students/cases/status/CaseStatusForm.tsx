@@ -189,6 +189,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           <StatusChip status={props.studentCase.status} />
         ) : (
           <Select<CaseStatus>
+            data-qa="status-select"
             items={caseStatuses}
             selectedItem={status}
             getItemLabel={(item) => caseStatusNames[item]}
@@ -200,6 +201,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         <LabeledInput $cols={4}>
           <Label>Syy ohjauksen päättymiselle *</Label>
           <Select<CaseFinishedReason>
+            data-qa="finished-reason-select"
             items={caseFinishedReasons}
             selectedItem={finishedReason}
             getItemLabel={(item) => caseFinishedReasonNames[item]}

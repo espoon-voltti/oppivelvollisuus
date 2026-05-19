@@ -4,14 +4,10 @@
 
 package fi.espoo.oppivelvollisuus.domain
 
-import org.jdbi.v3.core.Handle
-import org.jdbi.v3.core.kotlin.mapTo
+import fi.espoo.oppivelvollisuus.shared.db.Database
 import java.time.LocalDate
 
-data class CaseReportRequest(
-    val start: LocalDate?,
-    val end: LocalDate?
-)
+data class CaseReportRequest(val start: LocalDate?, val end: LocalDate?)
 
 data class CaseReportRow(
     val openedAt: LocalDate,
@@ -31,46 +27,46 @@ data class CaseReportRow(
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
     val followUpMeasures: Set<FollowUpMeasure>?,
-    val eventTypes: Set<CaseEventType>
+    val eventTypes: Set<CaseEventType>,
 )
 
-fun Handle.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
-    createQuery(
-        """
-    SELECT 
-        sc.opened_at,
-        extract('year' FROM s.date_of_birth) AS birth_year,
-        CASE WHEN s.date_of_birth IS NOT NULL 
-            THEN date_part('year', age(sc.opened_at, s.date_of_birth)) 
-        END AS age_at_case_opened,
-        s.gender,
-        s.language,
-        s.municipality_in_finland,
-        s.partner_organisations,
-        sc.status,
-        sc.finished_reason,
-        sc.other_reason,
-        sc.follow_up_measures,
-        sc.started_at_school,
-        sc.source,
-        sc.source_valpas,
-        sc.source_other,
-        sc.school_background,
-        sc.case_background_reasons,
-        sc.not_in_school_reason,
-        coalesce(
-            (SELECT array_agg(DISTINCT type)
-            FROM case_events ce
-            WHERE ce.student_case_id = sc.id),
-            '{}'::case_event_type[]
-        ) AS event_types
-    FROM student_cases sc
-    JOIN students s on sc.student_id = s.id
-    WHERE TRUE 
-    ${request.start?.let { "AND sc.opened_at >= :start" } ?: ""}
-    ${request.end?.let { "AND sc.opened_at <= :end" } ?: ""}
-"""
-    ).also { if (request.start != null) it.bind("start", request.start) }
-        .also { if (request.end != null) it.bind("end", request.end) }
-        .mapTo<CaseReportRow>()
-        .list()
+fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
+    createQuery {
+            sql(
+                """
+                SELECT
+                    sc.opened_at,
+                    extract('year' FROM s.date_of_birth) AS birth_year,
+                    CASE WHEN s.date_of_birth IS NOT NULL
+                        THEN date_part('year', age(sc.opened_at, s.date_of_birth))
+                    END AS age_at_case_opened,
+                    s.gender,
+                    s.language,
+                    s.municipality_in_finland,
+                    s.partner_organisations,
+                    sc.status,
+                    sc.finished_reason,
+                    sc.other_reason,
+                    sc.follow_up_measures,
+                    sc.started_at_school,
+                    sc.source,
+                    sc.source_valpas,
+                    sc.source_other,
+                    sc.school_background,
+                    sc.case_background_reasons,
+                    sc.not_in_school_reason,
+                    coalesce(
+                        (SELECT array_agg(DISTINCT type)
+                        FROM case_events ce
+                        WHERE ce.student_case_id = sc.id),
+                        '{}'::case_event_type[]
+                    ) AS event_types
+                FROM student_cases sc
+                JOIN students s on sc.student_id = s.id
+                WHERE TRUE
+                ${if (request.start != null) "AND sc.opened_at >= ${bind(request.start)}" else ""}
+                ${if (request.end != null) "AND sc.opened_at <= ${bind(request.end)}" else ""}
+                """
+            )
+        }
+        .toList<CaseReportRow>()

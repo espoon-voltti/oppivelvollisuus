@@ -15,6 +15,7 @@ services:
       RESOLVER: "127.0.0.11 ipv6=off"
       API_GATEWAY_URL: http://api-gateway:3000
       HTTP_SCHEME: http
+      RATE_LIMIT_CIDR_WHITELIST: "0.0.0.0/0"
     depends_on:
       - api-gateway
 
@@ -27,11 +28,11 @@ services:
     environment:
       NODE_ENV: local
       HTTP_PORT: 3000
+      BASE_URL: http://frontend
       SERVICE_URL: http://service-e2e-tests:8080
       JWT_KID: "oppivelvollisuus-api-gateway"
       JWT_PRIVATE_KEY: "config/test-cert/jwt_private_key.pem"
       AD_MOCK: "true"
-      DEV_LOGIN: "true"
       COOKIE_SECRET: cookie_secret
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -48,10 +49,12 @@ services:
       - "8080:8080"
     environment:
       JAVA_OPTS: -server -Djava.security.egd=file:/dev/./urandom -Xms1024m -Xss512k -Xmx1024m -XX:TieredStopAtLevel=1
-      SPRING_DATASOURCE_URL: jdbc:postgresql://oppivelvollisuus-db:5432/oppivelvollisuus
-      SPRING_DATASOURCE_USERNAME: oppivelvollisuus
-      SPRING_DATASOURCE_PASSWORD: postgres
+      APP_DATABASE_URL: jdbc:postgresql://oppivelvollisuus-db:5432/oppivelvollisuus_it
+      APP_DATABASE_USERNAME: oppivelvollisuus
+      APP_DATABASE_PASSWORD: postgres
       E2E_ENV: docker
     entrypoint: ./e2e-test-entrypoint.sh
+    volumes:
+      - ./screenshots:/app/screenshots
     depends_on:
       - oppivelvollisuus-db

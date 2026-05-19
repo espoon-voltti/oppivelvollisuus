@@ -98,11 +98,16 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
       <RowOfInputs>
         <LabeledInput $cols={2}>
           <Label>Päivämäärä *</Label>
-          <InputField onChange={setDate} value={date} />
+          <InputField
+            data-qa="event-date-input"
+            onChange={setDate}
+            value={date}
+          />
         </LabeledInput>
         <LabeledInput $cols={4}>
           <Label>Merkinnän tyyppi *</Label>
           <Select<CaseEventType>
+            data-qa="event-type-select"
             items={caseEventTypes}
             selectedItem={type}
             getItemLabel={(item) => caseEventTypeNames[item]}
@@ -113,7 +118,11 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
       <RowOfInputs>
         <LabeledInput $cols={9}>
           <Label>Kommentti</Label>
-          <TextArea onChange={setNotes} value={notes} />
+          <TextArea
+            data-qa="event-notes-input"
+            onChange={setNotes}
+            value={notes}
+          />
         </LabeledInput>
       </RowOfInputs>
     </GroupOfInputRows>

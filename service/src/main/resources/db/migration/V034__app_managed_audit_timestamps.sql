@@ -1,0 +1,4 @@
+ALTER TABLE users          ALTER COLUMN created DROP DEFAULT;
+ALTER TABLE students       ALTER COLUMN created DROP DEFAULT;
+ALTER TABLE student_cases  ALTER COLUMN created DROP DEFAULT;
+ALTER TABLE case_events    ALTER COLUMN created DROP DEFAULT;

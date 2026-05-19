@@ -219,9 +219,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           <LabeledInput $cols={2}>
             <Label>Hetu</Label>
             {props.mode === 'VIEW' ? (
-              <span>{props.student.ssn || '-'}</span>
+              <span data-qa="ssn-value">{props.student.ssn || '-'}</span>
             ) : (
-              <InputField onChange={setSsn} value={ssn} />
+              <InputField data-qa="ssn-input" onChange={setSsn} value={ssn} />
             )}
           </LabeledInput>
           <LabeledInput $cols={2}>

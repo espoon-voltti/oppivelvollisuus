@@ -296,7 +296,7 @@ jobs:
         run: |
           ./e2e-test-compose logs > tests-all.log
 
-      - name: Store logs
+      - name: Store logs and screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
@@ -304,6 +304,7 @@ jobs:
           path: |
             compose/tests.log
             compose/tests-all.log
+            compose/screenshots/
           retention-days: 2
 
   deploy:

@@ -157,6 +157,7 @@ export const StudentPage = React.memo(function StudentPage() {
           </H2>
           {studentResponse && (
             <InlineButton
+              data-qa="delete-student-button"
               text="Poista oppivelvollisen tiedot"
               icon={faTrash}
               disabled={editingSomething}
@@ -188,6 +189,7 @@ export const StudentPage = React.memo(function StudentPage() {
         <>
           <SectionContainer>
             <CollapsableRow
+              data-qa="toggle-student-details"
               onClick={() => setExpandedStudentDetails((prev) => !prev)}
             >
               <H3>Oppivelvollisen tiedot</H3>
@@ -204,6 +206,7 @@ export const StudentPage = React.memo(function StudentPage() {
                 <FlexRight>
                   <FlexRowWithGaps $gapSize="m">
                     <InlineButton
+                      data-qa="edit-student-button"
                       text="Muokkaa"
                       icon={faPen}
                       disabled={editingSomething}
@@ -221,11 +224,13 @@ export const StudentPage = React.memo(function StudentPage() {
                   <FlexRight>
                     <FlexRowWithGaps>
                       <Button
+                        data-qa="cancel-student-button"
                         text="Peruuta"
                         disabled={submitting}
                         onClick={() => setEditingStudent(false)}
                       />
                       <Button
+                        data-qa="save-student-button"
                         text="Tallenna"
                         primary
                         disabled={submitting || !studentInput}
@@ -255,6 +260,7 @@ export const StudentPage = React.memo(function StudentPage() {
               <H3>Oppivelvollisuusilmoitukset</H3>
               {editingCase !== true && (
                 <InlineButton
+                  data-qa="add-case-button"
                   text="Lisää ilmoitus"
                   icon={faPlus}
                   disabled={editingSomething || activeCaseExists}
@@ -277,6 +283,7 @@ export const StudentPage = React.memo(function StudentPage() {
                 <FlexRight>
                   <FlexRowWithGaps>
                     <Button
+                      data-qa="cancel-case-button"
                       text="Peruuta"
                       disabled={submitting}
                       onClick={() => {
@@ -284,6 +291,7 @@ export const StudentPage = React.memo(function StudentPage() {
                       }}
                     />
                     <Button
+                      data-qa="save-case-button"
                       text="Tallenna"
                       primary
                       disabled={submitting || !studentCaseInput}
@@ -409,7 +417,10 @@ const CasesList = React.memo(function CasesList({
   return (
     <FlexColWithGaps $gapSize="L">
       {cases.map((studentCase) => (
-        <FlexColWithGaps key={studentCase.id}>
+        <FlexColWithGaps
+          key={studentCase.id}
+          data-qa={`case-row-${studentCase.id}`}
+        >
           <AccordionRow
             $disabled={
               editingCase !== false ||
@@ -454,12 +465,14 @@ const CasesList = React.memo(function CasesList({
                   <FlexRight style={{ marginBottom: '-24px', zIndex: 1 }}>
                     <FlexRowWithGaps $gapSize="m">
                       <InlineButton
+                        data-qa="edit-case-button"
                         text="Muokkaa"
                         icon={faPen}
                         disabled={editingSomething}
                         onClick={() => setEditingCase(studentCase.id)}
                       />
                       <InlineButton
+                        data-qa="delete-case-button"
                         text="Poista"
                         icon={faTrash}
                         disabled={editingSomething}
@@ -496,6 +509,7 @@ const CasesList = React.memo(function CasesList({
                   <FlexRight>
                     <FlexRowWithGaps>
                       <Button
+                        data-qa="cancel-case-edit-button"
                         text="Peruuta"
                         disabled={submitting}
                         onClick={() => {
@@ -503,6 +517,7 @@ const CasesList = React.memo(function CasesList({
                         }}
                       />
                       <Button
+                        data-qa="save-case-edit-button"
                         text="Tallenna"
                         primary
                         disabled={submitting || !studentCaseInput}
@@ -532,6 +547,7 @@ const CasesList = React.memo(function CasesList({
                   <H4>Ohjauksen tila</H4>
                   {editingCaseStatus !== studentCase.id && (
                     <InlineButton
+                      data-qa="change-status-button"
                       text="Vaihda tilaa"
                       icon={faPen}
                       disabled={editingSomething}
@@ -550,11 +566,13 @@ const CasesList = React.memo(function CasesList({
                     <FlexRight>
                       <FlexRowWithGaps>
                         <Button
+                          data-qa="cancel-status-button"
                           text="Peruuta"
                           disabled={submitting}
                           onClick={() => setEditingCaseStatus(null)}
                         />
                         <Button
+                          data-qa="save-status-button"
                           text="Tallenna"
                           primary
                           disabled={submitting || !caseStatusInput}

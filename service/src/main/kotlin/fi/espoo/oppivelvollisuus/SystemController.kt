@@ -4,46 +4,34 @@
 
 package fi.espoo.oppivelvollisuus
 
-import fi.espoo.oppivelvollisuus.common.AdUser
-import fi.espoo.oppivelvollisuus.common.AppUser
-import fi.espoo.oppivelvollisuus.common.getAppUser
-import fi.espoo.oppivelvollisuus.common.upsertAppUserFromAd
-import fi.espoo.oppivelvollisuus.config.AuthenticatedUser
-import fi.espoo.oppivelvollisuus.config.audit
-import mu.KotlinLogging
-import org.jdbi.v3.core.Jdbi
-import org.jdbi.v3.core.kotlin.inTransactionUnchecked
-import org.springframework.beans.factory.annotation.Autowired
+import fi.espoo.oppivelvollisuus.shared.Audit
+import fi.espoo.oppivelvollisuus.shared.AuditId
+import fi.espoo.oppivelvollisuus.shared.auth.AdUser
+import fi.espoo.oppivelvollisuus.shared.db.Database
+import fi.espoo.oppivelvollisuus.shared.time.AppClock
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.UUID
 
 /**
- * Controller for "system" endpoints intended to be only called from api-gateway
- * as the system internal user
+ * Controller for "system" endpoints intended to be only called from api-gateway as the system
+ * internal user
  */
 @RestController
 @RequestMapping("/system")
 class SystemController {
-    @Autowired
-    lateinit var jdbi: Jdbi
-
-    private val logger = KotlinLogging.logger {}
-
     @PostMapping("/user-login")
-    fun userLogin(
-        @RequestBody adUser: AdUser
-    ): AppUser =
-        jdbi.inTransactionUnchecked { it.upsertAppUserFromAd(adUser) }.also {
-            logger.audit(AuthenticatedUser(it.id), "USER_LOGIN")
-        }
+    fun userLogin(db: Database, clock: AppClock, @RequestBody adUser: AdUser): AppUser =
+        db.connect { dbc ->
+                dbc.transaction { tx -> tx.upsertAppUserFromAd(adUser, now = clock.now()) }
+            }
+            .also { Audit.EspooUserLogin.log(targetId = AuditId(it.id)) }
 
     @GetMapping("/users/{id}")
-    fun getUser(
-        @PathVariable id: UUID
-    ): AppUser? = jdbi.inTransactionUnchecked { it.getAppUser(id) }
+    fun getUser(db: Database, @PathVariable id: EspooUserId): AppUser? = db.connect { dbc ->
+        dbc.read { it.getAppUser(id) }
+    }
 }

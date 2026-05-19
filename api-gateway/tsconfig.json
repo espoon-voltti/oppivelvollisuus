@@ -1,16 +1,13 @@
 {
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
     "esModuleInterop": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "noEmit": false,
-    "noEmitOnError": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "sourceMap": true,
+    "module": "node16",
+    "moduleResolution": "node16",
+    "noEmit": true,
     "strict": true,
-    "target": "es2023",
-    "types": ["node"]
+    "target": "es2023"
   },
   "include": ["src/**/*.ts"]
 }

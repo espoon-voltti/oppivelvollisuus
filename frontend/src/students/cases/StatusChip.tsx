@@ -22,6 +22,7 @@ export const StatusChip = React.memo(function StatusChip({
 }) {
   return (
     <StaticChip
+      data-qa="case-status"
       $color={chipColors[status]}
       $textColor={
         status === 'FINISHED' ? colors.grayscale.g70 : colors.grayscale.g0

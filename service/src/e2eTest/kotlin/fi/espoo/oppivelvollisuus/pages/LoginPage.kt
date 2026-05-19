@@ -9,11 +9,9 @@ import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
 
-class LoginPage(
-    private val page: Page
-) {
-    val startLoginButton = page.locator(dataQa("start-login"))
-    val loggedInUser = page.locator(dataQa("logged-in-user"))
+class LoginPage(private val page: Page) {
+    val startLoginButton = page.dataQa("start-login")
+    val loggedInUser = page.dataQa("logged-in-user")
 
     fun assertUrl() {
         assertThat(page).hasURL("$baseUrl/kirjaudu")

@@ -56,11 +56,13 @@ export const CaseEvents = React.memo(function CaseEvents({
               <CaseEventForm mode="CREATE" onChange={setCaseEventInput} />
               <FlexRowWithGaps $gapSize="m">
                 <InlineButton
+                  data-qa="cancel-event-button"
                   text="Peruuta"
                   disabled={submitting}
                   onClick={() => setEditingCaseEvent(false)}
                 />
                 <InlineButton
+                  data-qa="save-event-button"
                   text="Tallenna"
                   disabled={submitting || !caseEventInput}
                   onClick={() => {
@@ -81,6 +83,7 @@ export const CaseEvents = React.memo(function CaseEvents({
           </>
         ) : (
           <InlineButton
+            data-qa="add-event-button"
             text="Lisää merkintä"
             disabled={editingCaseEvent !== false || submitting || disabled}
             onClick={() => setEditingCaseEvent(true)}
@@ -92,7 +95,7 @@ export const CaseEvents = React.memo(function CaseEvents({
       <FlexCol>
         {events.map((caseEvent, idx) => (
           <Fragment key={caseEvent.id}>
-            <FlexRowWithGaps $gapSize="L">
+            <FlexRowWithGaps $gapSize="L" data-qa={`event-row-${caseEvent.id}`}>
               <div style={{ flexGrow: '1' }}>
                 {editingCaseEvent === caseEvent.id ? (
                   <CaseEventForm
@@ -108,11 +111,13 @@ export const CaseEvents = React.memo(function CaseEvents({
               {editingCaseEvent === caseEvent.id ? (
                 <FlexRowWithGaps $gapSize="m" style={{ alignSelf: 'flex-end' }}>
                   <InlineButton
+                    data-qa="cancel-event-edit-button"
                     text="Peruuta"
                     disabled={submitting}
                     onClick={() => setEditingCaseEvent(false)}
                   />
                   <InlineButton
+                    data-qa="save-event-edit-button"
                     text="Tallenna"
                     disabled={submitting || !caseEventInput}
                     onClick={() => {
@@ -134,12 +139,14 @@ export const CaseEvents = React.memo(function CaseEvents({
                   style={{ alignSelf: 'flex-start' }}
                 >
                   <IconButton
+                    data-qa="edit-event-button"
                     icon={faPen}
                     aria-label="Muokkaa"
                     disabled={disabled || editingCaseEvent !== false}
                     onClick={() => setEditingCaseEvent(caseEvent.id)}
                   />
                   <IconButton
+                    data-qa="delete-event-button"
                     icon={faTrash}
                     aria-label="Poista"
                     disabled={disabled || editingCaseEvent !== false}
