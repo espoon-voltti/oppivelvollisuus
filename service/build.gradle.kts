@@ -22,6 +22,9 @@ plugins {
 
 java { sourceCompatibility = JavaVersion.VERSION_25 }
 
+// CVE-2026-43515, CVE-2026-43512; overrides Spring Boot 4.0.6's tomcat 11.0.21
+extra["tomcat.version"] = "11.0.22"
+
 repositories { mavenCentral() }
 
 sourceSets {
