@@ -46,9 +46,10 @@ On macOS with a display, `./gradlew e2eTest` works without xvfb.
 
 ```
 cd service && ./gradlew test
+cd api-gateway && yarn test
 ```
 
-api-gateway and frontend have no test suites.
+frontend has no test suite.
 
 ## Lint / format / type-check
 
