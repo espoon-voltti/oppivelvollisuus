@@ -93,3 +93,7 @@ fun Database.Transaction.updateCaseEvent(
 fun Database.Transaction.deleteCaseEvent(id: CaseEventId) {
     createUpdate { sql("DELETE FROM case_events WHERE id = ${bind(id)}") }.execute()
 }
+
+fun Database.Read.getStudentCaseIdByEventId(eventId: CaseEventId): StudentCaseId? =
+    createQuery { sql("SELECT student_case_id FROM case_events WHERE id = ${bind(eventId)}") }
+        .exactlyOneOrNull<StudentCaseId>()

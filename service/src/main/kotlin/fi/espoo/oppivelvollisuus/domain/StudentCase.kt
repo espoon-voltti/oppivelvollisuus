@@ -290,7 +290,10 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                 FROM student_cases sc
                 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
                 WHERE student_id = ${bind(studentId)}
-                ORDER BY opened_at DESC, sc.created DESC
+                ORDER BY
+                    CASE WHEN sc.status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)} THEN 0 ELSE 1 END,
+                    opened_at DESC,
+                    sc.created DESC
                 """
             )
         }
@@ -435,4 +438,55 @@ fun Database.Read.findExistingValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
         }
         .toList<UUID>()
         .toSet()
+}
+
+fun Database.Read.getStudentCaseStatus(id: StudentCaseId): CaseStatus? =
+    createQuery { sql("SELECT status FROM student_cases WHERE id = ${bind(id)}") }
+        .exactlyOneOrNull<CaseStatus>()
+
+fun Database.Read.findStudentIdByCaseId(id: StudentCaseId): StudentId? =
+    createQuery { sql("SELECT student_id FROM student_cases WHERE id = ${bind(id)}") }
+        .exactlyOneOrNull<StudentId>()
+
+fun Database.Read.studentHasNonFinishedCaseOtherThan(
+    studentId: StudentId,
+    excludingCase: StudentCaseId,
+): Boolean =
+    createQuery {
+            sql(
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM student_cases
+                    WHERE student_id = ${bind(studentId)}
+                      AND id <> ${bind(excludingCase)}
+                      AND status IN (${bind(CaseStatus.TODO)}, ${bind(CaseStatus.ON_HOLD)})
+                )
+                """
+            )
+        }
+        .exactlyOne<Boolean>()
+
+fun Database.Transaction.copyValpasNotificationIdAndDeleteSource(
+    sourceId: StudentCaseId,
+    targetId: StudentCaseId,
+    notificationId: UUID,
+    updatedBy: EspooUserId,
+    now: HelsinkiDateTime,
+) {
+    // Delete the source first to release the unique constraint on valpas_notification_id,
+    // then update the target — otherwise the unique constraint fires on the UPDATE.
+    createUpdate { sql("DELETE FROM student_cases WHERE id = ${bind(sourceId)}") }
+        .updateExactlyOne()
+    createUpdate {
+            sql(
+                """
+                UPDATE student_cases
+                SET valpas_notification_id = ${bind(notificationId)},
+                    updated = ${bind(now)},
+                    updated_by = ${bind(updatedBy)}
+                WHERE id = ${bind(targetId)}
+                """
+            )
+        }
+        .updateExactlyOne()
 }

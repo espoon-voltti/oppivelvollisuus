@@ -30,6 +30,7 @@ class CaseRow(val locator: Locator) {
     fun assertStatus(expected: CaseStatus) {
         val expectedText =
             when (expected) {
+                CaseStatus.IMPORTED_FROM_VALPAS -> "Tuotu Valppaasta"
                 CaseStatus.TODO -> "Selvittämättä"
                 CaseStatus.ON_HOLD -> "Edistynyt - odottaa"
                 CaseStatus.FINISHED -> "Ohjaus päättynyt"
