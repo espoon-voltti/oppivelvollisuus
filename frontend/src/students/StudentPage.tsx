@@ -38,6 +38,7 @@ import {
   apiDeleteStudent,
   apiGetStudent,
   apiPutStudent,
+  StudentDetails,
   StudentInput,
   StudentResponse
 } from './api'
@@ -52,7 +53,12 @@ import {
 } from './cases/api'
 import { CaseEvents } from './cases/events/CaseEvents'
 import { CaseStatusForm } from './cases/status/CaseStatusForm'
-import { apiPutStudentCaseStatus, CaseStatusInput } from './cases/status/api'
+import { ImportedFromValpasActions } from './cases/status/ImportedFromValpasActions'
+import {
+  apiMarkCaseAsDuplicateOfLatest,
+  apiPutStudentCaseStatus,
+  CaseStatusInput
+} from './cases/status/api'
 
 const CollapsableRow = styled(FlexLeftRight)<{ $disabled?: boolean }>`
   ${(p) => (p.$disabled ? '' : 'cursor: pointer;')}
@@ -94,14 +100,16 @@ export const StudentPage = React.memo(function StudentPage() {
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
+  const cases = studentResponse?.cases
+  const activeCases = cases?.filter((c) => c.status !== 'FINISHED') ?? []
+  const finishedCases = cases?.filter((c) => c.status === 'FINISHED') ?? []
+  const activeCaseExists = activeCases.length > 0
+
   const [expandedCases, setExpandedCases] = useState<string[] | undefined>(
     undefined
   )
-  // Expand the first unfinished case by default
-  if (expandedCases === undefined && studentResponse) {
-    const firstUnfinished = studentResponse.cases.find(
-      (c) => c.status !== 'FINISHED'
-    )
+  if (expandedCases === undefined && cases) {
+    const firstUnfinished = cases.find((c) => c.status !== 'FINISHED')
     setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
   }
 
@@ -127,13 +135,6 @@ export const StudentPage = React.memo(function StudentPage() {
     editingCaseStatus ||
     editingCaseEvent
   )
-
-  const activeCase = studentResponse?.cases?.find(
-    (c) => c.status !== 'FINISHED'
-  )
-  const finishedCases =
-    studentResponse?.cases?.filter((c) => c.status === 'FINISHED') ?? []
-  const activeCaseExists = activeCase !== undefined
 
   useWarnOnUnsavedChanges(editingSomething)
 
@@ -214,12 +215,23 @@ export const StudentPage = React.memo(function StudentPage() {
                     />
                   </FlexRowWithGaps>
                 </FlexRight>
-                <StudentForm
-                  key={editingStudent ? 'EDIT' : 'VIEW'}
-                  mode={editingStudent ? 'EDIT' : 'VIEW'}
-                  student={studentResponse.student}
-                  onChange={setStudentInput}
-                />
+                {editingStudent ? (
+                  <StudentForm
+                    key="EDIT"
+                    mode="EDIT"
+                    student={studentResponse.student}
+                    onChange={setStudentInput}
+                    relaxValidation={studentResponse.cases.some(
+                      (c) => c.status === 'IMPORTED_FROM_VALPAS'
+                    )}
+                  />
+                ) : (
+                  <StudentForm
+                    key="VIEW"
+                    mode="VIEW"
+                    student={studentResponse.student}
+                  />
+                )}
                 {editingStudent && (
                   <FlexRight>
                     <FlexRowWithGaps>
@@ -316,7 +328,9 @@ export const StudentPage = React.memo(function StudentPage() {
 
             <CasesList
               studentId={studentResponse.student.id}
-              cases={activeCase ? [activeCase] : []}
+              student={studentResponse.student}
+              cases={activeCases}
+              allCases={cases ?? []}
               employees={employees}
               expandedCases={expandedCases}
               toggleExpandedCase={(caseId) =>
@@ -345,7 +359,9 @@ export const StudentPage = React.memo(function StudentPage() {
             <VerticalGap $size="m" />
             <CasesList
               studentId={studentResponse.student.id}
+              student={studentResponse.student}
               cases={finishedCases}
+              allCases={cases ?? []}
               employees={employees}
               expandedCases={expandedCases}
               toggleExpandedCase={(caseId) =>
@@ -376,7 +392,9 @@ export const StudentPage = React.memo(function StudentPage() {
 
 const CasesList = React.memo(function CasesList({
   studentId,
+  student,
   cases,
+  allCases,
   employees,
   expandedCases,
   toggleExpandedCase,
@@ -393,7 +411,9 @@ const CasesList = React.memo(function CasesList({
   loadStudent
 }: {
   studentId: string
+  student: StudentDetails
   cases: StudentCase[]
+  allCases: StudentCase[]
   employees: EmployeeUser[]
   expandedCases: string[]
   toggleExpandedCase: (id: string) => void
@@ -471,30 +491,32 @@ const CasesList = React.memo(function CasesList({
                         disabled={editingSomething}
                         onClick={() => setEditingCase(studentCase.id)}
                       />
-                      <InlineButton
-                        data-qa="delete-case-button"
-                        text="Poista"
-                        icon={faTrash}
-                        disabled={editingSomething}
-                        onClick={() => {
-                          if (studentCase.events.length > 0) {
-                            window.alert(
-                              'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
-                            )
-                          } else {
-                            if (
-                              window.confirm(
-                                'Haluatko varmasti poistaa ilmoituksen?'
+                      {studentCase.status !== 'IMPORTED_FROM_VALPAS' && (
+                        <InlineButton
+                          data-qa="delete-case-button"
+                          text="Poista"
+                          icon={faTrash}
+                          disabled={editingSomething}
+                          onClick={() => {
+                            if (studentCase.events.length > 0) {
+                              window.alert(
+                                'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
                               )
-                            ) {
-                              void apiDeleteStudentCase(
-                                studentId,
-                                studentCase.id
-                              ).then(() => loadStudent())
+                            } else {
+                              if (
+                                window.confirm(
+                                  'Haluatko varmasti poistaa ilmoituksen?'
+                                )
+                              ) {
+                                void apiDeleteStudentCase(
+                                  studentId,
+                                  studentCase.id
+                                ).then(() => loadStudent())
+                              }
                             }
-                          }
-                        }}
-                      />
+                          }}
+                        />
+                      )}
                     </FlexRowWithGaps>
                   </FlexRight>
                 )}
@@ -545,17 +567,36 @@ const CasesList = React.memo(function CasesList({
               <FlexColWithGaps>
                 <FlexLeftRight>
                   <H4>Ohjauksen tila</H4>
-                  {editingCaseStatus !== studentCase.id && (
-                    <InlineButton
-                      data-qa="change-status-button"
-                      text="Vaihda tilaa"
-                      icon={faPen}
-                      disabled={editingSomething}
-                      onClick={() => setEditingCaseStatus(studentCase.id)}
-                    />
-                  )}
+                  {studentCase.status !== 'IMPORTED_FROM_VALPAS' &&
+                    editingCaseStatus !== studentCase.id && (
+                      <InlineButton
+                        data-qa="change-status-button"
+                        text="Vaihda tilaa"
+                        icon={faPen}
+                        disabled={editingSomething}
+                        onClick={() => setEditingCaseStatus(studentCase.id)}
+                      />
+                    )}
                 </FlexLeftRight>
-                {editingCaseStatus === studentCase.id ? (
+                {studentCase.status === 'IMPORTED_FROM_VALPAS' ? (
+                  <ImportedFromValpasActions
+                    studentCase={studentCase}
+                    student={student}
+                    otherCases={allCases.filter((c) => c.id !== studentCase.id)}
+                    onApprove={() =>
+                      apiPutStudentCaseStatus(
+                        studentCase.studentId,
+                        studentCase.id,
+                        { status: 'TODO', finishedInfo: null }
+                      ).then(() => loadStudent())
+                    }
+                    onMarkAsDuplicate={() =>
+                      apiMarkCaseAsDuplicateOfLatest(studentCase.id).then(() =>
+                        loadStudent()
+                      )
+                    }
+                  />
+                ) : editingCaseStatus === studentCase.id ? (
                   <FlexColWithGaps>
                     <CaseStatusForm
                       mode="EDIT"

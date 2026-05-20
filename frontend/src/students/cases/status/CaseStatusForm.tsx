@@ -190,7 +190,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         ) : (
           <Select<CaseStatus>
             data-qa="status-select"
-            items={caseStatuses}
+            items={caseStatuses.filter((s) => s !== 'IMPORTED_FROM_VALPAS')}
             selectedItem={status}
             getItemLabel={(item) => caseStatusNames[item]}
             onChange={(item) => setStatus(item)}

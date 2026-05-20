@@ -50,6 +50,8 @@ interface EditProps {
   mode: 'EDIT'
   student: StudentDetails
   onChange: (validInput: StudentInput | null) => void
+  /** When true, validation is relaxed to allow saving with missing required fields */
+  relaxValidation?: boolean
 }
 type Props = CreateProps | ViewProps | EditProps
 
@@ -91,6 +93,11 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.valpasLink,
     duplicateCheckDelay
   )
+  const [valpasOppijaOid, setValpasOppijaOid, debouncedValpasOppijaOid] =
+    useDebouncedState(
+      props.mode === 'CREATE' ? '' : (props.student.valpasOppijaOid ?? ''),
+      duplicateCheckDelay
+    )
   const [firstName, setFirstName, debouncedFirstName] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.student.firstName,
     duplicateCheckDelay
@@ -150,12 +157,14 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     void apiGetPossibleDuplicateStudents({
       ssn: debouncedSsn,
       valpasLink: debouncedValpasLink,
+      valpasOppijaOid: debouncedValpasOppijaOid,
       firstName: debouncedFirstName,
       lastName: debouncedLastName
     }).then(setDuplicateStudents)
   }, [
     debouncedSsn,
     debouncedValpasLink,
+    debouncedValpasOppijaOid,
     debouncedFirstName,
     debouncedLastName,
     creating
@@ -167,19 +176,26 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   )
   const duplicateNameStudents = duplicateStudents.filter((s) => s.matchingName)
 
+  const relaxValidation =
+    props.mode === 'EDIT' && props.relaxValidation === true
+
   const validInput: StudentInput | null = useMemo(() => {
-    if (firstName.trim() === '') return null
-    if (lastName.trim() === '') return null
     const parsedDateOfBirth = parseDate(dateOfBirth.trim())
-    if (!parsedDateOfBirth) return null
+
+    if (!relaxValidation) {
+      if (firstName.trim() === '') return null
+      if (lastName.trim() === '') return null
+      if (!parsedDateOfBirth) return null
+    }
 
     return {
       valpasLink: valpasLink.trim(),
+      valpasOppijaOid: debouncedValpasOppijaOid.trim() || null,
       ssn: ssn.trim(),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       language: language.toLowerCase().trim(),
-      dateOfBirth: parsedDateOfBirth,
+      dateOfBirth: parsedDateOfBirth ?? new Date(0),
       phone: phone.trim(),
       email: email.trim(),
       gender,
@@ -190,7 +206,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       partnerOrganisations
     }
   }, [
+    relaxValidation,
     valpasLink,
+    debouncedValpasOppijaOid,
     ssn,
     firstName,
     lastName,
@@ -215,8 +233,9 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
   return (
     <FlexCol>
       <GroupOfInputRows>
+        {/* Row 1: SSN (1/8), DOB (1/8), Valpas-oppijanumero (1/4), Valpas-linkki (1/2) */}
         <RowOfInputs>
-          <LabeledInput $relativeWidth={1 / 6}>
+          <LabeledInput $relativeWidth={0.125}>
             <Label>Hetu</Label>
             {props.mode === 'VIEW' ? (
               <span data-qa="ssn-value">{props.student.ssn || '-'}</span>
@@ -224,7 +243,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <InputField data-qa="ssn-input" onChange={setSsn} value={ssn} />
             )}
           </LabeledInput>
-          <LabeledInput $relativeWidth={1 / 6}>
+          <LabeledInput $relativeWidth={0.125}>
             <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>
@@ -239,66 +258,20 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               />
             )}
           </LabeledInput>
-          <LabeledInput $relativeWidth={1 / 6}>
-            <Label>Oletettu sukupuoli</Label>
-            {props.mode === 'VIEW' ? (
-              <span>
-                {props.student.gender ? genderNames[props.student.gender] : '-'}
-              </span>
-            ) : (
-              <Select<Gender>
-                items={genders}
-                selectedItem={gender}
-                placeholder=" "
-                getItemLabel={(item) => genderNames[item]}
-                onChange={(item) => setGender(item)}
-              />
-            )}
-          </LabeledInput>
           <LabeledInput $relativeWidth={0.25}>
-            <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
+            <Label>Valpas-oppijanumero</Label>
             {props.mode === 'VIEW' ? (
-              <span>{props.student.lastName}</span>
+              <span>{props.student.valpasOppijaOid || '-'}</span>
             ) : (
               <InputField
-                data-qa="last-name-input"
-                onChange={setLastName}
-                value={lastName}
+                data-qa="valpas-oppija-oid-input"
+                onChange={setValpasOppijaOid}
+                value={valpasOppijaOid}
               />
-            )}
-          </LabeledInput>
-          <LabeledInput $relativeWidth={0.25}>
-            <Label>Etunimi {props.mode !== 'VIEW' && '*'}</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.firstName}</span>
-            ) : (
-              <InputField
-                data-qa="first-name-input"
-                onChange={setFirstName}
-                value={firstName}
-              />
-            )}
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $relativeWidth={1 / 6}>
-            <Label>Puhelinnumero</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.phone || '-'}</span>
-            ) : (
-              <InputField onChange={setPhone} value={phone} />
-            )}
-          </LabeledInput>
-          <LabeledInput $relativeWidth={1 / 3}>
-            <Label>Sähköposti</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.email || '-'}</span>
-            ) : (
-              <InputField onChange={setEmail} value={email} />
             )}
           </LabeledInput>
           <LabeledInput $relativeWidth={0.5}>
-            <Label>Valpas linkki</Label>
+            <Label>Valpas-linkki</Label>
             {props.mode === 'VIEW' ? (
               props.student.valpasLink ? (
                 <a
@@ -314,6 +287,83 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               )
             ) : (
               <InputField onChange={setValpasLink} value={valpasLink} />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+        {/* Row 2: Sukunimi (1/4), Etunimet (1/4), Sukupuoli (1/6), Kieli (1/6), Kotikunta (1/6) */}
+        <RowOfInputs>
+          <LabeledInput $relativeWidth={0.25}>
+            <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.lastName}</span>
+            ) : (
+              <InputField
+                data-qa="last-name-input"
+                onChange={setLastName}
+                value={lastName}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={0.25}>
+            <Label>Etunimet {props.mode !== 'VIEW' && '*'}</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.firstName}</span>
+            ) : (
+              <InputField
+                data-qa="first-name-input"
+                onChange={setFirstName}
+                value={firstName}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 6}>
+            <Label>Sukupuoli</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.gender ? genderNames[props.student.gender] : '-'}
+              </span>
+            ) : (
+              <Select<Gender>
+                items={genders}
+                selectedItem={gender}
+                placeholder=" "
+                getItemLabel={(item) => genderNames[item]}
+                onChange={(item) => setGender(item)}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 6}>
+            <Label>Kieli</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.language}</span>
+            ) : (
+              <FlexRowWithGaps>
+                <InputField onChange={setLanguage} value={language} />
+                <InputQuickFill>
+                  <Select<string>
+                    items={commonLanguages}
+                    selectedItem={null}
+                    placeholder=" "
+                    onChange={(item) => {
+                      if (item) setLanguage(item)
+                    }}
+                  />
+                </InputQuickFill>
+              </FlexRowWithGaps>
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 6}>
+            <Label>Kotikunta Suomessa</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.municipalityInFinland ? 'Kyllä' : 'Ei'}
+              </span>
+            ) : (
+              <Checkbox
+                label="Kyllä"
+                checked={municipalityInFinland}
+                onChange={setMunicipalityInFinland}
+              />
             )}
           </LabeledInput>
         </RowOfInputs>
@@ -360,47 +410,30 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </div>
         )}
+        {/* Row 3: Osoite (1/2), Puhelinnumero (1/6), Sähköposti (1/3) */}
         <RowOfInputs>
           <LabeledInput $relativeWidth={0.5}>
-            <Label>Lähiosoite</Label>
+            <Label>Osoite</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.address || '-'}</span>
             ) : (
               <InputField onChange={setAddress} value={address} />
             )}
           </LabeledInput>
-          <LabeledInput $relativeWidth={0.25}>
-            <Label>Kotikunta Suomessa</Label>
+          <LabeledInput $relativeWidth={1 / 6}>
+            <Label>Puhelinnumero</Label>
             {props.mode === 'VIEW' ? (
-              <span>
-                {props.student.municipalityInFinland ? 'Kyllä' : 'Ei'}
-              </span>
+              <span>{props.student.phone || '-'}</span>
             ) : (
-              <Checkbox
-                label="Kyllä"
-                checked={municipalityInFinland}
-                onChange={setMunicipalityInFinland}
-              />
+              <InputField onChange={setPhone} value={phone} />
             )}
           </LabeledInput>
-          <LabeledInput $relativeWidth={0.25}>
-            <Label>Äidinkieli</Label>
+          <LabeledInput $relativeWidth={1 / 3}>
+            <Label>Sähköposti</Label>
             {props.mode === 'VIEW' ? (
-              <span>{props.student.language}</span>
+              <span>{props.student.email || '-'}</span>
             ) : (
-              <FlexRowWithGaps>
-                <InputField onChange={setLanguage} value={language} />
-                <InputQuickFill>
-                  <Select<string>
-                    items={commonLanguages}
-                    selectedItem={null}
-                    placeholder=" "
-                    onChange={(item) => {
-                      if (item) setLanguage(item)
-                    }}
-                  />
-                </InputQuickFill>
-              </FlexRowWithGaps>
+              <InputField onChange={setEmail} value={email} />
             )}
           </LabeledInput>
         </RowOfInputs>

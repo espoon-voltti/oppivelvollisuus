@@ -25,7 +25,7 @@ interface StudentSearchState {
 }
 
 const defaultState: StudentSearchState = {
-  statuses: ['TODO', 'ON_HOLD'],
+  statuses: ['IMPORTED_FROM_VALPAS', 'TODO', 'ON_HOLD'],
   setStatuses: () => undefined,
   sources: [...caseSources],
   setSources: () => undefined,

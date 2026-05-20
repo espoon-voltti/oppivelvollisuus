@@ -54,6 +54,7 @@ export type StudentCase = StudentCaseInput &
     studentId: string
     assignedTo: EmployeeBasics | null
     events: CaseEvent[]
+    valpasNotificationId: string | null
   }
 
 export type StudentCaseInput = {

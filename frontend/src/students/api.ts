@@ -120,6 +120,7 @@ export interface StudentDetails extends StudentInput {
 
 export interface StudentInput {
   valpasLink: string
+  valpasOppijaOid: string | null
   ssn: string
   firstName: string
   lastName: string
@@ -169,6 +170,7 @@ export interface StudentSearchParams {
 export interface DuplicateStudentCheckInput {
   ssn: string
   valpasLink: string
+  valpasOppijaOid: string
   firstName: string
   lastName: string
 }
