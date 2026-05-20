@@ -408,7 +408,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
     }
 
     @Test
-    fun `mark-as-duplicate-of-active copies id and deletes imported case`() {
+    fun `mark-as-duplicate-of-latest copies id and deletes imported case`() {
         val notificationId = UUID.randomUUID()
 
         // Pre-seed student with active TODO case (no valpas_notification_id)

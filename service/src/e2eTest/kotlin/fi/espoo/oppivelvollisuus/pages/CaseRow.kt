@@ -20,6 +20,13 @@ class CaseRow(val locator: Locator) {
     val statusSelect = locator.dataQa("status-select")
     val finishedReasonSelect = locator.dataQa("finished-reason-select")
 
+    // Valpas import action buttons (visible only on IMPORTED_FROM_VALPAS cases)
+    val approveValpasButton = locator.dataQa("approve-valpas-case-button")
+    val markAsDuplicateButton = locator.dataQa("mark-as-duplicate-button")
+
+    // Case edit form fields
+    val sourceValpasSelect = locator.dataQa("source-valpas-select")
+
     val addEventButton = locator.dataQa("add-event-button")
     val saveEventButton = locator.dataQa("save-event-button")
     val eventNotesInput = locator.dataQa("event-notes-input")

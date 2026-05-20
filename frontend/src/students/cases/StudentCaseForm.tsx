@@ -224,6 +224,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
               )}
               {source === 'VALPAS_NOTICE' && (
                 <Select<ValpasNotifier>
+                  data-qa="source-valpas-select"
                   items={valpasNotifiers}
                   selectedItem={sourceValpas}
                   placeholder="Valitse"

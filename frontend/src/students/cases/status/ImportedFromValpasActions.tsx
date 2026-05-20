@@ -88,12 +88,14 @@ export const ImportedFromValpasActions = React.memo(
           <FlexRowWithGaps $gapSize="m">
             {hasActiveOther && (
               <Button
+                data-qa="mark-as-duplicate-button"
                 text="Merkitse duplikaatiksi"
                 disabled={submitting}
                 onClick={handleMarkAsDuplicate}
               />
             )}
             <Button
+              data-qa="approve-valpas-case-button"
               text="Hyväksy"
               primary
               disabled={approveDisabled || submitting}
