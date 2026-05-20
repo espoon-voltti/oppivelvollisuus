@@ -295,6 +295,12 @@ fun Database.Transaction.deleteStudent(id: StudentId) {
     createUpdate { sql("DELETE FROM students WHERE id = ${bind(id)}") }.updateExactlyOne()
 }
 
+fun Database.Read.findStudentIdBySsn(ssn: String): StudentId? {
+    require(ssn.isNotBlank()) { "ssn must not be blank" }
+    return createQuery { sql("SELECT id FROM students WHERE ssn = ${bind(ssn)}") }
+        .exactlyOneOrNull<StudentId>()
+}
+
 fun Database.Transaction.deleteOldStudents(thresholdDate: LocalDate) {
     createUpdate {
             sql(

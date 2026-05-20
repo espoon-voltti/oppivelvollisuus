@@ -9,6 +9,7 @@ import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.db.DatabaseEnum
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
@@ -366,4 +367,72 @@ fun Database.Transaction.deleteStudentCase(id: StudentCaseId, studentId: Student
             )
         }
         .updateExactlyOne()
+}
+
+fun Database.Read.findImportedFromValpasCaseForStudent(studentId: StudentId): StudentCaseId? =
+    createQuery {
+            sql(
+                """
+                SELECT id FROM student_cases
+                WHERE student_id = ${bind(studentId)}
+                  AND status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)}
+                """
+            )
+        }
+        .exactlyOneOrNull<StudentCaseId>()
+
+fun Database.Transaction.insertImportedCase(
+    studentId: StudentId,
+    valpasNotificationId: UUID,
+    openedAt: LocalDate,
+    now: HelsinkiDateTime,
+): StudentCaseId =
+    createUpdate {
+            sql(
+                """
+                INSERT INTO student_cases (
+                    created, created_by, student_id, opened_at, assigned_to,
+                    status, source, source_valpas, source_other, source_contact,
+                    school_background, case_background_reasons, not_in_school_reason,
+                    valpas_notification_id
+                ) VALUES (
+                    ${bind(now)},
+                    ${bind(AuthenticatedUser.SystemInternalUser.espooUserId)},
+                    ${bind(studentId)}, ${bind(openedAt)}, NULL,
+                    ${bind(CaseStatus.IMPORTED_FROM_VALPAS)},
+                    ${bind(CaseSource.VALPAS_NOTICE)},
+                    NULL, NULL, '',
+                    ${bind(emptyArray<SchoolBackground>())},
+                    ${bind(emptyArray<CaseBackgroundReason>())},
+                    NULL,
+                    ${bind(valpasNotificationId)}
+                )
+                RETURNING id
+                """
+            )
+        }
+        .executeAndReturnGeneratedKeys()
+        .exactlyOne<StudentCaseId>()
+
+fun Database.Transaction.existsCaseWithNotificationId(notificationId: UUID): Boolean =
+    createQuery {
+            sql(
+                "SELECT 1 FROM student_cases WHERE valpas_notification_id = ${bind(notificationId)}"
+            )
+        }
+        .toList<Int>()
+        .isNotEmpty()
+
+fun Database.Read.findExistingValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
+    if (ids.isEmpty()) return emptySet()
+    return createQuery {
+            sql(
+                """
+                SELECT valpas_notification_id FROM student_cases
+                WHERE valpas_notification_id = ANY(${bind(ids.toTypedArray())})
+                """
+            )
+        }
+        .toList<UUID>()
+        .toSet()
 }
