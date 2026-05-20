@@ -124,12 +124,12 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
   if (props.mode === 'VIEW') {
     return (
       <RowOfInputs>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Tila</Label>
           <span>{caseStatusNames[props.studentCase.status]}</span>
         </LabeledInput>
         {props.studentCase.status === 'FINISHED' && (
-          <LabeledInput $cols={4}>
+          <LabeledInput $relativeWidth={1 / 3}>
             <Label>Syy ohjauksen päättymiselle</Label>
             <span>
               {caseFinishedReasonNames[props.studentCase.finishedInfo.reason]}
@@ -138,7 +138,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         )}
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason === 'BEGAN_STUDIES' && (
-            <LabeledInput $cols={4}>
+            <LabeledInput $relativeWidth={1 / 3}>
               <Label>Oppilaitos</Label>
               <span>
                 {
@@ -152,7 +152,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason ===
             'COMPULSORY_EDUCATION_ENDED' && (
-            <LabeledInput $cols={4}>
+            <LabeledInput $relativeWidth={1 / 3}>
               <Label>Jatkotoimenpiteet</Label>
               <span>
                 <span>
@@ -172,7 +172,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
 
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason === 'OTHER' && (
-            <LabeledInput $cols={4}>
+            <LabeledInput $relativeWidth={1 / 3}>
               <Label>Selite</Label>
               <span>{props.studentCase.finishedInfo.otherReason || '-'}</span>
             </LabeledInput>
@@ -183,7 +183,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
 
   return (
     <RowOfInputs>
-      <LabeledInput $cols={4}>
+      <LabeledInput $relativeWidth={1 / 3}>
         <Label>Tila *</Label>
         {props.studentCase.status === 'FINISHED' && props.activeCaseExists ? (
           <StatusChip status={props.studentCase.status} />
@@ -198,7 +198,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         )}
       </LabeledInput>
       {status === 'FINISHED' && (
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Syy ohjauksen päättymiselle *</Label>
           <Select<CaseFinishedReason>
             data-qa="finished-reason-select"
@@ -211,7 +211,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         </LabeledInput>
       )}
       {status === 'FINISHED' && finishedReason === 'BEGAN_STUDIES' && (
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Oppilaitos *</Label>
           <Select<SchoolType>
             items={schoolTypes}
@@ -224,7 +224,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
       )}
       {status === 'FINISHED' &&
         finishedReason === 'COMPULSORY_EDUCATION_ENDED' && (
-          <LabeledInput $cols={4}>
+          <LabeledInput $relativeWidth={1 / 3}>
             <Label>Jatkotoimenpiteet *</Label>
             <FlexColWithGaps>
               {followUpMeasureValues.map((option) => (
@@ -246,7 +246,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         )}
 
       {status === 'FINISHED' && finishedReason === 'OTHER' && (
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Selite</Label>
           <InputField onChange={setOtherReason} value={otherReason} />
         </LabeledInput>

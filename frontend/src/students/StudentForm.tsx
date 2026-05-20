@@ -216,7 +216,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     <FlexCol>
       <GroupOfInputRows>
         <RowOfInputs>
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Hetu</Label>
             {props.mode === 'VIEW' ? (
               <span data-qa="ssn-value">{props.student.ssn || '-'}</span>
@@ -224,7 +224,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <InputField data-qa="ssn-input" onChange={setSsn} value={ssn} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>
@@ -239,7 +239,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               />
             )}
           </LabeledInput>
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Oletettu sukupuoli</Label>
             {props.mode === 'VIEW' ? (
               <span>
@@ -255,7 +255,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $relativeWidth={0.25}>
             <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.lastName}</span>
@@ -267,7 +267,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $relativeWidth={0.25}>
             <Label>Etunimi {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.firstName}</span>
@@ -281,7 +281,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           </LabeledInput>
         </RowOfInputs>
         <RowOfInputs>
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Puhelinnumero</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.phone || '-'}</span>
@@ -289,7 +289,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <InputField onChange={setPhone} value={phone} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={4}>
+          <LabeledInput $relativeWidth={1 / 3}>
             <Label>Sähköposti</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.email || '-'}</span>
@@ -297,7 +297,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <InputField onChange={setEmail} value={email} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={0.5}>
             <Label>Valpas linkki</Label>
             {props.mode === 'VIEW' ? (
               props.student.valpasLink ? (
@@ -361,7 +361,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           </div>
         )}
         <RowOfInputs>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={0.5}>
             <Label>Lähiosoite</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.address || '-'}</span>
@@ -369,7 +369,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <InputField onChange={setAddress} value={address} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $relativeWidth={0.25}>
             <Label>Kotikunta Suomessa</Label>
             {props.mode === 'VIEW' ? (
               <span>
@@ -383,7 +383,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
+          <LabeledInput $relativeWidth={0.25}>
             <Label>Äidinkieli</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.language}</span>
@@ -412,7 +412,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         <RowOfInputs>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={0.5}>
             <Label>Huoltajat ja yhteystiedot</Label>
             {props.mode === 'VIEW' ? (
               <ReadOnlyTextArea text={props.student.guardianInfo || '-'} />
@@ -420,7 +420,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <TextArea onChange={setGuardianInfo} value={guardianInfo} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={0.5}>
             <Label>Muut yhteyshenkilöt ja yhteystiedot</Label>
             {props.mode === 'VIEW' ? (
               <ReadOnlyTextArea
@@ -435,7 +435,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           </LabeledInput>
         </RowOfInputs>
         <RowOfInputs>
-          <LabeledInput $cols={4}>
+          <LabeledInput $relativeWidth={1 / 3}>
             <Label>Yhteistyötahot</Label>
             {props.mode === 'VIEW' ? (
               <span>

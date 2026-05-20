@@ -105,20 +105,22 @@ export const SectionContainer = styled.div<{ $minHeight?: string }>`
   ${(p) => (p.$minHeight ? `min-height: ${p.$minHeight};` : '')}
 `
 
-const widthByTwelveColLayout = (columns: number) => css`
-  width: calc(${columns / 12} * (${pageWidth} - 2 * ${sectionPadding}) - 32px);
+const widthByRelative = (fraction: number) => css`
+  width: calc(${fraction} * (${pageWidth} - 2 * ${sectionPadding}) - 32px);
   flex-grow: 0;
   flex-shrink: 0;
 `
 
-export const FixedWidthDiv = styled.div<{ $cols: number }>`
-  ${(p) => widthByTwelveColLayout(p.$cols)}
+export const FixedWidthDiv = styled.div<{ $relativeWidth: number }>`
+  ${(p) => widthByRelative(p.$relativeWidth)}
 `
 
-export const LabeledInput = styled(FlexColWithGaps)<{ $cols?: number }>`
+export const LabeledInput = styled(FlexColWithGaps)<{
+  $relativeWidth?: number
+}>`
   ${(p) =>
-    p.$cols
-      ? widthByTwelveColLayout(p.$cols)
+    p.$relativeWidth
+      ? widthByRelative(p.$relativeWidth)
       : css`
           flex-grow: 1;
         `}

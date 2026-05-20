@@ -71,13 +71,13 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
   if (props.mode === 'VIEW') {
     return (
       <RowOfInputs>
-        <LabeledInput $cols={2}>
+        <LabeledInput $relativeWidth={1 / 6}>
           <TypeLabel $type={props.caseEvent.type}>
             {formatDate(props.caseEvent.date)}
           </TypeLabel>
           <span>{props.caseEvent.created.name}</span>
         </LabeledInput>
-        <LabeledInput $cols={9}>
+        <LabeledInput $relativeWidth={0.75}>
           <TypeLabel $type={props.caseEvent.type}>
             {caseEventTypeNames[props.caseEvent.type]}
           </TypeLabel>
@@ -96,7 +96,7 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
   return (
     <GroupOfInputRows>
       <RowOfInputs>
-        <LabeledInput $cols={2}>
+        <LabeledInput $relativeWidth={1 / 6}>
           <Label>Päivämäärä *</Label>
           <InputField
             data-qa="event-date-input"
@@ -104,7 +104,7 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
             value={date}
           />
         </LabeledInput>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Merkinnän tyyppi *</Label>
           <Select<CaseEventType>
             data-qa="event-type-select"
@@ -116,7 +116,7 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
         </LabeledInput>
       </RowOfInputs>
       <RowOfInputs>
-        <LabeledInput $cols={9}>
+        <LabeledInput $relativeWidth={0.75}>
           <Label>Kommentti</Label>
           <TextArea
             data-qa="event-notes-input"

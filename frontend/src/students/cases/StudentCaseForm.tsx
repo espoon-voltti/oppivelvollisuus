@@ -155,8 +155,8 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
   return (
     <GroupOfInputRows>
       <RowOfInputs>
-        <FixedWidthDiv $cols={4}>
-          <LabeledInput $cols={2}>
+        <FixedWidthDiv $relativeWidth={1 / 3}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Ilmoitettu {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>{formatDate(props.studentCase.openedAt)}</span>
@@ -165,7 +165,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             )}
           </LabeledInput>
         </FixedWidthDiv>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Ohjaaja</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.assignedTo?.name ?? '-'}</span>
@@ -183,7 +183,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
         </LabeledInput>
       </RowOfInputs>
       <RowOfInputs>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>
             Mitä kautta tieto saapunut? {props.mode !== 'VIEW' && '*'}
           </Label>
@@ -201,7 +201,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             />
           )}
         </LabeledInput>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           {props.mode === 'VIEW' ? (
             <>
               {(props.studentCase.source === 'VALPAS_NOTICE' ||
@@ -243,7 +243,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             </>
           )}
         </LabeledInput>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Ilmoittajan yhteystiedot</Label>
           {props.mode === 'VIEW' ? (
             <span>{props.studentCase.sourceContact || '-'}</span>
@@ -253,7 +253,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
         </LabeledInput>
       </RowOfInputs>
       <RowOfInputs>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Opiskelutausta</Label>
           {props.mode === 'VIEW' ? (
             <span>
@@ -286,7 +286,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             </FlexColWithGaps>
           )}
         </LabeledInput>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Ilmoituksen taustasyyt</Label>
           {props.mode === 'VIEW' ? (
             <span>
@@ -319,7 +319,7 @@ export const StudentCaseForm = React.memo(function StudentCaseForm(
             </FlexColWithGaps>
           )}
         </LabeledInput>
-        <LabeledInput $cols={4}>
+        <LabeledInput $relativeWidth={1 / 3}>
           <Label>Ei suorita oppivelvollisuutta, koska</Label>
           {props.mode === 'VIEW' ? (
             <span>
