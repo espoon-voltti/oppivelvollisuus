@@ -23,12 +23,17 @@ data class AsyncJobType<T : Any>(val payloadClass: KClass<T>) {
 sealed interface AsyncJob {
     data class RunScheduledJob(val job: String) : AsyncJob
 
+    data object StartValpasImport : AsyncJob
+
+    data class ImportValpasOppija(val oppija: fi.espoo.oppivelvollisuus.valpas.ValpasOppija) :
+        AsyncJob
+
     companion object {
         val main =
             AsyncJobRunner.Pool(
                 AsyncJobPool.Id(AsyncJob::class, "main"),
                 AsyncJobPool.Config(concurrency = 2),
-                setOf(RunScheduledJob::class),
+                setOf(RunScheduledJob::class, StartValpasImport::class, ImportValpasOppija::class),
             )
     }
 }
