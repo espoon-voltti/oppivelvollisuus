@@ -148,6 +148,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                    valpasNotificationId = null,
                     events = emptyList(),
                 ),
                 studentCase,
@@ -199,6 +200,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
                     notInSchoolReason = null,
+                    valpasNotificationId = null,
                     events = emptyList(),
                 ),
                 studentCase,
@@ -242,6 +244,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                         setOf(CaseBackgroundReason.MOTIVAATION_PUUTE, CaseBackgroundReason.MUU_SYY),
                     notInSchoolReason =
                         NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA,
+                    valpasNotificationId = null,
                     events = emptyList(),
                 ),
                 studentCase,

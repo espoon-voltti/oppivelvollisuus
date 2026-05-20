@@ -278,6 +278,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
         val input =
             StudentInput(
                 valpasLink = "https://valpas.fi/x",
+                valpasOppijaOid = null,
                 ssn = "010203A123X",
                 firstName = "Iiris",
                 lastName = "Insertilä",
@@ -323,6 +324,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 data =
                     StudentInput(
                         valpasLink = "after",
+                        valpasOppijaOid = null,
                         ssn = "010203A123X",
                         firstName = "After",
                         lastName = "Updated",

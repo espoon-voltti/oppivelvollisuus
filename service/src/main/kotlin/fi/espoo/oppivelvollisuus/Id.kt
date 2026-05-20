@@ -19,6 +19,8 @@ sealed interface DatabaseTable {
     sealed class StudentCase : DatabaseTable
 
     sealed class CaseEvent : DatabaseTable
+
+    sealed class ValpasQueryRun : DatabaseTable
 }
 
 typealias EspooUserId = Id<DatabaseTable.User>
@@ -28,6 +30,8 @@ typealias StudentId = Id<DatabaseTable.Student>
 typealias StudentCaseId = Id<DatabaseTable.StudentCase>
 
 typealias CaseEventId = Id<DatabaseTable.CaseEvent>
+
+typealias ValpasQueryRunId = Id<DatabaseTable.ValpasQueryRun>
 
 @JsonDeserialize(keyUsing = Id.KeyFromJson::class)
 data class Id<out T : DatabaseTable>(val raw: UUID) : Comparable<Id<*>> {

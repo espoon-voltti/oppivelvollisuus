@@ -37,6 +37,7 @@ enum class PartnerOrganisation : DatabaseEnum {
 
 data class StudentInput(
     val valpasLink: String,
+    val valpasOppijaOid: String?,
     val ssn: String,
     val firstName: String,
     val lastName: String,
@@ -60,8 +61,8 @@ fun Database.Transaction.insertStudent(
     createUpdate {
             sql(
                 """
-                INSERT INTO students (created, created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
-                VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)}, ${bind(data.partnerOrganisations.toTypedArray())})
+                INSERT INTO students (created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
+                VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.valpasOppijaOid)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)}, ${bind(data.partnerOrganisations.toTypedArray())})
                 RETURNING id
                 """
             )
@@ -111,7 +112,14 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
                     SELECT id, opened_at, assigned_to, status, source
                     FROM student_cases
                     WHERE student_id = s.id
-                    ORDER BY status != 'FINISHED' DESC, opened_at DESC
+                    ORDER BY
+                      CASE status
+                        WHEN 'IMPORTED_FROM_VALPAS' THEN 0
+                        WHEN 'TODO'                 THEN 1
+                        WHEN 'ON_HOLD'              THEN 1
+                        WHEN 'FINISHED'             THEN 2
+                      END,
+                      opened_at DESC NULLS LAST
                     LIMIT 1
                 ) sc ON true
                 LEFT JOIN LATERAL (
@@ -173,6 +181,7 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
 data class Student(
     val id: StudentId,
     val valpasLink: String,
+    val valpasOppijaOid: String?,
     val ssn: String,
     val firstName: String,
     val lastName: String,
@@ -192,7 +201,7 @@ fun Database.Read.getStudent(id: StudentId): Student =
     createQuery {
             sql(
                 """
-                SELECT id, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
+                SELECT id, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
                 FROM students
                 WHERE id = ${bind(id)}
                 """
@@ -214,6 +223,7 @@ fun Database.Transaction.updateStudent(
                     updated = ${bind(now)},
                     updated_by = ${bind(updatedBy)},
                     valpas_link = ${bind(data.valpasLink)},
+                    valpas_oppija_oid = ${bind(data.valpasOppijaOid)},
                     ssn = ${bind(data.ssn)},
                     first_name = ${bind(data.firstName)},
                     last_name = ${bind(data.lastName)},

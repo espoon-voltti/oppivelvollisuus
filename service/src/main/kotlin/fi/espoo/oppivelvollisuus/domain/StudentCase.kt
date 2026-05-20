@@ -13,11 +13,13 @@ import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.db.DatabaseEnum
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import java.time.LocalDate
+import java.util.UUID
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
 
 enum class CaseStatus : DatabaseEnum {
+    IMPORTED_FROM_VALPAS,
     TODO,
     ON_HOLD,
     FINISHED;
@@ -120,9 +122,6 @@ data class StudentCaseInput(
     val notInSchoolReason: NotInSchoolReason?,
 ) {
     init {
-        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
-            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
-        }
         if ((source == CaseSource.OTHER) != (sourceOther != null)) {
             throw BadRequest("sourceOther must be present if and only if source is OTHER")
         }
@@ -225,14 +224,19 @@ data class StudentCase(
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
+    val valpasNotificationId: UUID?,
     @param:Json val events: List<CaseEvent>,
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
             throw BadRequest("finishedInfo must be present if and only if status is FINISHED")
         }
-        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
-            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
+        if (status != CaseStatus.IMPORTED_FROM_VALPAS) {
+            if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
+                throw BadRequest(
+                    "sourceValpas must be present if and only if source is VALPAS_NOTICE"
+                )
+            }
         }
         if ((source == CaseSource.OTHER) != (sourceOther != null)) {
             throw BadRequest("sourceOther must be present if and only if source is OTHER")
@@ -260,6 +264,7 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                     sc.school_background,
                     sc.case_background_reasons,
                     sc.not_in_school_reason,
+                    sc.valpas_notification_id,
                     coalesce((
                         SELECT jsonb_agg(jsonb_build_object(
                             'id', e.id,

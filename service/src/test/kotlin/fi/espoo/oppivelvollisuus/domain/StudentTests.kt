@@ -87,6 +87,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     student =
                         StudentInput(
                             valpasLink = "valpas",
+                            valpasOppijaOid = null,
                             ssn = "170108A927R",
                             firstName = "Testi",
                             lastName = "Testilä",
@@ -176,6 +177,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             Student(
                 id = studentId,
                 valpasLink = "valpas",
+                valpasOppijaOid = null,
                 ssn = "170108A927R",
                 firstName = "Testi",
                 lastName = "Testilä",
@@ -210,6 +212,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                    valpasNotificationId = null,
                     events = studentCase.events,
                 ),
                 studentCase,
@@ -225,6 +228,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     student =
                         StudentInput(
                             valpasLink = "",
+                            valpasOppijaOid = null,
                             ssn = "",
                             firstName = "Testi",
                             lastName = "Testilä",
@@ -274,6 +278,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             Student(
                 id = studentId,
                 valpasLink = "",
+                valpasOppijaOid = null,
                 ssn = "",
                 firstName = "Testi",
                 lastName = "Testilä",
@@ -306,6 +311,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
                     notInSchoolReason = null,
+                    valpasNotificationId = null,
                     events = emptyList(),
                 ),
                 studentCase,
@@ -327,6 +333,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             student.id,
             StudentInput(
                 valpasLink = "valpas",
+                valpasOppijaOid = null,
                 ssn = "170108A927R",
                 firstName = "Teppo",
                 lastName = "Testaajainen",
@@ -352,6 +359,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             Student(
                 id = student.id,
                 valpasLink = "valpas",
+                valpasOppijaOid = null,
                 ssn = "170108A927R",
                 firstName = "Teppo",
                 lastName = "Testaajainen",
@@ -364,7 +372,11 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo",
-                setOf(PartnerOrganisation.TUKIHENKILO, PartnerOrganisation.MIELENTERVEYSPALVELUT),
+                partnerOrganisations =
+                    setOf(
+                        PartnerOrganisation.TUKIHENKILO,
+                        PartnerOrganisation.MIELENTERVEYSPALVELUT,
+                    ),
             ),
             studentResponse.student,
         )
@@ -594,6 +606,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             student =
                 StudentInput(
                     valpasLink = valpasLink,
+                    valpasOppijaOid = null,
                     ssn = ssn,
                     firstName = "Testi",
                     lastName = "Testilä",
