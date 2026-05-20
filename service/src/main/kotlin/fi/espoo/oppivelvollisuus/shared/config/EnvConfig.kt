@@ -8,6 +8,7 @@ import fi.espoo.oppivelvollisuus.AppEnv
 import fi.espoo.oppivelvollisuus.DatabaseEnv
 import fi.espoo.oppivelvollisuus.JwtEnv
 import fi.espoo.oppivelvollisuus.ScheduledJobsEnv
+import fi.espoo.oppivelvollisuus.ValpasIntegrationEnv
 import fi.espoo.oppivelvollisuus.shared.asyncjob.ScheduledJob
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -22,6 +23,10 @@ class EnvConfig {
     @Bean fun databaseEnv(env: Environment): DatabaseEnv = DatabaseEnv.fromEnvironment(env)
 
     @Bean fun jwtEnv(env: Environment): JwtEnv = JwtEnv.fromEnvironment(env)
+
+    @Bean
+    fun valpasIntegrationEnv(env: Environment): ValpasIntegrationEnv =
+        ValpasIntegrationEnv.fromEnvironment(env)
 
     @Bean
     fun scheduledJobsEnv(env: Environment): ScheduledJobsEnv<ScheduledJob> =
