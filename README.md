@@ -23,6 +23,22 @@ The application consists of
 ![Entiry diagram](./docs/oppivelvollisuus_entity.png)
 
 
+## Valpas integration
+
+Set the following environment variables (or Spring properties) to enable
+the nightly Valpas import:
+
+- `app.integration.valpas.enabled=true`
+- `app.integration.valpas.opintopolku_base_url=https://virkailija.opintopolku.fi`
+  (or `https://virkailija.testiopintopolku.fi` for the test environment)
+- `app.integration.valpas.username=...`
+- `app.integration.valpas.password=...`
+- `app.integration.valpas.kunta_oid=...`
+
+When `enabled=false` (the default), the integration's scheduled jobs are
+no-ops, so dev environments don't need any of the other values set.
+
+
 ## Local environment and development
 
 ### Quick start with mise (recommended)
