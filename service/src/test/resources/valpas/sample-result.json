@@ -1,0 +1,242 @@
+{
+  "oppijat": [
+    {
+      "oppijanumero": "1.2.246.562.98.10749863493",
+      "kaikkiOidit": [
+        "1.2.246.562.98.10749863493"
+      ],
+      "etunimet": "Bertha Theresa",
+      "sukunimi": "Berg",
+      "syntymäaika": "2009-03-08",
+      "hetu": "080309A9983",
+      "viimeisinOppivelvollisuudenSuorittamiseenKelpaavaOpiskeluoikeus": {
+        "suorituksenTyyppi": {
+          "koodiarvo": "tuvakoulutuksensuoritus",
+          "nimi": {
+            "fi": "Tutkintokoulutukseen valmentava koulutuksen suoritus",
+            "sv": "Prestation i utbildning som handleder för examensutbildning",
+            "en": "Tutkintokoulutukseen valmentava koulutuksen suoritus"
+          },
+          "koodistoUri": "suorituksentyyppi",
+          "koodistoVersio": 1
+        },
+        "koulutusmoduulinTunniste": "999908",
+        "päättymispäivä": "2025-12-01",
+        "viimeisinValpasTila": {
+          "koodiarvo": "katsotaaneronneeksi",
+          "nimi": {
+            "fi": "Katsotaan eronneeksi",
+            "sv": "Anses utskriven",
+            "en": "Considered as discontinued"
+          },
+          "koodistoUri": "valpasopiskeluoikeudentila",
+          "koodistoVersio": 1
+        },
+        "viimeisinTila": {
+          "koodiarvo": "katsotaaneronneeksi",
+          "nimi": {
+            "fi": "Katsotaan eronneeksi",
+            "sv": "Anses utskriven",
+            "en": "Considered as discontinued"
+          },
+          "koodistoUri": "koskiopiskeluoikeudentila",
+          "koodistoVersio": 1
+        },
+        "toimipiste": {
+          "fi": "Stadin ammattiopisto"
+        }
+      },
+      "oppivelvollisuudenKeskeytys": [],
+      "vainOppijanumerorekisterissä": false,
+      "aktiivinenKuntailmoitus": {
+        "oppijaOid": "1.2.246.562.98.10749863493",
+        "id": "b9a126df-ba1d-4bed-925d-9823d2d8b25f",
+        "tekijä": {
+          "organisaatio": {
+            "oid": "1.2.246.562.10.34482399333",
+            "nimi": {
+              "fi": "Vehmaan kunta",
+              "sv": "Vehmaan kunta",
+              "en": "Vehmaan kunta"
+            },
+            "yTunnus": "0144561-8",
+            "kotipaikka": {
+              "koodiarvo": "918",
+              "nimi": {
+                "fi": "Vehmaa",
+                "sv": "Vehmaa"
+              },
+              "koodistoUri": "kunta",
+              "koodistoVersio": 2
+            }
+          }
+        },
+        "kunta": {
+          "oid": "1.2.246.562.10.34482399333",
+          "nimi": {
+            "fi": "Vehmaan kunta",
+            "sv": "Vehmaan kunta",
+            "en": "Vehmaan kunta"
+          },
+          "yTunnus": "0144561-8",
+          "kotipaikka": {
+            "koodiarvo": "918",
+            "nimi": {
+              "fi": "Vehmaa",
+              "sv": "Vehmaa"
+            },
+            "koodistoUri": "kunta",
+            "koodistoVersio": 2
+          }
+        },
+        "aikaleima": "2026-04-10T12:10:19.839705",
+        "hakenutMuualle": false,
+        "onUudempiaIlmoituksiaMuihinKuntiin": false,
+        "aktiivinen": true,
+        "oppijanYhteystiedot": {
+          "puhelinnumero": "04012345667",
+          "email": "sdsada@dadsa.com",
+          "lähiosoite": "katu123",
+          "postinumero": "02030",
+          "postitoimipaikka": "helsinki",
+          "maa": {
+            "koodiarvo": "246",
+            "nimi": {
+              "fi": "Suomi",
+              "sv": "Finland",
+              "en": "Finland"
+            },
+            "lyhytNimi": {
+              "fi": "FI",
+              "sv": "FI",
+              "en": "FI"
+            },
+            "koodistoUri": "maatjavaltiot2",
+            "koodistoVersio": 2
+          }
+        }
+      },
+      "oikeusMaksuttomaanKoulutukseenVoimassaAsti": "2029-12-31",
+      "kotikuntaSuomessaAlkaen": "2009-03-08"
+    },
+    {
+      "oppijanumero": "1.2.246.562.98.28644422124",
+      "kaikkiOidit": [
+        "1.2.246.562.98.28644422124"
+      ],
+      "etunimet": "Linus Olof",
+      "sukunimi": "Haraldsson Tes",
+      "syntymäaika": "2015-06-15",
+      "hetu": "150615A9512",
+      "viimeisinOppivelvollisuudenSuorittamiseenKelpaavaOpiskeluoikeus": {
+        "suorituksenTyyppi": {
+          "koodiarvo": "perusopetuksenvuosiluokka",
+          "nimi": {
+            "fi": "Perusopetuksen vuosiluokka",
+            "sv": "Årskurs i grundläggande utbildning",
+            "en": "Comprehensive school class"
+          },
+          "koodistoUri": "suorituksentyyppi",
+          "koodistoVersio": 1
+        },
+        "koulutusmoduulinTunniste": "9",
+        "päättymispäivä": "2025-05-31",
+        "viimeisinValpasTila": {
+          "koodiarvo": "valmistunut",
+          "nimi": {
+            "fi": "Valmistunut",
+            "sv": "Utexaminerad",
+            "en": "Graduated"
+          },
+          "koodistoUri": "valpasopiskeluoikeudentila",
+          "koodistoVersio": 1
+        },
+        "viimeisinTila": {
+          "koodiarvo": "valmistunut",
+          "nimi": {
+            "fi": "Valmistunut",
+            "sv": "Utexaminerad",
+            "en": "Graduated"
+          },
+          "koodistoUri": "koskiopiskeluoikeudentila",
+          "koodistoVersio": 1
+        },
+        "toimipiste": {
+          "fi": "Jyväskylän normaalikoulu"
+        }
+      },
+      "oppivelvollisuudenKeskeytys": [],
+      "vainOppijanumerorekisterissä": false,
+      "aktiivinenKuntailmoitus": {
+        "oppijaOid": "1.2.246.562.98.28644422124",
+        "id": "4df23a77-c656-4210-8836-1bc5f862b9bc",
+        "tekijä": {
+          "organisaatio": {
+            "oid": "1.2.246.562.10.346830761110",
+            "nimi": {
+              "fi": "Helsingin kaupunki",
+              "sv": "Helsingin kaupunki",
+              "en": "Helsingin kaupunki"
+            },
+            "yTunnus": "0201256-6",
+            "kotipaikka": {
+              "koodiarvo": "091",
+              "nimi": {
+                "fi": "Helsinki",
+                "sv": "Helsingfors"
+              },
+              "koodistoUri": "kunta",
+              "koodistoVersio": 2
+            }
+          }
+        },
+        "kunta": {
+          "oid": "1.2.246.562.10.34482399333",
+          "nimi": {
+            "fi": "Vehmaan kunta",
+            "sv": "Vehmaan kunta",
+            "en": "Vehmaan kunta"
+          },
+          "yTunnus": "0144561-8",
+          "kotipaikka": {
+            "koodiarvo": "918",
+            "nimi": {
+              "fi": "Vehmaa",
+              "sv": "Vehmaa"
+            },
+            "koodistoUri": "kunta",
+            "koodistoVersio": 2
+          }
+        },
+        "aikaleima": "2026-05-18T14:22:45.728250",
+        "hakenutMuualle": true,
+        "onUudempiaIlmoituksiaMuihinKuntiin": false,
+        "aktiivinen": true,
+        "oppijanYhteystiedot": {
+          "puhelinnumero": "0401234567",
+          "email": "esimerkkioppija1@sposti.fi",
+          "lähiosoite": "Esimerkkitie 1",
+          "postinumero": "00100",
+          "postitoimipaikka": "Helsinki",
+          "maa": {
+            "koodiarvo": "246",
+            "nimi": {
+              "fi": "Suomi",
+              "sv": "Finland",
+              "en": "Finland"
+            },
+            "lyhytNimi": {
+              "fi": "FI",
+              "sv": "FI",
+              "en": "FI"
+            },
+            "koodistoUri": "maatjavaltiot2",
+            "koodistoVersio": 2
+          }
+        }
+      },
+      "oikeusMaksuttomaanKoulutukseenVoimassaAsti": "2035-12-31",
+      "kotikuntaSuomessaAlkaen": "2015-06-15"
+    }
+  ]
+}
