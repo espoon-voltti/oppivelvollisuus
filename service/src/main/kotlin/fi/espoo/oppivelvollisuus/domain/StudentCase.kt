@@ -290,10 +290,6 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                 FROM student_cases sc
                 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
                 WHERE student_id = ${bind(studentId)}
-                ORDER BY
-                    CASE WHEN sc.status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)} THEN 0 ELSE 1 END,
-                    opened_at DESC,
-                    sc.created DESC
                 """
             )
         }
@@ -417,22 +413,30 @@ fun Database.Transaction.insertImportedCase(
         .executeAndReturnGeneratedKeys()
         .exactlyOne<StudentCaseId>()
 
-fun Database.Transaction.existsCaseWithNotificationId(notificationId: UUID): Boolean =
+fun Database.Read.existsCaseWithNotificationId(notificationId: UUID): Boolean =
     createQuery {
             sql(
-                "SELECT 1 FROM student_cases WHERE valpas_notification_id = ${bind(notificationId)}"
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM student_cases
+                    WHERE valpas_notification_id = ${bind(notificationId)}
+                )
+                """
             )
         }
-        .toList<Int>()
-        .isNotEmpty()
+        .exactlyOne<Boolean>()
 
-fun Database.Read.findExistingValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
+fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
     if (ids.isEmpty()) return emptySet()
     return createQuery {
             sql(
                 """
-                SELECT valpas_notification_id FROM student_cases
-                WHERE valpas_notification_id = ANY(${bind(ids.toTypedArray())})
+                SELECT incoming.id
+                FROM unnest(${bind(ids.toTypedArray())}) AS incoming(id)
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM student_cases sc
+                    WHERE sc.valpas_notification_id = incoming.id
+                )
                 """
             )
         }
@@ -448,17 +452,13 @@ fun Database.Read.findStudentIdByCaseId(id: StudentCaseId): StudentId? =
     createQuery { sql("SELECT student_id FROM student_cases WHERE id = ${bind(id)}") }
         .exactlyOneOrNull<StudentId>()
 
-fun Database.Read.studentHasNonFinishedCaseOtherThan(
-    studentId: StudentId,
-    excludingCase: StudentCaseId,
-): Boolean =
+fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean =
     createQuery {
             sql(
                 """
                 SELECT EXISTS (
                     SELECT 1 FROM student_cases
                     WHERE student_id = ${bind(studentId)}
-                      AND id <> ${bind(excludingCase)}
                       AND status IN (${bind(CaseStatus.TODO)}, ${bind(CaseStatus.ON_HOLD)})
                 )
                 """

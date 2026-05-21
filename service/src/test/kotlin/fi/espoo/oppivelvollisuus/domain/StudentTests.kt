@@ -429,6 +429,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "170108A927R",
                     valpasLink = "",
+                    valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
                 )
@@ -437,6 +438,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
         duplicateStudents.first().let { duplicate ->
             assertTrue(duplicate.matchingSsn)
             assertFalse(duplicate.matchingValpasLink)
+            assertFalse(duplicate.matchingOppijaOid)
             assertFalse(duplicate.matchingName)
         }
     }
@@ -461,6 +463,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "",
                     valpasLink = "https://valpas.fi/123",
+                    valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
                 )
@@ -469,6 +472,41 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
         duplicateStudents.first().let { duplicate ->
             assertFalse(duplicate.matchingSsn)
             assertTrue(duplicate.matchingValpasLink)
+            assertFalse(duplicate.matchingOppijaOid)
+            assertFalse(duplicate.matchingName)
+        }
+    }
+
+    @Test
+    fun `duplicate valpasOppijaOid is detected`() {
+        db.transaction { tx ->
+            val student =
+                DevStudent(
+                    createdBy = testUser.id,
+                    created = now,
+                    valpasOppijaOid = "1.2.246.562.24.10000000001",
+                )
+            tx.insert(student)
+            tx.insert(
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+            )
+        }
+
+        val duplicateStudents =
+            getDuplicateStudents(
+                DuplicateStudentCheckInput(
+                    ssn = "",
+                    valpasLink = "",
+                    valpasOppijaOid = "1.2.246.562.24.10000000001",
+                    firstName = "",
+                    lastName = "",
+                )
+            )
+        assertEquals(1, duplicateStudents.size)
+        duplicateStudents.first().let { duplicate ->
+            assertFalse(duplicate.matchingSsn)
+            assertFalse(duplicate.matchingValpasLink)
+            assertTrue(duplicate.matchingOppijaOid)
             assertFalse(duplicate.matchingName)
         }
     }
@@ -494,6 +532,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "",
                     valpasLink = "",
+                    valpasOppijaOid = "",
                     firstName = "Tupu",
                     lastName = "Ankka",
                 )
@@ -502,6 +541,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
         duplicateStudents.first().let { duplicate ->
             assertFalse(duplicate.matchingSsn)
             assertFalse(duplicate.matchingValpasLink)
+            assertFalse(duplicate.matchingOppijaOid)
             assertTrue(duplicate.matchingName)
         }
     }
@@ -528,6 +568,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "100507A967F",
                     valpasLink = "",
+                    valpasOppijaOid = "",
                     firstName = "Tupu",
                     lastName = "Ankka",
                 )

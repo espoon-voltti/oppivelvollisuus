@@ -5,6 +5,7 @@
 package fi.espoo.oppivelvollisuus.shared.asyncjob
 
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
+import fi.espoo.oppivelvollisuus.valpas.ValpasOppija
 import java.time.Duration
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -25,8 +26,7 @@ sealed interface AsyncJob {
 
     data object StartValpasImport : AsyncJob
 
-    data class ImportValpasOppija(val oppija: fi.espoo.oppivelvollisuus.valpas.ValpasOppija) :
-        AsyncJob
+    data class ImportValpasOppija(val oppija: ValpasOppija) : AsyncJob
 
     companion object {
         val main =

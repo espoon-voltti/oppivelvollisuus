@@ -12,10 +12,13 @@ import {
   SchoolType
 } from './enums'
 
-export const apiMarkCaseAsDuplicateOfLatest = (
-  caseId: string
+export const apiMarkCaseAsDuplicate = (
+  caseId: string,
+  targetCaseId: string
 ): Promise<void> => {
-  return apiClient.post(`/student-cases/${caseId}/mark-as-duplicate-of-latest`)
+  return apiClient.post(`/student-cases/${caseId}/mark-as-duplicate`, {
+    targetCaseId
+  })
 }
 
 export const apiPutStudentCaseStatus = (

@@ -77,7 +77,7 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
           </TypeLabel>
           <span>{props.caseEvent.created.name}</span>
         </LabeledInput>
-        <LabeledInput $relativeWidth={0.75}>
+        <LabeledInput $relativeWidth={3 / 4}>
           <TypeLabel $type={props.caseEvent.type}>
             {caseEventTypeNames[props.caseEvent.type]}
           </TypeLabel>
@@ -116,7 +116,7 @@ export const CaseEventForm = React.memo(function CaseEventForm(props: Props) {
         </LabeledInput>
       </RowOfInputs>
       <RowOfInputs>
-        <LabeledInput $relativeWidth={0.75}>
+        <LabeledInput $relativeWidth={3 / 4}>
           <Label>Kommentti</Label>
           <TextArea
             data-qa="event-notes-input"

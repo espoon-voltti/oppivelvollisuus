@@ -163,7 +163,13 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
 
         val result = db.read {
             it.getPossibleDuplicateStudents(
-                DuplicateStudentCheckInput(ssn = "", valpasLink = "", firstName = "", lastName = "")
+                DuplicateStudentCheckInput(
+                    ssn = "",
+                    valpasLink = "",
+                    valpasOppijaOid = "",
+                    firstName = "",
+                    lastName = "",
+                )
             )
         }
 
@@ -186,6 +192,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "170108A927R",
                     valpasLink = "https://valpas.fi/abc",
+                    valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
                 )
@@ -220,6 +227,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "170108A927R",
                     valpasLink = "https://valpas.fi/abc",
+                    valpasOppijaOid = "",
                     firstName = "Donald",
                     lastName = "Duck",
                 )
@@ -244,6 +252,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "",
                     valpasLink = "",
+                    valpasOppijaOid = "",
                     firstName = "Donald",
                     lastName = "",
                 )
@@ -262,6 +271,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 DuplicateStudentCheckInput(
                     ssn = "",
                     valpasLink = "",
+                    valpasOppijaOid = "",
                     firstName = "",
                     lastName = "Duck",
                 )

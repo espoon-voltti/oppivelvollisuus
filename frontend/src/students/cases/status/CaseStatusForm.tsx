@@ -181,13 +181,13 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
     )
   }
 
+  const canEditStatus =
+    props.studentCase.status !== 'FINISHED' || !props.activeCaseExists
   return (
     <RowOfInputs>
       <LabeledInput $relativeWidth={1 / 3}>
         <Label>Tila *</Label>
-        {props.studentCase.status === 'FINISHED' && props.activeCaseExists ? (
-          <StatusChip status={props.studentCase.status} />
-        ) : (
+        {canEditStatus ? (
           <Select<CaseStatus>
             data-qa="status-select"
             items={caseStatuses.filter((s) => s !== 'IMPORTED_FROM_VALPAS')}
@@ -195,6 +195,8 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
             getItemLabel={(item) => caseStatusNames[item]}
             onChange={(item) => setStatus(item)}
           />
+        ) : (
+          <StatusChip status={props.studentCase.status} />
         )}
       </LabeledInput>
       {status === 'FINISHED' && (
@@ -248,7 +250,11 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
       {status === 'FINISHED' && finishedReason === 'OTHER' && (
         <LabeledInput $relativeWidth={1 / 3}>
           <Label>Selite</Label>
-          <InputField onChange={setOtherReason} value={otherReason} />
+          <InputField
+            data-qa="finished-other-reason-input"
+            onChange={setOtherReason}
+            value={otherReason}
+          />
         </LabeledInput>
       )}
     </RowOfInputs>

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025-2026 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -55,18 +55,6 @@ class ValpasQueryRunQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
 
         val result = db.read { it.getMostRecentValpasQueryRun() }
         assertEquals(ValpasQueryRunState.FAILED, result?.state)
-    }
-
-    @Test
-    fun `cancelled state transition`() {
-        val id = db.transaction { tx ->
-            tx.insertValpasQueryRun(externalQueryId = "query-cancel", now = now)
-        }
-
-        db.transaction { tx -> tx.markValpasQueryRunCancelled(id = id, now = now) }
-
-        val result = db.read { it.getMostRecentValpasQueryRun() }
-        assertEquals(ValpasQueryRunState.CANCELLED, result?.state)
     }
 
     @Test

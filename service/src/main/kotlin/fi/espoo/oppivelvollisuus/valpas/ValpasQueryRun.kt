@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025-2026 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -13,8 +13,7 @@ enum class ValpasQueryRunState : DatabaseEnum {
     STARTED,
     FILES_READY,
     COMPLETED,
-    FAILED,
-    CANCELLED;
+    FAILED;
 
     override val sqlType: String = "valpas_query_run_state"
 }
@@ -105,24 +104,6 @@ fun Database.Transaction.markValpasQueryRunFailed(id: ValpasQueryRunId, now: Hel
                 """
                 UPDATE valpas_query_runs
                 SET state = ${bind(ValpasQueryRunState.FAILED)},
-                    finished_at = ${bind(now)}
-                WHERE id = ${bind(id)}
-                  AND state IN (
-                      ${bind(ValpasQueryRunState.STARTED)},
-                      ${bind(ValpasQueryRunState.FILES_READY)}
-                  )
-                """
-            )
-        }
-        .updateExactlyOne()
-}
-
-fun Database.Transaction.markValpasQueryRunCancelled(id: ValpasQueryRunId, now: HelsinkiDateTime) {
-    createUpdate {
-            sql(
-                """
-                UPDATE valpas_query_runs
-                SET state = ${bind(ValpasQueryRunState.CANCELLED)},
                     finished_at = ${bind(now)}
                 WHERE id = ${bind(id)}
                   AND state IN (

@@ -63,7 +63,7 @@ enum class Audit(
     CreateCaseEvent,
     UpdateCaseEvent,
     DeleteCaseEvent,
-    MarkCaseAsDuplicateOfLatest,
+    MarkCaseAsDuplicate,
     GetEmployees,
     GetCasesReport,
     DeleteOldStudents;

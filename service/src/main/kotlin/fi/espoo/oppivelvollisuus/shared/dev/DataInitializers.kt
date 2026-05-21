@@ -78,6 +78,7 @@ data class DevStudent(
     val createdBy: EspooUserId,
     val created: HelsinkiDateTime = defaultDevTime,
     val valpasLink: String = "",
+    val valpasOppijaOid: String? = null,
     val ssn: String = "",
     val firstName: String = "Testi",
     val lastName: String = "Testilä",
@@ -97,8 +98,8 @@ fun Database.Transaction.insert(row: DevStudent): StudentId =
     createUpdate {
             sql(
                 """
-                INSERT INTO students (id, created, created_by, valpas_link, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
-                VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.valpasLink)}, ${bind(row.ssn)}, ${bind(row.firstName)}, ${bind(row.lastName)}, ${bind(row.language)}, ${bind(row.dateOfBirth)}, ${bind(row.phone)}, ${bind(row.email)}, ${bind(row.gender)}, ${bind(row.address)}, ${bind(row.municipalityInFinland)}, ${bind(row.guardianInfo)}, ${bind(row.supportContactsInfo)}, ${bind(row.partnerOrganisations.toTypedArray())})
+                INSERT INTO students (id, created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
+                VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.valpasLink)}, ${bind(row.valpasOppijaOid)}, ${bind(row.ssn)}, ${bind(row.firstName)}, ${bind(row.lastName)}, ${bind(row.language)}, ${bind(row.dateOfBirth)}, ${bind(row.phone)}, ${bind(row.email)}, ${bind(row.gender)}, ${bind(row.address)}, ${bind(row.municipalityInFinland)}, ${bind(row.guardianInfo)}, ${bind(row.supportContactsInfo)}, ${bind(row.partnerOrganisations.toTypedArray())})
                 RETURNING id
                 """
             )

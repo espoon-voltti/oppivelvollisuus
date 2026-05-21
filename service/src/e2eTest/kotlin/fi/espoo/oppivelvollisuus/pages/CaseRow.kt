@@ -10,6 +10,7 @@ import fi.espoo.oppivelvollisuus.dataQa
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 
 class CaseRow(val locator: Locator) {
+    val header = locator.dataQa("case-header")
     val editButton = locator.dataQa("edit-case-button")
     val deleteButton = locator.dataQa("delete-case-button")
     val saveCaseEditButton = locator.dataQa("save-case-edit-button")
@@ -19,6 +20,7 @@ class CaseRow(val locator: Locator) {
     val saveStatusButton = locator.dataQa("save-status-button")
     val statusSelect = locator.dataQa("status-select")
     val finishedReasonSelect = locator.dataQa("finished-reason-select")
+    val finishedOtherReasonInput = locator.dataQa("finished-other-reason-input")
 
     // Valpas import action buttons (visible only on IMPORTED_FROM_VALPAS cases)
     val approveValpasButton = locator.dataQa("approve-valpas-case-button")

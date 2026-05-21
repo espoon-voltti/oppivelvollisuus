@@ -181,5 +181,6 @@ export interface DuplicateStudent {
   dateOfBirth: Date
   matchingSsn: boolean
   matchingValpasLink: boolean
+  matchingOppijaOid: boolean
   matchingName: boolean
 }

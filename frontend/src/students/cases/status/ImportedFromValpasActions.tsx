@@ -1,16 +1,14 @@
-// SPDX-FileCopyrightText: 2023-2024 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import orderBy from 'lodash/orderBy'
 import React, { useState } from 'react'
 
-import { InfoBox } from '../../../shared/MessageBoxes'
+import { AlertBox, InfoBox } from '../../../shared/MessageBoxes'
 import { Button } from '../../../shared/buttons/Button'
-import {
-  FlexColWithGaps,
-  FlexRight,
-  FlexRowWithGaps
-} from '../../../shared/layout'
+import { formatDate } from '../../../shared/dates'
+import { FlexRight, FlexRowWithGaps, VerticalGap } from '../../../shared/layout'
 import { StudentDetails } from '../../api'
 import { StudentCase } from '../api'
 
@@ -35,24 +33,38 @@ function getMissingCaseFields(studentCase: StudentCase): MissingField[] {
 }
 
 interface Props {
-  studentCase: StudentCase
+  cases: StudentCase[]
   student: StudentDetails
-  otherCases: StudentCase[]
   onApprove: () => Promise<void>
-  onMarkAsDuplicate: () => Promise<void>
+  onMarkAsDuplicate: (targetCaseId: string) => Promise<void>
 }
 
 export const ImportedFromValpasActions = React.memo(
   function ImportedFromValpasActions(props: Props) {
-    const hasActiveOther = props.otherCases.some(
+    const [submitting, setSubmitting] = useState(false)
+
+    const importedCase = props.cases.find(
+      (c) => c.status === 'IMPORTED_FROM_VALPAS'
+    )
+    if (!importedCase) return null
+
+    const activeCase = props.cases.find(
       (c) => c.status === 'TODO' || c.status === 'ON_HOLD'
     )
-    const missingStudent = getMissingStudentFields(props.student)
-    const missingCase = getMissingCaseFields(props.studentCase)
-    const allMissing = [...missingStudent, ...missingCase]
-    const approveDisabled = hasActiveOther || allMissing.length > 0
-
-    const [submitting, setSubmitting] = useState(false)
+    const hasActiveCase = activeCase !== undefined
+    const latestFinishedCase = orderBy(
+      props.cases.filter((c) => c.status === 'FINISHED'),
+      [(c) => c.openedAt, (c) => c.id],
+      ['desc', 'desc']
+    )[0]
+    const duplicateTarget = activeCase ?? latestFinishedCase
+    const canMarkAsDuplicate =
+      duplicateTarget !== undefined &&
+      duplicateTarget.valpasNotificationId === null
+    const missingStudentFields = getMissingStudentFields(props.student)
+    const missingCaseFields = getMissingCaseFields(importedCase)
+    const allMissingFields = [...missingStudentFields, ...missingCaseFields]
+    const approveDisabled = hasActiveCase || allMissingFields.length > 0
 
     const handleApprove = () => {
       setSubmitting(true)
@@ -61,35 +73,36 @@ export const ImportedFromValpasActions = React.memo(
 
     const handleMarkAsDuplicate = () => {
       if (
+        duplicateTarget &&
         window.confirm(
-          'Haluatko varmasti merkitä tämän ilmoituksen duplikaatiksi? Ilmoitus suljetaan ja merkitään aktiivisen ilmoituksen duplikaatiksi.'
+          `Poistetaanko tämä Valppaasta tuotu ilmoitus manuaalisesti luodun ilmoituksen (${formatDate(duplicateTarget.openedAt)}) duplikaattina?`
         )
       ) {
         setSubmitting(true)
-        void props.onMarkAsDuplicate().finally(() => setSubmitting(false))
+        void props
+          .onMarkAsDuplicate(duplicateTarget.id)
+          .finally(() => setSubmitting(false))
       }
     }
 
     return (
-      <FlexColWithGaps $gapSize="s">
-        {hasActiveOther && (
-          <InfoBox
-            title="Alla oleva aktiivinen ilmoitus on ensin päätettävä, jos haluat hyväksyä tämän."
-            wide
+      <div>
+        <VerticalGap />
+        {hasActiveCase && (
+          <InfoBox title="Aiemmin luotu aktiivinen ilmoitus on ensin päätettävä, jos haluat hyväksyä tämän." />
+        )}
+        {!hasActiveCase && allMissingFields.length > 0 && (
+          <AlertBox
+            title={`Pakollisia tietoja puuttuu: ${allMissingFields.map((f) => f.label).join(', ')}`}
           />
         )}
-        {!hasActiveOther && allMissing.length > 0 && (
-          <InfoBox
-            title={`Pakollisia tietoja puuttuu: ${allMissing.map((f) => f.label).join(', ')}`}
-            wide
-          />
-        )}
+        <VerticalGap $size="L" />
         <FlexRight>
           <FlexRowWithGaps $gapSize="m">
-            {hasActiveOther && (
+            {canMarkAsDuplicate && (
               <Button
                 data-qa="mark-as-duplicate-button"
-                text="Merkitse duplikaatiksi"
+                text="Hylkää duplikaattina"
                 disabled={submitting}
                 onClick={handleMarkAsDuplicate}
               />
@@ -103,7 +116,7 @@ export const ImportedFromValpasActions = React.memo(
             />
           </FlexRowWithGaps>
         </FlexRight>
-      </FlexColWithGaps>
+      </div>
     )
   }
 )

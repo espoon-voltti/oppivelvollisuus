@@ -10,7 +10,7 @@ CREATE UNIQUE INDEX uniq$student_cases$one_imported_from_valpas_per_student
     ON student_cases(student_id) WHERE status = 'IMPORTED_FROM_VALPAS';
 
 CREATE TYPE valpas_query_run_state AS ENUM
-    ('STARTED', 'FILES_READY', 'COMPLETED', 'FAILED', 'CANCELLED');
+    ('STARTED', 'FILES_READY', 'COMPLETED', 'FAILED');
 
 CREATE TABLE valpas_query_runs (
     id uuid PRIMARY KEY DEFAULT uuid_generate_v1mc(),
@@ -30,7 +30,6 @@ CREATE TABLE valpas_query_runs (
             WHEN 'FILES_READY' THEN file_urls IS NOT NULL AND finished_at IS NULL
             WHEN 'COMPLETED'   THEN file_urls IS NOT NULL AND finished_at IS NOT NULL
             WHEN 'FAILED'      THEN finished_at IS NOT NULL
-            WHEN 'CANCELLED'   THEN finished_at IS NOT NULL
         END
     )
 );
@@ -46,3 +45,6 @@ ALTER TABLE student_cases ADD CONSTRAINT check_source_valpas_required_or_null
         status = 'IMPORTED_FROM_VALPAS'
         OR (source = 'VALPAS_NOTICE') = (source_valpas IS NOT NULL)
     );
+
+ALTER INDEX uniq$student_cases$one_unfinished_per_student
+    RENAME TO uniq$student_cases$one_active_per_student;

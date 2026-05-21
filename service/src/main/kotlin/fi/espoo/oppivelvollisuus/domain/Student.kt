@@ -247,6 +247,7 @@ fun Database.Transaction.updateStudent(
 data class DuplicateStudentCheckInput(
     val ssn: String,
     val valpasLink: String,
+    val valpasOppijaOid: String,
     val firstName: String,
     val lastName: String,
 )
@@ -257,6 +258,7 @@ data class DuplicateStudent(
     val dateOfBirth: LocalDate,
     val matchingSsn: Boolean,
     val matchingValpasLink: Boolean,
+    val matchingOppijaOid: Boolean,
     val matchingName: Boolean,
 )
 
@@ -273,6 +275,7 @@ fun Database.Read.getPossibleDuplicateStudents(
                         date_of_birth,
                         ${if (input.ssn.isNotBlank()) "(lower(ssn) = lower(${bind(input.ssn)}))" else "FALSE"} AS matching_ssn,
                         ${if (input.valpasLink.isNotBlank()) "(lower(valpas_link) = lower(${bind(input.valpasLink)}))" else "FALSE"} AS matching_valpas_link,
+                        ${if (input.valpasOppijaOid.isNotBlank()) "(lower(valpas_oppija_oid) = lower(${bind(input.valpasOppijaOid)}))" else "FALSE"} AS matching_oppija_oid,
                         ${if (input.firstName.isNotBlank() && input.lastName.isNotBlank()) {
                     """(
                             lower(first_name) = lower(${bind(input.firstName)}) AND
@@ -285,7 +288,7 @@ fun Database.Read.getPossibleDuplicateStudents(
                     FROM students
                 )
                 SELECT * FROM match_data
-                WHERE matching_ssn OR matching_valpas_link OR matching_name
+                WHERE matching_ssn OR matching_valpas_link OR matching_oppija_oid OR matching_name
                 """
             )
         }

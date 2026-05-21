@@ -12,6 +12,7 @@ import {
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { differenceInYears } from 'date-fns/differenceInYears'
+import orderBy from 'lodash/orderBy'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
@@ -55,7 +56,7 @@ import { CaseEvents } from './cases/events/CaseEvents'
 import { CaseStatusForm } from './cases/status/CaseStatusForm'
 import { ImportedFromValpasActions } from './cases/status/ImportedFromValpasActions'
 import {
-  apiMarkCaseAsDuplicateOfLatest,
+  apiMarkCaseAsDuplicate,
   apiPutStudentCaseStatus,
   CaseStatusInput
 } from './cases/status/api'
@@ -101,17 +102,36 @@ export const StudentPage = React.memo(function StudentPage() {
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
   const cases = studentResponse?.cases
-  const activeCases = cases?.filter((c) => c.status !== 'FINISHED') ?? []
-  const finishedCases = cases?.filter((c) => c.status === 'FINISHED') ?? []
-  const activeCaseExists = activeCases.length > 0
+  const importedCase = cases?.find((c) => c.status === 'IMPORTED_FROM_VALPAS')
+  const activeCase = cases?.find(
+    (c) => c.status === 'TODO' || c.status === 'ON_HOLD'
+  )
+  const finishedCases = orderBy(
+    cases?.filter((c) => c.status === 'FINISHED') ?? [],
+    [(c) => c.openedAt, (c) => c.id],
+    ['desc', 'desc']
+  )
+  const unfinishedCases: StudentCase[] = [importedCase, activeCase].filter(
+    (c): c is StudentCase => c !== undefined
+  )
+  const unfinishedCaseExists = unfinishedCases.length > 0
+  const activeCaseExists = activeCase !== undefined
 
   const [expandedCases, setExpandedCases] = useState<string[] | undefined>(
     undefined
   )
   if (expandedCases === undefined && cases) {
-    const firstUnfinished = cases.find((c) => c.status !== 'FINISHED')
+    const firstUnfinished = unfinishedCases[0]
     setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
   }
+  const toggleExpandedCase = useCallback((caseId: string) => {
+    setExpandedCases((prev) => {
+      if (!prev) return [caseId]
+      return prev.includes(caseId)
+        ? prev.filter((id) => id !== caseId)
+        : [...prev, caseId]
+    })
+  }, [])
 
   // true = creating new, string = id of the edited case
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
@@ -221,9 +241,6 @@ export const StudentPage = React.memo(function StudentPage() {
                     mode="EDIT"
                     student={studentResponse.student}
                     onChange={setStudentInput}
-                    relaxValidation={studentResponse.cases.some(
-                      (c) => c.status === 'IMPORTED_FROM_VALPAS'
-                    )}
                   />
                 ) : (
                   <StudentForm
@@ -275,7 +292,7 @@ export const StudentPage = React.memo(function StudentPage() {
                   data-qa="add-case-button"
                   text="Lisää ilmoitus"
                   icon={faPlus}
-                  disabled={editingSomething || activeCaseExists}
+                  disabled={editingSomething || unfinishedCaseExists}
                   onClick={() => {
                     setEditingCase(true)
                     setExpandedCases([])
@@ -329,17 +346,11 @@ export const StudentPage = React.memo(function StudentPage() {
             <CasesList
               studentId={studentResponse.student.id}
               student={studentResponse.student}
-              cases={activeCases}
+              cases={unfinishedCases}
               allCases={cases ?? []}
               employees={employees}
               expandedCases={expandedCases}
-              toggleExpandedCase={(caseId) =>
-                setExpandedCases(
-                  expandedCases.includes(caseId)
-                    ? expandedCases.filter((id) => id !== caseId)
-                    : [...expandedCases, caseId]
-                )
-              }
+              toggleExpandedCase={toggleExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -364,13 +375,7 @@ export const StudentPage = React.memo(function StudentPage() {
               allCases={cases ?? []}
               employees={employees}
               expandedCases={expandedCases}
-              toggleExpandedCase={(caseId) =>
-                setExpandedCases(
-                  expandedCases.includes(caseId)
-                    ? expandedCases.filter((id) => id !== caseId)
-                    : [...expandedCases, caseId]
-                )
-              }
+              toggleExpandedCase={toggleExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -442,6 +447,7 @@ const CasesList = React.memo(function CasesList({
           data-qa={`case-row-${studentCase.id}`}
         >
           <AccordionRow
+            data-qa="case-header"
             $disabled={
               editingCase !== false ||
               editingCaseStatus !== null ||
@@ -580,9 +586,8 @@ const CasesList = React.memo(function CasesList({
                 </FlexLeftRight>
                 {studentCase.status === 'IMPORTED_FROM_VALPAS' ? (
                   <ImportedFromValpasActions
-                    studentCase={studentCase}
+                    cases={allCases}
                     student={student}
-                    otherCases={allCases.filter((c) => c.id !== studentCase.id)}
                     onApprove={() =>
                       apiPutStudentCaseStatus(
                         studentCase.studentId,
@@ -590,9 +595,9 @@ const CasesList = React.memo(function CasesList({
                         { status: 'TODO', finishedInfo: null }
                       ).then(() => loadStudent())
                     }
-                    onMarkAsDuplicate={() =>
-                      apiMarkCaseAsDuplicateOfLatest(studentCase.id).then(() =>
-                        loadStudent()
+                    onMarkAsDuplicate={(targetCaseId) =>
+                      apiMarkCaseAsDuplicate(studentCase.id, targetCaseId).then(
+                        () => loadStudent()
                       )
                     }
                   />

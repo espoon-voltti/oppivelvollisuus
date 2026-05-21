@@ -132,7 +132,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               data-qa="create-student-button"
             />
           </FlexLeftRight>
-          <LabeledInput $relativeWidth={0.5}>
+          <LabeledInput $relativeWidth={1 / 2}>
             <Label>Haku nimellä tai hetulla</Label>
             <InputField
               value={query}
@@ -160,7 +160,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                 ))}
               </FlexRowWithGaps>
             </LabeledInput>
-            <LabeledInput $relativeWidth={0.25}>
+            <LabeledInput $relativeWidth={1 / 4}>
               <Label>Ohjaaja</Label>
               {employees ? (
                 <Select<Assignee>

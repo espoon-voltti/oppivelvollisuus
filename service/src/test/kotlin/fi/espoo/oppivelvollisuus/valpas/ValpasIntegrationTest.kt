@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025-2026 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -6,15 +6,21 @@ package fi.espoo.oppivelvollisuus.valpas
 
 import fi.espoo.oppivelvollisuus.FullApplicationTest
 import fi.espoo.oppivelvollisuus.StudentCaseId
+import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.domain.AppController
 import fi.espoo.oppivelvollisuus.domain.CaseEventInput
 import fi.espoo.oppivelvollisuus.domain.CaseEventType
+import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.CaseStatusInput
+import fi.espoo.oppivelvollisuus.domain.FinishedInfo
+import fi.espoo.oppivelvollisuus.domain.StudentCase
 import fi.espoo.oppivelvollisuus.domain.StudentCaseInput
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import fi.espoo.oppivelvollisuus.domain.findStudentIdBySsn
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.Conflict
 import fi.espoo.oppivelvollisuus.shared.dev.DevStudent
 import fi.espoo.oppivelvollisuus.shared.dev.DevStudentCase
 import fi.espoo.oppivelvollisuus.shared.dev.DevUser
@@ -100,10 +106,48 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         asyncJobRunner.runPendingJobsSync(clock)
     }
 
-    private fun getStudentCases(ssn: String): List<fi.espoo.oppivelvollisuus.domain.StudentCase> {
+    private fun getStudentCases(ssn: String): List<StudentCase> {
         val studentId = db.read { it.findStudentIdBySsn(ssn) } ?: return emptyList()
-        return controller.getStudent(dbInstance(), testUser.user, studentId).cases
+        return getStudent(studentId).cases
     }
+
+    private fun getStudent(studentId: StudentId) =
+        controller.getStudent(dbInstance(), testUser.user, studentId)
+
+    private fun updateStudentCase(
+        studentId: StudentId,
+        caseId: StudentCaseId,
+        body: StudentCaseInput,
+    ) = controller.updateStudentCase(dbInstance(), testUser.user, clock, studentId, caseId, body)
+
+    private fun updateStudentCaseStatus(
+        studentId: StudentId,
+        caseId: StudentCaseId,
+        body: CaseStatusInput,
+    ) =
+        controller.updateStudentCaseStatus(
+            dbInstance(),
+            testUser.user,
+            clock,
+            studentId,
+            caseId,
+            body,
+        )
+
+    private fun deleteStudentCase(studentId: StudentId, caseId: StudentCaseId) =
+        controller.deleteStudentCase(dbInstance(), testUser.user, studentId, caseId)
+
+    private fun createCaseEvent(caseId: StudentCaseId, body: CaseEventInput) =
+        controller.createCaseEvent(dbInstance(), testUser.user, clock, caseId, body)
+
+    private fun markAsDuplicate(caseId: StudentCaseId, targetCaseId: StudentCaseId) =
+        controller.markAsDuplicate(
+            dbInstance(),
+            testUser.user,
+            clock,
+            caseId,
+            AppController.MarkAsDuplicateBody(targetCaseId),
+        )
 
     private fun countCases(): Int = db.read { tx ->
         tx.createQuery { sql("SELECT count(*) FROM student_cases") }.exactlyOne<Int>()
@@ -177,12 +221,12 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         assertEquals(1, countStudents())
 
         // The student's manual fields should be unchanged
-        val student = controller.getStudent(dbInstance(), testUser.user, existingStudent.id).student
+        val student = getStudent(existingStudent.id).student
         assertEquals("OriginalFirst", student.firstName)
         assertEquals("OriginalLast", student.lastName)
 
         // A new case should have been created for the student
-        val cases = controller.getStudent(dbInstance(), testUser.user, existingStudent.id).cases
+        val cases = getStudent(existingStudent.id).cases
         assertEquals(1, cases.size)
         assertEquals(CaseStatus.IMPORTED_FROM_VALPAS, cases.first().status)
         assertEquals(notificationId, cases.first().valpasNotificationId)
@@ -260,22 +304,12 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         val caseId = importedCase.id
 
         // Trying to approve without sourceValpas should fail (400)
-        assertThrows<fi.espoo.oppivelvollisuus.shared.BadRequest> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser.user,
-                clock,
-                studentId,
-                caseId,
-                CaseStatusInput(CaseStatus.TODO, null),
-            )
+        assertThrows<BadRequest> {
+            updateStudentCaseStatus(studentId, caseId, CaseStatusInput(CaseStatus.TODO, null))
         }
 
         // Update the case to set sourceValpas
-        controller.updateStudentCase(
-            dbInstance(),
-            testUser.user,
-            clock,
+        updateStudentCase(
             studentId,
             caseId,
             StudentCaseInput(
@@ -292,16 +326,9 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         )
 
         // Now approve should succeed
-        controller.updateStudentCaseStatus(
-            dbInstance(),
-            testUser.user,
-            clock,
-            studentId,
-            caseId,
-            CaseStatusInput(CaseStatus.TODO, null),
-        )
+        updateStudentCaseStatus(studentId, caseId, CaseStatusInput(CaseStatus.TODO, null))
 
-        val updatedCases = controller.getStudent(dbInstance(), testUser.user, studentId).cases
+        val updatedCases = getStudent(studentId).cases
         assertEquals(CaseStatus.TODO, updatedCases.first().status)
     }
 
@@ -331,15 +358,12 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         runFullImport("query-conflict")
 
         // Find the IMPORTED_FROM_VALPAS case
-        val allCases = controller.getStudent(dbInstance(), testUser.user, existingStudent.id).cases
+        val allCases = getStudent(existingStudent.id).cases
         assertEquals(2, allCases.size)
         val importedCase = allCases.first { it.status == CaseStatus.IMPORTED_FROM_VALPAS }
 
         // Set sourceValpas on the imported case first
-        controller.updateStudentCase(
-            dbInstance(),
-            testUser.user,
-            clock,
+        updateStudentCase(
             existingStudent.id,
             importedCase.id,
             StudentCaseInput(
@@ -356,11 +380,8 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         )
 
         // Trying to approve should fail with Conflict because student already has a TODO case
-        assertThrows<fi.espoo.oppivelvollisuus.shared.Conflict> {
-            controller.updateStudentCaseStatus(
-                dbInstance(),
-                testUser.user,
-                clock,
+        assertThrows<Conflict> {
+            updateStudentCaseStatus(
                 existingStudent.id,
                 importedCase.id,
                 CaseStatusInput(CaseStatus.TODO, null),
@@ -382,11 +403,8 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         val importedCase = cases.first()
 
         // POST case-event should fail with 400
-        assertThrows<fi.espoo.oppivelvollisuus.shared.BadRequest> {
-            controller.createCaseEvent(
-                dbInstance(),
-                testUser.user,
-                clock,
+        assertThrows<BadRequest> {
+            createCaseEvent(
                 importedCase.id,
                 CaseEventInput(
                     date = LocalDate.of(2026, 1, 15),
@@ -397,24 +415,17 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         }
 
         // DELETE the case should fail with 400
-        assertThrows<fi.espoo.oppivelvollisuus.shared.BadRequest> {
-            controller.deleteStudentCase(
-                dbInstance(),
-                testUser.user,
-                importedCase.studentId,
-                importedCase.id,
-            )
-        }
+        assertThrows<BadRequest> { deleteStudentCase(importedCase.studentId, importedCase.id) }
     }
 
     @Test
-    fun `mark-as-duplicate-of-latest copies id and deletes imported case`() {
+    fun `mark-as-duplicate copies id and deletes imported case`() {
         val notificationId = UUID.randomUUID()
 
         // Pre-seed student with active TODO case (no valpas_notification_id)
         val existingStudent =
             DevStudent(createdBy = testUser.id, created = now, ssn = "170108A927R")
-        val activeCaseId = fi.espoo.oppivelvollisuus.StudentCaseId(UUID.randomUUID())
+        val activeCaseId = StudentCaseId(UUID.randomUUID())
         val activeCase =
             DevStudentCase(
                 id = activeCaseId,
@@ -435,23 +446,109 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         runFullImport("query-dup")
 
         // Find the IMPORTED_FROM_VALPAS case
-        val allCases = controller.getStudent(dbInstance(), testUser.user, existingStudent.id).cases
+        val allCases = getStudent(existingStudent.id).cases
         assertEquals(2, allCases.size)
         val importedCase = allCases.first { it.status == CaseStatus.IMPORTED_FROM_VALPAS }
         val importedCaseId = importedCase.id
 
-        // Mark as duplicate of active
-        controller.markAsDuplicateOfLatest(dbInstance(), testUser.user, clock, importedCaseId)
+        // Mark as duplicate of the active case
+        markAsDuplicate(importedCaseId, activeCaseId)
 
         // Imported case should be deleted
-        val casesAfter =
-            controller.getStudent(dbInstance(), testUser.user, existingStudent.id).cases
+        val casesAfter = getStudent(existingStudent.id).cases
         assertEquals(1, casesAfter.size)
         assertEquals(activeCaseId, casesAfter.first().id)
 
         // Active case's valpas_notification_id should now be set to the imported case's
         // notification id
         assertEquals(notificationId, casesAfter.first().valpasNotificationId)
+    }
+
+    private fun seedFinishedCase(studentId: StudentId, openedAt: LocalDate): StudentCaseId {
+        val id = StudentCaseId(UUID.randomUUID())
+        db.transaction { tx ->
+            tx.insert(
+                DevStudentCase(
+                    id = id,
+                    studentId = studentId,
+                    createdBy = testUser.id,
+                    created = now,
+                    openedAt = openedAt,
+                    status = CaseStatus.TODO,
+                )
+            )
+        }
+        updateStudentCaseStatus(
+            studentId,
+            id,
+            CaseStatusInput(
+                CaseStatus.FINISHED,
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED, null, null, null),
+            ),
+        )
+        return id
+    }
+
+    @Test
+    fun `mark-as-duplicate merges into the specified FINISHED case`() {
+        val notificationId = UUID.randomUUID()
+
+        val existingStudent =
+            DevStudent(createdBy = testUser.id, created = now, ssn = "170108A927R")
+        db.transaction { tx -> tx.insert(existingStudent) }
+        val olderFinishedId = seedFinishedCase(existingStudent.id, LocalDate.of(2024, 1, 1))
+        val newerFinishedId = seedFinishedCase(existingStudent.id, LocalDate.of(2024, 6, 1))
+
+        val oppija = sampleOppija(hetu = "170108A927R", notificationId = notificationId)
+        mock.nextStartReturnsQueryId = "query-dup-finished"
+        mock.stageCompleteResult("query-dup-finished", listOf(oppija))
+        runFullImport("query-dup-finished")
+
+        val allCases = getStudent(existingStudent.id).cases
+        val importedCase = allCases.first { it.status == CaseStatus.IMPORTED_FROM_VALPAS }
+
+        markAsDuplicate(importedCase.id, newerFinishedId)
+
+        val casesAfter = getStudent(existingStudent.id).cases
+        assertEquals(2, casesAfter.size)
+        val newerAfter = casesAfter.first { it.id == newerFinishedId }
+        val olderAfter = casesAfter.first { it.id == olderFinishedId }
+        assertEquals(notificationId, newerAfter.valpasNotificationId)
+        assertEquals(null, olderAfter.valpasNotificationId)
+    }
+
+    @Test
+    fun `mark-as-duplicate rejected when target already has notification id`() {
+        val previousNotificationId = UUID.randomUUID()
+
+        val existingStudent =
+            DevStudent(createdBy = testUser.id, created = now, ssn = "170108A927R")
+        val activeCaseId = StudentCaseId(UUID.randomUUID())
+        val activeCase =
+            DevStudentCase(
+                id = activeCaseId,
+                studentId = existingStudent.id,
+                createdBy = testUser.id,
+                created = now,
+                status = CaseStatus.TODO,
+                valpasNotificationId = previousNotificationId,
+            )
+        db.transaction { tx ->
+            tx.insert(existingStudent)
+            tx.insert(activeCase)
+        }
+
+        val oppija = sampleOppija(hetu = "170108A927R", notificationId = UUID.randomUUID())
+        mock.nextStartReturnsQueryId = "query-dup-claimed"
+        mock.stageCompleteResult("query-dup-claimed", listOf(oppija))
+        runFullImport("query-dup-claimed")
+
+        val importedCase =
+            getStudent(existingStudent.id).cases.first {
+                it.status == CaseStatus.IMPORTED_FROM_VALPAS
+            }
+
+        assertThrows<Conflict> { markAsDuplicate(importedCase.id, activeCaseId) }
     }
 
     @Test
@@ -517,19 +614,19 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
     }
 
     @Test
-    fun `StartValpasImport cancels stale STARTED row`() {
+    fun `StartValpasImport fails stale STARTED row`() {
         // Insert a stale STARTED row
         val staleRunId = db.transaction { tx ->
             tx.insertValpasQueryRun("query-stale", now.minusHours(1))
         }
 
-        // Schedule and run scheduleStartValpasImport — it should cancel the stale row
+        // Schedule and run scheduleStartValpasImport — it should fail the stale row
         db.transaction { tx -> valpasIntegrationService.scheduleStartValpasImport(tx, clock) }
 
         val result = db.read { it.getMostRecentValpasQueryRun() }
         assertNotNull(result)
-        // The stale row should have been cancelled
-        assertEquals(ValpasQueryRunState.CANCELLED, result.state)
+        // The stale row should have been marked FAILED
+        assertEquals(ValpasQueryRunState.FAILED, result.state)
         assertEquals(staleRunId, result.id)
     }
 }

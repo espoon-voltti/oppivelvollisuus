@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2026-2026 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
@@ -6,6 +6,7 @@ package fi.espoo.oppivelvollisuus
 
 import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import fi.espoo.oppivelvollisuus.domain.CaseFinishedReason
 import fi.espoo.oppivelvollisuus.domain.CaseSource
 import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
@@ -53,18 +54,18 @@ class ValpasImportE2ETest : PlaywrightTest() {
     }
 
     @Test
-    fun `mark-as-duplicate-of-latest flow`() {
+    fun `mark-as-duplicate flow`() {
         val page = getPageWithDefaultOptions()
         doLogin(page)
 
-        val seeder = DevUser(lastName = "Seeder")
-        val student = DevStudent(createdBy = seeder.id)
+        val creator = DevUser()
+        val student = DevStudent(createdBy = creator.id)
         val notificationId = UUID.randomUUID()
         // Active TODO case – no valpas_notification_id
         val activeTodoCase =
             DevStudentCase(
                 studentId = student.id,
-                createdBy = seeder.id,
+                createdBy = creator.id,
                 status = CaseStatus.TODO,
                 source = CaseSource.VALPAS_AUTOMATIC_CHECK,
             )
@@ -72,13 +73,13 @@ class ValpasImportE2ETest : PlaywrightTest() {
         val importedCase =
             DevStudentCase(
                 studentId = student.id,
-                createdBy = seeder.id,
+                createdBy = creator.id,
                 status = CaseStatus.IMPORTED_FROM_VALPAS,
                 source = CaseSource.VALPAS_NOTICE,
                 valpasNotificationId = notificationId,
             )
         db.transaction { tx ->
-            tx.insert(seeder)
+            tx.insert(creator)
             tx.insert(student)
             tx.insert(activeTodoCase)
             tx.insert(importedCase)
@@ -95,8 +96,10 @@ class ValpasImportE2ETest : PlaywrightTest() {
         val importedCaseRow = studentPage.caseRow(importedCase.id)
         importedCaseRow.assertStatus(CaseStatus.IMPORTED_FROM_VALPAS)
 
-        // "Merkitse duplikaatiksi" button is visible because an active TODO case exists.
+        // "Hylkää duplikaattina" button is visible because an active TODO case exists.
         assertThat(importedCaseRow.markAsDuplicateButton).isVisible()
+        // Approve is blocked while an active case exists.
+        assertThat(importedCaseRow.approveValpasButton).isDisabled()
 
         // Confirm the window.confirm dialog.
         page.acceptNextDialog()
@@ -110,25 +113,81 @@ class ValpasImportE2ETest : PlaywrightTest() {
         remainingCaseRow.assertStatus(CaseStatus.TODO)
     }
 
+    @Test
+    fun `finishing the active case unblocks approving the imported one`() {
+        val page = getPageWithDefaultOptions()
+        doLogin(page)
+
+        val creator = DevUser()
+        val student = DevStudent(createdBy = creator.id, ssn = "150610A123B")
+        val activeTodoCase =
+            DevStudentCase(
+                studentId = student.id,
+                createdBy = creator.id,
+                status = CaseStatus.TODO,
+                source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+            )
+        val importedCase =
+            DevStudentCase(
+                studentId = student.id,
+                createdBy = creator.id,
+                status = CaseStatus.IMPORTED_FROM_VALPAS,
+                source = CaseSource.VALPAS_NOTICE,
+                sourceValpas = ValpasNotifier.PERUSOPETUS,
+                valpasNotificationId = UUID.randomUUID(),
+            )
+        db.transaction { tx ->
+            tx.insert(creator)
+            tx.insert(student)
+            tx.insert(activeTodoCase)
+            tx.insert(importedCase)
+        }
+
+        page.navigate("$baseUrl/oppivelvolliset/${student.id}")
+
+        val studentPage = StudentPage(page)
+        assertThat(studentPage.studentName).isVisible()
+        assertThat(studentPage.caseRows).hasCount(2)
+
+        val importedCaseRow = studentPage.caseRow(importedCase.id)
+        // Approve is blocked while an active case exists.
+        assertThat(importedCaseRow.approveValpasButton).isDisabled()
+
+        // Finish the active case via FINISHED + OTHER reason.
+        val activeCaseRow = studentPage.caseRow(activeTodoCase.id)
+        activeCaseRow.header.click()
+        activeCaseRow.changeStatusButton.click()
+        activeCaseRow.statusSelect.selectOption(CaseStatus.FINISHED.name)
+        activeCaseRow.finishedReasonSelect.selectOption(CaseFinishedReason.OTHER.name)
+        activeCaseRow.finishedOtherReasonInput.fill("Korvattu uudemmalla valpas-ilmoituksella")
+        activeCaseRow.saveStatusButton.click()
+        activeCaseRow.assertStatus(CaseStatus.FINISHED)
+
+        // Approving the imported case is now allowed.
+        assertThat(importedCaseRow.approveValpasButton).isEnabled()
+        importedCaseRow.approveValpasButton.click()
+        importedCaseRow.assertStatus(CaseStatus.TODO)
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
 
     private fun seedImportedFromValpasCase(): Pair<StudentId, StudentCaseId> {
-        val seeder = DevUser(lastName = "Seeder")
+        val creator = DevUser()
         // Match what the integration would produce: ssn populated from hetu.
-        val student = DevStudent(createdBy = seeder.id, ssn = "150610A123B")
+        val student = DevStudent(createdBy = creator.id, ssn = "150610A123B")
         val importedCase =
             DevStudentCase(
                 studentId = student.id,
-                createdBy = seeder.id,
+                createdBy = creator.id,
                 status = CaseStatus.IMPORTED_FROM_VALPAS,
                 source = CaseSource.VALPAS_NOTICE,
                 // sourceValpas intentionally null so required fields are initially missing
                 valpasNotificationId = UUID.randomUUID(),
             )
         db.transaction { tx ->
-            tx.insert(seeder)
+            tx.insert(creator)
             tx.insert(student)
             tx.insert(importedCase)
         }

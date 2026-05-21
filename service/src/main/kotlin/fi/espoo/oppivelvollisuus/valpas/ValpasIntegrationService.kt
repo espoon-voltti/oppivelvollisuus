@@ -1,11 +1,11 @@
-// SPDX-FileCopyrightText: 2025-2026 City of Espoo
+// SPDX-FileCopyrightText: 2023-2026 City of Espoo
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
 package fi.espoo.oppivelvollisuus.valpas
 
 import fi.espoo.oppivelvollisuus.ValpasIntegrationEnv
-import fi.espoo.oppivelvollisuus.domain.findExistingValpasNotificationIds
+import fi.espoo.oppivelvollisuus.domain.findNewValpasNotificationIds
 import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJob
 import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
 import fi.espoo.oppivelvollisuus.shared.db.Database
@@ -47,9 +47,9 @@ class ValpasIntegrationService(
                     latest.state == ValpasQueryRunState.FILES_READY)
         ) {
             logger.warn {
-                "Cancelling stale in-flight valpas_query_run ${latest.id} (state=${latest.state})"
+                "Failing stale in-flight valpas_query_run ${latest.id} (state=${latest.state})"
             }
-            tx.markValpasQueryRunCancelled(latest.id, now)
+            tx.markValpasQueryRunFailed(latest.id, now)
         }
         asyncJobRunner.plan(
             tx,
@@ -72,8 +72,7 @@ class ValpasIntegrationService(
             ValpasQueryRunState.FILES_READY -> advanceFromFilesReady(db, clock, latest)
 
             ValpasQueryRunState.COMPLETED,
-            ValpasQueryRunState.FAILED,
-            ValpasQueryRunState.CANCELLED -> Unit
+            ValpasQueryRunState.FAILED -> Unit
         }
     }
 
@@ -166,10 +165,10 @@ class ValpasIntegrationService(
         val oppijat = files.flatMap { it.oppijat }
         db.transaction { tx ->
             val incomingIds = oppijat.mapNotNull { it.aktiivinenKuntailmoitus?.id }.toSet()
-            val existingIds = tx.findExistingValpasNotificationIds(incomingIds)
+            val newIds = tx.findNewValpasNotificationIds(incomingIds)
             val toImport = oppijat.filter { o ->
                 val id = o.aktiivinenKuntailmoitus?.id
-                id != null && id !in existingIds
+                id != null && id in newIds
             }
             asyncJobRunner.plan(
                 tx,
