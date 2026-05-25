@@ -224,6 +224,67 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     }
   }, [validInput, props])
 
+  const duplicateBanner: React.ReactNode = (() => {
+    if (duplicateSsnStudent) {
+      return (
+        <AlertBox
+          title="Samalla hetulla löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateSsnStudent.id}`}>
+              {duplicateSsnStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateOppijaOidStudent) {
+      return (
+        <AlertBox
+          title="Samalla oppijanumerolla löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateOppijaOidStudent.id}`}>
+              {duplicateOppijaOidStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateValpasStudent) {
+      return (
+        <AlertBox
+          title="Samalla Valpas-linkillä löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateValpasStudent.id}`}>
+              {duplicateValpasStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateNameStudents.length > 0) {
+      return (
+        <InfoBox
+          title={`Samalla nimellä löytyy jo ${
+            duplicateNameStudents.length > 1
+              ? 'oppivelvollisia'
+              : 'oppivelvollinen'
+          }. Tarkista onko kyseessä sama henkilö:`}
+          message={
+            <FlexColWithGaps>
+              {duplicateNameStudents.map((s) => (
+                <Link key={s.id} to={`/oppivelvolliset/${s.id}`}>
+                  {s.name}
+                  {s.dateOfBirth ? ` (s. ${formatDate(s.dateOfBirth)})` : ''}
+                </Link>
+              ))}
+            </FlexColWithGaps>
+          }
+        />
+      )
+    }
+    return null
+  })()
+
   return (
     <FlexCol>
       <GroupOfInputRows>
@@ -347,58 +408,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
         </RowOfInputs>
-        {duplicateStudents.length > 0 && (
-          <div>
-            {duplicateSsnStudent ? (
-              <AlertBox
-                title="Samalla hetulla löytyy jo oppivelvollinen:"
-                message={
-                  <Link to={`/oppivelvolliset/${duplicateSsnStudent.id}`}>
-                    {duplicateSsnStudent.name}
-                  </Link>
-                }
-              />
-            ) : duplicateOppijaOidStudent ? (
-              <AlertBox
-                title="Samalla oppijanumerolla löytyy jo oppivelvollinen:"
-                message={
-                  <Link to={`/oppivelvolliset/${duplicateOppijaOidStudent.id}`}>
-                    {duplicateOppijaOidStudent.name}
-                  </Link>
-                }
-              />
-            ) : duplicateValpasStudent ? (
-              <AlertBox
-                title="Samalla Valpas-linkillä löytyy jo oppivelvollinen:"
-                message={
-                  <Link to={`/oppivelvolliset/${duplicateValpasStudent.id}`}>
-                    {duplicateValpasStudent.name}
-                  </Link>
-                }
-              />
-            ) : (
-              <InfoBox
-                title={`Samalla nimellä löytyy jo ${
-                  duplicateNameStudents.length > 1
-                    ? 'oppivelvollisia'
-                    : 'oppivelvollinen'
-                }. Tarkista onko kyseessä sama henkilö:`}
-                message={
-                  <FlexColWithGaps>
-                    {duplicateNameStudents.map((s) => (
-                      <Link key={s.id} to={`/oppivelvolliset/${s.id}`}>
-                        {s.name}
-                        {s.dateOfBirth
-                          ? ` (s. ${formatDate(s.dateOfBirth)})`
-                          : ''}
-                      </Link>
-                    ))}
-                  </FlexColWithGaps>
-                }
-              />
-            )}
-          </div>
-        )}
+        {duplicateBanner && <div>{duplicateBanner}</div>}
         <RowOfInputs>
           <LabeledInput $relativeWidth={1 / 4}>
             <Label>Puhelinnumero</Label>

@@ -10,6 +10,7 @@ import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJob
 import fi.espoo.oppivelvollisuus.shared.asyncjob.AsyncJobRunner
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.time.AppClock
+import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.Duration
 import org.springframework.stereotype.Service
@@ -82,20 +83,29 @@ class ValpasIntegrationService(
         db.transaction { tx -> tx.insertValpasQueryRun(queryId, clock.now()) }
     }
 
+    private fun checkTimeout(
+        db: Database.Connection,
+        latest: ValpasQueryRun,
+        startedAt: HelsinkiDateTime,
+        max: Duration,
+        label: String,
+        now: HelsinkiDateTime,
+    ): Boolean {
+        if (Duration.between(startedAt.toInstant(), now.toInstant()) <= max) return false
+        logger.error {
+            "Valpas query ${latest.externalQueryId} $label timeout exceeded — marking FAILED"
+        }
+        db.transaction { tx -> tx.markValpasQueryRunFailed(latest.id, now) }
+        return true
+    }
+
     private fun advanceFromStarted(
         db: Database.Connection,
         clock: AppClock,
         latest: ValpasQueryRun,
     ) {
         val now = clock.now()
-        if (
-            Duration.between(latest.startedPollingAt.toInstant(), now.toInstant()) >
-                MAX_POLL_DURATION
-        ) {
-            logger.error {
-                "Valpas query ${latest.externalQueryId} polling timeout exceeded — marking FAILED"
-            }
-            db.transaction { tx -> tx.markValpasQueryRunFailed(latest.id, now) }
+        if (checkTimeout(db, latest, latest.startedPollingAt, MAX_POLL_DURATION, "polling", now)) {
             return
         }
         val status =
@@ -146,13 +156,8 @@ class ValpasIntegrationService(
                 "FILES_READY row missing startedDownloadingAt"
             }
         if (
-            Duration.between(startedDownloadingAt.toInstant(), now.toInstant()) >
-                MAX_DOWNLOAD_DURATION
+            checkTimeout(db, latest, startedDownloadingAt, MAX_DOWNLOAD_DURATION, "download", now)
         ) {
-            logger.error {
-                "Valpas query ${latest.externalQueryId} download timeout exceeded — marking FAILED"
-            }
-            db.transaction { tx -> tx.markValpasQueryRunFailed(latest.id, now) }
             return
         }
         val files =

@@ -203,15 +203,16 @@ class AppController {
         }
         db.connect { dbc ->
                 dbc.transaction { tx ->
-                    val studentId = tx.findStudentIdByCaseId(caseId) ?: throw NotFound()
-                    val cases = tx.getStudentCasesByStudent(studentId)
-                    val imported = cases.firstOrNull { it.id == caseId } ?: throw NotFound()
+                    val imported = tx.getStudentCaseSummary(caseId) ?: throw NotFound()
                     if (imported.status != CaseStatus.IMPORTED_FROM_VALPAS) {
                         throw BadRequest("Case is not in IMPORTED_FROM_VALPAS status")
                     }
                     val target =
-                        cases.firstOrNull { it.id == body.targetCaseId }
-                            ?: throw BadRequest("Target case not found for this student")
+                        tx.getStudentCaseSummary(body.targetCaseId)
+                            ?: throw BadRequest("Target case not found")
+                    if (target.studentId != imported.studentId) {
+                        throw BadRequest("Target case not found for this student")
+                    }
                     if (target.valpasNotificationId != null) {
                         throw Conflict("Target case already has a valpas_notification_id")
                     }
@@ -247,28 +248,9 @@ class AppController {
     ) {
         db.connect { dbc ->
                 dbc.transaction { tx ->
-                    val before =
-                        tx.getStudentCasesByStudent(studentId).find { it.id == id }
-                            ?: throw NotFound()
-                    if (before.status == CaseStatus.IMPORTED_FROM_VALPAS) {
-                        if (body.status != CaseStatus.TODO) {
-                            throw BadRequest(
-                                "From IMPORTED_FROM_VALPAS only target=TODO is allowed"
-                            )
-                        }
-                        if (
-                            before.source == CaseSource.VALPAS_NOTICE && before.sourceValpas == null
-                        ) {
-                            throw BadRequest("sourceValpas must be set before approval")
-                        }
-                        if (tx.studentHasActiveCase(studentId)) {
-                            throw Conflict("Student has another active case")
-                        }
-                    } else if (body.status == CaseStatus.IMPORTED_FROM_VALPAS) {
-                        throw BadRequest(
-                            "Cannot transition into IMPORTED_FROM_VALPAS via this endpoint"
-                        )
-                    }
+                    val before = tx.getStudentCaseSummary(id) ?: throw NotFound()
+                    if (before.studentId != studentId) throw NotFound()
+                    tx.validateStatusTransition(before, body.status)
                     tx.updateStudentCaseStatus(
                         id = id,
                         studentId = studentId,

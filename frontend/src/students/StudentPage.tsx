@@ -111,6 +111,7 @@ export const StudentPage = React.memo(function StudentPage() {
     [(c) => c.openedAt, (c) => c.id],
     ['desc', 'desc']
   )
+  const latestFinishedCase = finishedCases[0]
   const unfinishedCases: StudentCase[] = [importedCase, activeCase].filter(
     (c): c is StudentCase => c !== undefined
   )
@@ -346,8 +347,9 @@ export const StudentPage = React.memo(function StudentPage() {
             <CasesList
               studentId={studentResponse.student.id}
               student={studentResponse.student}
-              cases={unfinishedCases}
-              allCases={cases ?? []}
+              displayedCases={unfinishedCases}
+              activeCase={activeCase}
+              latestFinishedCase={latestFinishedCase}
               employees={employees}
               expandedCases={expandedCases}
               toggleExpandedCase={toggleExpandedCase}
@@ -371,8 +373,9 @@ export const StudentPage = React.memo(function StudentPage() {
             <CasesList
               studentId={studentResponse.student.id}
               student={studentResponse.student}
-              cases={finishedCases}
-              allCases={cases ?? []}
+              displayedCases={finishedCases}
+              activeCase={activeCase}
+              latestFinishedCase={latestFinishedCase}
               employees={employees}
               expandedCases={expandedCases}
               toggleExpandedCase={toggleExpandedCase}
@@ -398,8 +401,9 @@ export const StudentPage = React.memo(function StudentPage() {
 const CasesList = React.memo(function CasesList({
   studentId,
   student,
-  cases,
-  allCases,
+  displayedCases,
+  activeCase,
+  latestFinishedCase,
   employees,
   expandedCases,
   toggleExpandedCase,
@@ -417,8 +421,9 @@ const CasesList = React.memo(function CasesList({
 }: {
   studentId: string
   student: StudentDetails
-  cases: StudentCase[]
-  allCases: StudentCase[]
+  displayedCases: StudentCase[]
+  activeCase: StudentCase | undefined
+  latestFinishedCase: StudentCase | undefined
   employees: EmployeeUser[]
   expandedCases: string[]
   toggleExpandedCase: (id: string) => void
@@ -441,7 +446,7 @@ const CasesList = React.memo(function CasesList({
 
   return (
     <FlexColWithGaps $gapSize="L">
-      {cases.map((studentCase) => (
+      {displayedCases.map((studentCase) => (
         <FlexColWithGaps
           key={studentCase.id}
           data-qa={`case-row-${studentCase.id}`}
@@ -586,8 +591,10 @@ const CasesList = React.memo(function CasesList({
                 </FlexLeftRight>
                 {studentCase.status === 'IMPORTED_FROM_VALPAS' ? (
                   <ImportedFromValpasActions
-                    cases={allCases}
+                    importedCase={studentCase}
                     student={student}
+                    activeCase={activeCase}
+                    latestFinishedCase={latestFinishedCase}
                     onApprove={() =>
                       apiPutStudentCaseStatus(
                         studentCase.studentId,

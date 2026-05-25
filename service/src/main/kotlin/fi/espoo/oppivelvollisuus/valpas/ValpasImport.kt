@@ -8,7 +8,6 @@ import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.domain.StudentInput
 import fi.espoo.oppivelvollisuus.domain.deleteStudentCase
-import fi.espoo.oppivelvollisuus.domain.existsCaseWithNotificationId
 import fi.espoo.oppivelvollisuus.domain.findImportedFromValpasCaseForStudent
 import fi.espoo.oppivelvollisuus.domain.findStudentIdBySsn
 import fi.espoo.oppivelvollisuus.domain.insertImportedCase
@@ -91,10 +90,6 @@ fun importValpasOppija(
     }
     if (oppija.syntymäaika == null) {
         logger.warn { "Skipping oppija ${oppija.oppijanumero}: missing syntymäaika" }
-        return null
-    }
-
-    if (tx.existsCaseWithNotificationId(notification.id)) {
         return null
     }
 

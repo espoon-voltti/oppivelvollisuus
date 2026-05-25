@@ -13,8 +13,13 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import tools.jackson.databind.json.JsonMapper
+import tools.jackson.module.kotlin.readValue
 
 private val logger = KotlinLogging.logger {}
+
+private data class StartQueryResponse(val queryId: String)
+
+private data class QueryStatusResponse(val status: String, val files: List<String> = emptyList())
 
 class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMapper) :
     ValpasClient {
@@ -72,9 +77,11 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                     "startQuery failed: status=${resp.code} body=$text"
                 )
             }
-            val node = jsonMapper.readTree(text)
-            return node.get("queryId")?.asString()
-                ?: throw ValpasIntegrationException("startQuery response missing queryId: $text")
+            return try {
+                jsonMapper.readValue<StartQueryResponse>(text).queryId
+            } catch (e: Exception) {
+                throw ValpasIntegrationException("startQuery response unparseable: $text", e)
+            }
         }
     }
 
@@ -93,36 +100,21 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                     "getQueryStatus failed: status=${resp.code} body=$text"
                 )
             }
-            val node = jsonMapper.readTree(text)
-            return when (node.get("status")?.asString()) {
-                "pending" -> {
-                    ValpasQueryStatus.Pending
+            val response =
+                try {
+                    jsonMapper.readValue<QueryStatusResponse>(text)
+                } catch (e: Exception) {
+                    throw ValpasIntegrationException(
+                        "getQueryStatus response unparseable: $text",
+                        e,
+                    )
                 }
-
-                "running" -> {
-                    ValpasQueryStatus.Running
-                }
-
-                "complete" -> {
-                    val filesNode =
-                        node.get("files")
-                            ?: throw ValpasIntegrationException(
-                                "complete response missing files: $text"
-                            )
-                    val urls: List<String> =
-                        (filesNode as Iterable<*>)
-                            .filterIsInstance<tools.jackson.databind.JsonNode>()
-                            .map { it.asString() }
-                    ValpasQueryStatus.Complete(urls)
-                }
-
-                "failed" -> {
-                    ValpasQueryStatus.Failed
-                }
-
-                else -> {
-                    throw ValpasIntegrationException("getQueryStatus unknown status: $text")
-                }
+            return when (response.status) {
+                "pending" -> ValpasQueryStatus.Pending
+                "running" -> ValpasQueryStatus.Running
+                "complete" -> ValpasQueryStatus.Complete(response.files)
+                "failed" -> ValpasQueryStatus.Failed
+                else -> throw ValpasIntegrationException("getQueryStatus unknown status: $text")
             }
         }
     }

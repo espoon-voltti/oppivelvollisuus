@@ -9,6 +9,7 @@ import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.Conflict
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.db.DatabaseEnum
@@ -295,6 +296,27 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
         }
         .toList<StudentCase>()
 
+data class StudentCaseSummary(
+    val id: StudentCaseId,
+    val studentId: StudentId,
+    val status: CaseStatus,
+    val source: CaseSource,
+    val sourceValpas: ValpasNotifier?,
+    val valpasNotificationId: UUID?,
+)
+
+fun Database.Read.getStudentCaseSummary(id: StudentCaseId): StudentCaseSummary? =
+    createQuery {
+            sql(
+                """
+                SELECT id, student_id, status, source, source_valpas, valpas_notification_id
+                FROM student_cases
+                WHERE id = ${bind(id)}
+                """
+            )
+        }
+        .exactlyOneOrNull<StudentCaseSummary>()
+
 fun Database.Transaction.updateStudentCase(
     id: StudentCaseId,
     studentId: StudentId,
@@ -330,6 +352,22 @@ data class CaseStatusInput(val status: CaseStatus, val finishedInfo: FinishedInf
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
             throw BadRequest("finishedInfo must be present if and only if status is FINISHED")
         }
+    }
+}
+
+fun Database.Read.validateStatusTransition(before: StudentCaseSummary, newStatus: CaseStatus) {
+    if (before.status == CaseStatus.IMPORTED_FROM_VALPAS) {
+        if (newStatus != CaseStatus.TODO) {
+            throw BadRequest("From IMPORTED_FROM_VALPAS only target=TODO is allowed")
+        }
+        if (before.source == CaseSource.VALPAS_NOTICE && before.sourceValpas == null) {
+            throw BadRequest("sourceValpas must be set before approval")
+        }
+        if (studentHasActiveCase(before.studentId)) {
+            throw Conflict("Student has another active case")
+        }
+    } else if (newStatus == CaseStatus.IMPORTED_FROM_VALPAS) {
+        throw BadRequest("Cannot transition into IMPORTED_FROM_VALPAS via this endpoint")
     }
 }
 
@@ -413,19 +451,6 @@ fun Database.Transaction.insertImportedCase(
         .executeAndReturnGeneratedKeys()
         .exactlyOne<StudentCaseId>()
 
-fun Database.Read.existsCaseWithNotificationId(notificationId: UUID): Boolean =
-    createQuery {
-            sql(
-                """
-                SELECT EXISTS (
-                    SELECT 1 FROM student_cases
-                    WHERE valpas_notification_id = ${bind(notificationId)}
-                )
-                """
-            )
-        }
-        .exactlyOne<Boolean>()
-
 fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
     if (ids.isEmpty()) return emptySet()
     return createQuery {
@@ -447,10 +472,6 @@ fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
 fun Database.Read.getStudentCaseStatus(id: StudentCaseId): CaseStatus? =
     createQuery { sql("SELECT status FROM student_cases WHERE id = ${bind(id)}") }
         .exactlyOneOrNull<CaseStatus>()
-
-fun Database.Read.findStudentIdByCaseId(id: StudentCaseId): StudentId? =
-    createQuery { sql("SELECT student_id FROM student_cases WHERE id = ${bind(id)}") }
-        .exactlyOneOrNull<StudentId>()
 
 fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean =
     createQuery {
