@@ -6,6 +6,7 @@ package fi.espoo.oppivelvollisuus.valpas
 
 import fi.espoo.oppivelvollisuus.ValpasIntegrationEnv
 import io.github.oshai.kotlinlogging.KotlinLogging
+import java.io.InputStream
 import java.time.Duration
 import okhttp3.Credentials
 import okhttp3.MediaType.Companion.toMediaType
@@ -48,7 +49,14 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
             .connectTimeout(Duration.ofSeconds(10))
             .readTimeout(Duration.ofSeconds(60))
             .writeTimeout(Duration.ofSeconds(30))
-            .followRedirects(true)
+            // Disable automatic redirect-following. The result-file URLs returned by
+            // Valpas live under our configured baseUrl but redirect (302) to a presigned
+            // URL on a different host (e.g. AWS S3). OkHttp would forward the
+            // Authorization header to that cross-host target, leaking our Valpas
+            // basic-auth credentials. downloadResultFile follows the redirect manually
+            // with no Authorization header — the presigned URL self-authenticates via
+            // its query-string signature.
+            .followRedirects(false)
             .build()
 
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
@@ -120,21 +128,53 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
     }
 
     override fun downloadResultFile(url: String): ValpasResultFile {
-        val request =
+        // Refuse URLs not under the configured Valpas baseUrl so a compromised
+        // getQueryStatus response can't steer the authenticated GET to an attacker.
+        require(url.startsWith("$baseUrl/")) {
+            "downloadResultFile refused URL not under configured Valpas baseUrl"
+        }
+        val initialRequest =
             Request.Builder()
                 .url(url)
                 .header("Authorization", authHeader)
                 .header("Accept", "application/json")
                 .get()
                 .build()
-        httpClient.newCall(request).execute().use { resp ->
+        httpClient.newCall(initialRequest).execute().use { resp ->
+            if (resp.code in 300..399) {
+                val location =
+                    resp.header("Location")
+                        ?: throw ValpasIntegrationException(
+                            "downloadResultFile got ${resp.code} without Location header"
+                        )
+                // Drop the Authorization header on the redirect. Valpas redirects to a
+                // presigned URL on a different host; forwarding our basic-auth credentials
+                // cross-host would leak them. The presigned URL self-authenticates via
+                // its query-string signature.
+                val redirectRequest =
+                    Request.Builder()
+                        .url(location)
+                        .header("Accept", "application/json")
+                        .get()
+                        .build()
+                return httpClient.newCall(redirectRequest).execute().use { redirectResp ->
+                    if (!redirectResp.isSuccessful) {
+                        throw ValpasIntegrationException(
+                            "downloadResultFile redirect target failed: status=${redirectResp.code}"
+                        )
+                    }
+                    parseResultFile(redirectResp.body?.byteStream())
+                }
+            }
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException("downloadResultFile failed: status=${resp.code}")
             }
-            val stream =
-                resp.body?.byteStream()
-                    ?: throw ValpasIntegrationException("downloadResultFile empty body")
-            return jsonMapper.readValue(stream, ValpasResultFile::class.java)
+            return parseResultFile(resp.body?.byteStream())
         }
+    }
+
+    private fun parseResultFile(stream: InputStream?): ValpasResultFile {
+        if (stream == null) throw ValpasIntegrationException("downloadResultFile empty body")
+        return jsonMapper.readValue(stream, ValpasResultFile::class.java)
     }
 }
