@@ -16,11 +16,7 @@ app:
     disable_runner: true
   integration:
     valpas:
-      enabled: true
-      opintopolku_base_url: http://mock-valpas.invalid
-      username: test-user
-      password: test-pass
-      kunta_oid: 1.2.3.4
+      enabled: false
 
 spring:
   flyway:

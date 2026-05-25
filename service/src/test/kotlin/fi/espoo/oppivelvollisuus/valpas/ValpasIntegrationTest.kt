@@ -36,8 +36,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.convention.TestBean
 
+@TestPropertySource(
+    properties =
+        [
+            "app.integration.valpas.enabled=true",
+            "app.integration.valpas.opintopolku_base_url=http://mock-valpas.invalid",
+            "app.integration.valpas.username=test-user",
+            "app.integration.valpas.password=test-pass",
+            "app.integration.valpas.kunta_oid=1.2.3.4",
+        ]
+)
 class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
 
     @TestBean(name = "valpasClient") private lateinit var mockValpasClient: ValpasClient

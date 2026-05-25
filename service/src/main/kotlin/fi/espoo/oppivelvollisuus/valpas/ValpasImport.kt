@@ -97,7 +97,7 @@ fun importValpasOppija(
 
     val existingImported = tx.findImportedFromValpasCaseForStudent(studentId)
     if (existingImported != null) {
-        logger.error {
+        logger.info {
             "Replacing existing IMPORTED_FROM_VALPAS case $existingImported " +
                 "for student $studentId with newer notification ${notification.id}"
         }
@@ -113,7 +113,7 @@ fun importValpasOppija(
             now = now,
         )
     } catch (e: DuplicateKeyException) {
-        logger.error(e) { "Concurrent insert won the race for notification ${notification.id}" }
+        logger.warn(e) { "Concurrent insert won the race for notification ${notification.id}" }
         null
     }
 }

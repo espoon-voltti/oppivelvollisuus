@@ -119,7 +119,7 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
                         WHEN 'ON_HOLD'              THEN 1
                         WHEN 'FINISHED'             THEN 2
                       END,
-                      opened_at DESC NULLS LAST
+                      opened_at DESC
                     LIMIT 1
                 ) sc ON true
                 LEFT JOIN LATERAL (

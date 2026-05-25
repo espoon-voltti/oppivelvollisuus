@@ -13,9 +13,9 @@ import { StudentCase } from '../api'
 
 function getMissingStudentFields(student: StudentDetails): string[] {
   const missing: string[] = []
-  if (!student.firstName?.trim()) missing.push('Etunimet')
-  if (!student.lastName?.trim()) missing.push('Sukunimi')
-  if (!student.ssn?.trim()) missing.push('Henkilötunnus')
+  if (!student.firstName.trim()) missing.push('Etunimet')
+  if (!student.lastName.trim()) missing.push('Sukunimi')
+  if (!student.ssn.trim()) missing.push('Henkilötunnus')
   return missing
 }
 
