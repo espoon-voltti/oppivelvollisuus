@@ -5,6 +5,7 @@
 package fi.espoo.oppivelvollisuus.shared.asyncjob
 
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
+import fi.espoo.oppivelvollisuus.valpas.ValpasOppija
 import java.time.Duration
 import java.util.UUID
 import kotlin.reflect.KClass
@@ -23,12 +24,16 @@ data class AsyncJobType<T : Any>(val payloadClass: KClass<T>) {
 sealed interface AsyncJob {
     data class RunScheduledJob(val job: String) : AsyncJob
 
+    data object StartValpasImport : AsyncJob
+
+    data class ImportValpasOppija(val oppija: ValpasOppija) : AsyncJob
+
     companion object {
         val main =
             AsyncJobRunner.Pool(
                 AsyncJobPool.Id(AsyncJob::class, "main"),
                 AsyncJobPool.Config(concurrency = 2),
-                setOf(RunScheduledJob::class),
+                setOf(RunScheduledJob::class, StartValpasImport::class, ImportValpasOppija::class),
             )
     }
 }

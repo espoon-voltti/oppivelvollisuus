@@ -9,15 +9,19 @@ import fi.espoo.oppivelvollisuus.StudentCaseId
 import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.UserBasics
 import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.Conflict
+import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.db.DatabaseEnum
 import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import java.time.LocalDate
+import java.util.UUID
 import org.jdbi.v3.core.mapper.Nested
 import org.jdbi.v3.core.mapper.PropagateNull
 import org.jdbi.v3.json.Json
 
 enum class CaseStatus : DatabaseEnum {
+    IMPORTED_FROM_VALPAS,
     TODO,
     ON_HOLD,
     FINISHED;
@@ -120,9 +124,6 @@ data class StudentCaseInput(
     val notInSchoolReason: NotInSchoolReason?,
 ) {
     init {
-        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
-            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
-        }
         if ((source == CaseSource.OTHER) != (sourceOther != null)) {
             throw BadRequest("sourceOther must be present if and only if source is OTHER")
         }
@@ -225,14 +226,19 @@ data class StudentCase(
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
+    val valpasNotificationId: UUID?,
     @param:Json val events: List<CaseEvent>,
 ) {
     init {
         if ((status == CaseStatus.FINISHED) != (finishedInfo != null)) {
             throw BadRequest("finishedInfo must be present if and only if status is FINISHED")
         }
-        if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
-            throw BadRequest("sourceValpas must be present if and only if source is VALPAS_NOTICE")
+        if (status != CaseStatus.IMPORTED_FROM_VALPAS) {
+            if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
+                throw BadRequest(
+                    "sourceValpas must be present if and only if source is VALPAS_NOTICE"
+                )
+            }
         }
         if ((source == CaseSource.OTHER) != (sourceOther != null)) {
             throw BadRequest("sourceOther must be present if and only if source is OTHER")
@@ -260,6 +266,7 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                     sc.school_background,
                     sc.case_background_reasons,
                     sc.not_in_school_reason,
+                    sc.valpas_notification_id,
                     coalesce((
                         SELECT jsonb_agg(jsonb_build_object(
                             'id', e.id,
@@ -284,11 +291,31 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                 FROM student_cases sc
                 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
                 WHERE student_id = ${bind(studentId)}
-                ORDER BY opened_at DESC, sc.created DESC
                 """
             )
         }
         .toList<StudentCase>()
+
+data class StudentCaseSummary(
+    val id: StudentCaseId,
+    val studentId: StudentId,
+    val status: CaseStatus,
+    val source: CaseSource,
+    val sourceValpas: ValpasNotifier?,
+    val valpasNotificationId: UUID?,
+)
+
+fun Database.Read.getStudentCaseSummary(id: StudentCaseId): StudentCaseSummary? =
+    createQuery {
+            sql(
+                """
+                SELECT id, student_id, status, source, source_valpas, valpas_notification_id
+                FROM student_cases
+                WHERE id = ${bind(id)}
+                """
+            )
+        }
+        .exactlyOneOrNull<StudentCaseSummary>()
 
 fun Database.Transaction.updateStudentCase(
     id: StudentCaseId,
@@ -328,6 +355,22 @@ data class CaseStatusInput(val status: CaseStatus, val finishedInfo: FinishedInf
     }
 }
 
+fun Database.Read.validateStatusTransition(before: StudentCaseSummary, newStatus: CaseStatus) {
+    if (before.status == CaseStatus.IMPORTED_FROM_VALPAS) {
+        if (newStatus != CaseStatus.TODO) {
+            throw BadRequest("From IMPORTED_FROM_VALPAS only target=TODO is allowed")
+        }
+        if (before.source == CaseSource.VALPAS_NOTICE && before.sourceValpas == null) {
+            throw BadRequest("sourceValpas must be set before approval")
+        }
+        if (studentHasActiveCase(before.studentId)) {
+            throw Conflict("Student has another active case")
+        }
+    } else if (newStatus == CaseStatus.IMPORTED_FROM_VALPAS) {
+        throw BadRequest("Cannot transition into IMPORTED_FROM_VALPAS via this endpoint")
+    }
+}
+
 fun Database.Transaction.updateStudentCaseStatus(
     id: StudentCaseId,
     studentId: StudentId,
@@ -358,6 +401,112 @@ fun Database.Transaction.deleteStudentCase(id: StudentCaseId, studentId: Student
     createUpdate {
             sql(
                 "DELETE FROM student_cases WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}"
+            )
+        }
+        .updateExactlyOne()
+}
+
+fun Database.Read.findImportedFromValpasCaseForStudent(studentId: StudentId): StudentCaseId? =
+    createQuery {
+            sql(
+                """
+                SELECT id FROM student_cases
+                WHERE student_id = ${bind(studentId)}
+                  AND status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)}
+                """
+            )
+        }
+        .exactlyOneOrNull<StudentCaseId>()
+
+fun Database.Transaction.insertImportedCase(
+    studentId: StudentId,
+    valpasNotificationId: UUID,
+    openedAt: LocalDate,
+    now: HelsinkiDateTime,
+): StudentCaseId =
+    createUpdate {
+            sql(
+                """
+                INSERT INTO student_cases (
+                    created, created_by, student_id, opened_at, assigned_to,
+                    status, source, source_valpas, source_other, source_contact,
+                    school_background, case_background_reasons, not_in_school_reason,
+                    valpas_notification_id
+                ) VALUES (
+                    ${bind(now)},
+                    ${bind(AuthenticatedUser.SystemInternalUser.espooUserId)},
+                    ${bind(studentId)}, ${bind(openedAt)}, NULL,
+                    ${bind(CaseStatus.IMPORTED_FROM_VALPAS)},
+                    ${bind(CaseSource.VALPAS_NOTICE)},
+                    NULL, NULL, '',
+                    ${bind(emptyArray<SchoolBackground>())},
+                    ${bind(emptyArray<CaseBackgroundReason>())},
+                    NULL,
+                    ${bind(valpasNotificationId)}
+                )
+                RETURNING id
+                """
+            )
+        }
+        .executeAndReturnGeneratedKeys()
+        .exactlyOne<StudentCaseId>()
+
+fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
+    if (ids.isEmpty()) return emptySet()
+    return createQuery {
+            sql(
+                """
+                SELECT incoming.id
+                FROM unnest(${bind(ids.toTypedArray())}) AS incoming(id)
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM student_cases sc
+                    WHERE sc.valpas_notification_id = incoming.id
+                )
+                """
+            )
+        }
+        .toList<UUID>()
+        .toSet()
+}
+
+fun Database.Read.getStudentCaseStatus(id: StudentCaseId): CaseStatus? =
+    createQuery { sql("SELECT status FROM student_cases WHERE id = ${bind(id)}") }
+        .exactlyOneOrNull<CaseStatus>()
+
+fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean =
+    createQuery {
+            sql(
+                """
+                SELECT EXISTS (
+                    SELECT 1 FROM student_cases
+                    WHERE student_id = ${bind(studentId)}
+                      AND status IN (${bind(CaseStatus.TODO)}, ${bind(CaseStatus.ON_HOLD)})
+                )
+                """
+            )
+        }
+        .exactlyOne<Boolean>()
+
+fun Database.Transaction.copyValpasNotificationIdAndDeleteSource(
+    sourceId: StudentCaseId,
+    targetId: StudentCaseId,
+    notificationId: UUID,
+    updatedBy: EspooUserId,
+    now: HelsinkiDateTime,
+) {
+    // Delete the source first to release the unique constraint on valpas_notification_id,
+    // then update the target — otherwise the unique constraint fires on the UPDATE.
+    createUpdate { sql("DELETE FROM student_cases WHERE id = ${bind(sourceId)}") }
+        .updateExactlyOne()
+    createUpdate {
+            sql(
+                """
+                UPDATE student_cases
+                SET valpas_notification_id = ${bind(notificationId)},
+                    updated = ${bind(now)},
+                    updated_by = ${bind(updatedBy)}
+                WHERE id = ${bind(targetId)}
+                """
             )
         }
         .updateExactlyOne()

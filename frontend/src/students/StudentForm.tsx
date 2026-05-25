@@ -91,6 +91,11 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.valpasLink,
     duplicateCheckDelay
   )
+  const [valpasOppijaOid, setValpasOppijaOid, debouncedValpasOppijaOid] =
+    useDebouncedState(
+      props.mode === 'CREATE' ? '' : (props.student.valpasOppijaOid ?? ''),
+      duplicateCheckDelay
+    )
   const [firstName, setFirstName, debouncedFirstName] = useDebouncedState(
     props.mode === 'CREATE' ? '' : props.student.firstName,
     duplicateCheckDelay
@@ -150,18 +155,23 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     void apiGetPossibleDuplicateStudents({
       ssn: debouncedSsn,
       valpasLink: debouncedValpasLink,
+      valpasOppijaOid: debouncedValpasOppijaOid,
       firstName: debouncedFirstName,
       lastName: debouncedLastName
     }).then(setDuplicateStudents)
   }, [
     debouncedSsn,
     debouncedValpasLink,
+    debouncedValpasOppijaOid,
     debouncedFirstName,
     debouncedLastName,
     creating
   ])
 
   const duplicateSsnStudent = duplicateStudents.find((s) => s.matchingSsn)
+  const duplicateOppijaOidStudent = duplicateStudents.find(
+    (s) => s.matchingOppijaOid
+  )
   const duplicateValpasStudent = duplicateStudents.find(
     (s) => s.matchingValpasLink
   )
@@ -175,6 +185,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
 
     return {
       valpasLink: valpasLink.trim(),
+      valpasOppijaOid: valpasOppijaOid.trim() || null,
       ssn: ssn.trim(),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -191,6 +202,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     }
   }, [
     valpasLink,
+    valpasOppijaOid,
     ssn,
     firstName,
     lastName,
@@ -212,93 +224,73 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     }
   }, [validInput, props])
 
+  const duplicateBanner: React.ReactNode = (() => {
+    if (duplicateSsnStudent) {
+      return (
+        <AlertBox
+          title="Samalla hetulla löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateSsnStudent.id}`}>
+              {duplicateSsnStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateOppijaOidStudent) {
+      return (
+        <AlertBox
+          title="Samalla oppijanumerolla löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateOppijaOidStudent.id}`}>
+              {duplicateOppijaOidStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateValpasStudent) {
+      return (
+        <AlertBox
+          title="Samalla Valpas-linkillä löytyy jo oppivelvollinen:"
+          message={
+            <Link to={`/oppivelvolliset/${duplicateValpasStudent.id}`}>
+              {duplicateValpasStudent.name}
+            </Link>
+          }
+        />
+      )
+    }
+    if (duplicateNameStudents.length > 0) {
+      return (
+        <InfoBox
+          title={`Samalla nimellä löytyy jo ${
+            duplicateNameStudents.length > 1
+              ? 'oppivelvollisia'
+              : 'oppivelvollinen'
+          }. Tarkista onko kyseessä sama henkilö:`}
+          message={
+            <FlexColWithGaps>
+              {duplicateNameStudents.map((s) => (
+                <Link key={s.id} to={`/oppivelvolliset/${s.id}`}>
+                  {s.name}
+                  {s.dateOfBirth ? ` (s. ${formatDate(s.dateOfBirth)})` : ''}
+                </Link>
+              ))}
+            </FlexColWithGaps>
+          }
+        />
+      )
+    }
+    return null
+  })()
+
   return (
     <FlexCol>
       <GroupOfInputRows>
         <RowOfInputs>
-          <LabeledInput $cols={2}>
-            <Label>Hetu</Label>
-            {props.mode === 'VIEW' ? (
-              <span data-qa="ssn-value">{props.student.ssn || '-'}</span>
-            ) : (
-              <InputField data-qa="ssn-input" onChange={setSsn} value={ssn} />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={2}>
-            <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
-            {props.mode === 'VIEW' ? (
-              <span>
-                {formatDate(props.student.dateOfBirth)} (
-                {differenceInYears(new Date(), props.student.dateOfBirth)}v)
-              </span>
-            ) : (
-              <InputField
-                data-qa="date-of-birth-input"
-                onChange={setDateOfBirth}
-                value={dateOfBirth}
-              />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={2}>
-            <Label>Oletettu sukupuoli</Label>
-            {props.mode === 'VIEW' ? (
-              <span>
-                {props.student.gender ? genderNames[props.student.gender] : '-'}
-              </span>
-            ) : (
-              <Select<Gender>
-                items={genders}
-                selectedItem={gender}
-                placeholder=" "
-                getItemLabel={(item) => genderNames[item]}
-                onChange={(item) => setGender(item)}
-              />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={3}>
-            <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.lastName}</span>
-            ) : (
-              <InputField
-                data-qa="last-name-input"
-                onChange={setLastName}
-                value={lastName}
-              />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={3}>
-            <Label>Etunimi {props.mode !== 'VIEW' && '*'}</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.firstName}</span>
-            ) : (
-              <InputField
-                data-qa="first-name-input"
-                onChange={setFirstName}
-                value={firstName}
-              />
-            )}
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $cols={2}>
-            <Label>Puhelinnumero</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.phone || '-'}</span>
-            ) : (
-              <InputField onChange={setPhone} value={phone} />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={4}>
-            <Label>Sähköposti</Label>
-            {props.mode === 'VIEW' ? (
-              <span>{props.student.email || '-'}</span>
-            ) : (
-              <InputField onChange={setEmail} value={email} />
-            )}
-          </LabeledInput>
-          <LabeledInput $cols={6}>
-            <Label>Valpas linkki</Label>
+          <LabeledInput>
+            <Label>Valpas-linkki</Label>
             {props.mode === 'VIEW' ? (
               props.student.valpasLink ? (
                 <a
@@ -317,74 +309,86 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
         </RowOfInputs>
-        {duplicateStudents.length > 0 && (
-          <div>
-            {duplicateSsnStudent ? (
-              <AlertBox
-                title="Samalla hetulla löytyy jo oppivelvollinen:"
-                message={
-                  <Link to={`/oppivelvolliset/${duplicateSsnStudent.id}`}>
-                    {duplicateSsnStudent.name}
-                  </Link>
-                }
-              />
-            ) : duplicateValpasStudent ? (
-              <AlertBox
-                title="Samalla Valpas linkillä löytyy jo oppivelvollinen:"
-                message={
-                  <Link to={`/oppivelvolliset/${duplicateValpasStudent.id}`}>
-                    {duplicateValpasStudent.name}
-                  </Link>
-                }
-              />
-            ) : (
-              <InfoBox
-                title={`Samalla nimellä löytyy jo ${
-                  duplicateNameStudents.length > 1
-                    ? 'oppivelvollisia'
-                    : 'oppivelvollinen'
-                }. Tarkista onko kyseessä sama henkilö:`}
-                message={
-                  <FlexColWithGaps>
-                    {duplicateNameStudents.map((s) => (
-                      <Link key={s.id} to={`/oppivelvolliset/${s.id}`}>
-                        {s.name}
-                        {s.dateOfBirth
-                          ? ` (s. ${formatDate(s.dateOfBirth)})`
-                          : ''}
-                      </Link>
-                    ))}
-                  </FlexColWithGaps>
-                }
-              />
-            )}
-          </div>
-        )}
         <RowOfInputs>
-          <LabeledInput $cols={6}>
-            <Label>Lähiosoite</Label>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Hetu</Label>
             {props.mode === 'VIEW' ? (
-              <span>{props.student.address || '-'}</span>
+              <span data-qa="ssn-value">{props.student.ssn || '-'}</span>
             ) : (
-              <InputField onChange={setAddress} value={address} />
+              <InputField data-qa="ssn-input" onChange={setSsn} value={ssn} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
-            <Label>Kotikunta Suomessa</Label>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Syntymäaika {props.mode !== 'VIEW' && '*'}</Label>
             {props.mode === 'VIEW' ? (
               <span>
-                {props.student.municipalityInFinland ? 'Kyllä' : 'Ei'}
+                {formatDate(props.student.dateOfBirth)} (
+                {differenceInYears(new Date(), props.student.dateOfBirth)}v)
               </span>
             ) : (
-              <Checkbox
-                label="Kyllä"
-                checked={municipalityInFinland}
-                onChange={setMunicipalityInFinland}
+              <InputField
+                data-qa="date-of-birth-input"
+                onChange={setDateOfBirth}
+                value={dateOfBirth}
               />
             )}
           </LabeledInput>
-          <LabeledInput $cols={3}>
-            <Label>Äidinkieli</Label>
+          <LabeledInput $relativeWidth={1 / 2}>
+            <Label>Oppijanumero</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.valpasOppijaOid || '-'}</span>
+            ) : (
+              <InputField
+                data-qa="valpas-oppija-oid-input"
+                onChange={setValpasOppijaOid}
+                value={valpasOppijaOid}
+              />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+        <RowOfInputs>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Sukunimi {props.mode !== 'VIEW' && '*'}</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.lastName}</span>
+            ) : (
+              <InputField
+                data-qa="last-name-input"
+                onChange={setLastName}
+                value={lastName}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Etunimet {props.mode !== 'VIEW' && '*'}</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.firstName}</span>
+            ) : (
+              <InputField
+                data-qa="first-name-input"
+                onChange={setFirstName}
+                value={firstName}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Sukupuoli</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.gender ? genderNames[props.student.gender] : '-'}
+              </span>
+            ) : (
+              <Select<Gender>
+                items={genders}
+                selectedItem={gender}
+                placeholder=" "
+                getItemLabel={(item) => genderNames[item]}
+                onChange={(item) => setGender(item)}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Kieli</Label>
             {props.mode === 'VIEW' ? (
               <span>{props.student.language}</span>
             ) : (
@@ -404,6 +408,49 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
             )}
           </LabeledInput>
         </RowOfInputs>
+        {duplicateBanner && <div>{duplicateBanner}</div>}
+        <RowOfInputs>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Puhelinnumero</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.phone || '-'}</span>
+            ) : (
+              <InputField onChange={setPhone} value={phone} />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={3 / 4}>
+            <Label>Sähköposti</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.email || '-'}</span>
+            ) : (
+              <InputField onChange={setEmail} value={email} />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
+        <RowOfInputs>
+          <LabeledInput $relativeWidth={1 / 4}>
+            <Label>Kotikunta Suomessa</Label>
+            {props.mode === 'VIEW' ? (
+              <span>
+                {props.student.municipalityInFinland ? 'Kyllä' : 'Ei'}
+              </span>
+            ) : (
+              <Checkbox
+                label="Kyllä"
+                checked={municipalityInFinland}
+                onChange={setMunicipalityInFinland}
+              />
+            )}
+          </LabeledInput>
+          <LabeledInput $relativeWidth={3 / 4}>
+            <Label>Osoite</Label>
+            {props.mode === 'VIEW' ? (
+              <span>{props.student.address || '-'}</span>
+            ) : (
+              <InputField onChange={setAddress} value={address} />
+            )}
+          </LabeledInput>
+        </RowOfInputs>
       </GroupOfInputRows>
 
       <VerticalGap $size="XL" />
@@ -412,7 +459,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       <VerticalGap $size="m" />
       <GroupOfInputRows>
         <RowOfInputs>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={1 / 2}>
             <Label>Huoltajat ja yhteystiedot</Label>
             {props.mode === 'VIEW' ? (
               <ReadOnlyTextArea text={props.student.guardianInfo || '-'} />
@@ -420,7 +467,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
               <TextArea onChange={setGuardianInfo} value={guardianInfo} />
             )}
           </LabeledInput>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={1 / 2}>
             <Label>Muut yhteyshenkilöt ja yhteystiedot</Label>
             {props.mode === 'VIEW' ? (
               <ReadOnlyTextArea
@@ -435,7 +482,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
           </LabeledInput>
         </RowOfInputs>
         <RowOfInputs>
-          <LabeledInput $cols={4}>
+          <LabeledInput $relativeWidth={1 / 3}>
             <Label>Yhteistyötahot</Label>
             {props.mode === 'VIEW' ? (
               <span>

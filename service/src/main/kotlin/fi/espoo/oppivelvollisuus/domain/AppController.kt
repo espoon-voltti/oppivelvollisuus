@@ -11,6 +11,9 @@ import fi.espoo.oppivelvollisuus.StudentId
 import fi.espoo.oppivelvollisuus.getActiveAppUsers
 import fi.espoo.oppivelvollisuus.shared.Audit
 import fi.espoo.oppivelvollisuus.shared.AuditId
+import fi.espoo.oppivelvollisuus.shared.BadRequest
+import fi.espoo.oppivelvollisuus.shared.Conflict
+import fi.espoo.oppivelvollisuus.shared.NotFound
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
 import fi.espoo.oppivelvollisuus.shared.db.Database
 import fi.espoo.oppivelvollisuus.shared.time.AppClock
@@ -175,10 +178,62 @@ class AppController {
         @PathVariable id: StudentCaseId,
     ) {
         db.connect { dbc ->
-                dbc.transaction { tx -> tx.deleteStudentCase(id = id, studentId = studentId) }
+                dbc.transaction { tx ->
+                    assertCaseIsNotImportedFromValpas(tx, id)
+                    tx.deleteStudentCase(id = id, studentId = studentId)
+                }
             }
             .also {
                 Audit.DeleteStudentCase.log(targetId = AuditId(studentId), objectId = AuditId(id))
+            }
+    }
+
+    data class MarkAsDuplicateBody(val targetCaseId: StudentCaseId)
+
+    @PostMapping("/student-cases/{caseId}/mark-as-duplicate")
+    fun markAsDuplicate(
+        db: Database,
+        user: AuthenticatedUser.EspooUser,
+        clock: AppClock,
+        @PathVariable caseId: StudentCaseId,
+        @RequestBody body: MarkAsDuplicateBody,
+    ) {
+        if (body.targetCaseId == caseId) {
+            throw BadRequest("Target case must differ from the imported case")
+        }
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    val imported = tx.getStudentCaseSummary(caseId) ?: throw NotFound()
+                    if (imported.status != CaseStatus.IMPORTED_FROM_VALPAS) {
+                        throw BadRequest("Case is not in IMPORTED_FROM_VALPAS status")
+                    }
+                    val target =
+                        tx.getStudentCaseSummary(body.targetCaseId)
+                            ?: throw BadRequest("Target case not found")
+                    if (target.studentId != imported.studentId) {
+                        throw BadRequest("Target case not found for this student")
+                    }
+                    if (target.valpasNotificationId != null) {
+                        throw Conflict("Target case already has a valpas_notification_id")
+                    }
+                    val notificationId =
+                        requireNotNull(imported.valpasNotificationId) {
+                            "imported case missing valpas_notification_id"
+                        }
+                    tx.copyValpasNotificationIdAndDeleteSource(
+                        sourceId = imported.id,
+                        targetId = target.id,
+                        notificationId = notificationId,
+                        updatedBy = user.id,
+                        now = clock.now(),
+                    )
+                }
+            }
+            .also {
+                Audit.MarkCaseAsDuplicate.log(
+                    targetId = AuditId(caseId),
+                    objectId = AuditId(body.targetCaseId),
+                )
             }
     }
 
@@ -193,6 +248,9 @@ class AppController {
     ) {
         db.connect { dbc ->
                 dbc.transaction { tx ->
+                    val before = tx.getStudentCaseSummary(id) ?: throw NotFound()
+                    if (before.studentId != studentId) throw NotFound()
+                    tx.validateStatusTransition(before, body.status)
                     tx.updateStudentCaseStatus(
                         id = id,
                         studentId = studentId,
@@ -220,6 +278,7 @@ class AppController {
     ): CaseEventId =
         db.connect { dbc ->
                 dbc.transaction { tx ->
+                    assertCaseIsNotImportedFromValpas(tx, studentCaseId)
                     tx.insertCaseEvent(
                         studentCaseId = studentCaseId,
                         data = body,
@@ -242,6 +301,8 @@ class AppController {
     ) {
         db.connect { dbc ->
                 dbc.transaction { tx ->
+                    val studentCaseId = tx.getStudentCaseIdByEventId(id) ?: throw NotFound()
+                    assertCaseIsNotImportedFromValpas(tx, studentCaseId)
                     tx.updateCaseEvent(id = id, data = body, updatedBy = user.id, now = clock.now())
                 }
             }
@@ -254,7 +315,13 @@ class AppController {
         user: AuthenticatedUser.EspooUser,
         @PathVariable id: CaseEventId,
     ) {
-        db.connect { dbc -> dbc.transaction { tx -> tx.deleteCaseEvent(id = id) } }
+        db.connect { dbc ->
+                dbc.transaction { tx ->
+                    val studentCaseId = tx.getStudentCaseIdByEventId(id) ?: throw NotFound()
+                    assertCaseIsNotImportedFromValpas(tx, studentCaseId)
+                    tx.deleteCaseEvent(id = id)
+                }
+            }
             .also { Audit.DeleteCaseEvent.log(targetId = AuditId(id)) }
     }
 
@@ -280,5 +347,12 @@ class AppController {
                 }
             }
             .also { Audit.DeleteOldStudents.log() }
+    }
+}
+
+private fun assertCaseIsNotImportedFromValpas(tx: Database.Read, id: StudentCaseId) {
+    val caseStatus = tx.getStudentCaseStatus(id) ?: throw NotFound()
+    if (caseStatus == CaseStatus.IMPORTED_FROM_VALPAS) {
+        throw BadRequest("Operation not allowed on IMPORTED_FROM_VALPAS case")
     }
 }

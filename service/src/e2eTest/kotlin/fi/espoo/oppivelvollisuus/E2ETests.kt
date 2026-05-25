@@ -158,11 +158,11 @@ class E2ETests : PlaywrightTest() {
 
     private fun seedStudentWithCase(page: Page): Pair<StudentId, StudentCaseId> {
         doLogin(page)
-        val seeder = DevUser(lastName = "Seeder")
-        val student = DevStudent(createdBy = seeder.id)
-        val studentCase = DevStudentCase(studentId = student.id, createdBy = seeder.id)
+        val creator = DevUser()
+        val student = DevStudent(createdBy = creator.id)
+        val studentCase = DevStudentCase(studentId = student.id, createdBy = creator.id)
         db.transaction { tx ->
-            tx.insert(seeder)
+            tx.insert(creator)
             tx.insert(student)
             tx.insert(studentCase)
         }

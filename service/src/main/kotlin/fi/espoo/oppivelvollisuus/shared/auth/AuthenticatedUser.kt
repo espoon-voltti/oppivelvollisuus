@@ -21,6 +21,9 @@ sealed class AuthenticatedUser {
     val rawIdHash: HashCode
         get() = Hashing.sha256().hashString(rawId().toString(), Charsets.UTF_8)
 
+    val espooUserId: EspooUserId
+        get() = EspooUserId(rawId())
+
     data class EspooUser(val id: EspooUserId) : AuthenticatedUser() {
         override fun rawId(): UUID = id.raw
 

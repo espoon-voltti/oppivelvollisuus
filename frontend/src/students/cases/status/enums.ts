@@ -2,11 +2,17 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
-export const caseStatuses = ['TODO', 'ON_HOLD', 'FINISHED'] as const
+export const caseStatuses = [
+  'IMPORTED_FROM_VALPAS',
+  'TODO',
+  'ON_HOLD',
+  'FINISHED'
+] as const
 
 export type CaseStatus = (typeof caseStatuses)[number]
 
 export const caseStatusNames: Record<CaseStatus, string> = {
+  IMPORTED_FROM_VALPAS: 'Tuotu Valppaasta',
   TODO: 'Selvittämättä',
   ON_HOLD: 'Edistynyt - odottaa',
   FINISHED: 'Ohjaus päättynyt'

@@ -132,7 +132,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
               data-qa="create-student-button"
             />
           </FlexLeftRight>
-          <LabeledInput $cols={6}>
+          <LabeledInput $relativeWidth={1 / 2}>
             <Label>Haku nimellä tai hetulla</Label>
             <InputField
               value={query}
@@ -141,7 +141,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
             />
           </LabeledInput>
           <FlexRowWithGaps $gapSize="L">
-            <LabeledInput $cols={7}>
+            <LabeledInput $relativeWidth={7 / 12}>
               <Label>Näytettävät tilat</Label>
               <FlexRowWithGaps $gapSize="s">
                 {caseStatuses.map((status) => (
@@ -160,7 +160,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
                 ))}
               </FlexRowWithGaps>
             </LabeledInput>
-            <LabeledInput $cols={3}>
+            <LabeledInput $relativeWidth={1 / 4}>
               <Label>Ohjaaja</Label>
               {employees ? (
                 <Select<Assignee>
@@ -182,7 +182,7 @@ export const StudentsSearchPage = React.memo(function StudentsSearchPage() {
             </LabeledInput>
           </FlexRowWithGaps>
 
-          <LabeledInput $cols={7}>
+          <LabeledInput $relativeWidth={7 / 12}>
             <Label>Ilmoituksen lähde</Label>
             <FlexRowWithGaps $gapSize="s" style={{ alignItems: 'baseline' }}>
               {caseSources.map((source) => (

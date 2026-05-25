@@ -12,6 +12,10 @@ BEGIN
     AND table_name <> 'flyway_schema_history'
   );
 
+  -- Re-insert the system user wiped by the TRUNCATE (V006 baseline).
+  INSERT INTO users (id, created, external_id, first_names, last_name, email, is_system_user)
+  VALUES ('00000000-0000-0000-0000-000000000000', now(), 'api-gw', 'api-gw', 'system-user', NULL, TRUE);
+
   IF (SELECT count(*) FROM information_schema.sequences) > 0 THEN
     EXECUTE (
       SELECT 'SELECT ' || string_agg(format('setval(%L, %L, false)', sequence_name, start_value), ', ')

@@ -10,6 +10,7 @@ import { colors } from '../../shared/theme'
 import { CaseStatus, caseStatusNames } from './status/enums'
 
 const chipColors: Record<CaseStatus, string> = {
+  IMPORTED_FROM_VALPAS: '#8920a3',
   TODO: colors.main.m1,
   ON_HOLD: '#148190',
   FINISHED: colors.grayscale.g15

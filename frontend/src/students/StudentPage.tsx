@@ -12,6 +12,7 @@ import {
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { differenceInYears } from 'date-fns/differenceInYears'
+import orderBy from 'lodash/orderBy'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import styled from 'styled-components'
@@ -38,6 +39,7 @@ import {
   apiDeleteStudent,
   apiGetStudent,
   apiPutStudent,
+  StudentDetails,
   StudentInput,
   StudentResponse
 } from './api'
@@ -52,7 +54,12 @@ import {
 } from './cases/api'
 import { CaseEvents } from './cases/events/CaseEvents'
 import { CaseStatusForm } from './cases/status/CaseStatusForm'
-import { apiPutStudentCaseStatus, CaseStatusInput } from './cases/status/api'
+import { ImportedFromValpasActions } from './cases/status/ImportedFromValpasActions'
+import {
+  apiMarkCaseAsDuplicate,
+  apiPutStudentCaseStatus,
+  CaseStatusInput
+} from './cases/status/api'
 
 const CollapsableRow = styled(FlexLeftRight)<{ $disabled?: boolean }>`
   ${(p) => (p.$disabled ? '' : 'cursor: pointer;')}
@@ -94,16 +101,38 @@ export const StudentPage = React.memo(function StudentPage() {
   const [editingStudent, setEditingStudent] = useState(false)
   const [studentInput, setStudentInput] = useState<StudentInput | null>(null)
 
+  const cases = studentResponse?.cases
+  const importedCase = cases?.find((c) => c.status === 'IMPORTED_FROM_VALPAS')
+  const activeCase = cases?.find(
+    (c) => c.status === 'TODO' || c.status === 'ON_HOLD'
+  )
+  const finishedCases = orderBy(
+    cases?.filter((c) => c.status === 'FINISHED') ?? [],
+    [(c) => c.openedAt, (c) => c.id],
+    ['desc', 'desc']
+  )
+  const latestFinishedCase = finishedCases[0]
+  const unfinishedCases: StudentCase[] = [importedCase, activeCase].filter(
+    (c): c is StudentCase => c !== undefined
+  )
+  const unfinishedCaseExists = unfinishedCases.length > 0
+  const activeCaseExists = activeCase !== undefined
+
   const [expandedCases, setExpandedCases] = useState<string[] | undefined>(
     undefined
   )
-  // Expand the first unfinished case by default
-  if (expandedCases === undefined && studentResponse) {
-    const firstUnfinished = studentResponse.cases.find(
-      (c) => c.status !== 'FINISHED'
-    )
+  if (expandedCases === undefined && cases) {
+    const firstUnfinished = unfinishedCases[0]
     setExpandedCases(firstUnfinished ? [firstUnfinished.id] : [])
   }
+  const toggleExpandedCase = useCallback((caseId: string) => {
+    setExpandedCases((prev) => {
+      if (!prev) return [caseId]
+      return prev.includes(caseId)
+        ? prev.filter((id) => id !== caseId)
+        : [...prev, caseId]
+    })
+  }, [])
 
   // true = creating new, string = id of the edited case
   const [editingCase, setEditingCase] = useState<boolean | string>(false)
@@ -127,13 +156,6 @@ export const StudentPage = React.memo(function StudentPage() {
     editingCaseStatus ||
     editingCaseEvent
   )
-
-  const activeCase = studentResponse?.cases?.find(
-    (c) => c.status !== 'FINISHED'
-  )
-  const finishedCases =
-    studentResponse?.cases?.filter((c) => c.status === 'FINISHED') ?? []
-  const activeCaseExists = activeCase !== undefined
 
   useWarnOnUnsavedChanges(editingSomething)
 
@@ -214,12 +236,20 @@ export const StudentPage = React.memo(function StudentPage() {
                     />
                   </FlexRowWithGaps>
                 </FlexRight>
-                <StudentForm
-                  key={editingStudent ? 'EDIT' : 'VIEW'}
-                  mode={editingStudent ? 'EDIT' : 'VIEW'}
-                  student={studentResponse.student}
-                  onChange={setStudentInput}
-                />
+                {editingStudent ? (
+                  <StudentForm
+                    key="EDIT"
+                    mode="EDIT"
+                    student={studentResponse.student}
+                    onChange={setStudentInput}
+                  />
+                ) : (
+                  <StudentForm
+                    key="VIEW"
+                    mode="VIEW"
+                    student={studentResponse.student}
+                  />
+                )}
                 {editingStudent && (
                   <FlexRight>
                     <FlexRowWithGaps>
@@ -263,7 +293,7 @@ export const StudentPage = React.memo(function StudentPage() {
                   data-qa="add-case-button"
                   text="Lisää ilmoitus"
                   icon={faPlus}
-                  disabled={editingSomething || activeCaseExists}
+                  disabled={editingSomething || unfinishedCaseExists}
                   onClick={() => {
                     setEditingCase(true)
                     setExpandedCases([])
@@ -316,16 +346,13 @@ export const StudentPage = React.memo(function StudentPage() {
 
             <CasesList
               studentId={studentResponse.student.id}
-              cases={activeCase ? [activeCase] : []}
+              student={studentResponse.student}
+              displayedCases={unfinishedCases}
+              activeCase={activeCase}
+              latestFinishedCase={latestFinishedCase}
               employees={employees}
               expandedCases={expandedCases}
-              toggleExpandedCase={(caseId) =>
-                setExpandedCases(
-                  expandedCases.includes(caseId)
-                    ? expandedCases.filter((id) => id !== caseId)
-                    : [...expandedCases, caseId]
-                )
-              }
+              toggleExpandedCase={toggleExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -345,16 +372,13 @@ export const StudentPage = React.memo(function StudentPage() {
             <VerticalGap $size="m" />
             <CasesList
               studentId={studentResponse.student.id}
-              cases={finishedCases}
+              student={studentResponse.student}
+              displayedCases={finishedCases}
+              activeCase={activeCase}
+              latestFinishedCase={latestFinishedCase}
               employees={employees}
               expandedCases={expandedCases}
-              toggleExpandedCase={(caseId) =>
-                setExpandedCases(
-                  expandedCases.includes(caseId)
-                    ? expandedCases.filter((id) => id !== caseId)
-                    : [...expandedCases, caseId]
-                )
-              }
+              toggleExpandedCase={toggleExpandedCase}
               editingCase={editingCase}
               setEditingCase={setEditingCase}
               editingCaseStatus={editingCaseStatus}
@@ -376,7 +400,10 @@ export const StudentPage = React.memo(function StudentPage() {
 
 const CasesList = React.memo(function CasesList({
   studentId,
-  cases,
+  student,
+  displayedCases,
+  activeCase,
+  latestFinishedCase,
   employees,
   expandedCases,
   toggleExpandedCase,
@@ -393,7 +420,10 @@ const CasesList = React.memo(function CasesList({
   loadStudent
 }: {
   studentId: string
-  cases: StudentCase[]
+  student: StudentDetails
+  displayedCases: StudentCase[]
+  activeCase: StudentCase | undefined
+  latestFinishedCase: StudentCase | undefined
   employees: EmployeeUser[]
   expandedCases: string[]
   toggleExpandedCase: (id: string) => void
@@ -416,12 +446,13 @@ const CasesList = React.memo(function CasesList({
 
   return (
     <FlexColWithGaps $gapSize="L">
-      {cases.map((studentCase) => (
+      {displayedCases.map((studentCase) => (
         <FlexColWithGaps
           key={studentCase.id}
           data-qa={`case-row-${studentCase.id}`}
         >
           <AccordionRow
+            data-qa="case-header"
             $disabled={
               editingCase !== false ||
               editingCaseStatus !== null ||
@@ -471,30 +502,32 @@ const CasesList = React.memo(function CasesList({
                         disabled={editingSomething}
                         onClick={() => setEditingCase(studentCase.id)}
                       />
-                      <InlineButton
-                        data-qa="delete-case-button"
-                        text="Poista"
-                        icon={faTrash}
-                        disabled={editingSomething}
-                        onClick={() => {
-                          if (studentCase.events.length > 0) {
-                            window.alert(
-                              'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
-                            )
-                          } else {
-                            if (
-                              window.confirm(
-                                'Haluatko varmasti poistaa ilmoituksen?'
+                      {studentCase.status !== 'IMPORTED_FROM_VALPAS' && (
+                        <InlineButton
+                          data-qa="delete-case-button"
+                          text="Poista"
+                          icon={faTrash}
+                          disabled={editingSomething}
+                          onClick={() => {
+                            if (studentCase.events.length > 0) {
+                              window.alert(
+                                'Jos haluat poistaa ilmoituksen, poista ensin kaikki ilmoituksen muistiinpanot ja toimenpiteet'
                               )
-                            ) {
-                              void apiDeleteStudentCase(
-                                studentId,
-                                studentCase.id
-                              ).then(() => loadStudent())
+                            } else {
+                              if (
+                                window.confirm(
+                                  'Haluatko varmasti poistaa ilmoituksen?'
+                                )
+                              ) {
+                                void apiDeleteStudentCase(
+                                  studentId,
+                                  studentCase.id
+                                ).then(() => loadStudent())
+                              }
                             }
-                          }
-                        }}
-                      />
+                          }}
+                        />
+                      )}
                     </FlexRowWithGaps>
                   </FlexRight>
                 )}
@@ -545,17 +578,37 @@ const CasesList = React.memo(function CasesList({
               <FlexColWithGaps>
                 <FlexLeftRight>
                   <H4>Ohjauksen tila</H4>
-                  {editingCaseStatus !== studentCase.id && (
-                    <InlineButton
-                      data-qa="change-status-button"
-                      text="Vaihda tilaa"
-                      icon={faPen}
-                      disabled={editingSomething}
-                      onClick={() => setEditingCaseStatus(studentCase.id)}
-                    />
-                  )}
+                  {studentCase.status !== 'IMPORTED_FROM_VALPAS' &&
+                    editingCaseStatus !== studentCase.id && (
+                      <InlineButton
+                        data-qa="change-status-button"
+                        text="Vaihda tilaa"
+                        icon={faPen}
+                        disabled={editingSomething}
+                        onClick={() => setEditingCaseStatus(studentCase.id)}
+                      />
+                    )}
                 </FlexLeftRight>
-                {editingCaseStatus === studentCase.id ? (
+                {studentCase.status === 'IMPORTED_FROM_VALPAS' ? (
+                  <ImportedFromValpasActions
+                    importedCase={studentCase}
+                    student={student}
+                    activeCase={activeCase}
+                    latestFinishedCase={latestFinishedCase}
+                    onApprove={() =>
+                      apiPutStudentCaseStatus(
+                        studentCase.studentId,
+                        studentCase.id,
+                        { status: 'TODO', finishedInfo: null }
+                      ).then(() => loadStudent())
+                    }
+                    onMarkAsDuplicate={(targetCaseId) =>
+                      apiMarkCaseAsDuplicate(studentCase.id, targetCaseId).then(
+                        () => loadStudent()
+                      )
+                    }
+                  />
+                ) : editingCaseStatus === studentCase.id ? (
                   <FlexColWithGaps>
                     <CaseStatusForm
                       mode="EDIT"

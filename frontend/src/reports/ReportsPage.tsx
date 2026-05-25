@@ -86,7 +86,7 @@ export const ReportsPage = React.memo(function ReportsPage() {
         </P>
         <VerticalGap $size="L" />
         <FlexRowWithGaps $gapSize="L">
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Alkupäivä</Label>
             <InputField
               value={startDate}
@@ -96,7 +96,7 @@ export const ReportsPage = React.memo(function ReportsPage() {
               }}
             />
           </LabeledInput>
-          <LabeledInput $cols={2}>
+          <LabeledInput $relativeWidth={1 / 6}>
             <Label>Loppupäivä</Label>
             <InputField
               value={endDate}

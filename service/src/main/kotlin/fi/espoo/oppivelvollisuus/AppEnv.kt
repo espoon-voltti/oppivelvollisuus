@@ -39,6 +39,25 @@ data class JwtEnv(val publicKeysUrl: URI) {
     }
 }
 
+data class ValpasIntegrationEnv(
+    val enabled: Boolean,
+    val opintopolkuBaseUrl: String?,
+    val username: String?,
+    val password: Sensitive<String>?,
+    val kuntaOid: String?,
+) {
+    companion object {
+        fun fromEnvironment(env: Environment): ValpasIntegrationEnv =
+            ValpasIntegrationEnv(
+                enabled = env.lookup("app.integration.valpas.enabled") ?: false,
+                opintopolkuBaseUrl = env.lookup("app.integration.valpas.opintopolku_base_url"),
+                username = env.lookup("app.integration.valpas.username"),
+                password = env.lookup<String?>("app.integration.valpas.password")?.let(::Sensitive),
+                kuntaOid = env.lookup("app.integration.valpas.kunta_oid"),
+            )
+    }
+}
+
 data class DatabaseEnv(
     val url: String,
     val username: String,

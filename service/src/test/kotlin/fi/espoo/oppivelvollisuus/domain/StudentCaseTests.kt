@@ -18,6 +18,7 @@ import fi.espoo.oppivelvollisuus.shared.time.HelsinkiDateTime
 import fi.espoo.oppivelvollisuus.shared.time.MockAppClock
 import java.time.LocalDate
 import java.time.LocalTime
+import java.util.UUID
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -132,27 +133,30 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
 
         val studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
-        studentResponse.cases.first().let { studentCase ->
-            assertEquals(
-                StudentCase(
-                    id = caseId,
-                    studentId = testStudent.id,
-                    openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = UserBasics(id = testUser.id, name = testUser.name),
-                    status = CaseStatus.TODO,
-                    finishedInfo = null,
-                    source = CaseSource.OTHER,
-                    sourceValpas = null,
-                    sourceOther = OtherNotifier.LASTENSUOJELU,
-                    sourceContact = "Lastensuojelu, Minna Mikkola",
-                    schoolBackground = SchoolBackground.entries.toSet(),
-                    caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
-                    notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
-                    events = emptyList(),
-                ),
-                studentCase,
-            )
-        }
+        studentResponse.cases
+            .first { it.id == caseId }
+            .let { studentCase ->
+                assertEquals(
+                    StudentCase(
+                        id = caseId,
+                        studentId = testStudent.id,
+                        openedAt = LocalDate.of(2023, 12, 8),
+                        assignedTo = UserBasics(id = testUser.id, name = testUser.name),
+                        status = CaseStatus.TODO,
+                        finishedInfo = null,
+                        source = CaseSource.OTHER,
+                        sourceValpas = null,
+                        sourceOther = OtherNotifier.LASTENSUOJELU,
+                        sourceContact = "Lastensuojelu, Minna Mikkola",
+                        schoolBackground = SchoolBackground.entries.toSet(),
+                        caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
+                        notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
+                        valpasNotificationId = null,
+                        events = emptyList(),
+                    ),
+                    studentCase,
+                )
+            }
     }
 
     @Test
@@ -183,27 +187,30 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
 
         var studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
-        studentResponse.cases.first().let { studentCase ->
-            assertEquals(
-                StudentCase(
-                    id = caseId,
-                    studentId = testStudent.id,
-                    openedAt = LocalDate.of(2023, 12, 8),
-                    assignedTo = null,
-                    status = CaseStatus.TODO,
-                    finishedInfo = null,
-                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
-                    sourceValpas = null,
-                    sourceOther = null,
-                    sourceContact = "",
-                    schoolBackground = emptySet(),
-                    caseBackgroundReasons = emptySet(),
-                    notInSchoolReason = null,
-                    events = emptyList(),
-                ),
-                studentCase,
-            )
-        }
+        studentResponse.cases
+            .first { it.id == caseId }
+            .let { studentCase ->
+                assertEquals(
+                    StudentCase(
+                        id = caseId,
+                        studentId = testStudent.id,
+                        openedAt = LocalDate.of(2023, 12, 8),
+                        assignedTo = null,
+                        status = CaseStatus.TODO,
+                        finishedInfo = null,
+                        source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                        sourceValpas = null,
+                        sourceOther = null,
+                        sourceContact = "",
+                        schoolBackground = emptySet(),
+                        caseBackgroundReasons = emptySet(),
+                        notInSchoolReason = null,
+                        valpasNotificationId = null,
+                        events = emptyList(),
+                    ),
+                    studentCase,
+                )
+            }
 
         updateStudentCase(
             caseId,
@@ -224,29 +231,35 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
 
         studentResponse = getStudent()
         assertEquals(2, studentResponse.cases.size)
-        studentResponse.cases.first().let { studentCase ->
-            assertEquals(
-                StudentCase(
-                    id = caseId,
-                    studentId = testStudent.id,
-                    openedAt = LocalDate.of(2023, 12, 9),
-                    assignedTo = UserBasics(id = testUser.id, name = testUser.name),
-                    status = CaseStatus.TODO,
-                    finishedInfo = null,
-                    source = CaseSource.VALPAS_NOTICE,
-                    sourceValpas = ValpasNotifier.LUKIO,
-                    sourceOther = null,
-                    sourceContact = "Espoon lukio",
-                    schoolBackground = setOf(SchoolBackground.EI_PERUSKOULUN_PAATTOTODISTUSTA),
-                    caseBackgroundReasons =
-                        setOf(CaseBackgroundReason.MOTIVAATION_PUUTE, CaseBackgroundReason.MUU_SYY),
-                    notInSchoolReason =
-                        NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA,
-                    events = emptyList(),
-                ),
-                studentCase,
-            )
-        }
+        studentResponse.cases
+            .first { it.id == caseId }
+            .let { studentCase ->
+                assertEquals(
+                    StudentCase(
+                        id = caseId,
+                        studentId = testStudent.id,
+                        openedAt = LocalDate.of(2023, 12, 9),
+                        assignedTo = UserBasics(id = testUser.id, name = testUser.name),
+                        status = CaseStatus.TODO,
+                        finishedInfo = null,
+                        source = CaseSource.VALPAS_NOTICE,
+                        sourceValpas = ValpasNotifier.LUKIO,
+                        sourceOther = null,
+                        sourceContact = "Espoon lukio",
+                        schoolBackground = setOf(SchoolBackground.EI_PERUSKOULUN_PAATTOTODISTUSTA),
+                        caseBackgroundReasons =
+                            setOf(
+                                CaseBackgroundReason.MOTIVAATION_PUUTE,
+                                CaseBackgroundReason.MUU_SYY,
+                            ),
+                        notInSchoolReason =
+                            NotInSchoolReason.EI_OLE_ALOITTANUT_VASTAANOTTAMASSAAN_OPISKELUPAIKASSA,
+                        valpasNotificationId = null,
+                        events = emptyList(),
+                    ),
+                    studentCase,
+                )
+            }
     }
 
     @Test
@@ -411,7 +424,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
     }
 
     @Test
-    fun `cannot reset status after finishing if there already is another unfinished case`() {
+    fun `cannot reset status after finishing if there already is another active case`() {
         val caseId = seedCase()
         updateStudentCaseStatus(
             caseId,
@@ -426,6 +439,36 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                 updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.TODO, null))
             }
             .also { assertTrue { it.isUniqueConstraintViolation() } }
+    }
+
+    @Test
+    fun `can reset status after finishing if the only other case is IMPORTED_FROM_VALPAS`() {
+        val caseId = seedCase()
+        updateStudentCaseStatus(
+            caseId,
+            CaseStatusInput(
+                CaseStatus.FINISHED,
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
+            ),
+        )
+        db.transaction { tx ->
+            tx.insert(
+                DevStudentCase(
+                    studentId = testStudent.id,
+                    createdBy = testUser.id,
+                    created = now,
+                    status = CaseStatus.IMPORTED_FROM_VALPAS,
+                    source = CaseSource.VALPAS_AUTOMATIC_CHECK,
+                    valpasNotificationId = UUID.randomUUID(),
+                )
+            )
+        }
+
+        updateStudentCaseStatus(caseId, CaseStatusInput(CaseStatus.TODO, null))
+
+        val resetCase = getStudent().cases.first { it.id == caseId }
+        assertEquals(CaseStatus.TODO, resetCase.status)
+        assertNull(resetCase.finishedInfo)
     }
 
     @Test

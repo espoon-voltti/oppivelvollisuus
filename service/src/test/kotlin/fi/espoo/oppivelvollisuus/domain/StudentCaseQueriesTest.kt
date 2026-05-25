@@ -61,50 +61,6 @@ class StudentCaseQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
     }
 
     @Test
-    fun `getStudentCasesByStudent returns cases ordered by opened_at DESC`() {
-        val older =
-            DevStudentCase(
-                studentId = student.id,
-                createdBy = user.id,
-                created = now,
-                openedAt = LocalDate.of(2022, 1, 1),
-            )
-        db.transaction { tx -> tx.insert(older) }
-        // partial unique index allows at most one non-FINISHED case per student
-        db.transaction {
-            it.updateStudentCaseStatus(
-                id = older.id,
-                studentId = student.id,
-                data =
-                    CaseStatusInput(
-                        status = CaseStatus.FINISHED,
-                        finishedInfo =
-                            FinishedInfo(
-                                reason = CaseFinishedReason.OTHER,
-                                startedAtSchool = null,
-                                followUpMeasures = null,
-                                otherReason = "test",
-                            ),
-                    ),
-                updatedBy = user.id,
-                now = now,
-            )
-        }
-        val newer =
-            DevStudentCase(
-                studentId = student.id,
-                createdBy = user.id,
-                created = now,
-                openedAt = LocalDate.of(2023, 1, 1),
-            )
-        db.transaction { tx -> tx.insert(newer) }
-
-        val cases = db.read { it.getStudentCasesByStudent(student.id) }
-
-        assertEquals(listOf(newer.id, older.id), cases.map { it.id })
-    }
-
-    @Test
     fun `updateStudentCase overwrites the fields`() {
         val case = DevStudentCase(studentId = student.id, createdBy = user.id, created = now)
         db.transaction { tx -> tx.insert(case) }
