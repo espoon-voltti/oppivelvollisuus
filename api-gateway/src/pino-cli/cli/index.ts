@@ -2,12 +2,14 @@
 //
 // SPDX-License-Identifier: LGPL-2.1-or-later
 
+import type { TransformCallback } from 'node:stream'
+
 import type {
   SerializedRequest,
   SerializedResponse
 } from 'pino-std-serializers'
 import split from 'split2'
-import * as through from 'through2'
+import through2 from 'through2'
 
 import { ipv6ToIpv4 } from './utils.ts'
 
@@ -242,7 +244,7 @@ const parser = (input: string) => {
 export const parserStream = split(parser)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const transport = (obj: any, _: string, cb: through.TransformCallback) => {
+const transport = (obj: any, _: string, cb: TransformCallback) => {
   try {
     if (
       !isPinoAccessLog(obj) &&
@@ -279,4 +281,4 @@ const transport = (obj: any, _: string, cb: through.TransformCallback) => {
   }
 }
 
-export const transportStream = through.obj(transport)
+export const transportStream = through2.obj(transport)
