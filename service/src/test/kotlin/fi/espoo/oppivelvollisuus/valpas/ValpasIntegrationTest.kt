@@ -202,6 +202,24 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
     }
 
     @Test
+    fun `notification transferred to another municipality skips row`() {
+        val oppija = sampleOppija()
+        val transferred =
+            oppija.copy(
+                aktiivinenKuntailmoitus =
+                    oppija.aktiivinenKuntailmoitus!!.copy(onUudempiaIlmoituksiaMuihinKuntiin = true)
+            )
+
+        mock.nextStartReturnsQueryId = "query-transferred"
+        mock.stageCompleteResult("query-transferred", listOf(transferred))
+
+        runFullImport("query-transferred")
+
+        assertEquals(0, countStudents())
+        assertEquals(0, countCases())
+    }
+
+    @Test
     fun `existing student matched by ssn is reused, no fields overwritten`() {
         // Pre-seed a student with the same SSN but different name
         val existingStudent =

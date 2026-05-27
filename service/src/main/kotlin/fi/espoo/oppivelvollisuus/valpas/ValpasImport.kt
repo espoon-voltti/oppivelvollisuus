@@ -84,6 +84,13 @@ fun importValpasOppija(
         logger.warn { "Skipping oppija ${oppija.oppijanumero}: no aktiivinenKuntailmoitus" }
         return null
     }
+    if (notification.onUudempiaIlmoituksiaMuihinKuntiin == true) {
+        logger.info {
+            "Skipping oppija ${oppija.oppijanumero}: " +
+                "newer kuntailmoitus exists for another municipality"
+        }
+        return null
+    }
     if (oppija.hetu.isNullOrBlank()) {
         logger.warn { "Skipping oppija ${oppija.oppijanumero}: missing hetu" }
         return null
