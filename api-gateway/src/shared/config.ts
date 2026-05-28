@@ -23,7 +23,7 @@ const envVariables = {
   /**
    * Default timeout (in minutes) for idle sessions.
    */
-  SESSION_TIMEOUT_MINUTES: 32,
+  SESSION_TIMEOUT_MINUTES: 8 * 60,
   /**
    * If true, all cookies are set with the `Secure` flag.
    *
