@@ -85,7 +85,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.5.32")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.03")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
     api(platform("io.opentelemetry:opentelemetry-bom:1.62.0"))
     implementation("io.opentelemetry:opentelemetry-api")
