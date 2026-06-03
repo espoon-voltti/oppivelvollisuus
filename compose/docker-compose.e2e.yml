@@ -6,7 +6,7 @@ version: '3.5'
 
 services:
   frontend:
-    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/frontend:${TAG:-master}
+    image: ghcr.io/espoon-voltti/oppivelvollisuus/frontend:${TAG:-master}
     build:
       context: ../frontend/
     read_only: true
@@ -20,7 +20,7 @@ services:
       HTTP_SCHEME: http
 
   service:
-    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/service:${TAG:-master}
+    image: ghcr.io/espoon-voltti/oppivelvollisuus/service:${TAG:-master}
     build:
       context: ../service/
     read_only: true
@@ -40,7 +40,7 @@ services:
       APP_JWT_PUBLIC_KEYS_URL: classpath:local-development/jwks.json
 
   api-gateway:
-    image: 095341522062.dkr.ecr.eu-north-1.amazonaws.com/oppivelvollisuus/api-gateway:${TAG:-master}
+    image: ghcr.io/espoon-voltti/oppivelvollisuus/api-gateway:${TAG:-master}
     build:
       context: ../api-gateway/
     read_only: true
