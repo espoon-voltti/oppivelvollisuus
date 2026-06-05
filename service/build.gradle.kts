@@ -74,7 +74,7 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    api(platform("tools.jackson:jackson-bom:3.1.3"))
+    api(platform("tools.jackson:jackson-bom:3.1.4"))
     implementation("tools.jackson.core:jackson-core")
     implementation("tools.jackson.core:jackson-databind")
     implementation("tools.jackson.module:jackson-module-kotlin")
