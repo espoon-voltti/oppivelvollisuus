@@ -10,8 +10,8 @@ import org.springframework.boot.gradle.tasks.bundling.BootJar
 plugins {
     id("org.springframework.boot") version "4.0.6"
     id("io.spring.dependency-management") version "1.1.7"
-    kotlin("jvm") version "2.3.21"
-    kotlin("plugin.spring") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
+    kotlin("plugin.spring") version "2.4.0"
     id("org.flywaydb.flyway") version "12.7.0"
     id("com.ncorti.ktfmt.gradle") version "0.26.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
