@@ -91,7 +91,8 @@
     "trailingComma": "none"
   },
   "resolutions": {
-    "@types/ms": "2.1.0"
+    "@types/ms": "2.1.0",
+    "shell-quote": "1.8.4"
   },
   "engines": {
     "node": ">= 22.18.0"
