@@ -119,9 +119,7 @@ class ValpasIntegrationService(
             }
         when (status) {
             ValpasQueryStatus.Pending,
-            ValpasQueryStatus.Running -> {
-                Unit
-            }
+            ValpasQueryStatus.Running -> {}
 
             is ValpasQueryStatus.Complete -> {
                 db.transaction { tx ->
