@@ -27,7 +27,7 @@
     "react": "19.2.7",
     "react-csv": "2.2.2",
     "react-dom": "19.2.7",
-    "styled-components": "6.4.2"
+    "styled-components": "6.4.3"
   },
   "devDependencies": {
     "@babel/core": "8.0.1",
