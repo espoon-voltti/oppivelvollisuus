@@ -173,6 +173,7 @@ jobs:
         shell: bash
         run: |
           docker run --rm \
+              -e CI=true \
               -e NVD_API_KEY=${{ secrets.NVD_API_KEY }} \
               -e OSS_INDEX_USERNAME=${{ secrets.OSS_INDEX_USERNAME }} -e OSS_INDEX_PASSWORD=${{ secrets.OSS_INDEX_PASSWORD }} \
               -v $(pwd)/dependency-check-data:/root/.gradle/dependency-check-data \
@@ -291,7 +292,7 @@ jobs:
           retention-days: 2
 
   ecr-push:
-    if: ${{ !github.event.pull_request.head.repo.fork }}
+    if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
     needs:
       - dockerize
       - service
