@@ -44,7 +44,7 @@ jobs:
           - oppivelvollisuus/service-builder
     steps:
       - name: Delete untagged versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5
+        uses: actions/delete-package-versions@v5.0.0
         with:
           owner: espoon-voltti
           package-name: ${{ matrix.package }}
@@ -52,7 +52,7 @@ jobs:
           delete-only-untagged-versions: 'true'
 
       - name: Keep newest 100 versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5
+        uses: actions/delete-package-versions@v5.0.0
         with:
           owner: espoon-voltti
           package-name: ${{ matrix.package }}
@@ -74,7 +74,7 @@ jobs:
           - oppivelvollisuus/service-builder
     steps:
       - name: Delete untagged versions of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5
+        uses: actions/delete-package-versions@v5.0.0
         with:
           owner: espoon-voltti
           package-name: ${{ matrix.package }}
@@ -82,7 +82,7 @@ jobs:
           delete-only-untagged-versions: 'true'
 
       - name: Keep only the newest version of ${{ matrix.package }}
-        uses: actions/delete-package-versions@v5
+        uses: actions/delete-package-versions@v5.0.0
         with:
           owner: espoon-voltti
           package-name: ${{ matrix.package }}
