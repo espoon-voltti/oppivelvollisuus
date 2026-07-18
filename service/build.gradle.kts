@@ -87,7 +87,7 @@ dependencies {
     implementation("ch.qos.logback:logback-access:1.5.38")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
-    api(platform("io.opentelemetry:opentelemetry-bom:1.63.0"))
+    api(platform("io.opentelemetry:opentelemetry-bom:1.64.0"))
     implementation("io.opentelemetry:opentelemetry-api")
     implementation("com.github.kagkarlsson:db-scheduler:16.12.0")
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
