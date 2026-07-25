@@ -97,7 +97,7 @@ dependencies {
     api(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.kotest:kotest-property:6.2.2")
+    testImplementation("io.kotest:kotest-property:6.2.3")
     testImplementation("com.microsoft.playwright:playwright:1.61.0")
 }
 
