@@ -6154,7 +6154,7 @@ __metadata:
     query-string: "npm:9.4.1"
     redis: "npm:5.12.1"
     split2: "npm:4.2.0"
-    through2: "npm:5.0.6"
+    through2: "npm:5.0.7"
     tough-cookie: "npm:6.0.2"
     ts-jest: "npm:29.4.12"
     typescript: "npm:6.0.3"
@@ -7498,12 +7498,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"through2@npm:5.0.6":
-  version: 5.0.6
-  resolution: "through2@npm:5.0.6"
+"through2@npm:5.0.7":
+  version: 5.0.7
+  resolution: "through2@npm:5.0.7"
   dependencies:
     readable-stream: "npm:^4.7.0"
-  checksum: 10/24b5e443dedaa592d17269eabc5e1073fa18faa115633b795ad9cb3fa19221d75a9331c48806f897ffb5cb359bd23abf469c14e3f84d2ae72617bc2b77909b37
+  checksum: 10/ef9e1089317f342dfdad59e3097f5c11564b78f358373d56a794ff6e55910bce4cb5e6936ab0ca63ae0b5adea707092b9cf415da46c5974a0c9da2970b28b3db
   languageName: node
   linkType: hard
 
