@@ -398,22 +398,28 @@ jobs:
         include:
           - environment: staging
             aws_region: eu-north-1
-            ecr_role_secret: AWS_ROLE
           - environment: prod
             aws_region: eu-north-1
-            ecr_role_secret: AWS_ROLE
           - environment: esc-staging
             aws_region: eusc-de-east-1
-            ecr_role_secret: AWS_ROLE_ESC
     environment:
       name: ${{ matrix.environment }}
 
     steps:
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (staging/prod)
+        if: ${{ matrix.environment == 'staging' || matrix.environment == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ matrix.aws_region }}
-          role-to-assume: ${{ secrets[matrix.ecr_role_secret] }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-duration-seconds: 1200
+
+      - name: Configure AWS credentials (esc-staging)
+        if: ${{ matrix.environment == 'esc-staging' }}
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ matrix.aws_region }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ESC }}
           role-duration-seconds: 1200
 
       - name: Retag
