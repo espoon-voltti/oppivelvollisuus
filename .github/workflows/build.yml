@@ -429,7 +429,7 @@ jobs:
             aws ecr put-image --repository-name "oppivelvollisuus/$repository" --image-tag "env-${{ matrix.environment }}" --image-manifest "$MANIFEST"
           done
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (deploy role)
         uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ matrix.aws_region }}
