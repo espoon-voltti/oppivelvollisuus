@@ -58,11 +58,13 @@ export const inputWidthCss = (width: InputWidth) => css`
   max-width: ${inputWidths[width]};
 
   @media (max-width: ${tabletMin}) {
-    ${width === 'L' || width === 'XL'
-      ? css`
-          width: 100%;
-          max-width: 100%;
-        `
-      : ''}
+    ${
+      width === 'L' || width === 'XL'
+        ? css`
+            width: 100%;
+            max-width: 100%;
+          `
+        : ''
+    }
   }
 `
