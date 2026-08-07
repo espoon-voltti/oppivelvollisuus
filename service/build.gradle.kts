@@ -15,7 +15,7 @@ plugins {
     id("org.flywaydb.flyway") version "12.11.0"
     id("com.ncorti.ktfmt.gradle") version "0.26.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.owasp.dependencycheck") version "12.2.2"
+    id("org.owasp.dependencycheck") version "13.0.0"
 
     idea
 }
