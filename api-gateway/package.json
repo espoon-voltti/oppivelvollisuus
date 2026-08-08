@@ -74,7 +74,7 @@
     "prettier": "3.9.6",
     "tough-cookie": "6.0.2",
     "ts-jest": "29.4.12",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "typescript-eslint": "8.66.0",
     "xml-crypto": "6.1.2",
     "xml2js": "0.6.2"
