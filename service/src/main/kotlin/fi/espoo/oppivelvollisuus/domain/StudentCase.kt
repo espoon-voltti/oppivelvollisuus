@@ -135,18 +135,17 @@ fun Database.Transaction.insertStudentCase(
     data: StudentCaseInput,
     createdBy: EspooUserId,
     now: HelsinkiDateTime,
-): StudentCaseId =
-    createUpdate {
-            sql(
-                """
+): StudentCaseId = createUpdate {
+    sql(
+        """
                 INSERT INTO student_cases (created, created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(studentId)}, ${bind(data.openedAt)}, ${bind(data.assignedTo)}, ${bind(CaseStatus.TODO)}, ${bind(data.source)}, ${bind(data.sourceValpas)}, ${bind(data.sourceOther)}, ${bind(data.sourceContact)}, ${bind(data.schoolBackground.toTypedArray())}, ${bind(data.caseBackgroundReasons.toTypedArray())}, ${bind(data.notInSchoolReason)})
                 RETURNING id
                 """
-            )
-        }
-        .executeAndReturnGeneratedKeys()
-        .exactlyOne<StudentCaseId>()
+    )
+}
+    .executeAndReturnGeneratedKeys()
+    .exactlyOne<StudentCaseId>()
 
 enum class CaseFinishedReason : DatabaseEnum {
     BEGAN_STUDIES,
@@ -246,10 +245,9 @@ data class StudentCase(
     }
 }
 
-fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCase> =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCase> = createQuery {
+    sql(
+        """
                 SELECT
                     sc.id, sc.student_id, sc.opened_at,
                     assignee.id AS assigned_to_id,
@@ -292,9 +290,9 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
                 WHERE student_id = ${bind(studentId)}
                 """
-            )
-        }
-        .toList<StudentCase>()
+    )
+}
+    .toList<StudentCase>()
 
 data class StudentCaseSummary(
     val id: StudentCaseId,
@@ -305,17 +303,16 @@ data class StudentCaseSummary(
     val valpasNotificationId: UUID?,
 )
 
-fun Database.Read.getStudentCaseSummary(id: StudentCaseId): StudentCaseSummary? =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getStudentCaseSummary(id: StudentCaseId): StudentCaseSummary? = createQuery {
+    sql(
+        """
                 SELECT id, student_id, status, source, source_valpas, valpas_notification_id
                 FROM student_cases
                 WHERE id = ${bind(id)}
                 """
-            )
-        }
-        .exactlyOneOrNull<StudentCaseSummary>()
+    )
+}
+    .exactlyOneOrNull<StudentCaseSummary>()
 
 fun Database.Transaction.updateStudentCase(
     id: StudentCaseId,
@@ -325,8 +322,8 @@ fun Database.Transaction.updateStudentCase(
     now: HelsinkiDateTime,
 ) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE student_cases
                 SET
                     updated = ${bind(now)},
@@ -342,8 +339,8 @@ fun Database.Transaction.updateStudentCase(
                     not_in_school_reason = ${bind(data.notInSchoolReason)}
                 WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
@@ -379,8 +376,8 @@ fun Database.Transaction.updateStudentCaseStatus(
     now: HelsinkiDateTime,
 ) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE student_cases
                 SET
                     updated = ${bind(now)},
@@ -392,41 +389,38 @@ fun Database.Transaction.updateStudentCaseStatus(
                     other_reason = ${bind(data.finishedInfo?.otherReason)}
                 WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
 fun Database.Transaction.deleteStudentCase(id: StudentCaseId, studentId: StudentId) {
     createUpdate {
-            sql(
-                "DELETE FROM student_cases WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}"
-            )
-        }
+        sql("DELETE FROM student_cases WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}")
+    }
         .updateExactlyOne()
 }
 
 fun Database.Read.findImportedFromValpasCaseForStudent(studentId: StudentId): StudentCaseId? =
     createQuery {
-            sql(
-                """
+        sql(
+            """
                 SELECT id FROM student_cases
                 WHERE student_id = ${bind(studentId)}
                   AND status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)}
                 """
-            )
-        }
-        .exactlyOneOrNull<StudentCaseId>()
+        )
+    }
+    .exactlyOneOrNull<StudentCaseId>()
 
 fun Database.Transaction.insertImportedCase(
     studentId: StudentId,
     valpasNotificationId: UUID,
     openedAt: LocalDate,
     now: HelsinkiDateTime,
-): StudentCaseId =
-    createUpdate {
-            sql(
-                """
+): StudentCaseId = createUpdate {
+    sql(
+        """
                 INSERT INTO student_cases (
                     created, created_by, student_id, opened_at, assigned_to,
                     status, source, source_valpas, source_other, source_contact,
@@ -446,16 +440,16 @@ fun Database.Transaction.insertImportedCase(
                 )
                 RETURNING id
                 """
-            )
-        }
-        .executeAndReturnGeneratedKeys()
-        .exactlyOne<StudentCaseId>()
+    )
+}
+    .executeAndReturnGeneratedKeys()
+    .exactlyOne<StudentCaseId>()
 
 fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
     if (ids.isEmpty()) return emptySet()
     return createQuery {
-            sql(
-                """
+        sql(
+            """
                 SELECT incoming.id
                 FROM unnest(${bind(ids.toTypedArray())}) AS incoming(id)
                 WHERE NOT EXISTS (
@@ -463,29 +457,29 @@ fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
                     WHERE sc.valpas_notification_id = incoming.id
                 )
                 """
-            )
-        }
+        )
+    }
         .toList<UUID>()
         .toSet()
 }
 
-fun Database.Read.getStudentCaseStatus(id: StudentCaseId): CaseStatus? =
-    createQuery { sql("SELECT status FROM student_cases WHERE id = ${bind(id)}") }
-        .exactlyOneOrNull<CaseStatus>()
+fun Database.Read.getStudentCaseStatus(id: StudentCaseId): CaseStatus? = createQuery {
+    sql("SELECT status FROM student_cases WHERE id = ${bind(id)}")
+}
+    .exactlyOneOrNull<CaseStatus>()
 
-fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean =
-    createQuery {
-            sql(
-                """
+fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean = createQuery {
+    sql(
+        """
                 SELECT EXISTS (
                     SELECT 1 FROM student_cases
                     WHERE student_id = ${bind(studentId)}
                       AND status IN (${bind(CaseStatus.TODO)}, ${bind(CaseStatus.ON_HOLD)})
                 )
                 """
-            )
-        }
-        .exactlyOne<Boolean>()
+    )
+}
+    .exactlyOne<Boolean>()
 
 fun Database.Transaction.copyValpasNotificationIdAndDeleteSource(
     sourceId: StudentCaseId,
@@ -499,15 +493,15 @@ fun Database.Transaction.copyValpasNotificationIdAndDeleteSource(
     createUpdate { sql("DELETE FROM student_cases WHERE id = ${bind(sourceId)}") }
         .updateExactlyOne()
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE student_cases
                 SET valpas_notification_id = ${bind(notificationId)},
                     updated = ${bind(now)},
                     updated_by = ${bind(updatedBy)}
                 WHERE id = ${bind(targetId)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }

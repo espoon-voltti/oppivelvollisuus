@@ -2746,13 +2746,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"connect-redis@npm:9.0.0":
-  version: 9.0.0
-  resolution: "connect-redis@npm:9.0.0"
+"connect-redis@npm:10.0.0":
+  version: 10.0.0
+  resolution: "connect-redis@npm:10.0.0"
   peerDependencies:
     express-session: ">=1"
     redis: ">=5"
-  checksum: 10/da5c6304a33c54128f105f5022f515fbe651ae0b28e194f2ba8b5d9def6cf59a690bb5f99715a6e69d4ef8f27273be4cd59608727cecf0e42d6cbb0fe9022d6a
+  checksum: 10/6263130357f9fb29e612e181137bce3493d7a57a2f25481cb737d62020401007d934da99e4ccdded7b4401ba8431d5df38a9abd4356342d498afc704b12c0991
   languageName: node
   linkType: hard
 
@@ -5249,14 +5249,14 @@ __metadata:
   linkType: hard
 
 "js-yaml@npm:^3.13.1":
-  version: 3.14.2
-  resolution: "js-yaml@npm:3.14.2"
+  version: 3.15.1
+  resolution: "js-yaml@npm:3.15.1"
   dependencies:
     argparse: "npm:^1.0.7"
     esprima: "npm:^4.0.0"
   bin:
     js-yaml: bin/js-yaml.js
-  checksum: 10/172e0b6007b0bf0fc8d2469c94424f7dd765c64a047d2b790831fecef2204a4054eabf4d911eb73ab8c9a3256ab8ba1ee8d655b789bf24bf059c772acc2075a1
+  checksum: 10/905842ce08c18b154ff2c187ff81bb41294cc5dda214331b5d9b8bcf395894e48b00fa37b9d4dd4c3ffec672b7496a94558e3876d3a8ad4d12b06248112e6d92
   languageName: node
   linkType: hard
 
@@ -6123,7 +6123,7 @@ __metadata:
     "@typescript-eslint/parser": "npm:8.66.0"
     axios: "npm:1.19.0"
     concurrently: "npm:9.2.4"
-    connect-redis: "npm:9.0.0"
+    connect-redis: "npm:10.0.0"
     cookie-parser: "npm:1.4.7"
     date-fns: "npm:4.4.0"
     dd-trace: "npm:5.120.0"

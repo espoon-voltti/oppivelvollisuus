@@ -28,27 +28,25 @@ data class ValpasQueryRun(
     val fileUrls: List<String>?,
 )
 
-fun Database.Read.getMostRecentValpasQueryRun(): ValpasQueryRun? =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getMostRecentValpasQueryRun(): ValpasQueryRun? = createQuery {
+    sql(
+        """
                 SELECT id, external_query_id, state, started_polling_at,
                        started_downloading_at, finished_at, file_urls
                 FROM valpas_query_runs
                 ORDER BY started_polling_at DESC, id DESC
                 LIMIT 1
                 """
-            )
-        }
-        .exactlyOneOrNull<ValpasQueryRun>()
+    )
+}
+    .exactlyOneOrNull<ValpasQueryRun>()
 
 fun Database.Transaction.insertValpasQueryRun(
     externalQueryId: String,
     now: HelsinkiDateTime,
-): ValpasQueryRunId =
-    createUpdate {
-            sql(
-                """
+): ValpasQueryRunId = createUpdate {
+    sql(
+        """
                 INSERT INTO valpas_query_runs (
                     external_query_id, state, started_polling_at
                 ) VALUES (
@@ -58,10 +56,10 @@ fun Database.Transaction.insertValpasQueryRun(
                 )
                 RETURNING id
                 """
-            )
-        }
-        .executeAndReturnGeneratedKeys()
-        .exactlyOne<ValpasQueryRunId>()
+    )
+}
+    .executeAndReturnGeneratedKeys()
+    .exactlyOne<ValpasQueryRunId>()
 
 fun Database.Transaction.markValpasQueryRunFilesReady(
     id: ValpasQueryRunId,
@@ -69,8 +67,8 @@ fun Database.Transaction.markValpasQueryRunFilesReady(
     now: HelsinkiDateTime,
 ) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE valpas_query_runs
                 SET state = ${bind(ValpasQueryRunState.FILES_READY)},
                     file_urls = ${bind(fileUrls.toTypedArray())},
@@ -78,30 +76,30 @@ fun Database.Transaction.markValpasQueryRunFilesReady(
                 WHERE id = ${bind(id)}
                   AND state = ${bind(ValpasQueryRunState.STARTED)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
 fun Database.Transaction.markValpasQueryRunCompleted(id: ValpasQueryRunId, now: HelsinkiDateTime) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE valpas_query_runs
                 SET state = ${bind(ValpasQueryRunState.COMPLETED)},
                     finished_at = ${bind(now)}
                 WHERE id = ${bind(id)}
                   AND state = ${bind(ValpasQueryRunState.FILES_READY)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
 fun Database.Transaction.markValpasQueryRunFailed(id: ValpasQueryRunId, now: HelsinkiDateTime) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE valpas_query_runs
                 SET state = ${bind(ValpasQueryRunState.FAILED)},
                     finished_at = ${bind(now)}
@@ -111,7 +109,7 @@ fun Database.Transaction.markValpasQueryRunFailed(id: ValpasQueryRunId, now: Hel
                       ${bind(ValpasQueryRunState.FILES_READY)}
                   )
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
