@@ -42,18 +42,17 @@ fun Database.Transaction.insertCaseEvent(
     data: CaseEventInput,
     createdBy: EspooUserId,
     now: HelsinkiDateTime,
-): CaseEventId =
-    createUpdate {
-            sql(
-                """
+): CaseEventId = createUpdate {
+    sql(
+        """
                 INSERT INTO case_events (created, created_by, student_case_id, date, type, notes)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(studentCaseId)}, ${bind(data.date)}, ${bind(data.type)}, ${bind(data.notes)})
                 RETURNING id
                 """
-            )
-        }
-        .executeAndReturnGeneratedKeys()
-        .exactlyOne<CaseEventId>()
+    )
+}
+    .executeAndReturnGeneratedKeys()
+    .exactlyOne<CaseEventId>()
 
 data class CaseEvent(
     val id: CaseEventId,
@@ -74,8 +73,8 @@ fun Database.Transaction.updateCaseEvent(
     now: HelsinkiDateTime,
 ) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE case_events
                 SET
                     updated = ${bind(now)},
@@ -85,8 +84,8 @@ fun Database.Transaction.updateCaseEvent(
                     notes = ${bind(data.notes)}
                 WHERE id = ${bind(id)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
@@ -94,6 +93,7 @@ fun Database.Transaction.deleteCaseEvent(id: CaseEventId) {
     createUpdate { sql("DELETE FROM case_events WHERE id = ${bind(id)}") }.execute()
 }
 
-fun Database.Read.getStudentCaseIdByEventId(eventId: CaseEventId): StudentCaseId? =
-    createQuery { sql("SELECT student_case_id FROM case_events WHERE id = ${bind(eventId)}") }
-        .exactlyOneOrNull<StudentCaseId>()
+fun Database.Read.getStudentCaseIdByEventId(eventId: CaseEventId): StudentCaseId? = createQuery {
+    sql("SELECT student_case_id FROM case_events WHERE id = ${bind(eventId)}")
+}
+    .exactlyOneOrNull<StudentCaseId>()
