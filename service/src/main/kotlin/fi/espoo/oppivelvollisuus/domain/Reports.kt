@@ -30,10 +30,9 @@ data class CaseReportRow(
     val eventTypes: Set<CaseEventType>,
 )
 
-fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow> =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow> = createQuery {
+    sql(
+        """
                 SELECT
                     sc.opened_at,
                     extract('year' FROM s.date_of_birth) AS birth_year,
@@ -67,6 +66,6 @@ fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow
                 ${if (request.start != null) "AND sc.opened_at >= ${bind(request.start)}" else ""}
                 ${if (request.end != null) "AND sc.opened_at <= ${bind(request.end)}" else ""}
                 """
-            )
-        }
-        .toList<CaseReportRow>()
+    )
+}
+    .toList<CaseReportRow>()
