@@ -17,4 +17,14 @@ SPDX-License-Identifier: LGPL-2.1-or-later
        <cve>CVE-2026-34486</cve>
        <cve>CVE-2026-34487</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+        CVE-2026-53914: code execution via unsafe deserialization in Kotlin build cache
+        metadata. Build-time only, not reachable in the deployed service. Fixed in Kotlin
+        2.4.20, which has no stable release yet (2.4.20-Beta2 as of 2026-08).
+        Remove this suppression when Kotlin 2.4.20 is released and the plugins are bumped.
+       ]]></notes>
+       <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/.*$</packageUrl>
+       <cve>CVE-2026-53914</cve>
+    </suppress>
 </suppressions>
