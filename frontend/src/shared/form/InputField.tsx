@@ -192,9 +192,7 @@ interface OtherInputProps extends InputProps {
 }
 
 export type TextInputProps =
-  | OtherInputProps
-  | DateInputProps
-  | ClearableInputProps
+  OtherInputProps | DateInputProps | ClearableInputProps
 
 export const InputField = React.memo(function InputField({
   value,

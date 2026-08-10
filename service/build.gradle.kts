@@ -13,17 +13,25 @@ plugins {
     kotlin("jvm") version "2.4.10"
     kotlin("plugin.spring") version "2.4.10"
     id("org.flywaydb.flyway") version "12.11.0"
-    id("com.ncorti.ktfmt.gradle") version "0.26.0"
+    id("com.ncorti.ktfmt.gradle") version "0.27.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
-    id("org.owasp.dependencycheck") version "12.2.2"
+    id("org.owasp.dependencycheck") version "13.0.0"
 
     idea
 }
 
 java { sourceCompatibility = JavaVersion.VERSION_25 }
 
-// CVE-2026-43515, CVE-2026-43512; overrides Spring Boot 4.0.6's tomcat 11.0.21
-extra["tomcat.version"] = "11.0.22"
+// CVE-2026-53434, CVE-2026-53404, CVE-2026-55276, CVE-2026-55955, CVE-2026-55956,
+// CVE-2026-50229, CVE-2026-59083, CVE-2026-59084; overrides Spring Boot 4.1.0's tomcat 11.0.22
+extra["tomcat.version"] = "11.0.24"
+
+// CVE-2026-49844; overrides Spring Boot 4.1.0's log4j 2.25.4
+extra["log4j2.version"] = "2.25.5"
+
+// CVE-2026-54515; overrides Spring Boot 4.1.0's Jackson 2 BOM 2.21.4.
+// Jackson 3 (jackson-bom.version) resolves to 4.1.0's 3.1.4, which is already fixed.
+extra["jackson-2-bom.version"] = "2.21.5"
 
 repositories { mavenCentral() }
 
@@ -54,8 +62,8 @@ dependencies {
     api("org.yaml:snakeyaml:2.6")
 
     // CVE-2025-11226
-    api("ch.qos.logback:logback-classic:1.5.38")
-    api("ch.qos.logback:logback-core:1.5.38")
+    api("ch.qos.logback:logback-classic:1.6.1")
+    api("ch.qos.logback:logback-core:1.6.1")
 
     api("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -84,7 +92,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.6.0")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("ch.qos.logback:logback-access:1.5.38")
+    implementation("ch.qos.logback:logback-access:1.6.1")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
     api(platform("io.opentelemetry:opentelemetry-bom:1.64.0"))
@@ -97,8 +105,8 @@ dependencies {
     api(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("io.kotest:kotest-property:6.2.2")
-    testImplementation("com.microsoft.playwright:playwright:1.61.0")
+    testImplementation("io.kotest:kotest-property:6.2.3")
+    testImplementation("com.microsoft.playwright:playwright:1.62.0")
 }
 
 tasks.withType<KotlinCompile> {

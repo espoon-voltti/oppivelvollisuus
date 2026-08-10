@@ -57,18 +57,17 @@ fun Database.Transaction.insertStudent(
     data: StudentInput,
     createdBy: EspooUserId,
     now: HelsinkiDateTime,
-): StudentId =
-    createUpdate {
-            sql(
-                """
+): StudentId = createUpdate {
+    sql(
+        """
                 INSERT INTO students (created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.valpasOppijaOid)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)}, ${bind(data.partnerOrganisations.toTypedArray())})
                 RETURNING id
                 """
-            )
-        }
-        .executeAndReturnGeneratedKeys()
-        .exactlyOne<StudentId>()
+    )
+}
+    .executeAndReturnGeneratedKeys()
+    .exactlyOne<StudentId>()
 
 data class StudentSummary(
     val id: StudentId,
@@ -101,8 +100,8 @@ data class StudentSearchParams(
 
 fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<StudentSummary> =
     createQuery {
-            sql(
-                """
+        sql(
+            """
                 SELECT s.id, s.first_name, s.last_name, sc.opened_at, sc.status, sc.source,
                     assignee.id AS assigned_to_id,
                     assignee.first_name || ' ' || assignee.last_name AS assigned_to_name,
@@ -158,25 +157,25 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
                 }}
                 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
                 """
-            )
-        }
-        .toList<StudentSummary>()
-        .map {
-            it.copy(
-                lastEvent =
-                    it.lastEvent?.copy(
-                        notes =
-                            if (it.lastEvent.notes.length > 100) {
-                                it.lastEvent.notes.substring(0, 100).let { str ->
-                                    val lastSpace = max(str.lastIndexOf(' '), 50)
-                                    str.substring(0, lastSpace) + "..."
-                                }
-                            } else {
-                                it.lastEvent.notes
+        )
+    }
+    .toList<StudentSummary>()
+    .map {
+        it.copy(
+            lastEvent =
+                it.lastEvent?.copy(
+                    notes =
+                        if (it.lastEvent.notes.length > 100) {
+                            it.lastEvent.notes.substring(0, 100).let { str ->
+                                val lastSpace = max(str.lastIndexOf(' '), 50)
+                                str.substring(0, lastSpace) + "..."
                             }
-                    )
-            )
-        }
+                        } else {
+                            it.lastEvent.notes
+                        }
+                )
+        )
+    }
 
 data class Student(
     val id: StudentId,
@@ -199,14 +198,14 @@ data class Student(
 
 fun Database.Read.getStudent(id: StudentId): Student =
     createQuery {
-            sql(
-                """
+        sql(
+            """
                 SELECT id, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
                 FROM students
                 WHERE id = ${bind(id)}
                 """
-            )
-        }
+        )
+    }
         .exactlyOneOrNull<Student>() ?: throw NotFound()
 
 fun Database.Transaction.updateStudent(
@@ -216,8 +215,8 @@ fun Database.Transaction.updateStudent(
     now: HelsinkiDateTime,
 ) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 UPDATE students
                 SET
                     updated = ${bind(now)},
@@ -239,8 +238,8 @@ fun Database.Transaction.updateStudent(
                     partner_organisations = ${bind(data.partnerOrganisations.toTypedArray())}
                 WHERE id = ${bind(id)}
                 """
-            )
-        }
+        )
+    }
         .updateExactlyOne()
 }
 
@@ -264,10 +263,9 @@ data class DuplicateStudent(
 
 fun Database.Read.getPossibleDuplicateStudents(
     input: DuplicateStudentCheckInput
-): List<DuplicateStudent> =
-    createQuery {
-            sql(
-                """
+): List<DuplicateStudent> = createQuery {
+    sql(
+        """
                 WITH match_data AS (
                     SELECT
                         id,
@@ -290,9 +288,9 @@ fun Database.Read.getPossibleDuplicateStudents(
                 SELECT * FROM match_data
                 WHERE matching_ssn OR matching_valpas_link OR matching_oppija_oid OR matching_name
                 """
-            )
-        }
-        .toList<DuplicateStudent>()
+    )
+}
+    .toList<DuplicateStudent>()
 
 fun Database.Transaction.deleteStudent(id: StudentId) {
     createUpdate { sql("DELETE FROM students WHERE id = ${bind(id)}") }.updateExactlyOne()
@@ -306,8 +304,8 @@ fun Database.Read.findStudentIdBySsn(ssn: String): StudentId? {
 
 fun Database.Transaction.deleteOldStudents(thresholdDate: LocalDate) {
     createUpdate {
-            sql(
-                """
+        sql(
+            """
                 WITH students_to_delete AS (
                     SELECT id
                     FROM students
@@ -328,7 +326,7 @@ fun Database.Transaction.deleteOldStudents(thresholdDate: LocalDate) {
                 DELETE FROM students
                 WHERE id IN (SELECT id FROM students_to_delete)
                 """
-            )
-        }
+        )
+    }
         .execute()
 }

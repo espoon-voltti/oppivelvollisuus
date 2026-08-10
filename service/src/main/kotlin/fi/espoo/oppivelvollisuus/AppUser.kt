@@ -22,38 +22,36 @@ data class UserBasics(@param:PropagateNull val id: EspooUserId, val name: String
 
 fun Database.Transaction.upsertAppUserFromAd(adUser: AdUser, now: HelsinkiDateTime): AppUser =
     createQuery {
-            sql(
-                """
+        sql(
+            """
                 INSERT INTO users (external_id, first_names, last_name, email, is_active, created)
                 VALUES (${bind(adUser.externalId)}, ${bind(adUser.firstName)}, ${bind(adUser.lastName)}, ${bind(adUser.email)}, true, ${bind(now)})
                 ON CONFLICT (external_id) DO UPDATE
                 SET updated = ${bind(now)}, first_names = ${bind(adUser.firstName)}, last_name = ${bind(adUser.lastName)}, email = ${bind(adUser.email)}
                 RETURNING id, external_id, first_name, last_name, email, is_active
                 """
-            )
-        }
-        .exactlyOne<AppUser>()
+        )
+    }
+    .exactlyOne<AppUser>()
 
-fun Database.Read.getActiveAppUsers(): List<AppUser> =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getActiveAppUsers(): List<AppUser> = createQuery {
+    sql(
+        """
                 SELECT id, external_id, first_name, last_name, email, is_active
                 FROM users
                 WHERE NOT is_system_user AND is_active
                 """
-            )
-        }
-        .toList<AppUser>()
+    )
+}
+    .toList<AppUser>()
 
-fun Database.Read.getAppUser(id: EspooUserId): AppUser? =
-    createQuery {
-            sql(
-                """
+fun Database.Read.getAppUser(id: EspooUserId): AppUser? = createQuery {
+    sql(
+        """
                 SELECT id, external_id, first_name, last_name, email, is_active
                 FROM users
                 WHERE id = ${bind(id)} AND NOT is_system_user
                 """
-            )
-        }
-        .exactlyOneOrNull<AppUser>()
+    )
+}
+    .exactlyOneOrNull<AppUser>()

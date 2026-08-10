@@ -17,17 +17,17 @@
     "@fortawesome/fontawesome-svg-core": "7.3.1",
     "@fortawesome/free-regular-svg-icons": "7.3.1",
     "@fortawesome/free-solid-svg-icons": "7.3.1",
-    "@fortawesome/react-fontawesome": "3.4.0",
+    "@fortawesome/react-fontawesome": "3.5.0",
     "autosize": "6.0.1",
     "classnames": "2.5.1",
-    "core-js": "3.49.0",
+    "core-js": "3.50.0",
     "date-fns": "4.4.0",
     "lodash": "4.18.1",
     "polished": "4.3.1",
-    "react": "19.2.7",
+    "react": "19.2.8",
     "react-csv": "2.2.2",
-    "react-dom": "19.2.7",
-    "styled-components": "6.4.3"
+    "react-dom": "19.2.8",
+    "styled-components": "6.5.0"
   },
   "devDependencies": {
     "@babel/core": "8.0.1",
@@ -35,18 +35,18 @@
     "@eslint/compat": "2.1.0",
     "@eslint/js": "10.0.1",
     "@types/autosize": "4.0.3",
-    "@types/lodash": "4.17.24",
+    "@types/lodash": "4.17.25",
     "@types/node": "25.9.5",
-    "@types/react": "19.2.17",
+    "@types/react": "19.2.18",
     "@types/react-csv": "1.1.10",
-    "@types/react-dom": "19.2.3",
+    "@types/react-dom": "19.2.4",
     "@types/styled-components": "5.1.36",
-    "@typescript-eslint/eslint-plugin": "8.64.0",
-    "@typescript-eslint/parser": "8.64.0",
-    "axios": "1.18.1",
+    "@typescript-eslint/eslint-plugin": "8.66.0",
+    "@typescript-eslint/parser": "8.66.0",
+    "axios": "1.19.0",
     "concurrently": "9.2.4",
     "esbuild": "0.28.1",
-    "eslint": "10.7.0",
+    "eslint": "10.8.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-jsx-expressions": "1.3.2",
@@ -57,15 +57,15 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "express": "5.2.1",
     "express-http-proxy": "2.1.2",
-    "globals": "17.7.0",
-    "postcss": "8.5.19",
+    "globals": "17.9.0",
+    "postcss": "8.5.26",
     "postcss-preset-env": "11.3.2",
-    "prettier": "3.9.5",
-    "react-router": "7.18.1",
+    "prettier": "3.9.6",
+    "react-router": "8.3.0",
     "ts-node": "10.9.2",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.64.0",
-    "yargs": "18.0.0"
+    "typescript-eslint": "8.66.0",
+    "yargs": "18.1.0"
   },
   "engines": {
     "node": ">= 20.11.0"
@@ -81,7 +81,7 @@
       "postcss-preset-env": true
     }
   },
-  "packageManager": "yarn@4.17.1",
+  "packageManager": "yarn@4.18.0",
   "resolutions": {
     "shell-quote": "1.10.0"
   }
