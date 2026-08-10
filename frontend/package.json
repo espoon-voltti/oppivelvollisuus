@@ -63,7 +63,7 @@
     "prettier": "3.9.6",
     "react-router": "8.3.0",
     "ts-node": "10.9.2",
-    "typescript": "6.0.3",
+    "typescript": "7.0.2",
     "typescript-eslint": "8.66.0",
     "yargs": "18.1.0"
   },
