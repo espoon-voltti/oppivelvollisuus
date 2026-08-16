@@ -12,7 +12,7 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.4.10"
     kotlin("plugin.spring") version "2.4.10"
-    id("org.flywaydb.flyway") version "13.2.0"
+    id("org.flywaydb.flyway") version "13.3.0"
     id("com.ncorti.ktfmt.gradle") version "0.27.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.owasp.dependencycheck") version "13.0.0"
