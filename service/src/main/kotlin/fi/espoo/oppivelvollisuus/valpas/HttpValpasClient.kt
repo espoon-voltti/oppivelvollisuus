@@ -79,7 +79,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                 .post(body.toRequestBody(jsonMediaType))
                 .build()
         httpClient.newCall(request).execute().use { resp ->
-            val text = resp.body?.string().orEmpty()
+            val text = resp.body.string()
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException(
                     "startQuery failed: status=${resp.code} body=$text"
@@ -102,7 +102,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                 .get()
                 .build()
         httpClient.newCall(request).execute().use { resp ->
-            val text = resp.body?.string().orEmpty()
+            val text = resp.body.string()
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException(
                     "getQueryStatus failed: status=${resp.code} body=$text"
@@ -163,18 +163,16 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                             "downloadResultFile redirect target failed: status=${redirectResp.code}"
                         )
                     }
-                    parseResultFile(redirectResp.body?.byteStream())
+                    parseResultFile(redirectResp.body.byteStream())
                 }
             }
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException("downloadResultFile failed: status=${resp.code}")
             }
-            return parseResultFile(resp.body?.byteStream())
+            return parseResultFile(resp.body.byteStream())
         }
     }
 
-    private fun parseResultFile(stream: InputStream?): ValpasResultFile {
-        if (stream == null) throw ValpasIntegrationException("downloadResultFile empty body")
-        return jsonMapper.readValue(stream, ValpasResultFile::class.java)
-    }
+    private fun parseResultFile(stream: InputStream): ValpasResultFile =
+        jsonMapper.readValue(stream, ValpasResultFile::class.java)
 }
