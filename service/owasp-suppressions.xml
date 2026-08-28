@@ -9,19 +9,9 @@ SPDX-License-Identifier: LGPL-2.1-or-later
 <suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
     <suppress>
         <notes><![CDATA[
-        CVE-2025-41248: spring security is not used
-        VE-2025-68161 waiting for a fix
-       ]]></notes>
-       <cve>CVE-2026-34483</cve>
-       <cve>CVE-2026-34500</cve>
-       <cve>CVE-2026-34486</cve>
-       <cve>CVE-2026-34487</cve>
-    </suppress>
-    <suppress>
-        <notes><![CDATA[
         CVE-2026-53914: code execution via unsafe deserialization in Kotlin build cache
         metadata. Build-time only, not reachable in the deployed service. Fixed in Kotlin
-        2.4.20, which has no stable release yet (2.4.20-Beta2 as of 2026-08).
+        2.4.20, which still has no stable release (2.4.20-RC2 as of 2026-08-28).
         Remove this suppression when Kotlin 2.4.20 is released and the plugins are bumped.
        ]]></notes>
        <packageUrl regex="true">^pkg:maven/org\.jetbrains\.kotlin/.*$</packageUrl>
@@ -29,13 +19,14 @@ SPDX-License-Identifier: LGPL-2.1-or-later
     </suppress>
     <suppress>
         <notes><![CDATA[
-        CVE-2026-66299: resource exhaustion in Tomcat's WebSocket chat *example* web
-        application, which embedded Tomcat does not ship at all. Matched only on the
-        apache:tomcat CPE version, not on code present in tomcat-embed-core.
-        Affects <= 11.0.24; 11.0.25 fixes it but is not released yet, so this cannot be
-        cleared by a version bump. Remove once we are on tomcat 11.0.25 or later.
+        CVE-2026-54285: unbounded baggage-header parsing in W3CBaggagePropagator.extract().
+        This is a JavaScript vulnerability in the npm package @opentelemetry/core (fixed in
+        2.8.0, GHSA-8988-4f7v-96qf), not in the Java library. Dependency-check matches it
+        through the generic cpe:2.3:a:opentelemetry:opentelemetry CPE, so every Java 1.x
+        version sorts below the 2.8.0 fix and no bump can ever clear it.
+        @opentelemetry/core is not present in api-gateway/yarn.lock or frontend/yarn.lock.
        ]]></notes>
-       <packageUrl regex="true">^pkg:maven/org\.apache\.tomcat\.embed/.*$</packageUrl>
-       <cve>CVE-2026-66299</cve>
+       <packageUrl regex="true">^pkg:maven/io\.opentelemetry/.*$</packageUrl>
+       <cve>CVE-2026-54285</cve>
     </suppress>
 </suppressions>

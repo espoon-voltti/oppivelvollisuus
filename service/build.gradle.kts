@@ -22,16 +22,15 @@ plugins {
 
 java { sourceCompatibility = JavaVersion.VERSION_25 }
 
-// CVE-2026-53434, CVE-2026-53404, CVE-2026-55276, CVE-2026-55955, CVE-2026-55956,
-// CVE-2026-50229, CVE-2026-59083, CVE-2026-59084; overrides Spring Boot 4.1.0's tomcat 11.0.22
-extra["tomcat.version"] = "11.0.24"
+// CVE-2026-65637, CVE-2026-65182, CVE-2026-65183, CVE-2026-65905, CVE-2026-65927,
+// CVE-2026-68763, CVE-2026-73180, CVE-2026-68525, CVE-2026-68569, CVE-2026-66422,
+// CVE-2026-66299; overrides Spring Boot 4.1.1's tomcat 11.0.24
+extra["tomcat.version"] = "11.0.25"
 
-// CVE-2026-49844; overrides Spring Boot 4.1.0's log4j 2.25.4
-extra["log4j2.version"] = "2.25.5"
-
-// CVE-2026-54515; overrides Spring Boot 4.1.0's Jackson 2 BOM 2.21.4.
-// Jackson 3 (jackson-bom.version) resolves to 4.1.0's 3.1.4, which is already fixed.
-extra["jackson-2-bom.version"] = "2.21.5"
+// Spring Boot 4.1.1 manages OpenTelemetry at 1.62.0. Set the property rather than importing the
+// BOM: an `api(platform(...))` declaration is silently overridden by Spring Boot's dependency
+// management, so it looks like a pin but isn't one.
+extra["opentelemetry.version"] = "1.65.0"
 
 repositories { mavenCentral() }
 
@@ -95,7 +94,6 @@ dependencies {
     implementation("ch.qos.logback:logback-access:1.6.3")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
-    api(platform("io.opentelemetry:opentelemetry-bom:1.65.0"))
     implementation("io.opentelemetry:opentelemetry-api")
     implementation("com.github.kagkarlsson:db-scheduler:16.12.0")
     implementation("org.unbescape:unbescape:1.1.6.RELEASE")
