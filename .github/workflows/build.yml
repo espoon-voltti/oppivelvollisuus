@@ -331,9 +331,15 @@ jobs:
           set -euo pipefail
           for image in frontend api-gateway service; do
             src="ghcr.io/espoon-voltti/oppivelvollisuus/${image}:${SHA}"
-            dst="${ECR}/oppivelvollisuus/${image}:${SHA}"
-            echo "Copying ${src} -> ${dst}"
-            docker buildx imagetools create --prefer-index=false --tag "${dst}" "${src}"
+            dst="${ECR}/oppivelvollisuus/${image}"
+            tags=(--tag "${dst}:${SHA}")
+            # The scan reports key on :master, so only a master build may write
+            # it. Both tags go in one call, so the layers are copied once.
+            if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+              tags+=(--tag "${dst}:master")
+            fi
+            echo "Copying ${src} -> ${dst}:${SHA}"
+            docker buildx imagetools create --prefer-index=false "${tags[@]}" "${src}"
           done
 
   ecr-push-esc:
@@ -375,9 +381,15 @@ jobs:
           set -euo pipefail
           for image in frontend api-gateway service; do
             src="ghcr.io/espoon-voltti/oppivelvollisuus/${image}:${SHA}"
-            dst="${ECR}/oppivelvollisuus/${image}:${SHA}"
-            echo "Copying ${src} -> ${dst}"
-            docker buildx imagetools create --prefer-index=false --tag "${dst}" "${src}"
+            dst="${ECR}/oppivelvollisuus/${image}"
+            tags=(--tag "${dst}:${SHA}")
+            # The scan reports key on :master, so only a master build may write
+            # it. Both tags go in one call, so the layers are copied once.
+            if [ "${GITHUB_REF}" = "refs/heads/master" ]; then
+              tags+=(--tag "${dst}:master")
+            fi
+            echo "Copying ${src} -> ${dst}:${SHA}"
+            docker buildx imagetools create --prefer-index=false "${tags[@]}" "${src}"
           done
 
   deploy:
