@@ -88,7 +88,7 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:5.5.0")
 
-    implementation("com.auth0:java-jwt:4.6.0")
+    implementation("com.auth0:java-jwt:4.6.1")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.6.3")
