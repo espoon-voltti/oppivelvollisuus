@@ -53,6 +53,24 @@ ktfmt { kotlinLangStyle() }
 
 ktlint { version.set("1.8.0") }
 
+// ktfmt 0.64 builds against kotlin-compiler-embeddable 2.3.20 and ktlint 1.8.0 against 2.2.21.
+// The Kotlin plugin aligns both to the project's version, and the intellij-core they bundle cannot
+// initialise against 2.4.20: "Extensions storage is not registered". Only the formatter
+// classpaths are pinned, so the compiler used to build the service stays on 2.4.20.
+// Remove once ktfmt-gradle and ktlint ship releases supporting it.
+configurations
+    .matching { it.name == "ktfmt" || it.name.startsWith("ktlint") }
+    .configureEach {
+        resolutionStrategy.eachDependency {
+            if (
+                requested.group == "org.jetbrains.kotlin" &&
+                    requested.name == "kotlin-compiler-embeddable"
+            ) {
+                useVersion("2.4.10")
+            }
+        }
+    }
+
 dependencies {
     api(kotlin("stdlib"))
     implementation("org.jetbrains.kotlin:kotlin-reflect")
