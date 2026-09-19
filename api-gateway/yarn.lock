@@ -3055,9 +3055,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dd-trace@npm:6.15.0":
-  version: 6.15.0
-  resolution: "dd-trace@npm:6.15.0"
+"dd-trace@npm:6.16.0":
+  version: 6.16.0
+  resolution: "dd-trace@npm:6.16.0"
   dependencies:
     "@datadog/libdatadog": "npm:^0.21.0"
     "@datadog/libdatadog-extras": "npm:^0.21.0"
@@ -3069,7 +3069,7 @@ __metadata:
     "@opentelemetry/api": "npm:>=1.0.0 <1.10.0"
     "@opentelemetry/api-logs": "npm:<1.0.0"
     dc-polyfill: "npm:^0.1.11"
-    import-in-the-middle: "npm:^3.3.2"
+    import-in-the-middle: "npm:3.5.1"
     opentracing: "npm:>=0.14.7"
     oxc-parser: "npm:^0.132.0"
   dependenciesMeta:
@@ -3093,7 +3093,7 @@ __metadata:
       optional: true
     oxc-parser:
       optional: true
-  checksum: 10/5438d447fd81eed6e94e342cc6e9d921dd1fddd0584265a15cc187316975b919cdec607a923bde86115033bd886f7bbd99b87e9fac72e154be2f6c329b3bc579
+  checksum: 10/8bc8bfd55e48dd295dd9d26248ec8af565e2622209dc41670f32da38251d247ecec571fbdc92d84a4d285b27741454bf08061308ce10c9f865db687613d52c2d
   languageName: node
   linkType: hard
 
@@ -3396,10 +3396,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"es-module-lexer@npm:^2.1.0, es-module-lexer@npm:^2.2.0":
+"es-module-lexer@npm:^2.1.0":
   version: 2.3.2
   resolution: "es-module-lexer@npm:2.3.2"
   checksum: 10/065246d6e2b2dfea3287650b5800a30326771e0d9d238570e81371d7ae8d53db239bccb2166e272926bba44917da7c66dd7407a5214d17b0af5269005b1fec52
+  languageName: node
+  linkType: hard
+
+"es-module-lexer@npm:^3.0.2":
+  version: 3.0.2
+  resolution: "es-module-lexer@npm:3.0.2"
+  checksum: 10/5768f5614937f0a1f24fe985174c8202f4c1a53826249040a9c62d9473a22261cceaa3481e97d10f3854a966131b86047a163a9ac8db9a19aae2e2e96edd0fe3
   languageName: node
   linkType: hard
 
@@ -4459,14 +4466,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"import-in-the-middle@npm:^3.3.2":
-  version: 3.3.2
-  resolution: "import-in-the-middle@npm:3.3.2"
+"import-in-the-middle@npm:3.5.1":
+  version: 3.5.1
+  resolution: "import-in-the-middle@npm:3.5.1"
   dependencies:
     cjs-module-lexer: "npm:^2.2.0"
-    es-module-lexer: "npm:^2.2.0"
+    es-module-lexer: "npm:^3.0.2"
     module-details-from-path: "npm:^1.0.4"
-  checksum: 10/46c4bb22c5b2342547d4efaa5f1d2dc69ca94feb361aac92bbbc26b796bdbbeb0dab81e5e78205b6147b1cf571dbe2b50f219d2977eba951b63469918b411d9f
+  checksum: 10/4e5e355a24597eee79f29e5db35bfd4b394f64b446ea202a7757a4ec048c318a01a5b1c0345aa5b70dcff5cc546e4467e69a2662ff539bdfc9772e36ba8f4bed
   languageName: node
   linkType: hard
 
@@ -6125,7 +6132,7 @@ __metadata:
     connect-redis: "npm:10.0.0"
     cookie-parser: "npm:1.4.7"
     date-fns: "npm:4.4.0"
-    dd-trace: "npm:6.15.0"
+    dd-trace: "npm:6.16.0"
     eslint: "npm:10.10.0"
     eslint-config-prettier: "npm:10.1.8"
     eslint-plugin-import: "npm:2.32.0"
