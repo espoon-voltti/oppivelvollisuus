@@ -2165,7 +2165,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@xmldom/xmldom@npm:^0.8.10, @xmldom/xmldom@npm:^0.8.5":
+"@xmldom/xmldom@npm:^0.8.10, @xmldom/xmldom@npm:^0.8.15, @xmldom/xmldom@npm:^0.8.5":
   version: 0.8.15
   resolution: "@xmldom/xmldom@npm:0.8.15"
   checksum: 10/521d8e5a9798a47dddb28237d112e47637d638e4f3d60ce1eefa1f397d2439af5a00f781c956b5affc251ef8a1bbc1f8325161d32f7b27c89aacf5ff84f14cf7
@@ -6166,7 +6166,7 @@ __metadata:
     typescript: "npm:6.0.3"
     typescript-eslint: "npm:8.70.0"
     uuid: "npm:14.0.2"
-    xml-crypto: "npm:6.1.2"
+    xml-crypto: "npm:6.2.0"
     xml2js: "npm:0.6.2"
     zod: "npm:4.6.5"
   languageName: unknown
@@ -8043,14 +8043,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml-crypto@npm:6.1.2, xml-crypto@npm:^6.1.2":
-  version: 6.1.2
-  resolution: "xml-crypto@npm:6.1.2"
+"xml-crypto@npm:6.2.0, xml-crypto@npm:^6.1.2":
+  version: 6.2.0
+  resolution: "xml-crypto@npm:6.2.0"
   dependencies:
     "@xmldom/is-dom-node": "npm:^1.0.1"
-    "@xmldom/xmldom": "npm:^0.8.10"
+    "@xmldom/xmldom": "npm:^0.8.15"
     xpath: "npm:^0.0.33"
-  checksum: 10/fdaa52229404274a1aa992dbf74f4919c302a0a2091e1ba7b85673b37969b7795960d52994bf8479e1e5f37ab3cac36b8f09461efa68b59d93824ef1c2da0102
+  checksum: 10/9d05a0b6145751935759e63280c5dd551d04c01f75d37b406403a6681f8c47270e9a38c5df1ae4921809e822c9831304a8852d1c3edbfaf168e0b25a7fc3d99f
   languageName: node
   linkType: hard
 
