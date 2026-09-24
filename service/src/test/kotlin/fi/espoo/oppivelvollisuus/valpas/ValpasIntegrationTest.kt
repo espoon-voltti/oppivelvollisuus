@@ -39,6 +39,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.TestPropertySource
 import org.springframework.test.context.bean.override.convention.TestBean
 
+private const val OUR_KUNTA_OID = "1.2.3.4"
+
+private const val OTHER_KUNTA_OID = "1.2.3.5"
+
 @TestPropertySource(
     properties =
         [
@@ -46,7 +50,7 @@ import org.springframework.test.context.bean.override.convention.TestBean
             "app.integration.valpas.opintopolku_base_url=http://mock-valpas.invalid",
             "app.integration.valpas.username=test-user",
             "app.integration.valpas.password=test-pass",
-            "app.integration.valpas.kunta_oid=1.2.3.4",
+            "app.integration.valpas.kunta_oid=$OUR_KUNTA_OID",
         ]
 )
 class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
@@ -84,6 +88,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         aikaleima: LocalDate = LocalDate.of(2026, 1, 10),
         etunimet: String = "Testi",
         sukunimi: String = "Testilä",
+        kuntaOid: String = OUR_KUNTA_OID,
     ): ValpasOppija =
         ValpasOppija(
             oppijanumero = "1.2.246.562.24.${UUID.randomUUID()}",
@@ -103,6 +108,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
                             postinumero = "02100",
                             postitoimipaikka = "Espoo",
                         ),
+                    kunta = ValpasOrganisaatio(oid = kuntaOid),
                 ),
         )
 
@@ -199,6 +205,50 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
 
         assertEquals(0, countStudents())
         assertEquals(0, countCases())
+    }
+
+    @Test
+    fun `oppija without an aktiivinenKuntailmoitus is not imported`() {
+        val oppija = sampleOppija().copy(aktiivinenKuntailmoitus = null)
+
+        mock.nextStartReturnsQueryId = "query-no-notification"
+        mock.stageCompleteResult("query-no-notification", listOf(oppija))
+
+        runFullImport("query-no-notification")
+
+        assertEquals(0, countStudents())
+        assertEquals(0, countCases())
+    }
+
+    @Test
+    fun `notification belonging to another municipality is not imported`() {
+        val oppija = sampleOppija(kuntaOid = OTHER_KUNTA_OID)
+
+        mock.nextStartReturnsQueryId = "query-other-kunta"
+        mock.stageCompleteResult("query-other-kunta", listOf(oppija))
+
+        runFullImport("query-other-kunta")
+
+        assertEquals(0, countStudents())
+        assertEquals(0, countCases())
+    }
+
+    @Test
+    fun `only our municipality's rows are imported from a mixed result`() {
+        val ours = sampleOppija(hetu = "170108A927R")
+        val theirs = sampleOppija(hetu = "010109A911X", kuntaOid = OTHER_KUNTA_OID)
+        val noNotification = sampleOppija(hetu = "020109A922Y").copy(aktiivinenKuntailmoitus = null)
+
+        mock.nextStartReturnsQueryId = "query-mixed"
+        mock.stageCompleteResult("query-mixed", listOf(ours, theirs, noNotification))
+
+        runFullImport("query-mixed")
+
+        assertEquals(1, countStudents())
+        assertEquals(1, countCases())
+        assertEquals(1, getStudentCases("170108A927R").size)
+        assertEquals(0, getStudentCases("010109A911X").size)
+        assertEquals(0, getStudentCases("020109A922Y").size)
     }
 
     @Test
