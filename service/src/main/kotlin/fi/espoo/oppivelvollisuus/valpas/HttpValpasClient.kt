@@ -65,10 +65,9 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
         val body =
             jsonMapper.writeValueAsString(
                 mapOf(
-                    "type" to "eiSuoritaOppivelvollisuutta",
+                    "type" to "oppivelvolliset",
                     "format" to "application/json",
                     "kuntaOid" to kuntaOid,
-                    "vainAktiivisetKuntailmoitukset" to true,
                 )
             )
         val request =

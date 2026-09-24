@@ -31,7 +31,10 @@ data class ValpasKuntailmoitus(
     val aikaleima: LocalDate?,
     val oppijanYhteystiedot: ValpasYhteystiedot?,
     val onUudempiaIlmoituksiaMuihinKuntiin: Boolean? = null,
+    val kunta: ValpasOrganisaatio,
 )
+
+data class ValpasOrganisaatio(val oid: String)
 
 data class ValpasYhteystiedot(
     val puhelinnumero: String?,

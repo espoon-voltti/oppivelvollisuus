@@ -19,6 +19,8 @@ private val logger = KotlinLogging.logger {}
 
 private val MAX_POLL_DURATION: Duration = Duration.ofHours(6)
 private val MAX_DOWNLOAD_DURATION: Duration = Duration.ofHours(3)
+private val IMPORT_RETRY_INTERVAL: Duration = Duration.ofMinutes(5)
+private const val IMPORT_RETRY_COUNT = 12 * 60 / 5 // 12h with IMPORT_RETRY_INTERVAL
 
 @Service
 class ValpasIntegrationService(
@@ -158,14 +160,16 @@ class ValpasIntegrationService(
         ) {
             return
         }
-        val files =
+        val oppijat =
             try {
-                requireNotNull(latest.fileUrls).map { client.downloadResultFile(it) }
+                requireNotNull(latest.fileUrls).flatMap { url ->
+                    val file = client.downloadResultFile(url)
+                    file.oppijat.filter(::hasActiveNotificationForOurKunta)
+                }
             } catch (e: ValpasIntegrationException) {
                 logger.warn(e) { "Transient download failure; will retry next tick" }
                 return
             }
-        val oppijat = files.flatMap { it.oppijat }
         db.transaction { tx ->
             val incomingIds = oppijat.mapNotNull { it.aktiivinenKuntailmoitus?.id }.toSet()
             val newIds = tx.findNewValpasNotificationIds(incomingIds)
@@ -176,11 +180,20 @@ class ValpasIntegrationService(
             asyncJobRunner.plan(
                 tx,
                 toImport.map { AsyncJob.ImportValpasOppija(it) },
+                retryCount = IMPORT_RETRY_COUNT,
+                retryInterval = IMPORT_RETRY_INTERVAL,
                 runAt = clock.now(),
             )
             tx.markValpasQueryRunCompleted(latest.id, clock.now())
         }
     }
+
+    /** The query resolves aktiivinenKuntailmoitus across all municipalities, not just ours. */
+    private fun hasActiveNotificationForOurKunta(oppija: ValpasOppija): Boolean =
+        oppija.aktiivinenKuntailmoitus?.kunta?.oid ==
+            requireNotNull(env.kuntaOid) {
+                "ValpasIntegrationEnv.kuntaOid must be set when the integration is enabled"
+            }
 
     private fun runImportValpasOppija(
         db: Database.Connection,

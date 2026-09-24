@@ -38,6 +38,16 @@ the nightly Valpas import:
 When `enabled=false` (the default), the integration's scheduled jobs are
 no-ops, so dev environments don't need any of the other values set.
 
+The import uses the `oppivelvolliset` massaluovutus query
+([API docs](https://opintopolku.fi/koski/dokumentaatio/rajapinnat/massaluovutus/valpas)),
+which returns every oppivelvollinen in the municipality. It has no
+`vainAktiivisetKuntailmoitukset` parameter, so `ValpasIntegrationService` keeps
+only the oppijat whose `aktiivinenKuntailmoitus` is not null. Based on Valpas
+source code on 24.9.2026, this query apparently resolves that notification
+across all municipalities, not just ours, and `onUudempiaIlmoituksiaMuihinKuntiin`
+is always null, so we need to additionally require that its municipality matches
+our `kunta_oid`.
+
 
 ## Local environment and development
 

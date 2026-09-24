@@ -62,6 +62,7 @@ class ValpasImportMappingTest {
                                 postinumero = "00100",
                                 postitoimipaikka = "Helsinki",
                             ),
+                        kunta = ValpasOrganisaatio(oid = "1.2.3.4"),
                     ),
             )
         val input =
