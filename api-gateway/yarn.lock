@@ -1771,12 +1771,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/readable-stream@npm:4.0.24":
-  version: 4.0.24
-  resolution: "@types/readable-stream@npm:4.0.24"
+"@types/readable-stream@npm:4.0.25":
+  version: 4.0.25
+  resolution: "@types/readable-stream@npm:4.0.25"
   dependencies:
     "@types/node": "npm:*"
-  checksum: 10/e96af36f032495f28fac2df2a13d92ced3c7f76cd51d418fb60f960f997f79c6116ad40831539d76260b2e831a914f758f68d810bd52aeb2dc8b8a603238a0fb
+  checksum: 10/2917d1acb71df534ce1446c873fa2925f86ac1bb907501f165e7ede15361844465075c19c113d62c0e850b2a66f9e552d4533d62752d3e251f7d6341e7b0e1de
   languageName: node
   linkType: hard
 
@@ -6121,7 +6121,7 @@ __metadata:
     "@types/node": "npm:25.9.7"
     "@types/node-forge": "npm:1.3.14"
     "@types/pump": "npm:1.1.3"
-    "@types/readable-stream": "npm:4.0.24"
+    "@types/readable-stream": "npm:4.0.25"
     "@types/split2": "npm:4.2.3"
     "@types/tough-cookie": "npm:4.0.5"
     "@types/xml2js": "npm:0.4.14"
