@@ -6158,7 +6158,7 @@ __metadata:
     typescript: "npm:6.0.3"
     typescript-eslint: "npm:8.70.0"
     uuid: "npm:14.0.2"
-    xml-crypto: "npm:6.2.0"
+    xml-crypto: "npm:6.3.2"
     xml2js: "npm:0.6.2"
     zod: "npm:4.6.5"
   languageName: unknown
@@ -8035,14 +8035,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"xml-crypto@npm:6.2.0, xml-crypto@npm:^6.1.2":
-  version: 6.2.0
-  resolution: "xml-crypto@npm:6.2.0"
+"xml-crypto@npm:6.3.2, xml-crypto@npm:^6.1.2":
+  version: 6.3.2
+  resolution: "xml-crypto@npm:6.3.2"
   dependencies:
     "@xmldom/is-dom-node": "npm:^1.0.1"
     "@xmldom/xmldom": "npm:^0.8.15"
     xpath: "npm:^0.0.33"
-  checksum: 10/9d05a0b6145751935759e63280c5dd551d04c01f75d37b406403a6681f8c47270e9a38c5df1ae4921809e822c9831304a8852d1c3edbfaf168e0b25a7fc3d99f
+  checksum: 10/7d3a61c44d62fb68ba25b1e4704baa5ec7d59367aa5eb2723ab84d1e03a5c7a150b76f01915c6509a1bccbd17361dfd376564fce742b331169676ed0ca009fcf
   languageName: node
   linkType: hard
 
