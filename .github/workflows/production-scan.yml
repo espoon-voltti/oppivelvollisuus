@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2026 City of Espoo
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+name: Production vulnerability scan
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - .github/workflows/production-scan.yml
+
+env:
+  AWS_REGION: eu-north-1
+  ECR_REGISTRY: 095341522062.dkr.ecr.eu-north-1.amazonaws.com
+  TRIVY: aquasec/trivy:0.75.0
+
+permissions:
+  id-token: write
+  contents: read
+  security-events: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repository:
+          - service
+          - api-gateway
+          - frontend
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE }}
+          role-duration-seconds: 1200
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: 'true'
+
+      - name: Scan production image
+        id: scan
+        env:
+          IMAGE: ${{ env.ECR_REGISTRY }}/oppivelvollisuus/${{ matrix.repository }}:env-prod
+        run: |
+          docker pull --quiet "$IMAGE"
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/work" -w /work "$TRIVY" \
+            image --scanners vuln --ignore-unfixed --no-progress --format json --output result.json "$IMAGE"
+          docker run --rm -v "$PWD:/work" -w /work "$TRIVY" \
+            convert --format sarif --output result.sarif result.json
+          echo "commit=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"]' result.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Summary
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ steps.scan.outputs.commit }}
+        run: |
+          COMMITS_NOT_IN_PRODUCTION=$(gh api "repos/$GITHUB_REPOSITORY/compare/$COMMIT...master" --jq .ahead_by)
+          {
+            echo "## ${{ matrix.repository }}: production commit $COMMIT"
+            echo "master has $COMMITS_NOT_IN_PRODUCTION commits that are not in production."
+            echo
+            echo "| Severity | Package | Installed | Fixed | Vulnerability |"
+            echo "|---|---|---|---|---|"
+            jq -r '[.Results[]?.Vulnerabilities[]?
+                    | select(.Severity == "CRITICAL" or .Severity == "HIGH")
+                    | "| \(.Severity) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion) | \(.VulnerabilityID) |"]
+                   | unique | .[]' result.json
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload to code scanning
+        if: github.event_name != 'pull_request'
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: result.sarif
+          category: production/${{ matrix.repository }}
+          ref: refs/heads/production
+          sha: ${{ steps.scan.outputs.commit }}
