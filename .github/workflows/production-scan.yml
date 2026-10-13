@@ -37,40 +37,38 @@ jobs:
         with:
           mask-password: 'true'
 
-      - name: Scan production images
+      - name: Scan production and master images
         run: |
           mkdir results
           for repository in service api-gateway frontend; do
-            image="$ECR_REGISTRY/oppivelvollisuus/$repository:env-prod"
-            docker pull --quiet "$image"
-            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/work" -w /work "$TRIVY" \
-              image --scanners vuln --ignore-unfixed --no-progress --quiet --format json --output result.json "$image"
-            jq --arg repository "$repository" '.ArtifactName = $repository' result.json > "results/$repository.json"
+            for tag in env-prod master; do
+              image="$ECR_REGISTRY/oppivelvollisuus/$repository:$tag"
+              docker pull --quiet "$image"
+              docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/work" -w /work "$TRIVY" \
+                image --scanners vuln --ignore-unfixed --no-progress --quiet --format json --output "results/$tag-$repository.json" "$image"
+            done
           done
 
       - name: Compose Slack message
         env:
           GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          PRODUCTION_COMMIT=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"] // empty' results/*.json | sort -u | head -1)
+          serious_vulnerabilities() {
+            jq -s '[.[] | .Results[]?.Vulnerabilities[]? | select(.Severity == "CRITICAL" or .Severity == "HIGH")
+                    | "\(.Severity) \(.VulnerabilityID) \(.PkgName)"] | unique' "$@"
+          }
+          count() { jq --arg severity "$2" '[.[] | select(startswith($severity + " "))] | length' "$1"; }
+
+          serious_vulnerabilities results/env-prod-*.json > production.json
+          serious_vulnerabilities results/master-*.json > master.json
+          FIXED_BY_MASTER=$(jq -n --slurpfile p production.json --slurpfile m master.json '$p[0] - $m[0] | length')
+          INTRODUCED_BY_MASTER=$(jq -n --slurpfile p production.json --slurpfile m master.json '$m[0] - $p[0] | length')
+
+          PRODUCTION_COMMIT=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"] // empty' results/env-prod-*.json | sort -u | head -1)
           COMMITS_NOT_IN_PRODUCTION=$(gh api "repos/$GITHUB_REPOSITORY/compare/$PRODUCTION_COMMIT...master" --jq .ahead_by)
 
-          jq -s '[.[] | .ArtifactName as $image | .Results[]?.Vulnerabilities[]?
-                  | select(.Severity == "CRITICAL" or .Severity == "HIGH")
-                  | {Severity, PkgName, InstalledVersion, FixedVersion, VulnerabilityID, image: $image}]
-                 | group_by([.Severity, .PkgName, .InstalledVersion, .VulnerabilityID])
-                 | map(.[0] + {images: (map(.image) | unique | join(", "))})
-                 | sort_by((if .Severity == "CRITICAL" then 0 else 1 end), .PkgName, .VulnerabilityID)' \
-            results/*.json > findings.json
-
-          {
-            echo "*Oppivelvollisuus: tuotannon haavoittuvuudet*"
-            echo "Tuotannon commit <$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$PRODUCTION_COMMIT|${PRODUCTION_COMMIT:0:8}>, masterissa $COMMITS_NOT_IN_PRODUCTION committia, joita tuotannossa ei ole."
-            echo
-            echo "*Critical $(jq '[.[] | select(.Severity == "CRITICAL")] | length' findings.json), high $(jq '[.[] | select(.Severity == "HIGH")] | length' findings.json)* (korjattu versio saatavilla)"
-            jq -r '.[] | "• \(.Severity) \(.VulnerabilityID): \(.PkgName) \(.InstalledVersion) → \(.FixedVersion) (\(.images))"' findings.json
-          } > message.txt
-
+          echo "*Oppivelvollisuus* tuotanto: critical $(count production.json CRITICAL), high $(count production.json HIGH) · master: critical $(count master.json CRITICAL), high $(count master.json HIGH) ($COMMITS_NOT_IN_PRODUCTION committia edellä) · masterin vienti korjaisi $FIXED_BY_MASTER, toisi $INTRODUCED_BY_MASTER uutta · <$RUN_URL|ajo>" > message.txt
           jq -n --rawfile text message.txt '{text: $text}' > slack-payload.json
 
       - name: Send to Slack
