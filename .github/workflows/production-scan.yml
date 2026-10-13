@@ -18,7 +18,7 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
   security-events: write
 
 jobs:
@@ -57,23 +57,15 @@ jobs:
             convert --format sarif --output result.sarif result.json
           echo "commit=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"]' result.json)" >> "$GITHUB_OUTPUT"
 
-      - name: Summary
+      - name: Point production branch to production commit
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           COMMIT: ${{ steps.scan.outputs.commit }}
         run: |
-          COMMITS_NOT_IN_PRODUCTION=$(gh api "repos/$GITHUB_REPOSITORY/compare/$COMMIT...master" --jq .ahead_by)
-          {
-            echo "## ${{ matrix.repository }}: production commit $COMMIT"
-            echo "master has $COMMITS_NOT_IN_PRODUCTION commits that are not in production."
-            echo
-            echo "| Severity | Package | Installed | Fixed | Vulnerability |"
-            echo "|---|---|---|---|---|"
-            jq -r '[.Results[]?.Vulnerabilities[]?
-                    | select(.Severity == "CRITICAL" or .Severity == "HIGH")
-                    | "| \(.Severity) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion) | \(.VulnerabilityID) |"]
-                   | unique | .[]' result.json
-          } >> "$GITHUB_STEP_SUMMARY"
+          move_branch() { gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/production" -f sha="$COMMIT" -F force=true; }
+          create_branch() { gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/heads/production -f sha="$COMMIT"; }
+          move_branch || create_branch || move_branch
 
       - name: Upload to code scanning
         if: github.event_name != 'pull_request'
@@ -83,3 +75,4 @@ jobs:
           category: production/${{ matrix.repository }}
           ref: refs/heads/production
           sha: ${{ steps.scan.outputs.commit }}
+
