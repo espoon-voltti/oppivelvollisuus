@@ -18,7 +18,7 @@ env:
 
 permissions:
   id-token: write
-  contents: read
+  contents: write
   security-events: write
 
 jobs:
@@ -74,6 +74,16 @@ jobs:
                     | "| \(.Severity) | \(.PkgName) | \(.InstalledVersion) | \(.FixedVersion) | \(.VulnerabilityID) |"]
                    | unique | .[]' result.json
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Point production branch to production commit
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMIT: ${{ steps.scan.outputs.commit }}
+        run: |
+          move_branch() { gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/production" -f sha="$COMMIT" -F force=true; }
+          create_branch() { gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/heads/production -f sha="$COMMIT"; }
+          move_branch || create_branch || move_branch
 
       - name: Upload to code scanning
         if: github.event_name != 'pull_request'
