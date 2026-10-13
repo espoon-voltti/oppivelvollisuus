@@ -62,13 +62,16 @@ jobs:
 
           serious_vulnerabilities results/env-prod-*.json > production.json
           serious_vulnerabilities results/master-*.json > master.json
-          FIXED_BY_MASTER=$(jq -n --slurpfile p production.json --slurpfile m master.json '$p[0] - $m[0] | length')
-          INTRODUCED_BY_MASTER=$(jq -n --slurpfile p production.json --slurpfile m master.json '$m[0] - $p[0] | length')
 
           PRODUCTION_COMMIT=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"] // empty' results/env-prod-*.json | sort -u | head -1)
           COMMITS_NOT_IN_PRODUCTION=$(gh api "repos/$GITHUB_REPOSITORY/compare/$PRODUCTION_COMMIT...master" --jq .ahead_by)
 
-          echo "*Oppivelvollisuus* tuotanto: critical $(count production.json CRITICAL), high $(count production.json HIGH) · master: critical $(count master.json CRITICAL), high $(count master.json HIGH) ($COMMITS_NOT_IN_PRODUCTION committia edellä) · masterin vienti korjaisi $FIXED_BY_MASTER, toisi $INTRODUCED_BY_MASTER uutta · <$RUN_URL|ajo>" > message.txt
+          {
+            echo "*Oppivelvollisuus riippuvuuksien CVE skannaus*"
+            echo "tuotanto: critical $(count production.json CRITICAL), high $(count production.json HIGH)"
+            echo "master: critical $(count master.json CRITICAL), high $(count master.json HIGH) ($COMMITS_NOT_IN_PRODUCTION committia edellä)"
+            echo "<$RUN_URL|ajo>"
+          } > message.txt
           jq -n --rawfile text message.txt '{text: $text}' > slack-payload.json
 
       - name: Send to Slack
