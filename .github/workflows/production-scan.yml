@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+# Findings go only to Slack: run pages, logs and artifacts of a public repository are visible to anyone.
 name: Production vulnerability scan
 on:
   schedule:
-    - cron: "0 4 * * *"
+    - cron: "0 5 * * 1" # At 05:00 on Monday
   workflow_dispatch:
   pull_request:
     paths:
@@ -18,20 +19,11 @@ env:
 
 permissions:
   id-token: write
-  contents: write
-  security-events: write
+  contents: read
 
 jobs:
   scan:
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        repository:
-          - service
-          - api-gateway
-          - frontend
-
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -45,34 +37,46 @@ jobs:
         with:
           mask-password: 'true'
 
-      - name: Scan production image
-        id: scan
-        env:
-          IMAGE: ${{ env.ECR_REGISTRY }}/oppivelvollisuus/${{ matrix.repository }}:env-prod
+      - name: Scan production images
         run: |
-          docker pull --quiet "$IMAGE"
-          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/work" -w /work "$TRIVY" \
-            image --scanners vuln --ignore-unfixed --no-progress --format json --output result.json "$IMAGE"
-          docker run --rm -v "$PWD:/work" -w /work "$TRIVY" \
-            convert --format sarif --output result.sarif result.json
-          echo "commit=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"]' result.json)" >> "$GITHUB_OUTPUT"
+          mkdir results
+          for repository in service api-gateway frontend; do
+            image="$ECR_REGISTRY/oppivelvollisuus/$repository:env-prod"
+            docker pull --quiet "$image"
+            docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "$PWD:/work" -w /work "$TRIVY" \
+              image --scanners vuln --ignore-unfixed --no-progress --quiet --format json --output result.json "$image"
+            jq --arg repository "$repository" '.ArtifactName = $repository' result.json > "results/$repository.json"
+          done
 
-      - name: Point production branch to production commit
-        if: github.event_name != 'pull_request'
+      - name: Compose Slack message
         env:
           GH_TOKEN: ${{ github.token }}
-          COMMIT: ${{ steps.scan.outputs.commit }}
         run: |
-          move_branch() { gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/heads/production" -f sha="$COMMIT" -F force=true; }
-          create_branch() { gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" -f ref=refs/heads/production -f sha="$COMMIT"; }
-          move_branch || create_branch || move_branch
+          PRODUCTION_COMMIT=$(jq -r '.Metadata.ImageConfig.config.Labels["fi.espoo.commit"] // empty' results/*.json | sort -u | head -1)
+          COMMITS_NOT_IN_PRODUCTION=$(gh api "repos/$GITHUB_REPOSITORY/compare/$PRODUCTION_COMMIT...master" --jq .ahead_by)
 
-      - name: Upload to code scanning
+          jq -s '[.[] | .ArtifactName as $image | .Results[]?.Vulnerabilities[]?
+                  | select(.Severity == "CRITICAL" or .Severity == "HIGH")
+                  | {Severity, PkgName, InstalledVersion, FixedVersion, VulnerabilityID, image: $image}]
+                 | group_by([.Severity, .PkgName, .InstalledVersion, .VulnerabilityID])
+                 | map(.[0] + {images: (map(.image) | unique | join(", "))})
+                 | sort_by((if .Severity == "CRITICAL" then 0 else 1 end), .PkgName, .VulnerabilityID)' \
+            results/*.json > findings.json
+
+          {
+            echo "*Oppivelvollisuus: tuotannon haavoittuvuudet*"
+            echo "Tuotannon commit <$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit/$PRODUCTION_COMMIT|${PRODUCTION_COMMIT:0:8}>, masterissa $COMMITS_NOT_IN_PRODUCTION committia, joita tuotannossa ei ole."
+            echo
+            echo "*Critical $(jq '[.[] | select(.Severity == "CRITICAL")] | length' findings.json), high $(jq '[.[] | select(.Severity == "HIGH")] | length' findings.json)* (korjattu versio saatavilla)"
+            jq -r '.[] | "• \(.Severity) \(.VulnerabilityID): \(.PkgName) \(.InstalledVersion) → \(.FixedVersion) (\(.images))"' findings.json
+          } > message.txt
+
+          jq -n --rawfile text message.txt '{text: $text}' > slack-payload.json
+
+      - name: Send to Slack
         if: github.event_name != 'pull_request'
-        uses: github/codeql-action/upload-sarif@v4
-        with:
-          sarif_file: result.sarif
-          category: production/${{ matrix.repository }}
-          ref: refs/heads/production
-          sha: ${{ steps.scan.outputs.commit }}
-
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.PRODUCTION_SCAN_SLACK_WEBHOOK_URL }}
+        run: |
+          curl --silent --show-error --fail --output /dev/null \
+            -H 'Content-Type: application/json' --data @slack-payload.json "$SLACK_WEBHOOK_URL"
