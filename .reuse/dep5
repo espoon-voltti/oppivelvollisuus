@@ -79,3 +79,11 @@ License: LGPL-2.1-or-later
 Files: docs/*.png
 Copyright: 2023-2024 City of Espoo
 License: LGPL-2.1-or-later
+
+Files: *.oxfmtrc.json
+Copyright: 2026 City of Espoo
+License: LGPL-2.1-or-later
+
+Files: *.oxlintrc.json
+Copyright: 2026 City of Espoo
+License: LGPL-2.1-or-later

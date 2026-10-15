@@ -43,7 +43,7 @@ const loginFormHandler: RequestHandler = (req, res) => {
               type="radio"
               id="${externalId}"
               name="preset"
-              ${idx == 0 ? 'checked' : ''}
+              ${idx === 0 ? 'checked' : ''}
               value="${_.escape(json)}" />
             <label for="${externalId}">${firstName} ${lastName}</label>
           </div>`

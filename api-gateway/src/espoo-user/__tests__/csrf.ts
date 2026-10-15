@@ -10,7 +10,7 @@ import {
   describe,
   expect,
   it
-} from '@jest/globals'
+} from 'vitest'
 
 import { configFromEnv } from '../../shared/config.ts'
 import type { EspooUserResponse } from '../../shared/service-client.ts'
