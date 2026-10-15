@@ -106,7 +106,7 @@ To start API-gateway in http://localhost:3000
 - `yarn dev`
 
 To lint and format code
-- `yarn lint --fix`
+- `yarn lint:fix`
 
 The default config uses dev login with hard coded users, but it is also possible to configure the local development environment to use some real SAML IDP.
 
@@ -118,7 +118,7 @@ To start frontend in http://localhost:9000
 - `yarn dev`
 
 To lint and format code
-- `yarn lint --fix`
+- `yarn lint:fix`
 
 ### Version updates
 

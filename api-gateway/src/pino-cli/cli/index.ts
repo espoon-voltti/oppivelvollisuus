@@ -191,20 +191,20 @@ const mapPinoLogToMiscLog = (obj: PinoMiscLog): MiscLog => ({
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isPinoAccessLog = (obj: any): boolean =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
-  obj.req &&
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  obj.res &&
+  Boolean(obj.req) &&
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  Boolean(obj.res) &&
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   (obj.message === 'request completed' || obj.message === 'request errored')
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const isPinoAppAuditLog = (obj: any): boolean =>
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
-  obj.type && obj.type === 'app-audit-events'
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  obj.type === 'app-audit-events'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-return,@typescript-eslint/no-unsafe-member-access
-const isPinoMiscLog = (obj: any): boolean => obj.type && obj.type === 'app-misc'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any,@typescript-eslint/no-unsafe-member-access
+const isPinoMiscLog = (obj: any): boolean => obj.type === 'app-misc'
 
 const stdoutStream = process.stdout
 

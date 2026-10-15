@@ -57,13 +57,13 @@ Run in every changed project before committing.
 
 **frontend** (`cd frontend`):
 ```
-yarn lint --fix
+yarn lint:fix
 yarn type-check
 ```
 
 **api-gateway** (`cd api-gateway`):
 ```
-yarn lint --fix
+yarn lint:fix
 ```
 
 **service**:
