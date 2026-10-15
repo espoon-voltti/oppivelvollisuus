@@ -68,6 +68,13 @@
         "@types/jsonwebtoken"
       ],
       "allowedVersions": "9.0.2"
+    },
+    {
+      // `typescript` is aliased to @typescript/typescript6 so that typescript-eslint and ts-jest
+      // get the TS 6 compiler API, while `tsc` comes from `typescript-native` (TS 7).
+      // Remove when typescript-eslint and ts-jest support TypeScript 7.
+      matchPackageNames: ['@typescript/typescript6'],
+      allowedVersions: '6.x',
     }
   ],
 }
