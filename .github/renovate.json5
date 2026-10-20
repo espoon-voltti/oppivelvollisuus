@@ -78,7 +78,7 @@
       rangeStrategy: 'auto'
     },
     {
-      "packageNames": [
+      "matchPackageNames": [
         "@types/jsonwebtoken"
       ],
       "allowedVersions": "9.0.2"
