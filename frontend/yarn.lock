@@ -3803,7 +3803,7 @@ __metadata:
     react: "npm:19.3.1"
     react-csv: "npm:2.2.2"
     react-dom: "npm:19.3.1"
-    react-router: "npm:8.4.0"
+    react-router: "npm:8.5.0"
     styled-components: "npm:6.6.0"
     ts-node: "npm:10.9.2"
     typescript: "npm:7.0.2"
@@ -4526,19 +4526,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-router@npm:8.4.0":
-  version: 8.4.0
-  resolution: "react-router@npm:8.4.0"
+"react-router@npm:8.5.0":
+  version: 8.5.0
+  resolution: "react-router@npm:8.5.0"
   dependencies:
     "@remix-run/route-pattern": "npm:^0.22.1"
     cookie-es: "npm:^3.1.1"
   peerDependencies:
+    "@types/react": ">=19.2.0"
+    "@types/react-dom": ">=19.2.0"
     react: ">=19.2.7"
     react-dom: ">=19.2.7"
   peerDependenciesMeta:
+    "@types/react":
+      optional: true
+    "@types/react-dom":
+      optional: true
     react-dom:
       optional: true
-  checksum: 10/1a20f8d991b54e959d1deaf865fc9d701f289026d3aa1160b5292b4f03a3697ddc43971408e3df926cb4f240f7d266ab3c1157113b59610899c474a98244c610
+  checksum: 10/69e1ad42e7931423b0ce99d3908ce497ad63f9e7352f21fa2d54f6202b45df62a7a67346ea7f655c1150b6fc1cc5db992b926554ab799aeade3cedd347930a37
   languageName: node
   linkType: hard
 
