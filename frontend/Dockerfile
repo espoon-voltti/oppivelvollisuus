@@ -3,9 +3,9 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-ARG NGINX_VERSION=1.31.7
+ARG NGINX_VERSION=1.31.8
 
-FROM node:24.22.0-bookworm-slim AS builder
+FROM node:24.22.1-bookworm-slim AS builder
 
 ARG CACHE_BUST=2025-W07
 
@@ -34,8 +34,8 @@ ENV NGINX_ENV=local \
 ARG GOMPLATE_VERSION=v4.3.3
 ARG GOMPLATE_SHA256="ca281666e86f2f09218c1653e1908f572c0e349e9de64cb4ea93ade9333f0596"
 # https://github.com/espoon-voltti/s3-downloader/
-ARG S3_DOWNLOADER_VERSION=v1.5.3
-ARG S3_DOWNLOADER_SHA256="b3f631aaa0321c9f3b52cc2e0b7772d6bb926608c5451e644efd111b77ccb212"
+ARG S3_DOWNLOADER_VERSION=v1.6.0
+ARG S3_DOWNLOADER_SHA256="f69116f2e2eeb78fa6297e053ed7f311a1bf120c0ff0ea3c966335223f94a5e9"
 
 RUN apt-get update \
  && apt-get -y dist-upgrade \

@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
-FROM node:24.22.0-bookworm-slim AS base
+FROM node:24.22.1-bookworm-slim AS base
 
 ARG CACHE_BUST=2025-W07
 
 WORKDIR /app
 
-ARG S3_DOWNLOADER_VERSION=v1.5.3
-ARG S3_DOWNLOADER_SHA256="b3f631aaa0321c9f3b52cc2e0b7772d6bb926608c5451e644efd111b77ccb212"
+ARG S3_DOWNLOADER_VERSION=v1.6.0
+ARG S3_DOWNLOADER_SHA256="f69116f2e2eeb78fa6297e053ed7f311a1bf120c0ff0ea3c966335223f94a5e9"
 
 RUN apt-get update \
  && apt-get -y dist-upgrade \

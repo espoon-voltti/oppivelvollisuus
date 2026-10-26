@@ -8,11 +8,11 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 
 plugins {
-    id("org.springframework.boot") version "4.1.1"
+    id("org.springframework.boot") version "4.1.2"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("jvm") version "2.4.21"
     kotlin("plugin.spring") version "2.4.21"
-    id("org.flywaydb.flyway") version "13.10.3"
+    id("org.flywaydb.flyway") version "13.11.1"
     id("com.ncorti.ktfmt.gradle") version "0.27.0"
     id("org.jlleitschuh.gradle.ktlint") version "14.2.0"
     id("org.owasp.dependencycheck") version "13.0.0"
@@ -110,12 +110,12 @@ dependencies {
     implementation("org.jdbi:jdbi3-kotlin")
     implementation("org.jdbi:jdbi3-postgres")
 
-    api(platform("tools.jackson:jackson-bom:3.2.3"))
+    api(platform("tools.jackson:jackson-bom:3.2.4"))
     implementation("tools.jackson.core:jackson-core")
     implementation("tools.jackson.core:jackson-databind")
     implementation("tools.jackson.module:jackson-module-kotlin")
 
-    implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.1")
 
     implementation("com.auth0:java-jwt:4.6.2")
 
@@ -133,7 +133,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-property:6.2.6")
-    testImplementation("com.microsoft.playwright:playwright:1.63.0")
+    testImplementation("com.microsoft.playwright:playwright:1.64.0")
 }
 
 tasks.withType<KotlinCompile> {
