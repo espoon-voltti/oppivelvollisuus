@@ -439,12 +439,9 @@ jobs:
       fail-fast: false
       matrix:
         environment:
-          - staging
           - prod
           - esc-staging
         include:
-          - environment: staging
-            aws_region: eu-north-1
           - environment: prod
             aws_region: eu-north-1
           - environment: esc-staging
@@ -453,8 +450,8 @@ jobs:
       name: ${{ matrix.environment }}
 
     steps:
-      - name: Configure AWS credentials (staging/prod)
-        if: ${{ matrix.environment == 'staging' || matrix.environment == 'prod' }}
+      - name: Configure AWS credentials (prod)
+        if: ${{ matrix.environment == 'prod' }}
         uses: aws-actions/configure-aws-credentials@v6.3.0
         with:
           aws-region: ${{ matrix.aws_region }}
