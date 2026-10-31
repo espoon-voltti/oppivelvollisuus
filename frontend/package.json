@@ -35,7 +35,7 @@
     "@babel/preset-env": "8.0.7",
     "@types/autosize": "4.0.3",
     "@types/lodash": "4.17.27",
-    "@types/node": "25.9.9",
+    "@types/node": "26.6.5",
     "@types/react": "19.3.0",
     "@types/react-csv": "1.1.10",
     "@types/react-dom": "19.3.0",
