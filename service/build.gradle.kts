@@ -79,8 +79,8 @@ dependencies {
     api("org.yaml:snakeyaml:2.7")
 
     // CVE-2025-11226
-    api("ch.qos.logback:logback-classic:1.6.5")
-    api("ch.qos.logback:logback-core:1.6.5")
+    api("ch.qos.logback:logback-classic:1.6.6")
+    api("ch.qos.logback:logback-core:1.6.6")
 
     // CVE-2026-85532, CVE-2026-87830, CVE-2026-88920, CVE-2026-89238, CVE-2026-92121,
     // CVE-2026-92899, CVE-2026-95616
@@ -120,7 +120,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.6.2")
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
-    implementation("ch.qos.logback:logback-access:1.6.5")
+    implementation("ch.qos.logback:logback-access:1.6.6")
     implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
 
     implementation("io.opentelemetry:opentelemetry-api")
