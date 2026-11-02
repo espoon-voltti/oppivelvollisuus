@@ -50,7 +50,7 @@
     "oxlint": "1.90.0",
     "oxlint-tsgolint": "7.0.2005",
     "postcss": "8.5.32",
-    "postcss-preset-env": "11.6.1",
+    "postcss-preset-env": "11.6.2",
     "react-router": "8.5.1",
     "ts-node": "10.9.2",
     "typescript": "7.0.2",
