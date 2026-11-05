@@ -128,6 +128,16 @@ Dependabot runs in Github and creates PRs of new dependency versions.
 
 After merging a PR go to the Github action and approve the deployments after build succeeds. It is recommended to do a quick manual smoke test in staging before deploying to production.
 
+Only `master` and `deploy/<topic>` branches push images to Amazon ECR and deploy.
+
+To deploy a commit that is not the latest `master`, for example a pull request branch or an older version to roll production back to, push it to a `deploy/` branch:
+
+```sh
+git push --force origin <commit>:refs/heads/deploy/<topic>
+```
+
+`--force` lets an older or unrelated commit replace the one on the branch. The `prod` environment accepts deployments from `master` and `deploy/*` only, so a new branch pattern has to be added there too.
+
 ## License
 
 Oppivelvollisuus is published under **LGPL-2.1-or-later** license. Please refer to
