@@ -315,8 +315,10 @@ jobs:
             compose/screenshots/
           retention-days: 2
 
+  # Only master and deploy/* branches push images to ECR and deploy.
+  # See "Deployment" in README.md.
   ecr-push:
-    if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+    if: ${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/deploy/')) && github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: read
       id-token: write
@@ -370,7 +372,7 @@ jobs:
           done
 
   ecr-push-esc:
-    if: ${{ github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
+    if: ${{ (github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/heads/deploy/')) && github.actor != 'dependabot[bot]' && !github.event.pull_request.head.repo.fork }}
     permissions:
       contents: read
       id-token: write
@@ -424,7 +426,6 @@ jobs:
           done
 
   deploy:
-    if: ${{ github.ref == 'refs/heads/master' }}
     permissions:
       contents: read
       id-token: write
