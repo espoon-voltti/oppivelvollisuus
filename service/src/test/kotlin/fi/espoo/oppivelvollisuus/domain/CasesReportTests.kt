@@ -93,6 +93,7 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
                     municipalityInFinland = false,
                     status = CaseStatus.TODO,
                     finishedReason = null,
+                    otherReason = null,
                     startedAtSchool = null,
                     source = CaseSource.VALPAS_NOTICE,
                     sourceValpas = ValpasNotifier.PERUSOPETUS,
@@ -168,6 +169,25 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
             assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
+        }
+
+        updateStudentCaseStatus(
+            student.id,
+            case.id,
+            CaseStatusInput(
+                status = CaseStatus.FINISHED,
+                finishedInfo =
+                    FinishedInfo(
+                        reason = CaseFinishedReason.OTHER,
+                        startedAtSchool = null,
+                        otherReason = "Muutti Ahvenanmaalle",
+                    ),
+            ),
+        )
+
+        getCasesReport().first().also { row ->
+            assertEquals(CaseFinishedReason.OTHER, row.finishedReason)
+            assertEquals("Muutti Ahvenanmaalle", row.otherReason)
         }
     }
 }
