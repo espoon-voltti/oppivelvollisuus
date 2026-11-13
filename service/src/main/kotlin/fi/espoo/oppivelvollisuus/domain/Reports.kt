@@ -18,6 +18,7 @@ data class CaseReportRow(
     val municipalityInFinland: Boolean,
     val status: CaseStatus,
     val finishedReason: CaseFinishedReason?,
+    val otherReason: String?,
     val startedAtSchool: SchoolType?,
     val source: CaseSource,
     val sourceValpas: ValpasNotifier?,
