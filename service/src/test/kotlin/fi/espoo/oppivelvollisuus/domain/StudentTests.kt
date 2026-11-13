@@ -100,11 +100,6 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                             municipalityInFinland = false,
                             guardianInfo = "Huoltaja",
                             supportContactsInfo = "Joku muu",
-                            partnerOrganisations =
-                                setOf(
-                                    PartnerOrganisation.LASTENSUOJELU,
-                                    PartnerOrganisation.TERVEYDENHUOLTO,
-                                ),
                         ),
                     studentCase =
                         StudentCaseInput(
@@ -190,8 +185,6 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Joku muu",
-                partnerOrganisations =
-                    setOf(PartnerOrganisation.LASTENSUOJELU, PartnerOrganisation.TERVEYDENHUOLTO),
             ),
             studentResponse.student,
         )
@@ -346,11 +339,6 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo",
-                partnerOrganisations =
-                    setOf(
-                        PartnerOrganisation.TUKIHENKILO,
-                        PartnerOrganisation.MIELENTERVEYSPALVELUT,
-                    ),
             ),
         )
 
@@ -372,11 +360,6 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 municipalityInFinland = false,
                 guardianInfo = "Huoltaja",
                 supportContactsInfo = "Opo",
-                partnerOrganisations =
-                    setOf(
-                        PartnerOrganisation.TUKIHENKILO,
-                        PartnerOrganisation.MIELENTERVEYSPALVELUT,
-                    ),
             ),
             studentResponse.student,
         )
@@ -660,7 +643,6 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     municipalityInFinland = true,
                     guardianInfo = "",
                     supportContactsInfo = "",
-                    partnerOrganisations = emptySet(),
                 ),
             studentCase =
                 StudentCaseInput(

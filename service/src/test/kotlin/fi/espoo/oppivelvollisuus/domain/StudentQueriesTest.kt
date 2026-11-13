@@ -301,7 +301,6 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                 municipalityInFinland = true,
                 guardianInfo = "G",
                 supportContactsInfo = "S",
-                partnerOrganisations = setOf(PartnerOrganisation.LASTENSUOJELU),
             )
 
         val id = db.transaction { it.insertStudent(input, createdBy = user1.id, now = now) }
@@ -311,7 +310,6 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
         assertEquals(input.lastName, persisted.lastName)
         assertEquals(input.ssn, persisted.ssn)
         assertEquals(input.gender, persisted.gender)
-        assertEquals(input.partnerOrganisations, persisted.partnerOrganisations)
     }
 
     @Test
@@ -347,7 +345,6 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                         municipalityInFinland = false,
                         guardianInfo = "g",
                         supportContactsInfo = "s",
-                        partnerOrganisations = setOf(PartnerOrganisation.TUKIHENKILO),
                     ),
                 updatedBy = user1.id,
                 now = now,
@@ -358,7 +355,6 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
         assertEquals("After", persisted.firstName)
         assertEquals("Updated", persisted.lastName)
         assertEquals(Gender.MALE, persisted.gender)
-        assertEquals(setOf(PartnerOrganisation.TUKIHENKILO), persisted.partnerOrganisations)
     }
 
     @Test

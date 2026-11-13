@@ -5,12 +5,7 @@
 import { apiClient } from '../../../api-client'
 import { JsonOf } from '../../../shared/api-utils'
 
-import {
-  CaseFinishedReason,
-  CaseStatus,
-  FollowUpMeasure,
-  SchoolType
-} from './enums'
+import { CaseFinishedReason, CaseStatus, SchoolType } from './enums'
 
 export const apiMarkCaseAsDuplicate = (
   caseId: string,
@@ -42,29 +37,17 @@ export type CaseStatusInput =
 
 export type FinishedInfo =
   | {
-      reason: Exclude<
-        CaseFinishedReason,
-        'BEGAN_STUDIES' | 'COMPULSORY_EDUCATION_ENDED' | 'OTHER'
-      >
+      reason: Exclude<CaseFinishedReason, 'BEGAN_STUDIES' | 'OTHER'>
       startedAtSchool: null
-      followUpMeasures: null
       otherReason: null
     }
   | {
       reason: 'BEGAN_STUDIES'
       startedAtSchool: SchoolType
-      followUpMeasures: null
-      otherReason: null
-    }
-  | {
-      reason: 'COMPULSORY_EDUCATION_ENDED'
-      startedAtSchool: null
-      followUpMeasures: FollowUpMeasure[]
       otherReason: null
     }
   | {
       reason: 'OTHER'
       startedAtSchool: null
-      followUpMeasures: null
       otherReason: string | null
     }

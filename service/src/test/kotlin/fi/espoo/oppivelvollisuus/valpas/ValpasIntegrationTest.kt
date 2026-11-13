@@ -562,7 +562,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
             id,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED, null, null, null),
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED, null, null),
             ),
         )
         return id

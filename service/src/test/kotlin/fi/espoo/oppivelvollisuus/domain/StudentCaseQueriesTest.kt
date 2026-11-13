@@ -110,7 +110,6 @@ class StudentCaseQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                             FinishedInfo(
                                 reason = CaseFinishedReason.BEGAN_STUDIES,
                                 startedAtSchool = SchoolType.LUKIO,
-                                followUpMeasures = null,
                                 otherReason = null,
                             ),
                     ),
@@ -140,7 +139,6 @@ class StudentCaseQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                             FinishedInfo(
                                 reason = CaseFinishedReason.OTHER,
                                 startedAtSchool = null,
-                                followUpMeasures = null,
                                 otherReason = "x",
                             ),
                     ),

@@ -174,23 +174,3 @@ export const notInSchoolReasonNames: Record<NotInSchoolReason, string> = {
   OPINNOT_ULKOMAILLA: 'Opinnot ulkomailla (muu kuin vaihto-opiskelu)',
   MUU_SYY: 'Muu syy'
 }
-
-export const partnerOrganisationValues = [
-  'LASTENSUOJELU',
-  'TERVEYDENHUOLTO',
-  'MIELENTERVEYSPALVELUT',
-  'TUKIHENKILO',
-  'TYOPAJATOIMINTA',
-  'KOLMAS_SEKTORI'
-]
-
-export type PartnerOrganisation = (typeof partnerOrganisationValues)[number]
-
-export const partnerOrganisationNames: Record<PartnerOrganisation, string> = {
-  LASTENSUOJELU: 'Lastensuojelu',
-  TERVEYDENHUOLTO: 'Terveydenhuolto',
-  MIELENTERVEYSPALVELUT: 'Mielenterveys- ja päihdepalvelut',
-  TUKIHENKILO: 'Tukihenkilö',
-  TYOPAJATOIMINTA: 'Työpajatoiminta',
-  KOLMAS_SEKTORI: '3. sektori'
-}

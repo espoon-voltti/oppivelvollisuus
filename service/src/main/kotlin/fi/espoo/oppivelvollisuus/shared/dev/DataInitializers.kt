@@ -15,7 +15,6 @@ import fi.espoo.oppivelvollisuus.domain.CaseStatus
 import fi.espoo.oppivelvollisuus.domain.Gender
 import fi.espoo.oppivelvollisuus.domain.NotInSchoolReason
 import fi.espoo.oppivelvollisuus.domain.OtherNotifier
-import fi.espoo.oppivelvollisuus.domain.PartnerOrganisation
 import fi.espoo.oppivelvollisuus.domain.SchoolBackground
 import fi.espoo.oppivelvollisuus.domain.ValpasNotifier
 import fi.espoo.oppivelvollisuus.shared.auth.AuthenticatedUser
@@ -90,14 +89,13 @@ data class DevStudent(
     val municipalityInFinland: Boolean = true,
     val guardianInfo: String = "",
     val supportContactsInfo: String = "",
-    val partnerOrganisations: Set<PartnerOrganisation> = emptySet(),
 )
 
 fun Database.Transaction.insert(row: DevStudent): StudentId = createUpdate {
     sql(
         """
-                INSERT INTO students (id, created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
-                VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.valpasLink)}, ${bind(row.valpasOppijaOid)}, ${bind(row.ssn)}, ${bind(row.firstName)}, ${bind(row.lastName)}, ${bind(row.language)}, ${bind(row.dateOfBirth)}, ${bind(row.phone)}, ${bind(row.email)}, ${bind(row.gender)}, ${bind(row.address)}, ${bind(row.municipalityInFinland)}, ${bind(row.guardianInfo)}, ${bind(row.supportContactsInfo)}, ${bind(row.partnerOrganisations.toTypedArray())})
+                INSERT INTO students (id, created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info)
+                VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.valpasLink)}, ${bind(row.valpasOppijaOid)}, ${bind(row.ssn)}, ${bind(row.firstName)}, ${bind(row.lastName)}, ${bind(row.language)}, ${bind(row.dateOfBirth)}, ${bind(row.phone)}, ${bind(row.email)}, ${bind(row.gender)}, ${bind(row.address)}, ${bind(row.municipalityInFinland)}, ${bind(row.guardianInfo)}, ${bind(row.supportContactsInfo)})
                 RETURNING id
                 """
     )

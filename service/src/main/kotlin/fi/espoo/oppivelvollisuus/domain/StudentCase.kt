@@ -177,35 +177,15 @@ enum class SchoolType : DatabaseEnum {
     override val sqlType: String = "school_type"
 }
 
-enum class FollowUpMeasure : DatabaseEnum {
-    KELA_REHABILITATION_SERVICES,
-    SOCIAL_SERVICES,
-    YOUTH_WORK,
-    JOB_SEARCH_SUPPORT,
-    LANGUAGE_COURSE,
-    MISSING,
-    MOVE_ABROAD;
-
-    override val sqlType: String = "follow_up_measure"
-}
-
 data class FinishedInfo(
     @param:PropagateNull val reason: CaseFinishedReason,
     val startedAtSchool: SchoolType?,
-    val followUpMeasures: Set<FollowUpMeasure>?,
     val otherReason: String?,
 ) {
     init {
         if ((reason == CaseFinishedReason.BEGAN_STUDIES) != (startedAtSchool != null)) {
             throw BadRequest(
                 "startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES"
-            )
-        }
-        if (
-            (reason == CaseFinishedReason.COMPULSORY_EDUCATION_ENDED) != (followUpMeasures != null)
-        ) {
-            throw BadRequest(
-                "followUpMeasure must be present if and only if finished reason is COMPULSORY_EDUCATION_ENDED"
             )
         }
     }
@@ -256,7 +236,6 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                     sc.finished_reason AS finished_info_reason,
                     sc.other_reason AS finished_info_other_reason,
                     sc.started_at_school AS finished_info_started_at_school,
-                    sc.follow_up_measures AS finished_info_follow_up_measures,
                     sc.source,
                     sc.source_valpas,
                     sc.source_other,
@@ -385,7 +364,6 @@ fun Database.Transaction.updateStudentCaseStatus(
                     status = ${bind(data.status)},
                     finished_reason = ${bind(data.finishedInfo?.reason)},
                     started_at_school = ${bind(data.finishedInfo?.startedAtSchool)},
-                    follow_up_measures = ${bind(data.finishedInfo?.followUpMeasures?.toTypedArray())},
                     other_reason = ${bind(data.finishedInfo?.otherReason)}
                 WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}
                 """
