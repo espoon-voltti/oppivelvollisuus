@@ -32,10 +32,6 @@ import {
   StudentDetails,
   StudentInput
 } from './api'
-import {
-  partnerOrganisationNames,
-  partnerOrganisationValues
-} from './cases/enums'
 import { Gender, genderNames, genders } from './enums'
 
 interface CreateProps {
@@ -129,10 +125,6 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     props.mode === 'CREATE' ? '' : props.student.supportContactsInfo
   )
 
-  const [partnerOrganisations, setPartnerOrganisations] = useState<string[]>(
-    props.mode === 'CREATE' ? [] : props.student.partnerOrganisations || []
-  )
-
   const [duplicateStudents, setDuplicateStudents] = useState<
     DuplicateStudent[]
   >([])
@@ -197,8 +189,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
       address: address.trim(),
       municipalityInFinland,
       guardianInfo,
-      supportContactsInfo,
-      partnerOrganisations
+      supportContactsInfo
     }
   }, [
     valpasLink,
@@ -214,8 +205,7 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
     address,
     municipalityInFinland,
     guardianInfo,
-    supportContactsInfo,
-    partnerOrganisations
+    supportContactsInfo
   ])
 
   useEffect(() => {
@@ -478,41 +468,6 @@ export const StudentForm = React.memo(function StudentForm(props: Props) {
                 onChange={setSupportContactsInfo}
                 value={supportContactsInfo}
               />
-            )}
-          </LabeledInput>
-        </RowOfInputs>
-        <RowOfInputs>
-          <LabeledInput $relativeWidth={1 / 3}>
-            <Label>Yhteistyötahot</Label>
-            {props.mode === 'VIEW' ? (
-              <span>
-                {partnerOrganisations.length > 0 ? (
-                  <ul>
-                    {partnerOrganisations.map((opt) => (
-                      <li key={opt}>{partnerOrganisationNames[opt]}</li>
-                    ))}
-                  </ul>
-                ) : (
-                  '-'
-                )}
-              </span>
-            ) : (
-              <FlexColWithGaps>
-                {partnerOrganisationValues.map((option) => (
-                  <Checkbox
-                    key={option}
-                    label={partnerOrganisationNames[option]}
-                    checked={partnerOrganisations.includes(option)}
-                    onChange={(checked) =>
-                      setPartnerOrganisations((prev) =>
-                        checked
-                          ? [...prev, option]
-                          : prev.filter((cbr) => cbr !== option)
-                      )
-                    }
-                  />
-                ))}
-              </FlexColWithGaps>
             )}
           </LabeledInput>
         </RowOfInputs>

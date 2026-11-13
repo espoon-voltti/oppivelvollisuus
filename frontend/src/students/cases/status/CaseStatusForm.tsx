@@ -4,14 +4,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react'
 
-import { Checkbox } from '../../../shared/form/Checkbox'
 import { InputField } from '../../../shared/form/InputField'
 import { Select } from '../../../shared/form/Select'
-import {
-  FlexColWithGaps,
-  LabeledInput,
-  RowOfInputs
-} from '../../../shared/layout'
+import { LabeledInput, RowOfInputs } from '../../../shared/layout'
 import { Label } from '../../../shared/typography'
 import { StatusChip } from '../StatusChip'
 import { StudentCase } from '../api'
@@ -24,9 +19,6 @@ import {
   CaseStatus,
   caseStatuses,
   caseStatusNames,
-  FollowUpMeasure,
-  followUpMeasureNames,
-  followUpMeasureValues,
   SchoolType,
   schoolTypeNames,
   schoolTypes
@@ -53,9 +45,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
   const [startedAtSchool, setStartedAtSchool] = useState<SchoolType | null>(
     props.studentCase.finishedInfo?.startedAtSchool ?? null
   )
-  const [followUpMeasures, setFollowUpMeasures] = useState<FollowUpMeasure[]>(
-    props.studentCase.finishedInfo?.followUpMeasures ?? []
-  )
   const [otherReason, setOtherReason] = useState<string>(
     props.studentCase.finishedInfo?.otherReason ?? ''
   )
@@ -71,19 +60,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           finishedInfo: {
             reason: finishedReason,
             startedAtSchool,
-            followUpMeasures: null,
-            otherReason: null
-          }
-        }
-      }
-      if (finishedReason === 'COMPULSORY_EDUCATION_ENDED') {
-        if (followUpMeasures.length === 0) return null
-        return {
-          status,
-          finishedInfo: {
-            reason: finishedReason,
-            followUpMeasures: followUpMeasures,
-            startedAtSchool: null,
             otherReason: null
           }
         }
@@ -94,7 +70,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           status,
           finishedInfo: {
             reason: finishedReason,
-            followUpMeasures: null,
             startedAtSchool: null,
             otherReason: otherReason.trim()
           }
@@ -105,7 +80,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
         status,
         finishedInfo: {
           reason: finishedReason,
-          followUpMeasures: null,
           startedAtSchool: null,
           otherReason: null
         }
@@ -113,7 +87,7 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
     }
 
     return { status, finishedInfo: null }
-  }, [status, finishedReason, startedAtSchool, followUpMeasures, otherReason])
+  }, [status, finishedReason, startedAtSchool, otherReason])
 
   useEffect(() => {
     if (props.mode !== 'VIEW') {
@@ -149,27 +123,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
               </span>
             </LabeledInput>
           )}
-        {props.studentCase.status === 'FINISHED' &&
-          props.studentCase.finishedInfo.reason ===
-            'COMPULSORY_EDUCATION_ENDED' && (
-            <LabeledInput $relativeWidth={1 / 3}>
-              <Label>Jatkotoimenpiteet</Label>
-              <span>
-                <span>
-                  {followUpMeasures !== null && followUpMeasures.length > 0 ? (
-                    <ul>
-                      {followUpMeasures.map((opt) => (
-                        <li key={opt}>{followUpMeasureNames[opt]}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    '-'
-                  )}
-                </span>
-              </span>
-            </LabeledInput>
-          )}
-
         {props.studentCase.status === 'FINISHED' &&
           props.studentCase.finishedInfo.reason === 'OTHER' && (
             <LabeledInput $relativeWidth={1 / 3}>
@@ -224,29 +177,6 @@ export const CaseStatusForm = React.memo(function CaseStatusForm(props: Props) {
           />
         </LabeledInput>
       )}
-      {status === 'FINISHED' &&
-        finishedReason === 'COMPULSORY_EDUCATION_ENDED' && (
-          <LabeledInput $relativeWidth={1 / 3}>
-            <Label>Jatkotoimenpiteet *</Label>
-            <FlexColWithGaps>
-              {followUpMeasureValues.map((option) => (
-                <Checkbox
-                  key={option}
-                  label={followUpMeasureNames[option]}
-                  checked={followUpMeasures.includes(option)}
-                  onChange={(checked) =>
-                    setFollowUpMeasures((prev) =>
-                      checked
-                        ? [...prev, option]
-                        : prev?.filter((cbr) => cbr !== option)
-                    )
-                  }
-                />
-              ))}
-            </FlexColWithGaps>
-          </LabeledInput>
-        )}
-
       {status === 'FINISHED' && finishedReason === 'OTHER' && (
         <LabeledInput $relativeWidth={1 / 3}>
           <Label>Selite</Label>

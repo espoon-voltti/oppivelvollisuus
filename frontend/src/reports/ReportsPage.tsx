@@ -28,7 +28,6 @@ import {
   caseSourceNames,
   notInSchoolReasonNames,
   otherNotifierNames,
-  partnerOrganisationNames,
   schoolBackgroundNames,
   schoolBackgrounds,
   valpasNotifierNames
@@ -40,7 +39,6 @@ import {
 import {
   caseFinishedReasonNames,
   caseStatusNames,
-  followUpMeasureNames,
   schoolTypeNames
 } from '../students/cases/status/enums'
 import { genderNames } from '../students/enums'
@@ -136,11 +134,6 @@ export const ReportsPage = React.memo(function ReportsPage() {
               startedAtSchool: r.startedAtSchool
                 ? schoolTypeNames[r.startedAtSchool]
                 : '',
-              followUpMeasures: r.followUpMeasures
-                ? r.followUpMeasures
-                    .map((m) => m && followUpMeasureNames[m])
-                    .join(', ')
-                : '',
               otherReason: r.otherReason ? r.otherReason : '',
               source: caseSourceNames[r.source],
               sourceDetails: r.sourceValpas
@@ -148,11 +141,6 @@ export const ReportsPage = React.memo(function ReportsPage() {
                 : r.sourceOther
                   ? otherNotifierNames[r.sourceOther]
                   : '',
-              partnerOrganisations: r.partnerOrganisations
-                ? r.partnerOrganisations
-                    .map((po) => partnerOrganisationNames[po])
-                    .join(', ')
-                : '',
               ...schoolBackgrounds.reduce(
                 (acc, val) => ({
                   ...acc,
@@ -192,15 +180,10 @@ export const ReportsPage = React.memo(function ReportsPage() {
               { key: 'gender', label: 'Sukupuoli' },
               { key: 'language', label: 'Äidinkieli' },
               { key: 'municipalityInFinland', label: 'Kotikunta Suomessa' },
-              {
-                key: 'partnerOrganisations',
-                label: 'Yhteistyötahot'
-              },
               { key: 'status', label: 'Ohjauksen tila' },
               { key: 'finishedReason', label: 'Ohjauksen päättymisen syy' },
               { key: 'otherReason', label: 'Selite' },
               { key: 'startedAtSchool', label: 'Siirtynyt opiskelemaan' },
-              { key: 'followUpMeasures', label: 'Jatkotoimenpiteet' },
               { key: 'source', label: 'Lähde' },
               { key: 'sourceDetails', label: 'Lähde tarkennus' },
               ...schoolBackgrounds.map((val) => ({

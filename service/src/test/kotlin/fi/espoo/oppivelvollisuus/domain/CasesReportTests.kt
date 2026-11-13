@@ -101,8 +101,6 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
                     caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
                     notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
                     eventTypes = emptySet(),
-                    followUpMeasures = null,
-                    partnerOrganisations = emptySet(),
                 )
             ),
             getCasesReport(start = LocalDate.of(2022, 1, 1), end = LocalDate.of(2022, 12, 31)),
@@ -141,7 +139,6 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
                     FinishedInfo(
                         reason = CaseFinishedReason.BEGAN_STUDIES,
                         startedAtSchool = SchoolType.LUKIO,
-                        followUpMeasures = null,
                         otherReason = null,
                     ),
             ),
@@ -162,8 +159,6 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
                     FinishedInfo(
                         reason = CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
                         startedAtSchool = null,
-                        followUpMeasures =
-                            setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
                         otherReason = null,
                     ),
             ),
@@ -172,10 +167,6 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
         getCasesReport().first().also { row ->
             assertEquals(CaseStatus.FINISHED, row.status)
             assertEquals(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, row.finishedReason)
-            assertEquals(
-                setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE),
-                row.followUpMeasures,
-            )
             assertEquals(setOf(CaseEventType.HEARING_LETTER, CaseEventType.HEARING), row.eventTypes)
         }
     }

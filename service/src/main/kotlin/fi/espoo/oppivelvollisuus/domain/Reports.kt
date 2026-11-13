@@ -16,7 +16,6 @@ data class CaseReportRow(
     val gender: Gender?,
     val language: String,
     val municipalityInFinland: Boolean,
-    val partnerOrganisations: Set<PartnerOrganisation>?,
     val status: CaseStatus,
     val finishedReason: CaseFinishedReason?,
     val startedAtSchool: SchoolType?,
@@ -26,7 +25,6 @@ data class CaseReportRow(
     val schoolBackground: Set<SchoolBackground>,
     val caseBackgroundReasons: Set<CaseBackgroundReason>,
     val notInSchoolReason: NotInSchoolReason?,
-    val followUpMeasures: Set<FollowUpMeasure>?,
     val eventTypes: Set<CaseEventType>,
 )
 
@@ -42,11 +40,9 @@ fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow
                     s.gender,
                     s.language,
                     s.municipality_in_finland,
-                    s.partner_organisations,
                     sc.status,
                     sc.finished_reason,
                     sc.other_reason,
-                    sc.follow_up_measures,
                     sc.started_at_school,
                     sc.source,
                     sc.source_valpas,

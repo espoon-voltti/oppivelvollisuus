@@ -24,17 +24,6 @@ enum class Gender : DatabaseEnum {
     override val sqlType: String = "gender"
 }
 
-enum class PartnerOrganisation : DatabaseEnum {
-    LASTENSUOJELU,
-    TERVEYDENHUOLTO,
-    MIELENTERVEYSPALVELUT,
-    TUKIHENKILO,
-    TYOPAJATOIMINTA,
-    KOLMAS_SEKTORI;
-
-    override val sqlType: String = "partner_organisation"
-}
-
 data class StudentInput(
     val valpasLink: String,
     val valpasOppijaOid: String?,
@@ -50,7 +39,6 @@ data class StudentInput(
     val municipalityInFinland: Boolean,
     val guardianInfo: String,
     val supportContactsInfo: String,
-    val partnerOrganisations: Set<PartnerOrganisation> = emptySet(),
 )
 
 fun Database.Transaction.insertStudent(
@@ -60,8 +48,8 @@ fun Database.Transaction.insertStudent(
 ): StudentId = createUpdate {
     sql(
         """
-                INSERT INTO students (created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations)
-                VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.valpasOppijaOid)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)}, ${bind(data.partnerOrganisations.toTypedArray())})
+                INSERT INTO students (created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info)
+                VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.valpasOppijaOid)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)})
                 RETURNING id
                 """
     )
@@ -193,14 +181,13 @@ data class Student(
     val municipalityInFinland: Boolean,
     val guardianInfo: String,
     val supportContactsInfo: String,
-    val partnerOrganisations: Set<PartnerOrganisation> = emptySet(),
 )
 
 fun Database.Read.getStudent(id: StudentId): Student =
     createQuery {
         sql(
             """
-                SELECT id, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info, partner_organisations
+                SELECT id, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info
                 FROM students
                 WHERE id = ${bind(id)}
                 """
@@ -234,8 +221,7 @@ fun Database.Transaction.updateStudent(
                     address = ${bind(data.address)},
                     municipality_in_finland = ${bind(data.municipalityInFinland)},
                     guardian_info = ${bind(data.guardianInfo)},
-                    support_contacts_info = ${bind(data.supportContactsInfo)},
-                    partner_organisations = ${bind(data.partnerOrganisations.toTypedArray())}
+                    support_contacts_info = ${bind(data.supportContactsInfo)}
                 WHERE id = ${bind(id)}
                 """
         )

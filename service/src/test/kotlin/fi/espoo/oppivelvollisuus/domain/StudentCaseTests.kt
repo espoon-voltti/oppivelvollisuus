@@ -112,7 +112,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             firstCaseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"),
+                FinishedInfo(CaseFinishedReason.OTHER, null, "other reason"),
             ),
         )
 
@@ -166,7 +166,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             firstCaseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.OTHER, null, null, ""),
+                FinishedInfo(CaseFinishedReason.OTHER, null, ""),
             ),
         )
 
@@ -289,7 +289,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.OTHER, null, null, "other reason"),
+                FinishedInfo(CaseFinishedReason.OTHER, null, "other reason"),
             ),
         )
 
@@ -308,7 +308,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null),
             ),
         )
 
@@ -322,18 +322,11 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
     fun `change status to FINISHED with COMPULSORY_EDUCATION_ENDED`() {
         val caseId = seedCase()
 
-        val givenFollowUpMeasures =
-            setOf(FollowUpMeasure.SOCIAL_SERVICES, FollowUpMeasure.LANGUAGE_COURSE)
         updateStudentCaseStatus(
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(
-                    CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
-                    null,
-                    givenFollowUpMeasures,
-                    null,
-                ),
+                FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, null),
             ),
         )
 
@@ -343,22 +336,6 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             CaseFinishedReason.COMPULSORY_EDUCATION_ENDED,
             updatedCase.finishedInfo?.reason,
         )
-        assertEquals(givenFollowUpMeasures, updatedCase.finishedInfo?.followUpMeasures)
-    }
-
-    @Test
-    fun `cannot change status to COMPULSORY_EDUCATION_ENDED without follow up measure`() {
-        val caseId = seedCase()
-
-        assertThrows<BadRequest> {
-            updateStudentCaseStatus(
-                caseId,
-                CaseStatusInput(
-                    CaseStatus.FINISHED,
-                    FinishedInfo(CaseFinishedReason.COMPULSORY_EDUCATION_ENDED, null, null, null),
-                ),
-            )
-        }
     }
 
     @Test
@@ -379,7 +356,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                 caseId,
                 CaseStatusInput(
                     CaseStatus.FINISHED,
-                    FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, null, null, null),
+                    FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, null, null),
                 ),
             )
         }
@@ -398,7 +375,6 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                         CaseFinishedReason.COMPULSORY_EDUCATION_SUSPENDED,
                         SchoolType.LUKIO,
                         null,
-                        null,
                     ),
                 ),
             )
@@ -412,7 +388,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null),
             ),
         )
 
@@ -430,7 +406,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null),
             ),
         )
         createStudentCase(minimalCaseInput())
@@ -448,7 +424,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
             caseId,
             CaseStatusInput(
                 CaseStatus.FINISHED,
-                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null, null),
+                FinishedInfo(CaseFinishedReason.BEGAN_STUDIES, SchoolType.LUKIO, null),
             ),
         )
         db.transaction { tx ->

@@ -11,7 +11,6 @@ import {
   CaseSource,
   NotInSchoolReason,
   OtherNotifier,
-  PartnerOrganisation,
   SchoolBackground,
   ValpasNotifier
 } from '../students/cases/enums'
@@ -19,7 +18,6 @@ import { CaseEventType } from '../students/cases/events/enums'
 import {
   CaseFinishedReason,
   CaseStatus,
-  FollowUpMeasure,
   SchoolType
 } from '../students/cases/status/enums'
 import { Gender } from '../students/enums'
@@ -45,9 +43,7 @@ export interface CasesReportRow {
   schoolBackground: SchoolBackground[]
   caseBackgroundReasons: CaseBackgroundReason[]
   notInSchoolReason: NotInSchoolReason | null
-  partnerOrganisations: PartnerOrganisation[]
   eventTypes: CaseEventType[]
-  followUpMeasures: FollowUpMeasure[] | null
   otherReason: string | null
 }
 

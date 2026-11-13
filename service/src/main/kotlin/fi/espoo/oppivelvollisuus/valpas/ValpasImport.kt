@@ -54,7 +54,6 @@ fun mapToStudentInput(oppija: ValpasOppija, opintopolkuBaseUrl: String?): Studen
         municipalityInFinland = true,
         guardianInfo = "",
         supportContactsInfo = "",
-        partnerOrganisations = emptySet(),
     )
 }
 
