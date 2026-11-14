@@ -125,7 +125,7 @@ dependencies {
 
     implementation("io.opentelemetry:opentelemetry-api")
     implementation("com.github.kagkarlsson:db-scheduler:16.12.0")
-    implementation("org.unbescape:unbescape:1.1.6.RELEASE")
+    implementation("org.unbescape:unbescape:1.1.8.RELEASE")
 
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit5"))
