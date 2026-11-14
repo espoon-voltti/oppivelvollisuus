@@ -41,7 +41,7 @@
     "@types/react-dom": "19.3.0",
     "@types/styled-components": "5.1.36",
     "axios": "1.21.1",
-    "concurrently": "10.0.6",
+    "concurrently": "10.0.7",
     "esbuild": "0.28.2",
     "eslint-plugin-lodash": "8.1.0",
     "express": "5.3.0",
