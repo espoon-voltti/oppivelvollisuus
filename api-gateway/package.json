@@ -59,7 +59,7 @@
     "nock": "15.0.5",
     "node-forge": "1.4.3",
     "nodemon": "3.1.14",
-    "oxfmt": "0.76.0",
+    "oxfmt": "0.78.0",
     "oxlint": "1.91.0",
     "oxlint-tsgolint": "7.0.2006",
     "tough-cookie": "6.0.2",
