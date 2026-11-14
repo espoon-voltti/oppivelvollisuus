@@ -121,7 +121,7 @@ dependencies {
 
     implementation("net.logstash.logback:logstash-logback-encoder:9.0")
     implementation("ch.qos.logback:logback-access:1.6.6")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.7")
 
     implementation("io.opentelemetry:opentelemetry-api")
     implementation("com.github.kagkarlsson:db-scheduler:16.12.0")
