@@ -90,7 +90,7 @@ dependencies {
     // Bouncy Castle 1.82 from wss4j: GHSA-574f-3g2m-x479, GHSA-9pwp-9qqc-pr26,
     // GHSA-p93r-85wp-75v3, GHSA-qp49-qgx5-5m26, GHSA-c3fc-8qff-9hwx
     implementation("org.bouncycastle:bcprov-jdk18on:1.86")
-    implementation("org.bouncycastle:bcpkix-jdk18on:1.86")
+    implementation("org.bouncycastle:bcpkix-jdk18on:1.87")
     implementation("org.bouncycastle:bcutil-jdk18on:1.86")
 
     api("org.springframework.boot:spring-boot-starter")
