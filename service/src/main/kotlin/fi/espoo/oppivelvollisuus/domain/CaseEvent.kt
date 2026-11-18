@@ -48,7 +48,7 @@ fun Database.Transaction.insertCaseEvent(
                 INSERT INTO case_events (created, created_by, student_case_id, date, type, notes)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(studentCaseId)}, ${bind(data.date)}, ${bind(data.type)}, ${bind(data.notes)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -83,7 +83,7 @@ fun Database.Transaction.updateCaseEvent(
                     type = ${bind(data.type)},
                     notes = ${bind(data.notes)}
                 WHERE id = ${bind(id)}
-                """
+                """,
         )
     }
         .updateExactlyOne()

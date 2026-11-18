@@ -50,7 +50,7 @@ class AsyncJobRunnerTest : PureJdbiTest(resetDbBeforeEach = true) {
                         AsyncJobPool.Id(TestJob::class, "default"),
                         AsyncJobPool.Config(),
                         setOf(TestJob::class),
-                    )
+                    ),
                 ),
                 jdbi,
                 noopTracer,

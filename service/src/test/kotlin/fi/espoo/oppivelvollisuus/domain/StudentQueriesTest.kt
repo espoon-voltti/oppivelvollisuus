@@ -63,7 +63,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     createdBy = user1.id,
                     created = now,
                     assignedTo = assignedTo,
-                )
+                ),
             )
         }
         return student.id
@@ -169,7 +169,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
-                )
+                ),
             )
         }
 
@@ -195,7 +195,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
-                )
+                ),
             )
         }
 
@@ -230,7 +230,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "Donald",
                     lastName = "Duck",
-                )
+                ),
             )
         }
 
@@ -255,7 +255,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "Donald",
                     lastName = "",
-                )
+                ),
             )
         }
 
@@ -274,7 +274,7 @@ class StudentQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "",
                     lastName = "Duck",
-                )
+                ),
             )
         }
 

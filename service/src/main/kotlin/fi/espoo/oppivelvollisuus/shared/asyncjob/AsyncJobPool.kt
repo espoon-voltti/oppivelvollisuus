@@ -112,7 +112,7 @@ class AsyncJobPool<T : Any>(
                     .tag("jobType", id.jobType.simpleName!!)
                     .tag("pool", id.pool)
                     .register(meterRegistry),
-            )
+            ),
         )
     }
 
@@ -153,7 +153,7 @@ class AsyncJobPool<T : Any>(
                                 Duration.between(
                                     clock.now().toInstant(),
                                     permit.availableAt.toInstant(),
-                                )
+                                ),
                             )
                             tx.claimJob(clock.now(), registration.jobTypes())?.also {
                                 tx.updatePermit(this.id, clock.now().plus(throttleInterval))

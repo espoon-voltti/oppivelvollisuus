@@ -129,7 +129,7 @@ data class ScheduledJobsEnv<T : Enum<T>>(val jobs: Map<T, ScheduledJobSettings>)
                                 ?: default.schedule,
                         retryCount = env.lookup("$envPrefix.retry_count") ?: default.retryCount,
                     )
-                }
+                },
             )
     }
 }

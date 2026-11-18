@@ -73,7 +73,7 @@ class AsyncJobRunner<T : Any>(
     fun registerMeters(registry: MeterRegistry) = pools.forEach { it.registerMeters(registry) }
 
     inline fun <reified P : T> registerHandler(
-        noinline handler: (db: Database.Connection, clock: AppClock, msg: P) -> Unit
+        noinline handler: (db: Database.Connection, clock: AppClock, msg: P) -> Unit,
     ) =
         registerHandler(AsyncJobType(P::class)) { db, clock, msg ->
             db.connect { handler(it, clock, msg) }

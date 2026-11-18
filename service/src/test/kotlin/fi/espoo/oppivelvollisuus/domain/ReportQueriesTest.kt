@@ -36,7 +36,7 @@ class ReportQueriesTest : PureJdbiTest(resetDbBeforeEach = true) {
                     createdBy = user.id,
                     created = now,
                     openedAt = openedAt,
-                )
+                ),
             )
         }
         return openedAt

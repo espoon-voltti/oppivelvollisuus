@@ -36,7 +36,7 @@ fun Database.Read.getMostRecentValpasQueryRun(): ValpasQueryRun? = createQuery {
                 FROM valpas_query_runs
                 ORDER BY started_polling_at DESC, id DESC
                 LIMIT 1
-                """
+                """,
     )
 }
     .exactlyOneOrNull<ValpasQueryRun>()
@@ -55,7 +55,7 @@ fun Database.Transaction.insertValpasQueryRun(
                     ${bind(now)}
                 )
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -75,7 +75,7 @@ fun Database.Transaction.markValpasQueryRunFilesReady(
                     started_downloading_at = ${bind(now)}
                 WHERE id = ${bind(id)}
                   AND state = ${bind(ValpasQueryRunState.STARTED)}
-                """
+                """,
         )
     }
         .updateExactlyOne()
@@ -90,7 +90,7 @@ fun Database.Transaction.markValpasQueryRunCompleted(id: ValpasQueryRunId, now: 
                     finished_at = ${bind(now)}
                 WHERE id = ${bind(id)}
                   AND state = ${bind(ValpasQueryRunState.FILES_READY)}
-                """
+                """,
         )
     }
         .updateExactlyOne()
@@ -108,7 +108,7 @@ fun Database.Transaction.markValpasQueryRunFailed(id: ValpasQueryRunId, now: Hel
                       ${bind(ValpasQueryRunState.STARTED)},
                       ${bind(ValpasQueryRunState.FILES_READY)}
                   )
-                """
+                """,
         )
     }
         .updateExactlyOne()

@@ -114,7 +114,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                             notInSchoolReason =
                                 NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
                         ),
-                )
+                ),
             )
         val caseId = getStudent(studentId).cases.first().id
         createCaseEvent(
@@ -162,7 +162,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                                     """
                                         .trimIndent(),
                             ),
-                    )
+                    ),
                 ),
             actual = getStudents(),
         )
@@ -247,7 +247,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                             caseBackgroundReasons = emptySet(),
                             notInSchoolReason = null,
                         ),
-                )
+                ),
             )
         assertEquals(
             expected =
@@ -261,7 +261,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                         status = CaseStatus.TODO,
                         source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                         lastEvent = null,
-                    )
+                    ),
                 ),
             actual = getStudents(),
         )
@@ -318,7 +318,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
         db.transaction { tx ->
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -403,7 +403,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             val student = DevStudent(createdBy = testUser.id, created = now, ssn = "170108A927R")
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -415,7 +415,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
-                )
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -437,7 +437,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 )
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -449,7 +449,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "",
                     lastName = "",
-                )
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -471,7 +471,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 )
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -483,7 +483,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "1.2.246.562.24.10000000001",
                     firstName = "",
                     lastName = "",
-                )
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -506,7 +506,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 )
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -518,7 +518,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "Tupu",
                     lastName = "Ankka",
-                )
+                ),
             )
         assertEquals(1, duplicateStudents.size)
         duplicateStudents.first().let { duplicate ->
@@ -542,7 +542,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                 )
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
 
@@ -554,7 +554,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
                     valpasOppijaOid = "",
                     firstName = "Tupu",
                     lastName = "Ankka",
-                )
+                ),
             )
         assertEquals(0, duplicateStudents.size)
     }
@@ -565,7 +565,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
         db.transaction { tx ->
             tx.insert(student)
             tx.insert(
-                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = student.id, createdBy = testUser.id, created = now),
             )
         }
         assertThrows<UnableToExecuteStatementException> { deleteStudent(student.id) }
@@ -609,7 +609,7 @@ class StudentTests : FullApplicationTest(resetDbBeforeEach = true) {
             tx.insert(youngStudent)
             tx.insert(oldStudentCase)
             tx.insert(
-                DevStudentCase(studentId = youngStudent.id, createdBy = testUser.id, created = now)
+                DevStudentCase(studentId = youngStudent.id, createdBy = testUser.id, created = now),
             )
         }
         createCaseEvent(oldStudentCase.id, CaseEventInput(clock.today(), CaseEventType.NOTE, "foo"))

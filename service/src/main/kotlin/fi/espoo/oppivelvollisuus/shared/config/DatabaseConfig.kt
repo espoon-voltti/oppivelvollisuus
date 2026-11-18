@@ -40,7 +40,7 @@ class DatabaseConfig {
                     "*:future"
                 } else {
                     ""
-                }
+                },
             )
             .validateMigrationNaming(true)
             .dataSource(env.url, env.flywayUsername, env.flywayPassword.value)
@@ -62,7 +62,7 @@ class DatabaseConfig {
                     "socketTimeout",
                     TimeUnit.SECONDS.convert(15, TimeUnit.MINUTES).toInt(),
                 )
-            }
+            },
         )
     }
 }

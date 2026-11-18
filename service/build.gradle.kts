@@ -180,7 +180,7 @@ tasks.register("resolveDependencies") {
             .groupBy({ (_, count) -> count }) { (name, _) -> name }
             .forEach { (count, names) ->
                 println(
-                    "Resolved $count dependency files for configurations: ${names.joinToString(", ")}"
+                    "Resolved $count dependency files for configurations: ${names.joinToString(", ")}",
                 )
             }
     }

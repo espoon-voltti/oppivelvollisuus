@@ -42,7 +42,7 @@ class SpringMvcConfig(private val jdbi: Jdbi, private val tracer: Tracer, privat
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
         resolvers.add(asArgumentResolver<AuthenticatedUser.EspooUser?>(::resolveAuthenticatedUser))
         resolvers.add(
-            asArgumentResolver<AuthenticatedUser.SystemInternalUser?>(::resolveAuthenticatedUser)
+            asArgumentResolver<AuthenticatedUser.SystemInternalUser?>(::resolveAuthenticatedUser),
         )
         resolvers.add(asArgumentResolver<AuthenticatedUser?>(::resolveAuthenticatedUser))
         resolvers.add(asArgumentResolver { _, webRequest -> webRequest.getDatabaseInstance() })
@@ -93,7 +93,7 @@ class SpringMvcConfig(private val jdbi: Jdbi, private val tracer: Tracer, privat
 }
 
 private inline fun <reified T> asArgumentResolver(
-    crossinline f: (parameter: MethodParameter, webRequest: NativeWebRequest) -> T
+    crossinline f: (parameter: MethodParameter, webRequest: NativeWebRequest) -> T,
 ): HandlerMethodArgumentResolver =
     object : HandlerMethodArgumentResolver {
         override fun supportsParameter(parameter: MethodParameter): Boolean =
@@ -108,7 +108,7 @@ private inline fun <reified T> asArgumentResolver(
     }
 
 private inline fun <reified I, reified O> convertFrom(
-    crossinline f: (source: I) -> O
+    crossinline f: (source: I) -> O,
 ): GenericConverter =
     object : GenericConverter {
         override fun getConvertibleTypes(): Set<GenericConverter.ConvertiblePair> =

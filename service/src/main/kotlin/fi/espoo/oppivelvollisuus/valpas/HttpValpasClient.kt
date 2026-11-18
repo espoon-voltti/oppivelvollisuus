@@ -68,7 +68,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                     "type" to "oppivelvolliset",
                     "format" to "application/json",
                     "kuntaOid" to kuntaOid,
-                )
+                ),
             )
         val request =
             Request.Builder()
@@ -81,7 +81,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
             val text = resp.body.string()
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException(
-                    "startQuery failed: status=${resp.code} body=$text"
+                    "startQuery failed: status=${resp.code} body=$text",
                 )
             }
             return try {
@@ -104,7 +104,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
             val text = resp.body.string()
             if (!resp.isSuccessful) {
                 throw ValpasIntegrationException(
-                    "getQueryStatus failed: status=${resp.code} body=$text"
+                    "getQueryStatus failed: status=${resp.code} body=$text",
                 )
             }
             val response =
@@ -144,7 +144,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                 val location =
                     resp.header("Location")
                         ?: throw ValpasIntegrationException(
-                            "downloadResultFile got ${resp.code} without Location header"
+                            "downloadResultFile got ${resp.code} without Location header",
                         )
                 // Drop the Authorization header on the redirect. Valpas redirects to a
                 // presigned URL on a different host; forwarding our basic-auth credentials
@@ -159,7 +159,7 @@ class HttpValpasClient(env: ValpasIntegrationEnv, private val jsonMapper: JsonMa
                 return httpClient.newCall(redirectRequest).execute().use { redirectResp ->
                     if (!redirectResp.isSuccessful) {
                         throw ValpasIntegrationException(
-                            "downloadResultFile redirect target failed: status=${redirectResp.code}"
+                            "downloadResultFile redirect target failed: status=${redirectResp.code}",
                         )
                     }
                     parseResultFile(redirectResp.body.byteStream())

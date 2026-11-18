@@ -24,7 +24,7 @@ class MockValpasClient : ValpasClient {
         val status =
             statusByQueryId[queryId]
                 ?: throw ValpasIntegrationException(
-                    "MockValpasClient: no status configured for $queryId"
+                    "MockValpasClient: no status configured for $queryId",
                 )
         logger.info { "MockValpasClient.getQueryStatus($queryId) -> $status" }
         return status

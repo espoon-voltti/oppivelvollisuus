@@ -125,9 +125,9 @@ val databaseEnumArgumentFactory = ArgumentFactory.Preparable { type, _ ->
                         if (nullableValue != null) {
                             this.value = nullableValue.toString()
                         }
-                    }
+                    },
                 )
-            }
+            },
         )
     } else {
         Optional.empty()
@@ -316,7 +316,7 @@ class CustomArgumentFactory<T>(
                 }
             } else {
                 null
-            }
+            },
         )
 }
 
@@ -328,7 +328,7 @@ class PgObjectArgumentFactory<T>(private val clazz: Class<T>, private val f: (T?
                 Function { nullableValue -> CustomObjectArgument(f(clazz.cast(nullableValue))) }
             } else {
                 null
-            }
+            },
         )
 }
 
