@@ -61,7 +61,7 @@
     "nodemon": "3.1.14",
     "oxfmt": "0.78.0",
     "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2006",
+    "oxlint-tsgolint": "7.0.2007",
     "tough-cookie": "6.1.0",
     "typescript": "7.0.2",
     "vitest": "4.1.12",
