@@ -44,7 +44,7 @@ fun getTestDataSource(env: DatabaseEnv): TestDataSource =
                                 password = env.password.value
                                 maximumPoolSize = env.maximumPoolSize
                                 leakDetectionThreshold = env.leakDetectionThreshold
-                            }
+                            },
                         )
                         .also {
                             Flyway.configure()
@@ -59,7 +59,7 @@ fun getTestDataSource(env: DatabaseEnv): TestDataSource =
                                         setUrl(env.url)
                                         user = env.username
                                         password = env.password.value
-                                    }
+                                    },
                                 )
                                 .load()
                                 .run { migrate() }
@@ -69,7 +69,7 @@ fun getTestDataSource(env: DatabaseEnv): TestDataSource =
                                     tx.resetDatabase()
                                 }
                             }
-                        }
+                        },
                 )
                 .also { testDataSource = it }
     }

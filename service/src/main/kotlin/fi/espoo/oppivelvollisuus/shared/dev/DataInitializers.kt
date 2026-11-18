@@ -65,7 +65,7 @@ fun Database.Transaction.insert(row: DevUser): EspooUserId = createUpdate {
                 INSERT INTO users (id, external_id, first_names, last_name, email, is_active, created, updated)
                 VALUES (${bind(row.id)}, ${bind(row.externalId)}, ${bind(row.firstNames)}, ${bind(row.lastName)}, ${bind(row.email)}, ${bind(row.isActive)}, ${bind(row.created)}, ${bind(row.created)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -97,7 +97,7 @@ fun Database.Transaction.insert(row: DevStudent): StudentId = createUpdate {
                 INSERT INTO students (id, created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info)
                 VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.valpasLink)}, ${bind(row.valpasOppijaOid)}, ${bind(row.ssn)}, ${bind(row.firstName)}, ${bind(row.lastName)}, ${bind(row.language)}, ${bind(row.dateOfBirth)}, ${bind(row.phone)}, ${bind(row.email)}, ${bind(row.gender)}, ${bind(row.address)}, ${bind(row.municipalityInFinland)}, ${bind(row.guardianInfo)}, ${bind(row.supportContactsInfo)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -127,7 +127,7 @@ fun Database.Transaction.insert(row: DevStudentCase): StudentCaseId = createUpda
                 INSERT INTO student_cases (id, created, created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason, valpas_notification_id)
                 VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.studentId)}, ${bind(row.openedAt)}, ${bind(row.assignedTo)}, ${bind(row.status)}, ${bind(row.source)}, ${bind(row.sourceValpas)}, ${bind(row.sourceOther)}, ${bind(row.sourceContact)}, ${bind(row.schoolBackground.toTypedArray())}, ${bind(row.caseBackgroundReasons.toTypedArray())}, ${bind(row.notInSchoolReason)}, ${bind(row.valpasNotificationId)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -149,7 +149,7 @@ fun Database.Transaction.insert(row: DevCaseEvent): CaseEventId = createUpdate {
                 INSERT INTO case_events (id, created, created_by, student_case_id, date, type, notes)
                 VALUES (${bind(row.id)}, ${bind(row.created)}, ${bind(row.createdBy)}, ${bind(row.studentCaseId)}, ${bind(row.date)}, ${bind(row.type)}, ${bind(row.notes)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()

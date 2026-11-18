@@ -103,7 +103,7 @@ class JdbiExtensionsTest : PureJdbiTest(resetDbBeforeEach = false) {
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT array[daterange('2020-06-07', NULL, '[]'), daterange('2021-01-01', '2021-01-02', '[]')]::daterange[] AS values"
+                        "SELECT array[daterange('2020-06-07', NULL, '[]'), daterange('2021-01-01', '2021-01-02', '[]')]::daterange[] AS values",
                     )
                 }
                 .exactlyOne<QueryResult>()
@@ -152,7 +152,7 @@ class JdbiExtensionsTest : PureJdbiTest(resetDbBeforeEach = false) {
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT array[daterange('2020-06-07', '2021-01-01', '[]'), daterange('2021-01-01', '2021-01-02', '[]')]::daterange[] AS values"
+                        "SELECT array[daterange('2020-06-07', '2021-01-01', '[]'), daterange('2021-01-01', '2021-01-02', '[]')]::daterange[] AS values",
                     )
                 }
                 .exactlyOne<QueryResult>()
@@ -184,7 +184,7 @@ SELECT ${bind(input)} = datemultirange(
     daterange('2020-01-01', '2020-01-31', '[]'),
     daterange('2020-02-01', '2020-02-29', '[]'),
     daterange('2020-04-01', '2020-04-30', '[]')
-)"""
+)""",
                     )
                 },
                 input,
@@ -239,7 +239,7 @@ SELECT ${bind(input)} = datemultirange(
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT array['5ea2618c-3e9d-4fd3-8094-8d2f35311962', '2db6c1c7-402f-4d86-a308-a7f1b19bb313']::uuid[] AS values"
+                        "SELECT array['5ea2618c-3e9d-4fd3-8094-8d2f35311962', '2db6c1c7-402f-4d86-a308-a7f1b19bb313']::uuid[] AS values",
                     )
                 }
                 .exactlyOne<QueryResult>()
@@ -261,7 +261,7 @@ SELECT ${bind(input)} = datemultirange(
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT jsonb_build_object('value', '5ea2618c-3e9d-4fd3-8094-8d2f35311962'::uuid) AS jsonb"
+                        "SELECT jsonb_build_object('value', '5ea2618c-3e9d-4fd3-8094-8d2f35311962'::uuid) AS jsonb",
                     )
                 }
                 .exactlyOne<QueryResult>()
@@ -274,7 +274,7 @@ SELECT ${bind(input)} = datemultirange(
     fun testHelsinkiDateTime() {
         val input =
             HelsinkiDateTime.from(
-                ZonedDateTime.of(LocalDate.of(2020, 5, 7), LocalTime.of(13, 59), europeHelsinki)
+                ZonedDateTime.of(LocalDate.of(2020, 5, 7), LocalTime.of(13, 59), europeHelsinki),
             )
 
         val match = db.read {
@@ -303,7 +303,7 @@ SELECT ${bind(input)} = datemultirange(
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT array['2020-05-07T10:59Z', '2021-01-10T06:42Z']::timestamptz[] AS values"
+                        "SELECT array['2020-05-07T10:59Z', '2021-01-10T06:42Z']::timestamptz[] AS values",
                     )
                 }
                 .exactlyOne<QueryResult>()
@@ -326,7 +326,7 @@ SELECT ${bind(input)} = datemultirange(
         val result = db.read {
             it.createQuery {
                     sql(
-                        "SELECT jsonb_build_object('value', '2020-05-07T10:59Z'::timestamptz) AS jsonb"
+                        "SELECT jsonb_build_object('value', '2020-05-07T10:59Z'::timestamptz) AS jsonb",
                     )
                 }
                 .exactlyOne<QueryResult>()

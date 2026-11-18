@@ -59,7 +59,7 @@ abstract class PlaywrightTest {
                   END IF;
                 END $$ LANGUAGE plpgsql;
                 """
-                        .trimIndent()
+                        .trimIndent(),
                 )
             }
         }
@@ -69,7 +69,7 @@ abstract class PlaywrightTest {
             playwright
                 .chromium()
                 .launch(
-                    BrowserType.LaunchOptions().setHeadless(runningInDocker).setTimeout(10_000.0)
+                    BrowserType.LaunchOptions().setHeadless(runningInDocker).setTimeout(10_000.0),
                 )
     }
 

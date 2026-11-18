@@ -74,7 +74,7 @@ class AppController {
         db.connect { dbc ->
                 dbc.read { tx ->
                     tx.getStudentSummaries(
-                        params = body.copy(query = body.query.takeIf { !it.isNullOrBlank() })
+                        params = body.copy(query = body.query.takeIf { !it.isNullOrBlank() }),
                     )
                 }
             }

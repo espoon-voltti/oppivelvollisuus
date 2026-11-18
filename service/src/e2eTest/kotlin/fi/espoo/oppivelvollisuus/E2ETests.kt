@@ -51,7 +51,7 @@ class E2ETests : PlaywrightTest() {
         val studentsSearchPage = StudentsSearchPage(page)
         studentsSearchPage.assertUrl()
         studentsSearchPage.assertEmployeeSelectOptions(
-            listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija")
+            listOf("Näytä kaikki", "Ei ohjaajaa", "Sanna Suunnittelija"),
         )
 
         db.transaction { tx ->

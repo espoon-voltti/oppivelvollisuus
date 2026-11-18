@@ -102,7 +102,7 @@ class CasesReportTests : FullApplicationTest(resetDbBeforeEach = true) {
                     caseBackgroundReasons = setOf(CaseBackgroundReason.POISSAOLOT),
                     notInSchoolReason = NotInSchoolReason.EI_OLE_HAKEUTUNUT_JATKO_OPINTOIHIN,
                     eventTypes = emptySet(),
-                )
+                ),
             ),
             getCasesReport(start = LocalDate.of(2022, 1, 1), end = LocalDate.of(2022, 12, 31)),
         )

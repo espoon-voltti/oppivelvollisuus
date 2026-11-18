@@ -62,7 +62,7 @@ fun Database.Read.getCasesReport(request: CaseReportRequest): List<CaseReportRow
                 WHERE TRUE
                 ${if (request.start != null) "AND sc.opened_at >= ${bind(request.start)}" else ""}
                 ${if (request.end != null) "AND sc.opened_at <= ${bind(request.end)}" else ""}
-                """
+                """,
     )
 }
     .toList<CaseReportRow>()

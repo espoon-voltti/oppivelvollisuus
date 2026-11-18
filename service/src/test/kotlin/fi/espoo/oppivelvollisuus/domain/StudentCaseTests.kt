@@ -128,7 +128,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = SchoolBackground.entries.toSet(),
                     caseBackgroundReasons = CaseBackgroundReason.entries.toSet(),
                     notInSchoolReason = NotInSchoolReason.KATSOTTU_ERONNEEKSI_OPPILAITOKSESTA,
-                )
+                ),
             )
 
         val studentResponse = getStudent()
@@ -182,7 +182,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     schoolBackground = emptySet(),
                     caseBackgroundReasons = emptySet(),
                     notInSchoolReason = null,
-                )
+                ),
             )
 
         var studentResponse = getStudent()
@@ -436,7 +436,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     status = CaseStatus.IMPORTED_FROM_VALPAS,
                     source = CaseSource.VALPAS_AUTOMATIC_CHECK,
                     valpasNotificationId = UUID.randomUUID(),
-                )
+                ),
             )
         }
 
@@ -465,7 +465,7 @@ class StudentCaseTests : FullApplicationTest(resetDbBeforeEach = true) {
                     source = null,
                     assignedTo = null,
                     lastEvent = null,
-                )
+                ),
             ),
             getStudents(),
         )

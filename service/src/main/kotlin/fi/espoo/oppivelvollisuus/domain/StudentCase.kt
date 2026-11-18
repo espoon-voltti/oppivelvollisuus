@@ -141,7 +141,7 @@ fun Database.Transaction.insertStudentCase(
                 INSERT INTO student_cases (created, created_by, student_id, opened_at, assigned_to, status, source, source_valpas, source_other, source_contact, school_background, case_background_reasons, not_in_school_reason)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(studentId)}, ${bind(data.openedAt)}, ${bind(data.assignedTo)}, ${bind(CaseStatus.TODO)}, ${bind(data.source)}, ${bind(data.sourceValpas)}, ${bind(data.sourceOther)}, ${bind(data.sourceContact)}, ${bind(data.schoolBackground.toTypedArray())}, ${bind(data.caseBackgroundReasons.toTypedArray())}, ${bind(data.notInSchoolReason)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -185,7 +185,7 @@ data class FinishedInfo(
     init {
         if ((reason == CaseFinishedReason.BEGAN_STUDIES) != (startedAtSchool != null)) {
             throw BadRequest(
-                "startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES"
+                "startedAtSchool must be present if and only if finished reason is BEGAN_STUDIES",
             )
         }
     }
@@ -215,7 +215,7 @@ data class StudentCase(
         if (status != CaseStatus.IMPORTED_FROM_VALPAS) {
             if ((source == CaseSource.VALPAS_NOTICE) != (sourceValpas != null)) {
                 throw BadRequest(
-                    "sourceValpas must be present if and only if source is VALPAS_NOTICE"
+                    "sourceValpas must be present if and only if source is VALPAS_NOTICE",
                 )
             }
         }
@@ -268,7 +268,7 @@ fun Database.Read.getStudentCasesByStudent(studentId: StudentId): List<StudentCa
                 FROM student_cases sc
                 LEFT JOIN users assignee ON sc.assigned_to = assignee.id
                 WHERE student_id = ${bind(studentId)}
-                """
+                """,
     )
 }
     .toList<StudentCase>()
@@ -288,7 +288,7 @@ fun Database.Read.getStudentCaseSummary(id: StudentCaseId): StudentCaseSummary? 
                 SELECT id, student_id, status, source, source_valpas, valpas_notification_id
                 FROM student_cases
                 WHERE id = ${bind(id)}
-                """
+                """,
     )
 }
     .exactlyOneOrNull<StudentCaseSummary>()
@@ -317,7 +317,7 @@ fun Database.Transaction.updateStudentCase(
                     case_background_reasons = ${bind(data.caseBackgroundReasons.toTypedArray())},
                     not_in_school_reason = ${bind(data.notInSchoolReason)}
                 WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}
-                """
+                """,
         )
     }
         .updateExactlyOne()
@@ -366,7 +366,7 @@ fun Database.Transaction.updateStudentCaseStatus(
                     started_at_school = ${bind(data.finishedInfo?.startedAtSchool)},
                     other_reason = ${bind(data.finishedInfo?.otherReason)}
                 WHERE id = ${bind(id)} AND student_id = ${bind(studentId)}
-                """
+                """,
         )
     }
         .updateExactlyOne()
@@ -386,7 +386,7 @@ fun Database.Read.findImportedFromValpasCaseForStudent(studentId: StudentId): St
                 SELECT id FROM student_cases
                 WHERE student_id = ${bind(studentId)}
                   AND status = ${bind(CaseStatus.IMPORTED_FROM_VALPAS)}
-                """
+                """,
         )
     }
     .exactlyOneOrNull<StudentCaseId>()
@@ -417,7 +417,7 @@ fun Database.Transaction.insertImportedCase(
                     ${bind(valpasNotificationId)}
                 )
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -434,7 +434,7 @@ fun Database.Read.findNewValpasNotificationIds(ids: Set<UUID>): Set<UUID> {
                     SELECT 1 FROM student_cases sc
                     WHERE sc.valpas_notification_id = incoming.id
                 )
-                """
+                """,
         )
     }
         .toList<UUID>()
@@ -454,7 +454,7 @@ fun Database.Read.studentHasActiveCase(studentId: StudentId): Boolean = createQu
                     WHERE student_id = ${bind(studentId)}
                       AND status IN (${bind(CaseStatus.TODO)}, ${bind(CaseStatus.ON_HOLD)})
                 )
-                """
+                """,
     )
 }
     .exactlyOne<Boolean>()
@@ -478,7 +478,7 @@ fun Database.Transaction.copyValpasNotificationIdAndDeleteSource(
                     updated = ${bind(now)},
                     updated_by = ${bind(updatedBy)}
                 WHERE id = ${bind(targetId)}
-                """
+                """,
         )
     }
         .updateExactlyOne()

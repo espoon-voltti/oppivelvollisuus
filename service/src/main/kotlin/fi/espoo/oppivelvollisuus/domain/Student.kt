@@ -51,7 +51,7 @@ fun Database.Transaction.insertStudent(
                 INSERT INTO students (created, created_by, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info)
                 VALUES (${bind(now)}, ${bind(createdBy)}, ${bind(data.valpasLink)}, ${bind(data.valpasOppijaOid)}, ${bind(data.ssn)}, ${bind(data.firstName)}, ${bind(data.lastName)}, ${bind(data.language)}, ${bind(data.dateOfBirth)}, ${bind(data.phone)}, ${bind(data.email)}, ${bind(data.gender)}, ${bind(data.address)}, ${bind(data.municipalityInFinland)}, ${bind(data.guardianInfo)}, ${bind(data.supportContactsInfo)})
                 RETURNING id
-                """
+                """,
     )
 }
     .executeAndReturnGeneratedKeys()
@@ -76,7 +76,7 @@ data class CaseEventSummary(
 
 data class AssignedToSearch(
     // null = not assigned
-    val assignedTo: EspooUserId?
+    val assignedTo: EspooUserId?,
 )
 
 data class StudentSearchParams(
@@ -144,7 +144,7 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
                     ""
                 }}
                 ORDER BY opened_at DESC NULLS LAST, last_name, first_name
-                """
+                """,
         )
     }
     .toList<StudentSummary>()
@@ -160,8 +160,8 @@ fun Database.Read.getStudentSummaries(params: StudentSearchParams): List<Student
                             }
                         } else {
                             it.lastEvent.notes
-                        }
-                )
+                        },
+                ),
         )
     }
 
@@ -190,7 +190,7 @@ fun Database.Read.getStudent(id: StudentId): Student =
                 SELECT id, valpas_link, valpas_oppija_oid, ssn, first_name, last_name, language, date_of_birth, phone, email, gender, address, municipality_in_finland, guardian_info, support_contacts_info
                 FROM students
                 WHERE id = ${bind(id)}
-                """
+                """,
         )
     }
         .exactlyOneOrNull<Student>() ?: throw NotFound()
@@ -223,7 +223,7 @@ fun Database.Transaction.updateStudent(
                     guardian_info = ${bind(data.guardianInfo)},
                     support_contacts_info = ${bind(data.supportContactsInfo)}
                 WHERE id = ${bind(id)}
-                """
+                """,
         )
     }
         .updateExactlyOne()
@@ -248,7 +248,7 @@ data class DuplicateStudent(
 )
 
 fun Database.Read.getPossibleDuplicateStudents(
-    input: DuplicateStudentCheckInput
+    input: DuplicateStudentCheckInput,
 ): List<DuplicateStudent> = createQuery {
     sql(
         """
@@ -273,7 +273,7 @@ fun Database.Read.getPossibleDuplicateStudents(
                 )
                 SELECT * FROM match_data
                 WHERE matching_ssn OR matching_valpas_link OR matching_oppija_oid OR matching_name
-                """
+                """,
     )
 }
     .toList<DuplicateStudent>()
@@ -311,7 +311,7 @@ fun Database.Transaction.deleteOldStudents(thresholdDate: LocalDate) {
                 )
                 DELETE FROM students
                 WHERE id IN (SELECT id FROM students_to_delete)
-                """
+                """,
         )
     }
         .execute()

@@ -67,7 +67,7 @@ class ScheduledJobRunner(
                                     }
                                 }
                         }
-                    }
+                    },
             )
             .threads(SCHEDULER_THREADS)
             .pollingInterval(POLLING_INTERVAL)

@@ -24,7 +24,7 @@ class MockAppClock(private var now: HelsinkiDateTime) : AppClock {
         minute: Int,
         second: Int = 0,
     ) : this(
-        HelsinkiDateTime.of(LocalDate.of(year, month, day), LocalTime.of(hour, minute, second))
+        HelsinkiDateTime.of(LocalDate.of(year, month, day), LocalTime.of(hour, minute, second)),
     )
 
     override fun today(): LocalDate = now.toLocalDate()

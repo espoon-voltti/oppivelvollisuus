@@ -51,7 +51,7 @@ private const val OTHER_KUNTA_OID = "1.2.3.5"
             "app.integration.valpas.username=test-user",
             "app.integration.valpas.password=test-pass",
             "app.integration.valpas.kunta_oid=$OUR_KUNTA_OID",
-        ]
+        ],
 )
 class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
 
@@ -257,7 +257,9 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         val transferred =
             oppija.copy(
                 aktiivinenKuntailmoitus =
-                    oppija.aktiivinenKuntailmoitus!!.copy(onUudempiaIlmoituksiaMuihinKuntiin = true)
+                    oppija.aktiivinenKuntailmoitus!!.copy(
+                        onUudempiaIlmoituksiaMuihinKuntiin = true,
+                    ),
             )
 
         mock.nextStartReturnsQueryId = "query-transferred"
@@ -341,7 +343,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         val oppijaA =
             oppija.copy(
                 aktiivinenKuntailmoitus =
-                    oppija.aktiivinenKuntailmoitus!!.copy(id = notificationIdA)
+                    oppija.aktiivinenKuntailmoitus!!.copy(id = notificationIdA),
             )
         mock.nextStartReturnsQueryId = "query-replace-1"
         mock.stageCompleteResult("query-replace-1", listOf(oppijaA))
@@ -354,7 +356,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
         // Second import with notification B for same student
         val oppijaB =
             oppija.copy(
-                aktiivinenKuntailmoitus = oppija.aktiivinenKuntailmoitus.copy(id = notificationIdB)
+                aktiivinenKuntailmoitus = oppija.aktiivinenKuntailmoitus.copy(id = notificationIdB),
             )
         mock.nextStartReturnsQueryId = "query-replace-2"
         mock.stageCompleteResult("query-replace-2", listOf(oppijaB))
@@ -554,7 +556,7 @@ class ValpasIntegrationTest : FullApplicationTest(resetDbBeforeEach = true) {
                     created = now,
                     openedAt = openedAt,
                     status = CaseStatus.TODO,
-                )
+                ),
             )
         }
         updateStudentCaseStatus(
