@@ -84,7 +84,7 @@ dependencies {
 
     // CVE-2026-85532, CVE-2026-87830, CVE-2026-88920, CVE-2026-89238, CVE-2026-92121,
     // CVE-2026-92899, CVE-2026-95616
-    implementation("org.apache.wss4j:wss4j-ws-security-common:4.0.2") { exclude("org.opensaml") }
+    implementation("org.apache.wss4j:wss4j-ws-security-common:4.0.3") { exclude("org.opensaml") }
     implementation("org.apache.wss4j:wss4j-ws-security-dom:4.0.2") { exclude("org.opensaml") }
 
     // Bouncy Castle 1.82 from wss4j: GHSA-574f-3g2m-x479, GHSA-9pwp-9qqc-pr26,
