@@ -133,7 +133,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("io.kotest:kotest-property:6.2.7")
-    testImplementation("com.microsoft.playwright:playwright:1.65.0")
+    testImplementation("com.microsoft.playwright:playwright:1.65.1")
 }
 
 tasks.withType<KotlinCompile> {
