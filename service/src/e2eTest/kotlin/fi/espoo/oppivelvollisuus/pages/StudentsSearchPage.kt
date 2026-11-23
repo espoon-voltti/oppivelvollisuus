@@ -8,7 +8,6 @@ import com.microsoft.playwright.Page
 import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
 import fi.espoo.oppivelvollisuus.baseUrl
 import fi.espoo.oppivelvollisuus.dataQa
-import kotlin.test.assertEquals
 
 class StudentsSearchPage(private val page: Page) {
     val createStudentButton = page.dataQa("create-student-button")
@@ -19,6 +18,6 @@ class StudentsSearchPage(private val page: Page) {
     }
 
     fun assertEmployeeSelectOptions(expected: List<String>) {
-        assertEquals(expected.joinToString(""), employeeSelect.allTextContents().joinToString())
+        assertThat(employeeSelect.locator("option")).hasText(expected.toTypedArray())
     }
 }
