@@ -32,6 +32,13 @@ RUN apt-get update \
 
 FROM base AS builder
 
+# libatomic1 is needed by the Node binary bundled in the Playwright driver (>= 1.65),
+# which must be runnable before `playwright install-deps` can install anything.
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      libatomic1 \
+ && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY ./gradle/ ./gradle/
