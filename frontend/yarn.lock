@@ -2471,12 +2471,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:25.9.9":
-  version: 25.9.9
-  resolution: "@types/node@npm:25.9.9"
+"@types/node@npm:25.9.10":
+  version: 25.9.10
+  resolution: "@types/node@npm:25.9.10"
   dependencies:
     undici-types: "npm:>=7.24.0 <7.24.7"
-  checksum: 10/8accbdd15bc035db3b20bf9353dabce847a5d3dd1f3976c25e67907f4fd287b00b8163f661fe48cd6d644e30a11e1dffd67e2742233209c7b7cbc500d14d394c
+  checksum: 10/5117631c2fe14a72ff6e1cd53b02a30f3d6b1520265b2d8e9f2b353b09b5f394b913c0e0bfb83e687c874e752fae528bd1ab26c56732b05d25447b54f0021700
   languageName: node
   linkType: hard
 
@@ -3793,7 +3793,7 @@ __metadata:
     "@fortawesome/react-fontawesome": "npm:3.5.0"
     "@types/autosize": "npm:4.0.3"
     "@types/lodash": "npm:4.17.27"
-    "@types/node": "npm:25.9.9"
+    "@types/node": "npm:25.9.10"
     "@types/react": "npm:19.3.0"
     "@types/react-csv": "npm:1.1.10"
     "@types/react-dom": "npm:19.3.0"
