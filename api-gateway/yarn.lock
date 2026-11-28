@@ -1010,12 +1010,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:*, @types/node@npm:25.9.10":
-  version: 25.9.10
-  resolution: "@types/node@npm:25.9.10"
+"@types/node@npm:*, @types/node@npm:25.9.12":
+  version: 25.9.12
+  resolution: "@types/node@npm:25.9.12"
   dependencies:
     undici-types: "npm:>=7.24.0 <7.24.7"
-  checksum: 10/5117631c2fe14a72ff6e1cd53b02a30f3d6b1520265b2d8e9f2b353b09b5f394b913c0e0bfb83e687c874e752fae528bd1ab26c56732b05d25447b54f0021700
+  checksum: 10/b8edc7ac8ababb069be1691336afb17b220e5eeffd818ab931257eea4d3010810829f33b67de4f08855603ca42c650875e50d0dcd13051f61957e0f8c83fa4a9
   languageName: node
   linkType: hard
 
@@ -3077,7 +3077,7 @@ __metadata:
     "@types/jsonwebtoken": "npm:9.0.10"
     "@types/lodash": "npm:4.17.27"
     "@types/ms": "npm:2.1.0"
-    "@types/node": "npm:25.9.10"
+    "@types/node": "npm:25.9.12"
     "@types/node-forge": "npm:1.3.14"
     "@types/pump": "npm:1.1.3"
     "@types/readable-stream": "npm:4.0.25"
